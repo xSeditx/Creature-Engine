@@ -40,7 +40,7 @@ struct BaseComponent
         (
             ComponentCreateFunc _createf,
             ComponentDeleteFunc _deletef,
-            size_t _sz
+            uint32_t _sz
         )
             :
             Create_Function(_createf),
@@ -53,11 +53,11 @@ struct BaseComponent
         }
         ComponentCreateFunc Create_Function;
         ComponentDeleteFunc Delete_Function;
-        size_t SIZE;
-        int DebugTypeID = 0;
+        uint32_t SIZE;
 
-#ifdef _DEBUG 
-        std::string ComponentName;
+#ifdef _DEBUG   
+		idTag DebugTypeID = 0;
+        std::string ComponentName;  
 #endif
     };
 
@@ -71,7 +71,7 @@ struct BaseComponent
     {
         return ComponentTypes[_id].Delete_Function;
     }
-    static size_t g_TypeSize(Component_Handle _id)
+    static uint32_t g_TypeSize(Component_Handle _id)
     {
         return ComponentTypes[_id].SIZE;
     }

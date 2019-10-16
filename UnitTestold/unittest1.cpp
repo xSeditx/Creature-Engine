@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "Profiling\MemoryPerf\MemTracker.h"
+#include "Profiling\MemTracker.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

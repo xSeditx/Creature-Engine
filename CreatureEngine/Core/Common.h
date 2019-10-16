@@ -49,7 +49,7 @@ typedef glm::uint32 Uint32;
 typedef glm::uint64 Uint64;
 
 // Object Tags
-typedef unsigned int idTag;
+typedef uint32_t idTag;
 typedef std::string  nameTag;
 
 // 64 bit pointer to resident GPU objects

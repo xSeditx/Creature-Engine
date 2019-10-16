@@ -48,7 +48,7 @@ namespace Unknown_Engine
 			{
 				size_t typeSize = BaseComponent::g_TypeSize(it->first);
 				ComponentDeleteFunc freefn = BaseComponent::g_TypeDeleteFunction(it->first);
-				for (uint32_t i = 0; i < it->second.size(); i += typeSize)
+				for (uint32_t i = 0; i < it->second.size(); i += static_cast<uint32_t>(typeSize))
 				{
 					freefn((BaseComponent*)&it->second[i]);
 				}
@@ -183,8 +183,8 @@ namespace Unknown_Engine
 				if (_componentID == EntityComponents[I].first)
 				{
 					///IMPLEMENT THIS	DeleteComponent(EntityComponents[I].first, EntityComponents[I].second);
-					unsigned int SourceIndex = EntityComponents.size() - 1;
-					unsigned int DestinationIndex = I;
+					uint32_t SourceIndex = static_cast<uint32_t>( EntityComponents.size() - 1);
+					uint32_t DestinationIndex = I;
 					EntityComponents[DestinationIndex] = EntityComponents[SourceIndex];
 					EntityComponents.pop_back();
 					return true;
@@ -208,11 +208,11 @@ namespace Unknown_Engine
 
 		void EntityComponentSystem::ComponentDelete(Component_Handle _componentID, unsigned int index)
 		{
-			std::vector<unsigned char>& ComponentArray = Components[_componentID];
+			std::vector<uint8_t>& ComponentArray = Components[_componentID];
 			ComponentDeleteFunc FreeFunction = BaseComponent::g_TypeDeleteFunction(_componentID);
-			size_t typeSize = BaseComponent::g_TypeSize(_componentID);
+			uint32_t typeSize = BaseComponent::g_TypeSize(_componentID);
 
-			unsigned int SourceIndex = ComponentArray.size() - typeSize;
+			uint32_t SourceIndex = static_cast<uint32_t>(ComponentArray.size() - typeSize);
 
 			BaseComponent* destComponent = (BaseComponent*)&ComponentArray[index];
 			BaseComponent* srcComponent = (BaseComponent*)&ComponentArray[SourceIndex];
@@ -238,7 +238,7 @@ namespace Unknown_Engine
 		}
 
 
-		idTag EntityComponentSystem::FindLeastCommonComponent(const std::vector<idTag>& _componentTypes, const std::vector<idTag>& _componentFlags)
+		idTag EntityComponentSystem::FindLeastCommonComponent(const std::vector<Component_Handle>& _componentTypes, const std::vector<Component_Handle>& _componentFlags)
 		{
 			uint32_t minSize = (uint32_t)-1;
 			uint32_t minIndex = (uint32_t)-1;
@@ -288,7 +288,7 @@ namespace Unknown_Engine
 		(/// I despise this function and its signature
 			uint32_t _index,
 			SystemList& _systems,
-			const std::vector<uint32_t>& _componentTypes,
+			const std::vector<Component_Handle>& _componentTypes,
 			std::vector<BaseComponent*>& _componentParam,
 			std::vector<std::vector<uint8_t>*>& _componentArrays,
 			float _delta
@@ -306,7 +306,7 @@ namespace Unknown_Engine
 			}
 
 			uint32_t minSizeIndex = FindLeastCommonComponent(_componentTypes, componentFlags);
-			size_t typeSize = BaseComponent::g_TypeSize(_componentTypes[minSizeIndex]);
+			uint32_t typeSize = BaseComponent::g_TypeSize(_componentTypes[minSizeIndex]);
 			std::vector<uint8_t>& array = *_componentArrays[minSizeIndex];
 
 			for (uint32_t i = 0; i < array.size(); i += typeSize)

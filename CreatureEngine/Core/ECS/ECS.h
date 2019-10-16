@@ -164,24 +164,16 @@ namespace Unknown_Engine
 
 			void RemoveEntity(EntityPTR _handle);
 
-
 		private:
 			BaseComponent* g_ComponentInternal(EntityHandle_t& entityComponents, std::vector<uint8_t>& array, Component_Handle componentID);
-
-
 
 			void AddComponentInternal(EntityPTR handle, EntityHandle_t& entity, Component_Handle componentID, BaseComponent* component);
 			bool RemoveComponentInternal(EntityPTR _handle, Component_Handle _componentID);
 
-			///TODO: <WARNING!> I believe this is correct as it adds the pointer to the type here
 			std::vector<Entity_t* >  Entities;
 			Component_map            Components;
 			std::vector<BaseSystem*> Systems;
 			std::vector<ECSListener*> Listeners;
-
-
-
-
 
 			uint32_t HandleToEntityIndex(EntityPTR _handle)
 			{

@@ -10,9 +10,9 @@ _static idTag BaseComponent::RegisterComponentType
     size_t _size
 )
 {
-	idTag results = ComponentTypes.size();
+	idTag results = static_cast<idTag>(ComponentTypes.size());
     ComponentTypes.push_back({ _createfunc ,_deletefunc ,_size });
-    ComponentTypes.back().DebugTypeID = ComponentTypes.size();
+    ComponentTypes.back().DebugTypeID = static_cast<idTag>(ComponentTypes.size());
     return results;
 }     
  

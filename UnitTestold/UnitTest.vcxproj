@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{DECB601E-C94B-438F-8420-7DBEF6FFCD5B}</ProjectGuid>
+    <ProjectGuid>{A9F079D6-1BC3-4E6A-AF50-3CC73D9D48CA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>UnitTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
@@ -77,23 +77,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(Solution)\UnitTest;$(Solution)..\CreatureEngine\;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\DELL\source\repos\CreatureEngine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Solution)\UnitTest;$(Solution)..\UnknownEngine\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\DELL\source\repos\UnknownEngine\UnknownEngine\Debug</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(Solution)\UnitTest;$(Solution)..\CreatureEngine\;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\DELL\source\repos\CreatureEngine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Solution)\UnitTest;$(Solution)..\UnknownEngine\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\DELL\source\repos\UnknownEngine\UnknownEngine\Debug</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(Solution)\UnitTest;$(Solution)..\CreatureEngine\;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\DELL\source\repos\CreatureEngine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Solution)\UnitTest;$(Solution)..\UnknownEngine\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\DELL\source\repos\UnknownEngine\UnknownEngine\Debug</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(Solution)\UnitTest;$(Solution)..\CreatureEngine\;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\DELL\source\repos\CreatureEngine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Solution)\UnitTest;$(Solution)..\UnknownEngine\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\DELL\source\repos\UnknownEngine\UnknownEngine\Debug</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -177,8 +177,8 @@
     <ClCompile Include="unittest1.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CreatureEngine\CreatureEngine.vcxproj">
-      <Project>{b789a32e-28da-4128-b23a-0b5531fdfc00}</Project>
+    <ProjectReference Include="..\GLGameEngine\GLGameEngine.vcxproj">
+      <Project>{bac7ddcc-6d35-46ff-9e5b-603d381db75d}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
