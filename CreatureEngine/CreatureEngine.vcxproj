@@ -69,7 +69,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -115,6 +126,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\ECS\ECS.cpp" />
+    <ClCompile Include="Core\ECS\ECScomponent.cpp" />
+    <ClCompile Include="Core\ECS\ECSsystem.cpp" />
+    <ClCompile Include="FrontEnd\GUI\EventSystem.cpp" />
+    <ClCompile Include="FrontEnd\Input.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
+    <ClCompile Include="Profiling\Timing\Benchmark.cpp" />
+    <ClCompile Include="Renderer\OpenGL.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Common.h" />
+    <ClInclude Include="Core\ECS\ECS.h" />
+    <ClInclude Include="Core\ECS\ECScomponent.h" />
+    <ClInclude Include="Core\ECS\ECSsystem.h" />
+    <ClInclude Include="FrontEnd\GUI\EventSystem.h" />
+    <ClInclude Include="FrontEnd\Input.h" />
+    <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
+    <ClInclude Include="Profiling\Timing\Benchmark.h" />
+    <ClInclude Include="Renderer\Bitmap.h" />
+    <ClInclude Include="Renderer\Texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
