@@ -7,7 +7,7 @@ _static idTag BaseComponent::RegisterComponentType
 (
     ComponentCreateFunc _createfunc,
     ComponentDeleteFunc _deletefunc,
-    size_t _size
+    uint32_t _size
 )
 {
 	idTag results = static_cast<idTag>(ComponentTypes.size());

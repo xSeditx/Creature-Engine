@@ -1,9 +1,10 @@
 #include<iostream>
 //#include"Common.h"
 //#include"Profiling\MemTracker.h"
- 
+#include"Profiling\SystemInfo.h"
 int main()
 {
+	Profiling::SystemInfo::Retrieve_SystemInfo();
 	{
 		int *A = new int();
 		delete(A);

@@ -69,6 +69,9 @@
     <ClCompile Include="Renderer\OpenGL.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Profiling\SystemInfo.cpp">
+      <Filter>Source Files\Profiling</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Common.h">
@@ -100,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="FrontEnd\Input.h">
       <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling\SystemInfo.h">
+      <Filter>Header Files\Profiling</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

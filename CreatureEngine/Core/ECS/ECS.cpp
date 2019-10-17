@@ -79,7 +79,7 @@ namespace Unknown_Engine
 				AddComponentInternal(results, newEntity->second, _componentIDs[i], _comp[i]);
 			}
 
-			newEntity->first = Entities.size();
+			newEntity->first = static_cast<Entity_ID>(Entities.size());
 			Entities.push_back(newEntity);
 
 			for_loop(i, Listeners.size())
@@ -160,7 +160,7 @@ namespace Unknown_Engine
 			}
 
 			idTag destIndex = HandleToEntityIndex(_handle);
-			idTag srcIndex = Entities.size() - 1;
+			idTag srcIndex = static_cast<uint32_t>(Entities.size() - 1);
 			delete Entities[destIndex];
 			Entities[destIndex] = Entities[srcIndex];
 			Entities[destIndex]->first = destIndex;
@@ -248,8 +248,8 @@ namespace Unknown_Engine
 				{
 					continue;
 				}
-				size_t typeSize = BaseComponent::g_TypeSize(_componentTypes[i]);
-				uint32_t size = Components[_componentTypes[i]].size() / typeSize;
+				uint32_t typeSize = BaseComponent::g_TypeSize(_componentTypes[i]);
+				uint32_t size = static_cast<uint32_t>(Components[_componentTypes[i]].size() / typeSize);
 				if (size <= minSize)
 				{
 					minSize = size;
@@ -271,8 +271,8 @@ namespace Unknown_Engine
 				if (componentTypes.size() == 1)
 				{
 					size_t typeSize = BaseComponent::g_TypeSize(componentTypes[0]);
-					std::vector<unsigned char>& array = Components[componentTypes[0]];
-					for (unsigned int j = 0; j < array.size(); j += typeSize)
+					std::vector<uint8_t>& array = Components[componentTypes[0]];
+					for (uint32_t j{ 0 }; j < array.size(); j += static_cast<uint32_t>(typeSize))
 					{
 						BaseComponent* component = (BaseComponent*)&array[j];
 						_systems[i]->UpdateComponents(_delta, &component);

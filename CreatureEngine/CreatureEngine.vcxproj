@@ -133,6 +133,7 @@
     <ClCompile Include="FrontEnd\Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
+    <ClCompile Include="Profiling\SystemInfo.cpp" />
     <ClCompile Include="Profiling\Timing\Benchmark.cpp" />
     <ClCompile Include="Renderer\OpenGL.cpp" />
   </ItemGroup>
@@ -144,6 +145,7 @@
     <ClInclude Include="FrontEnd\GUI\EventSystem.h" />
     <ClInclude Include="FrontEnd\Input.h" />
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
+    <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
     <ClInclude Include="Renderer\Bitmap.h" />
     <ClInclude Include="Renderer\Texture.h" />

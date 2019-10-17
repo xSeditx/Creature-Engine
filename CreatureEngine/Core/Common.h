@@ -48,6 +48,10 @@ typedef glm::uint16 Uint16;
 typedef glm::uint32 Uint32;
 typedef glm::uint64 Uint64;
 
+
+typedef int8_t byte;
+typedef uint8_t ubyte;
+
 // Object Tags
 typedef uint32_t idTag;
 typedef std::string  nameTag;

@@ -199,7 +199,7 @@ namespace Unknown_Engine
 				std::vector<std::vector<uint8_t>*>& _componentArrays,
 				float delta
 			);
-
+			
 			idTag FindLeastCommonComponent(const std::vector<Component_Handle>& componentTypes, const std::vector<Component_Handle>& componentFlags);
 			static unsigned int EntityCount;
 

@@ -61,7 +61,7 @@ struct BaseComponent
 #endif
     };
 
-    static idTag RegisterComponentType(ComponentCreateFunc _createfunc, ComponentDeleteFunc _deletefunc, size_t _size);
+    static idTag RegisterComponentType(ComponentCreateFunc _createfunc, ComponentDeleteFunc _deletefunc, uint32_t _size);
 
     static ComponentCreateFunc g_TypeCreateFunction(Component_Handle _id)
     {
