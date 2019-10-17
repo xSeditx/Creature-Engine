@@ -1,20 +1,21 @@
 #include<iostream>
 //#include"Common.h"
-//#include"Profiling\MemTracker.h"
-#include"Profiling\SystemInfo.h"
+
+//#include"Profiling\SystemInfo.h"
+
+#include"Profiling\MemoryPerf\MemTracker.h"
+
 int main()
 {
-	Profiling::SystemInfo::Retrieve_SystemInfo();
+	//Profiling::SystemInfo::Retrieve_SystemInfo();
 	{
 		int *A = new int();
 		delete(A);
 	}
-
-//	Profiling::Memory::TrackListMemoryUsage();
 	return 0;
 }
 
-///$(VCInstallDir)Auxiliary\VS\UnitTest\lib
+
 /*
 Googles Class Structure:
 ---

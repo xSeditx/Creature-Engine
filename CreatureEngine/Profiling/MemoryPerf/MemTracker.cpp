@@ -1,4 +1,5 @@
 #include"Profiling\MemoryPerf\MemTracker.h"
+#define _TRACK_MEMORY_ALLOCATIONS_
 
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
@@ -88,20 +89,28 @@ namespace Profiling
 
 		/* ---------------------------------------- BlockHeader constructor */
 
-		BlockHeader::BlockHeader(size_t requestedSize)
+		BlockHeader::BlockHeader(size_t _requestedSize)
 		{
 			myPrevNode = NULL;
 			myNextNode = NULL;
-			myRequestedSize = requestedSize;
+			myRequestedSize = _requestedSize;
 			myFilename = "[unknown]";
 			myLineNum = 0;
 			myTypeName = "[unknown]";
+			std::cout << "Requesting Block Size: " << _requestedSize << "\n";
 		}
 
 		/* ---------------------------------------- BlockHeader destructor */
 
 		BlockHeader::~BlockHeader()
 		{
+			std::cout 
+				<< "BlockHeader Destroy: " 
+				<<	myRequestedSize << " byte " 
+				<<	myTypeName << "\n" 
+				<<	"In file " << myFilename
+				<<	" on Line " << myLineNum;
+
 		}
 
 		/* ---------------------------------------- BlockHeader Stamp */
@@ -562,45 +571,42 @@ namespace Profiling
 			free(ppBlockHeader);
 			free(pMemDigestArray);
 		}
-
-
-
-
-
 	}
 }
-		/* ------------------------------------------------------------ */
-		/* ---------------------- new and delete ---------------------- */
-		/* ------------------------------------------------------------ */
+/* ------------------------------------------------------------ */
+/* ---------------------- new and delete ---------------------- */
+/* ------------------------------------------------------------ */
+#ifdef _TRACK_MEMORY_ALLOCATIONS_
+	/* ---------------------------------------- operator new */
+    
+    void *operator new(size_t size)
+    {
+    	void *p = Profiling::Memory::TrackMalloc(size);
+    	if (p == NULL) throw std::bad_alloc();
+    	return p;
+    }
+    
+    /* ---------------------------------------- operator delete */
+    
+    void operator delete(void *p)
+    {
+    	Profiling::Memory::TrackFree(p);
+    }
+    
+    /* ---------------------------------------- operator new[] */
+    
+    void *operator new[](size_t size)
+    {
+    	void *p = Profiling::Memory::TrackMalloc(size);
+    	if (p == NULL) throw std::bad_alloc();
+    	return p;
+    }
+    
+    /* ---------------------------------------- operator delete[] */
+    
+    void operator delete[](void *p)
+    {
+    	Profiling::Memory::TrackFree(p);
+    }
 
-		/* ---------------------------------------- operator new */
-
-		void *operator new(size_t size)
-		{
-			void *p = Profiling::Memory::TrackMalloc(size);
-			if (p == NULL) throw std::bad_alloc();
-			return p;
-		}
-
-		/* ---------------------------------------- operator delete */
-
-		void operator delete(void *p)
-		{
-			Profiling::Memory::TrackFree(p);
-		}
-
-		/* ---------------------------------------- operator new[] */
-
-		void *operator new[](size_t size)
-		{
-			void *p = Profiling::Memory::TrackMalloc(size);
-			if (p == NULL) throw std::bad_alloc();
-			return p;
-		}
-
-			/* ---------------------------------------- operator delete[] */
-
-			void operator delete[](void *p)
-		{
-			Profiling::Memory::TrackFree(p);
-		}
+#endif

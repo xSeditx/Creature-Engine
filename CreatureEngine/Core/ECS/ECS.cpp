@@ -79,7 +79,7 @@ namespace Unknown_Engine
 				AddComponentInternal(results, newEntity->second, _componentIDs[i], _comp[i]);
 			}
 
-			newEntity->first = static_cast<Entity_ID>(Entities.size());
+			newEntity->first = static_cast<decltype(newEntity->first)>(Entities.size());
 			Entities.push_back(newEntity);
 
 			for_loop(i, Listeners.size())
@@ -183,8 +183,8 @@ namespace Unknown_Engine
 				if (_componentID == EntityComponents[I].first)
 				{
 					///IMPLEMENT THIS	DeleteComponent(EntityComponents[I].first, EntityComponents[I].second);
-					uint32_t SourceIndex = static_cast<uint32_t>( EntityComponents.size() - 1);
 					uint32_t DestinationIndex = I;
+					uint32_t SourceIndex = static_cast<uint32_t>( EntityComponents.size() - 1);
 					EntityComponents[DestinationIndex] = EntityComponents[SourceIndex];
 					EntityComponents.pop_back();
 					return true;

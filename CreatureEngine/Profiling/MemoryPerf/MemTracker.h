@@ -33,11 +33,13 @@ namespace Profiling
 					filename(_filename), 
 					lineNum(_lineNum) 
 				{
-					std::cout << "Filename: " << _filename << " : Line:" << _lineNum <<"\n";
+					std::cout << "CREATED: " << "  Filename: " << _filename << " : Line:" << _lineNum << "\n";
 				}
 
 				~MemStamp()
-				{ }
+				{ 
+					std::cout << "DESTROYED: " << "  Filename: " << filename << " : Line:" << lineNum << "\n";
+				}
 			};
 
 			/* ---------------------------------------- memory allocation and stamping prototypes */
