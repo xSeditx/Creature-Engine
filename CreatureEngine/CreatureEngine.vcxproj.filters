@@ -40,6 +40,12 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{15c459ae-c25d-40a7-a5f7-ef3213f4c71b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\System">
+      <UniqueIdentifier>{76e9b95b-89c9-4a22-8178-40f7cc87a744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System">
+      <UniqueIdentifier>{d9db4766-aefb-41dc-8e86-a15183674704}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,11 +72,17 @@
     <ClCompile Include="FrontEnd\Input.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\OpenGL.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Profiling\SystemInfo.cpp">
       <Filter>Source Files\Profiling</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Threading\Threadpool.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +118,12 @@
     </ClInclude>
     <ClInclude Include="Profiling\SystemInfo.h">
       <Filter>Header Files\Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\Threadpool.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

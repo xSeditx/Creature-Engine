@@ -36,6 +36,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* ---------------------------------------- includes */
 
+#ifdef _PROFILE_MEMORY
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -608,5 +610,7 @@ namespace Profiling
     {
     	Profiling::Memory::TrackFree(p);
     }
+
+#endif
 
 #endif

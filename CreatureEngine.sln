@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.438
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreatureEngine", "CreatureEngine\CreatureEngine.vcxproj", "{B789A32E-28DA-4128-B23A-0B5531FDFC00}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test2", "Test2\Test2.vcxproj", "{0C0F4FB7-847C-46D9-B23F-6D51B1ABAA8C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test2", "UnitTest\Test2.vcxproj", "{0C0F4FB7-847C-46D9-B23F-6D51B1ABAA8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

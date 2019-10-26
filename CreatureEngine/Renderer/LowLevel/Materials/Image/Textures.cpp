@@ -5,9 +5,11 @@
 #include"Camera.h"
 #include"Common.h"
 #include"Primitive.h"
-assimpmt.lib
-glfw3.lib
-libSOIL.lib
+
+//assimpmt.lib
+//glfw3.lib
+//libSOIL.lib
+
 Texture::Texture(std::string file)
 	:
 	Type(0)

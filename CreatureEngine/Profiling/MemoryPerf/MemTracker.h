@@ -9,6 +9,8 @@ are met:
 http://www.almostinfinite.com/memtrack.html
 */
 
+#ifdef _PROFILE_MEMORY
+
 #include <typeinfo>
 #include <cassert>
 #include <iostream>
@@ -72,3 +74,5 @@ Region per thread
 Check local thread flag on Allocation(dynamic Scoping)!
 Metadata Bitmap at 2MB granularity
 */
+
+#endif

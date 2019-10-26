@@ -18,7 +18,7 @@ namespace Unknown_Engine
 	namespace HID
 	{
 
-		struct UNKNOWN_API Event
+		struct CREATURE_API Event
 		{// Event Union Defining an Event the Engine can produce
 			Event();
 			Event(MsgType msg);
@@ -80,7 +80,7 @@ namespace Unknown_Engine
 			bool Handled() { return (ID == 0); }
 		};
 
-		struct UNKNOWN_API Listener
+		struct CREATURE_API Listener
 		{
 		public:
 			/* Creates a Listener Object that Executes param _func(Event _msg) Everytime a specific event is triggered.
@@ -95,7 +95,7 @@ namespace Unknown_Engine
 			void(*_handler)(Event msg);
 		};
 
-		class UNKNOWN_API EventSystem
+		class CREATURE_API EventSystem
 		{// Singleton design pattern
 			EventSystem();
 		public:

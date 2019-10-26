@@ -6,91 +6,103 @@
 #include <queue>
 
 typedef void(*Worker_Function)();
-
-struct JobQueue
+// NOTE: https://riptutorial.com/cplusplus/example/15806/create-a-simple-thread-pool
+namespace Core
 {
-public:
-	JobQueue() = default;
-	std::deque< Worker_Function> TaskQueue;
-	std::condition_variable is_Ready;
-	std::mutex QueueMutex;
-	bool is_Done{ false };
+	namespace Threading
+	{
 
-	bool Try_Pop(Worker_Function &func)
-	{// Try to aquire a function off the Queue to run
-		std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
-		if (!Lock || TaskQueue.empty())
+		struct JobQueue
 		{
-			return false;
-		}
-		func = std::move(TaskQueue.front());
-		TaskQueue.pop_front();
-		return true;
-	}
+		public:
+			JobQueue() = default;
 
-	void Done()
-	{
-		{
-			std::unique_lock<std::mutex> Lock{ QueueMutex }; is_Done = true;
-		}
-		is_Ready.notify_all();
-	}
-	bool pop(Worker_Function &func)
-	{
-		std::unique_lock<std::mutex> Lock{ QueueMutex };
-		while (TaskQueue.empty() && !is_Done)
-		{
-			is_Ready.wait(Lock);
-		}
-		if (TaskQueue.empty())
-		{
-			return false;
-		}
-		func = std::move(TaskQueue.front());
-		TaskQueue.pop_front();
-		return true;
-	}
-	template<typename F> bool try_push(F&& func)
-	{
-		{
-			std::unique_lock<std::mutex> Lock{ QueueMutex ,std::try_to_lock };
-			if (!Lock)
+			std::deque<std::packaged_task<void()>> TaskQueue;
+			std::vector<std::future<void>> finished;
+
+
+			std::condition_variable is_Ready;
+			std::mutex QueueMutex;
+			bool is_Done{ false };
+
+			bool Try_Pop(std::packaged_task<void()> &func);
+			
+			void Done();
+			bool pop(std::packaged_task<void()> &func);
+			template<typename _FUNC> bool try_push(_FUNC&& func)
 			{
-				return false;
+				{
+					std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+					if (!Lock)
+					{
+						return false;
+					}
+					TaskQueue.emplace_back(std::forward<_FUNC>(func));
+				}
+				is_Ready.notify_one();
+				return true;
 			}
-			TaskQueue.emplace_back(std::forward<F>(func));
-		}
-		is_Ready.notify_one();
-		return true;
-	}
-	template<typename F> void push(F&& func)
-	{
+			template<typename _FUNC> void push(_FUNC&& func)
+			{
+				{
+					std::unique_lock<std::mutex> Lock{ QueueMutex };
+					TaskQueue.emplace_back(std::forward<_FUNC>(func));
+				}
+			}
+		};
+
+		class ThreadPool
 		{
-			std::unique_lock<std::mutex> Lock{ QueueMutex };
-			TaskQueue.emplace_back(std::forward<F>(func));
-		}
-	}
-};
+			const size_t ThreadCount{ std::thread::hardware_concurrency() };
+			std::vector<std::thread> Worker_Threads;
+			std::vector<JobQueue> ThreadQueue{ ThreadCount };
+			std::atomic<unsigned int> Index{ 0 };
 
-class ThreadPool
-{
-	const size_t ThreadCount{ std::thread::hardware_concurrency() };
-	std::vector<std::thread> Worker_Threads;
-	std::vector<JobQueue> ThreadQueue{ ThreadCount };
-	std::atomic<unsigned int> Index{ 0 };
+			ThreadPool();
+			~ThreadPool();
+// class _RET = std::result_of_t<_FUNC>,class _RET =std::result_of_t<_FUNC()>, 
 
-	ThreadPool();
-	~ThreadPool();
+			void Run(unsigned int _i);
+		public:
 
-	void Run(unsigned int _i);
-public:
+			static ThreadPool &get()
+			{
+				static ThreadPool instance;
+				return instance;
+			}
+			template<typename _FUNC, typename...ARGS >
+			auto Async(_FUNC&& _func, ARGS&&...args)->std::future<decltype(_func(args...))>//  //
+			{
+				auto i = Index++;
 
-	static ThreadPool &get()
-	{
-		static ThreadPool instance;
-		return instance;
-	}
+			//	std::function<decltype(_func(args...))()> func = ;
+				auto task_ptr = 
+					std::make_shared<std::packaged_task<decltype(_func(args...))()>>
+					(
+						std::bind
+						(
+							std::forward<_FUNC>(_func),
+							std::forward<ARGS>(args)...
+						)
+						);
+				std::function<void()> wrapper_func = [task_ptr]() {
+					(*task_ptr)();
+				};
 
-	template<typename F>
-	void Async(F&& _func);
-};
+
+				int K = 8;	
+				for (unsigned int n = 0; n != ThreadCount * K; ++n) // K is Tunable 
+				{
+					if (ThreadQueue[(i + n) % ThreadCount].try_push(wrapper_func))
+					{
+						return task_ptr->get_future();//taskPTR->get_future();
+					}
+				}
+				 
+				ThreadQueue[i % ThreadCount].push(std::forward<std::function<void()>>(wrapper_func));
+				return  task_ptr->get_future();
+			}
+		};
+
+	}// End NS Threading
+}// End NS Core 

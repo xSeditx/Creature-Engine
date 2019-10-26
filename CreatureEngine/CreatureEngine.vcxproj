@@ -129,25 +129,29 @@
     <ClCompile Include="Core\ECS\ECS.cpp" />
     <ClCompile Include="Core\ECS\ECScomponent.cpp" />
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
+    <ClCompile Include="Core\Threading\Threadpool.cpp" />
     <ClCompile Include="FrontEnd\GUI\EventSystem.cpp" />
     <ClCompile Include="FrontEnd\Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
     <ClCompile Include="Profiling\SystemInfo.cpp" />
     <ClCompile Include="Profiling\Timing\Benchmark.cpp" />
-    <ClCompile Include="Renderer\OpenGL.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Common.h" />
     <ClInclude Include="Core\ECS\ECS.h" />
     <ClInclude Include="Core\ECS\ECScomponent.h" />
     <ClInclude Include="Core\ECS\ECSsystem.h" />
+    <ClInclude Include="Core\Threading\Threadpool.h" />
     <ClInclude Include="FrontEnd\GUI\EventSystem.h" />
     <ClInclude Include="FrontEnd\Input.h" />
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
     <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
     <ClInclude Include="Renderer\Bitmap.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
     <ClInclude Include="Renderer\Texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

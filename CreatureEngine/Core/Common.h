@@ -10,9 +10,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-// Will determine if the Given class or structure is exportable 
-#define UNKNOWN_API
+/* Will determine if the Given class or structure is exportable */
+#define CREATURE_API
 
+/* Calling convention of the API */
+#define CREATURE_CALL 
+
+/* For turning off exceptions on optimization */
+#define NOEXCEPT noexcept
 
 // ===================================================================================================================================================
 // TYPES FOR OUR ENGINE

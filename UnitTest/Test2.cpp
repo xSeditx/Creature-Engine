@@ -6,6 +6,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace UnitTest
 {
+#ifdef _PROFILE_MEMORY
 	TEST_CLASS(MemoryTrackerTest)
 	{
 	public:
@@ -98,4 +99,6 @@ namespace UnitTest
 //}
 
 	};
-}
+#endif
+
+}//End UnitTest NS
