@@ -1,0 +1,2205 @@
+
+
+ ==================================================================================================================================================================================
+                                                               #11/28															  															  
+															  #Threadpool.cpp/h		
+															  #IMPORTANT
+															  #Reason: Cleanup of experimental Threadpool and Worker class
+====================================================================================================================================================================================
+
+
+include<iostream>
+#include<Windows.h>
+#pragma optimize( "", off )
+
+#define MY_WRAPPER
+#define _PROFILE_MEMORY
+
+#include"Profiling\SystemInfo.h"
+#include"Profiling\MemoryPerf\MemTracker.h"
+#include"Core\Threading\Threadpool.h"
+#include"Profiling\Timing\Benchmark.h"
+
+#include"Core\Common.h"
+
+using namespace Core;
+using namespace Threading;
+//#define LOOP_COUNT 100
+int LOOP_COUNT = 10000;
+#include<string>
+/*
+Physics Solver:    https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
+*/
+
+/*
+template <class F, class Tuple>
+constexpr decltype(auto) apply(F&& f, Tuple&& t);
+*/
+
+
+void  P0R0()
+{
+	std::cout << "P0R0" << "\n";
+}
+float P1R1(int _param)
+{
+	std::cout << "P1R1: " << _param << "\n";
+	return static_cast<float>(_param * _param);
+}
+void  P1R0(int _param)
+{
+	std::cout << "P1R0:" << _param << "\n";
+}
+void  P2R0(int _param, int _param2)
+{
+	std::cout << "P1R0:" << _param << ":" << _param2 << "\n";
+}
+int   P0R1()
+{
+	std::cout << "P0R1" << "\n";
+	return 42;
+}
+
+//void operator()(_Func&& _function, _Args&&..._args)
+//{
+//	return _function(_args...);
+//}
+
+
+
+/*
+struct A { int x; int y; int z; };
+A a{.y = 2, .x = 1}; // error; designator order does not match declaration order
+A b{.x = 1, .z = 2}; // ok, b.y initialized to 0
+
+
+		_Ret operator()(_Args&&..._args)
+		{
+			return FuncStorage(_args...);
+		}
+*/
+
+/// aggregate in C++17/*
+/*
+			auto A = new(alloca(sizeof(Wrapper<decltype(TestFunctionE), int>))) Wrapper(TestFunctionE, std::move(LOOP_COUNT));
+			auto B = alloca(Wrapper(TestFunctionB, 1431);
+			auto C = alloca(Wrapper(TestFunctionD, 123.321f, 10);
+			auto D = alloca(Wrapper(TestFunctionA);
+			auto E = alloca(Wrapper(TestFunctionC, 3.14159f, 123);
+			auto F = alloca(Wrapper(TestFunctionF, std::move(LOOP_COUNT));
+			auto G = alloca(Wrapper(TestFunctionG, std::move(LOOP_COUNT));
+			auto H = alloca(Wrapper(TestFunctionH, std::move(LOOP_COUNT));
+			auto I = alloca(Wrapper(TestFunctionI, std::move(LOOP_COUNT));
+			auto J = alloca(Wrapper(TestFunctionJ, std::move(LOOP_COUNT));
+			auto K = alloca(Wrapper([](int)->int { Print("Lambda Function Threadpool call"); return 11; }, 10000);
+
+
+*/
+
+OPTIMIZATION_OFF()
+/*
+
+(alloca(sizeof(Wrapper<decltype(TestFunctionE), int>)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionB), int >)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionD),float,int >)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionA)  >)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionC),float,int >)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionF), int>)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionG), int>)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionH), int>)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionI), int>)))
+(alloca(sizeof(Wrapper<decltype(TestFunctionJ), int>)))
+
+*/
+#define NUMBER_OF_THREADS 2000
+int main()
+{/* Open STD http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3857.pdf */
+	ThreadPool::get();
+
+#ifdef MY_WRAPPER
+	while (true)
+	{
+		//alloca()
+		Function_Counter = 0;
+		LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
+		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
+
+		Profiling::Timing::Profile_Timer<100> Bench;
+		{
+			std::vector<std::vector<uint32_t>> Test;
+
+			///      auto L = new auto A = new asyncTask(TestFunctionE, std::move(LOOP_COUNT));
+			auto Af = Core::Threading::ThreadPool::get().Async([] {int ret = 10; return ret; });
+
+			auto A = ThreadPool::get().Async(TestFunctionE, std::move(LOOP_COUNT));
+			auto B = ThreadPool::get().Async(TestFunctionE, std::move(LOOP_COUNT));
+			auto C = ThreadPool::get().Async(TestFunctionB, 1431);
+			auto D = ThreadPool::get().Async(TestFunctionD, 123.321f, 10);
+			auto E = ThreadPool::get().Async(TestFunctionA);
+			auto F = ThreadPool::get().Async(TestFunctionC, 3.14159f, 123);
+			auto G = ThreadPool::get().Async(TestFunctionF, std::move(LOOP_COUNT));
+			auto H = ThreadPool::get().Async(TestFunctionG, std::move(LOOP_COUNT));
+			auto I = ThreadPool::get().Async(TestFunctionH, std::move(LOOP_COUNT));
+			auto J = ThreadPool::get().Async(TestFunctionI, std::move(LOOP_COUNT));
+			auto K = ThreadPool::get().Async(TestFunctionJ, std::move(LOOP_COUNT));
+
+//new asyncTask(TestFunctionB, 1431);
+//new asyncTask(TestFunctionD, 123.321f, 10);
+//new asyncTask(TestFunctionA);
+//new asyncTask(TestFunctionC, 3.14159f, 123);
+//new asyncTask(TestFunctionF, std::move(LOOP_COUNT));
+//new asyncTask(TestFunctionG, std::move(LOOP_COUNT));
+//new asyncTask(TestFunctionH, std::move(LOOP_COUNT));
+//new asyncTask(TestFunctionI, std::move(LOOP_COUNT));     auto  TPTest5 = ThreadPool::get().Async(A);
+//new asyncTask(TestFunctionJ, std::move(LOOP_COUNT));     auto  TPTest1 = ThreadPool::get().Async(B);
+//new asyncTask([](int)->int { Print("Lambda Function Threadpool call"); return 11; }, 10000);     auto  TPTest4 = ThreadPool::get().Async(C);
+//new asyncTask(TestFunctionLarge, (uint64_t)(rand() % 1000), (uint64_t)(rand() % 1000), (uint64_t)(rand() % 1000), (uint64_t)(rand() % 1000), (uint64_t)(rand() % 1000));     auto  TPTest3 = ThreadPool::get().Async(D);
+  
+// auto  TPTest2 = ThreadPool::get().Async(E);
+// auto  TPTest6 = ThreadPool::get().Async(F);
+// auto  TPTest7 = ThreadPool::get().Async(G);
+// auto  TPTest8 = ThreadPool::get().Async(H);
+// auto  TPTest9 = ThreadPool::get().Async(I);
+// auto TPTest10 = ThreadPool::get().Async(J);
+// auto TPTest11 = ThreadPool::get().Async(K);
+     
+		//	ThreadPool::get().Async(TestFunctionE, std::move(LOOP_COUNT));
+			//Sleep(5);
+			Print("Thread Pool Cluster");
+
+			std::vector<std::future<float>> Fut;
+			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			{
+				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(i));
+				Fut.push_back(std::forward<std::future<float>>(F));
+			}	
+
+			uint64_t result{ 0 };
+			int counter = Fut.size();
+			int C2{ 0 }, C3{ 0 };
+//for (auto& G : Fut)
+//{
+//	result += G.get();
+//	GotFuture--;
+//}
+			while (counter)
+			{
+				for (auto& F : Fut)
+				{
+					if (!is_ready(F))
+					{/* if not ready yet, check the next */
+						++C2;
+						continue;
+					}
+					result += F.get(); /* it is ready */
+					//Print("Result: " << result);
+					++C3;
+					--counter;
+				}
+			}
+
+			Print("End Thread Pool Cluster: " << result);
+
+//   Test.push_back(TPTest6.get());
+//   Test.push_back(TPTest7.get());
+//   Test.push_back(TPTest8.get());
+//   Test.push_back(TPTest9.get());
+//   Test.push_back(TPTest10.get());
+
+			while (Function_Counter < 10) {/* SpinLock until every single function called returns as measured via the atomic int Function_Counter. */ }
+
+		 	Print("Threadpool: " << result);
+		 	//Print("ThreadPool: " << TPTest4.get() << " : " << TestCompile(Test));
+///
+///		//	delete A; delete B; delete C; delete D; delete E; delete F; delete G; delete H; delete I; delete J;
+///		//	delete K;
+///
+ 			Bench.Stop();
+		}
+ 
+		Function_Counter = 0;
+		Profiling::Timing::Profile_Timer<100> ThreadBM;
+		{
+			auto  TPTest5T = std::async(std::launch::async | std::launch::deferred, TestFunctionE, LOOP_COUNT);
+			auto  TPTest1T = std::async(std::launch::async | std::launch::deferred, TestFunctionB, 1431);
+			auto  TPTest4T = std::async(std::launch::async | std::launch::deferred, TestFunctionD, 123.321f, 10);
+			auto  TPTest3T = std::async(std::launch::async | std::launch::deferred, TestFunctionA);
+			auto  TPTest2T = std::async(std::launch::async | std::launch::deferred, TestFunctionC, 3.14159f, 123);
+			auto  TPTest6T = std::async(std::launch::async | std::launch::deferred, TestFunctionF, LOOP_COUNT);
+			auto  TPTest7T = std::async(std::launch::async | std::launch::deferred, TestFunctionG, LOOP_COUNT);
+			auto  TPTest8T = std::async(std::launch::async | std::launch::deferred, TestFunctionH, LOOP_COUNT);
+			auto  TPTest9T = std::async(std::launch::async | std::launch::deferred, TestFunctionI, LOOP_COUNT);
+			auto TPTest10T = std::async(std::launch::async | std::launch::deferred, TestFunctionJ, LOOP_COUNT);
+			auto TPTest11T = new  asyncTask([](int)->int { Print("Lambda Function Call std::Async"); return 11; }, 10000);
+
+			Print("Async Cluster");
+			std::vector<std::future<float>> Fut;
+	        for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+	        {
+	        	auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, i);
+				Fut.push_back(std::move(TPTest4loop));
+	        }	
+			Print("End Async Cluster");
+
+
+			uint64_t result{ 0 };
+			int counter = Fut.size();
+			while (counter)
+			{
+				for (auto& F : Fut)
+				{
+					if (!is_ready(F))
+					{// if not ready yet, check the next  
+						continue;
+					}
+					result += F.get(); // it is ready 
+					--counter;
+				}
+			}
+			Print("Async :" << result);
+			while (Function_Counter < 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+ }
+			std::vector<std::vector<uint32_t>> Test;
+
+			Test.push_back(TPTest5T.get());
+			Test.push_back(TPTest6T.get());
+			Test.push_back(TPTest7T.get());
+			Test.push_back(TPTest8T.get());
+			Test.push_back(TPTest9T.get());
+			Test.push_back(TPTest10T.get());
+			Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
+
+			ThreadBM.Stop();
+		}
+
+
+		uint64_t  results;
+		Function_Counter = 0;
+		Profiling::Timing::Profile_Timer<100> LBench;
+		{
+			auto Test5 = TestFunctionE(std::move(LOOP_COUNT));// .5ms
+			auto Test4 = TestFunctionD(123.321f, 10);
+			auto Test1 = TestFunctionB(1431);
+			auto Test3 = TestFunctionA();
+			auto Test2 = TestFunctionC(3.14159f, 123);
+			auto Test6 = TestFunctionF(std::move(LOOP_COUNT));//.3
+			auto Test7 = TestFunctionG(std::move(LOOP_COUNT));//3.21
+			auto Test8 = TestFunctionH(std::move(LOOP_COUNT));// .32
+			auto Test9 = TestFunctionI(std::move(LOOP_COUNT));//2.8
+			auto Test10 = TestFunctionJ(std::move(LOOP_COUNT));//2.6
+			auto Test11 = [](int)->int { Print("Lambda Function Linear call"); return 11; };
+
+
+			while (Function_Counter > 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+			}
+
+			uint64_t result{ 0 };
+			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			{
+				result += TestFunctionC( 123.321f, rand()% NUMBER_OF_THREADS);
+			}
+			Print("Linear :" << result);
+			
+
+			std::vector<std::vector<uint32_t>> Test;
+			Test.push_back(Test5);
+			Test.push_back(Test6);
+			Test.push_back(Test7);
+			Test.push_back(Test8);
+			Test.push_back(Test9);
+			Test.push_back(Test10);
+			Print("Linear: " << Test4 << " : " << TestCompile(Test));
+
+			LBench.Stop();
+		}
+
+		std::cout << " Straight Linear = " << LBench.Results / 1000.0f << " ms" << "\n";//0.020034
+		std::cout << "     Thread Pool = " << Bench.Results / 1000.0f << " ms" << "\n";
+		std::cout << "      std::async = " << ThreadBM.Results / 1000.0f << " ms" << "\n";//0.020034
+		Sleep(1500);
+	}
+#else
+
+	while (true)
+	{
+		//LOOP_COUNT += 1000; // 23000 is where Linear = using Thread pool or Async
+		Function_Counter = 0;
+		Profiling::Timing::Profile_Timer<100> Bench;
+		{
+			auto  TPTest5 = ThreadPool::get().Async(TestFunctionE, LOOP_COUNT);
+			auto  TPTest1 = ThreadPool::get().Async(TestFunctionB, 1431);
+			auto  TPTest4 = ThreadPool::get().Async(TestFunctionD, 123.321f, 10);
+			auto  TPTest3 = ThreadPool::get().Async(TestFunctionA);
+			auto  TPTest2 = ThreadPool::get().Async(TestFunctionC, 3.14159f, 123);
+			auto  TPTest6 = ThreadPool::get().Async(TestFunctionF, LOOP_COUNT);
+			auto  TPTest7 = ThreadPool::get().Async(TestFunctionG, LOOP_COUNT);
+			auto  TPTest8 = ThreadPool::get().Async(TestFunctionH, LOOP_COUNT);
+			auto  TPTest9 = ThreadPool::get().Async(TestFunctionI, LOOP_COUNT);
+			auto TPTest10 = ThreadPool::get().Async(TestFunctionJ, LOOP_COUNT);
+
+			std::vector<std::future<float>> Fut;
+			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			{
+				auto  TPTest4loop = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(i));// (alloca(sizeof(Wrapper<decltype(TestFunctionC), float, int >))) 
+				Fut.push_back(std::forward<std::future<float>>(TPTest4loop));
+			}
+
+			uint64_t result{ 0 };
+			int counter = Fut.size();
+			int C2{ 0 }, C3{ 0 };
+			while (counter)
+			{
+				for (auto& F : Fut)
+				{
+					if (!is_ready(F))
+					{//* if not ready yet, check the next 
+						++C2;
+						continue;
+					}
+					result += F.get(); //* it is ready 
+					++C3;
+					--counter;
+				}
+			}
+			while (Function_Counter < 10) {//* SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+ }
+		
+			std::vector<std::vector<uint32_t>> Test;
+			Test.push_back(TPTest5.get());
+			Test.push_back(TPTest6.get());
+			Test.push_back(TPTest7.get());
+			Test.push_back(TPTest8.get());
+			Test.push_back(TPTest9.get());
+			Test.push_back(TPTest10.get());
+
+			Print("ThreadPool: " << TPTest4.get() << " : " << TestCompile(Test));
+			Bench.Stop();
+		}
+
+
+		Function_Counter = 0;
+		Profiling::Timing::Profile_Timer<100> ThreadBM;
+		{
+			auto  TPTest5T = std::async(TestFunctionE, LOOP_COUNT);
+			auto  TPTest1T = std::async(TestFunctionB, 1431);
+			auto  TPTest4T = std::async(TestFunctionD, 123.321f, 10);
+			auto  TPTest3T = std::async(TestFunctionA);
+			auto  TPTest2T = std::async(TestFunctionC, 3.14159f, 123);
+			auto  TPTest6T = std::async(TestFunctionF, LOOP_COUNT);
+			auto  TPTest7T = std::async(TestFunctionG, LOOP_COUNT);
+			auto  TPTest8T = std::async(TestFunctionH, LOOP_COUNT);
+			auto  TPTest9T = std::async(TestFunctionI, LOOP_COUNT);
+			auto TPTest10T = std::async(TestFunctionJ, LOOP_COUNT);
+
+
+			Print("Async Cluster");
+			std::vector<std::future<float>> Fut;
+			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			{
+				auto  TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, i);
+				Fut.push_back(std::move(TPTest4loop));
+			}
+			uint64_t result{ 0 };
+			int counter = Fut.size();
+			while (counter)
+			{
+				for (auto& F : Fut)
+				{
+					if (!is_ready(F))
+					{// if not ready yet, check the next 
+						continue;
+					}
+					result += F.get(); // it is ready 
+					--counter;
+				}
+			}
+			Print("Async :" << result);
+			Print("End Async Cluster");
+
+
+			while (Function_Counter < 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+			}
+
+			std::vector<std::vector<uint32_t>> Test;
+			Test.push_back(TPTest5T.get());
+			Test.push_back(TPTest6T.get());
+			Test.push_back(TPTest7T.get());
+			Test.push_back(TPTest8T.get());
+			Test.push_back(TPTest9T.get());
+			Test.push_back(TPTest10T.get());
+			Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
+
+
+			ThreadBM.Stop();
+		}
+
+		Function_Counter = 0;
+		Profiling::Timing::Profile_Timer<100> LBench;
+		{
+			auto Test5 = TestFunctionE(LOOP_COUNT);
+			auto Test1 = TestFunctionB(1431);
+			auto Test4 = TestFunctionD(123.321f, 10);
+			auto Test3 = TestFunctionA();
+			auto Test2 = TestFunctionC(3.14159f, 123);
+			auto Test6 = TestFunctionF(LOOP_COUNT);
+			auto Test7 = TestFunctionG(LOOP_COUNT);
+			auto Test8 = TestFunctionH(LOOP_COUNT);
+			auto Test9 = TestFunctionI(LOOP_COUNT);
+			auto Test10 = TestFunctionJ(LOOP_COUNT);
+
+			std::vector<float> Fut;
+			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			{
+				auto  TPTest4loop = TestFunctionC(123.321f, i);
+				Fut.push_back(std::move(TPTest4loop));
+			}
+			uint64_t result{ 0 };
+			int counter = Fut.size();
+			while (counter)
+			{
+				for (auto& F : Fut)
+				{
+					result += F; // it is ready 
+					--counter;
+				}
+			}
+			Print("Linear Result: " << result);
+			while (Function_Counter < 10) {//* SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+			}
+
+
+			std::vector<std::vector<uint32_t>> Test;
+			Test.push_back(Test5);
+			Test.push_back(Test6);
+			Test.push_back(Test7);
+			Test.push_back(Test8);
+			Test.push_back(Test9);
+			Test.push_back(Test10);
+			Print("Linear: " << Test4 << " : " << TestCompile(Test));
+			LBench.Stop();
+		}
+		//std::vector<Wrapper_Base*> FunctionList;
+
+		Function_Counter = 0;
+
+		Profiling::Timing::Profile_Timer<100> WrapperBenchmark;
+		{
+
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionE, LOOP_COUNT));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionB, 1431));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionD, 123.321f, 10));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionA));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionC, 3.14159f, 123));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionF, LOOP_COUNT));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionG, LOOP_COUNT));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionH, LOOP_COUNT));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionI, LOOP_COUNT));
+			//  FunctionList.emplace_back(new Wrapper(TestFunctionJ, LOOP_COUNT));
+			//  FunctionList.emplace_back(new Wrapper([](int)->int { Print("Lambda Function Function List calls"); return 11; }, 10000));
+
+			//for (auto& F : FunctionList)
+			//{
+			//	F->Invoke();
+			//}
+			WrapperBenchmark.Stop();
+		}
+ 
+	//	std::cout << "  Wrapper Linear = " << WrapperBenchmark.Results / 1000.f << " ms" << "\n"; // 0.020808  Difference of .000774
+	//	std::cout << " Straight Linear = " << LBench.Results / 1000.f << " ms" << "\n";//0.020034
+		std::cout << "     Thread Pool = " << Bench.Results / 1000.f << " ms" << "\n";
+	//	std::cout << "      std::async = " << ThreadBM.Results / 1000.f << " ms" << "\n";//0.020034
+		Sleep(1500);
+	}
+#endif
+
+	//	Profiling::Memory::TrackDumpBlocks();
+	//	Profiling::Memory::TrackListMemoryUsage();
+	return 0;
+}
+OPTIMIZATION_ON()
+
+
+
+#THREADPOOL.CPP
+
+
+#include"Threadpool.h"
+
+#pragma warning( push )
+#pragma warning( disable : 4244 )
+#pragma warning( disable : 4018 ) // Optimization off warning of mine
+
+///template<typename _F,typename ...ARGS>
+///void* Wrapper<_F,ARGS...>::MemoryBlock;
+///
+
+std::atomic<uint32_t> Create{ 0 };
+std::atomic<uint32_t> Delete{ 0 };
+std::atomic<uint32_t> GotFuture{ 0 };
+//template<typename _F, typename ...ARGS>
+//uint16_t Wrapper<_F, ARGS...>::Offset{ 0 };
+
+/*
+
+https://www.youtube.com/watch?v=zULU6Hhp42w&list=PLl8Qc2oUMko_FMAaK7WY4ly0ikLFrYCE3&index=4
+
+*/
+#define SLEEP_TIME 0
+std::atomic<int> Function_Counter{ 0 };
+
+#ifdef MY_WRAPPER
+
+namespace Core
+{
+	namespace Threading
+	{
+		bool JobQueue::Try_Pop(Worker_Function*& func)
+		{/* Try to aquire a function off the Queue to run */
+			std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+			if (!Lock || TaskQueue.empty())
+			{
+				return false;
+			}
+			func = TaskQueue.front();//std::forward(TaskQueue.front());// std::move(
+		 	TaskQueue.pop_front();
+			return true;
+		}
+
+		bool JobQueue::pop(Worker_Function*& func)
+		{
+			std::unique_lock<std::mutex> Lock{ QueueMutex };
+			while (TaskQueue.empty() && !is_Done)
+			{
+				is_Ready.wait(Lock);
+			}
+			if (TaskQueue.empty())
+			{
+				return false;
+			}
+			func = std::move(TaskQueue.front());
+			TaskQueue.pop_front();
+			return true;
+		}
+
+		void JobQueue::Done()
+		{
+			{
+				std::unique_lock<std::mutex> Lock{ QueueMutex };
+				is_Done = true;
+			}
+			is_Ready.notify_all();
+		}
+
+		ThreadPool::ThreadPool()
+		{
+			for (int N{ 0 }; N < ThreadCount; ++N)
+			{
+				Worker_Threads.emplace_back([&, N] {Run(N); });
+			}
+		}
+		ThreadPool::~ThreadPool()
+		{
+			for (auto& Q : ThreadQueue)
+			{
+				Q.Done();
+			}
+			for (auto& WT : Worker_Threads)
+			{
+				WT.join();
+			}
+		}
+
+		void ThreadPool::Run(unsigned int _i)
+		{
+			while (true)
+			{
+				Worker_Function* Func{ nullptr }; 
+				for (unsigned int N{ 0 }; N != ThreadCount; ++N)
+				{
+					if (ThreadQueue[static_cast<size_t>((_i + N) % ThreadCount)].Try_Pop(Func))
+					{
+						break;
+					}
+				}
+				if (!Func && !ThreadQueue[_i].pop(Func)) 
+				{
+					break; // Possibly need this to be a continue
+				}
+				//Print("Before: " << Func);
+				Func->Invoke();
+
+				/// If this is deleted before the future is gotten an error is thrown stating the Future has been aquired multiple times.
+			 	delete &(*Func);
+				++Delete;
+				//Func = nullptr;
+				
+				//Print("After: " << Func);
+
+			}
+		}
+	}// End NS Threading
+}// End NS Core
+
+#else
+namespace Core
+{
+	namespace Threading
+	{
+
+		bool JobQueue::Try_Pop(Worker_Function& func)
+		{/* Try to aquire a function off the Queue to run */
+			std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+			if (!Lock || TaskQueue.empty())
+			{
+				return false;
+			}
+			/// Something is wrong here. Will lock if the pop is performed here
+			func = std::move(TaskQueue.front());
+			TaskQueue.pop_front();
+			return true;
+		}
+		bool JobQueue::pop(Worker_Function& func)
+		{
+			std::unique_lock<std::mutex> Lock{ QueueMutex };
+			while (TaskQueue.empty() && !is_Done)
+			{
+				is_Ready.wait(Lock);
+			}
+			if (TaskQueue.empty())
+			{
+				return false;
+			}
+			func = std::move(TaskQueue.front());//std::forward(TaskQueue.front());// std::move(
+			TaskQueue.pop_front();
+			return true;
+		}
+
+		void JobQueue::Done()
+		{
+			{
+				std::unique_lock<std::mutex> Lock{ QueueMutex };
+				is_Done = true;
+			}
+			is_Ready.notify_all();
+		}
+
+		ThreadPool::ThreadPool()
+		{
+			for (int N{ 0 }; N < ThreadCount; ++N)
+			{
+				Worker_Threads.emplace_back([&, N] {Run(N); });
+			}
+		}
+		ThreadPool::~ThreadPool()
+		{
+			for (auto& Q : ThreadQueue)
+			{
+				Q.Done();
+			}
+			for (auto& WT : Worker_Threads)
+			{
+				WT.join();
+			}
+		}
+		// { nullptr };// = new Wrapper_Base();
+		void ThreadPool::Run(unsigned int _i)
+		{
+			while (true)
+			{
+				Worker_Function Func;
+				bool Popped{ false };
+				for (unsigned int N{ 0 }; N != ThreadCount; ++N)
+				{
+					if (ThreadQueue[static_cast<size_t>((_i + N) % ThreadCount)].Try_Pop(Func))
+					{
+						Popped = true; // This finally fixes the bad function call because if Try_Pop removes item from queue it still gets ran.
+						break;
+					}
+				}
+				if (!Popped && !ThreadQueue[_i].pop(Func))//!Func && 
+				{
+					break; // Possibly need this to be a continue
+				}
+				Func();
+			}
+		}
+	}// End NS Threading
+}// End NS Core
+#endif
+
+
+
+
+
+
+
+
+
+#include<iostream>
+#include<string>
+
+#pragma optimize( "", off )
+/* unoptimized code section */
+#define Worker_Print(x) //std::cout << x << " : "
+
+
+OPTIMIZATION_OFF()
+void TestFunction(int _count, int _output)
+{
+	int result{ 0 };
+	for (int i{ 0 }; i < _count; ++i)
+	{
+		result++;
+		result += std::pow(result, _output);
+	}
+	std::cout << "PARAM:" << _output << "Finished Work: " << result << "\n";
+}
+OPTIMIZATION_ON()
+
+
+OPTIMIZATION_OFF()
+int TestFunctionA()
+{
+	Worker_Print( "FunctionA");
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return 11;
+}
+OPTIMIZATION_ON()
+
+
+OPTIMIZATION_OFF()
+int TestFunctionB(int _param)
+{
+	int result;
+	Worker_Print("FunctionB: " << _param) ;
+	//result.set_value(10);
+	result = _param * 2;
+	Sleep(SLEEP_TIME);
+++Function_Counter;
+	return result;
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+float TestFunctionC(float _paramA, int _paramB)
+{
+	Worker_Print("FunctionC: " << _paramA << " : " << _paramB );
+	//Print("FuncC Param is " << _paramB << " : ");
+
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return _paramA * _paramB * (rand() % 1000);
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+std::string TestFunctionD(float _paramA, int _paramB)
+{
+	Worker_Print("FunctionD " << _paramA << " : " << _paramB );
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return "String: " + std::to_string(_paramA) + " : " + std::to_string(_paramB);
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+std::vector<uint32_t> TestFunctionE(int _paramA)
+{
+	std::vector<uint32_t> SomethingAllocated;
+
+	uint64_t result{ 0 };
+	for (int i{ 0 }; i < _paramA; ++i)
+	{
+		//	std::cout << "E: " << i*i ;
+		result += i * i;
+		SomethingAllocated.push_back(result);
+	}
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return SomethingAllocated;
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+std::vector<uint32_t> TestFunctionF(int _paramA)
+{
+	std::vector<uint32_t> SomethingAllocated;
+	uint64_t result{ 0 };
+	for (int i{ 0 }; i < _paramA; ++i)
+	{
+		double A = sqrt(i*i);
+		//		std::cout << "F: " << A ;
+		result += _paramA * i + A;
+		SomethingAllocated.push_back(result);
+	}	
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return SomethingAllocated;
+}
+OPTIMIZATION_ON()
+
+
+OPTIMIZATION_OFF()
+std::vector<uint32_t> TestFunctionG(int _paramA)
+{
+	std::vector<uint32_t> SomethingAllocated;
+	uint64_t result{ 0 };
+	int B = rand() % _paramA;
+	int C{ 0 };
+
+	for (int i{ 0 }; i < _paramA; ++i)
+	{
+		double A = sqrt(i*i);
+		//		std::cout << "G: " << A ;
+		result += (_paramA * i) / pow(A, i);
+		SomethingAllocated.push_back(result);
+	}
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return SomethingAllocated;
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+std::vector<uint32_t> TestFunctionH(int _paramA)
+{
+	std::vector<uint32_t> SomethingAllocated;
+	double A{ 0 };
+	uint64_t result{ 0 };
+	int B = rand() % _paramA;
+	int C{ 0 };
+
+	for (int i{ 0 }; i < _paramA; ++i)
+	{
+		A = sqrt(i*i);
+	    Worker_Print( "H: " << A );
+		result += i * A;
+		SomethingAllocated.push_back(result);
+	}
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return SomethingAllocated;
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+std::vector<uint32_t> TestFunctionI(int _paramA)
+{
+	std::vector<uint32_t> SomethingAllocated;
+	uint64_t A{ 0 };
+
+	int B = rand() % _paramA;
+	int C{ 0 };
+
+	for (int i{ 0 }; i < _paramA; ++i)
+	{
+		A = pow(_paramA, i);
+		if (!((i+1) % (B+1)))C += A;
+		Worker_Print( "I: " << A );	
+		uint32_t result = A * C;
+		SomethingAllocated.push_back(result);
+	}
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return SomethingAllocated;
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+std::vector<uint32_t> TestFunctionJ(int _paramA)
+{
+	std::vector<uint32_t> SomethingAllocated;
+	float A = 0;
+	int B = rand() % _paramA;
+	int C{ 0 };
+	for (int i{ 0 }; i < _paramA; ++i)
+	{
+		A = pow(i, _paramA) / i;
+		if (A == B)C = i;
+		Worker_Print("J: " << A << ":");
+		uint32_t result = A * C;
+		SomethingAllocated.push_back(result);
+	}
+	Sleep(SLEEP_TIME);
+	++Function_Counter;
+	return SomethingAllocated;
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+uint64_t Worker_TestFunction(size_t _count)
+{
+	int B = rand() % _count;
+	int C{ 0 };
+	for(uint32_t i{0}; i< _count; ++i)
+	{
+		std::cout << i << ":";
+		if (!((i+1) % (B+1)))C++;
+	}
+	return _count * C;
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+uint64_t TestCompile(std::vector<std::vector<uint32_t>> _input)
+{
+	uint64_t result{ 0 };
+	for (auto& Y : _input)
+	{
+		for (auto& X : Y)
+		{
+			result += X;
+		}
+	}
+	return result;
+}
+OPTIMIZATION_ON()
+OPTIMIZATION_OFF()
+
+uint64_t TestFunctionLarge(uint64_t _p1, uint64_t _p2, uint64_t _p3, uint64_t _p4, uint64_t _p5)
+{
+	uint64_t result = _p1 + _p2 +_p3 +_p4 + _p5;
+	Print(result);
+	return result;
+}
+
+OPTIMIZATION_ON()
+
+#pragma warning( pop )
+
+/*NOTES:
+
+Intel Game Engine Design:
+https://software.intel.com/en-us/articles/designing-the-framework-of-a-parallel-game-engine
+
+Faster STD::FUNCTION Implementation
+https://github.com/skarupke/std_function/blob/master/function.h
+
+
+Lock Free Ring Buffer
+https://github.com/tempesta-tech/blog/blob/master/lockfree_rb_q.cc
+
+Lock-Free Programming
+https://www.cs.cmu.edu/~410-s05/lectures/L31_LockFree.pdf
+
+A Fast Lock-Free Queue for C++
+http://moodycamel.com/blog/2013/a-fast-lock-free-queue-for-c++
+
+Introduction to Multithreaded Algorithms
+http://ccom.uprrp.edu/~ikoutis/classes/algorithms_12/Lectures/MultithreadedAlgorithmsApril23-2012.pdf
+
+A Thread Pool with C++11
+http://progsch.net/wordpress/?p=81
+
+Parallelizing the Naughty Dog Engine
+https://www.gdcvault.com/play/1022186/Parallelizing-the-Naughty-Dog-Engine
+
+C++11 threads, affinity and hyperthreading
+https://eli.thegreenplace.net/2016/c11-threads-affinity-and-hyperthreading/
+
+Thread pool worker implementation
+https://codereview.stackexchange.com/questions/60363/thread-pool-worker-implementation
+
+Thread pool implementation using c++11 threads
+https://github.com/mtrebi/thread-pool
+
+C++11 Multithreading – Part 8: std::future , std::promise and Returning values from Thread
+https://thispointer.com/c11-multithreading-part-8-stdfuture-stdpromise-and-returning-values-from-thread/
+
+
+CppCon 2015: Fedor Pikus PART 2 “Live Lock-Free or Deadlock (Practical Lock-free Programming) ”
+Queue
+https://www.youtube.com/watch?v=1obZeHnAwz4&t=3055s
+
+
+Thread Pool Implementation on Github:
+https://github.com/mtrebi/thread-pool/blob/master/README.md#queue
+
+Threadpool with documentation:
+https://www.reddit.com/r/cpp/comments/9lvji0/c_threadpool_with_documentation/
+
+Original White paper on Work stealing Queues:
+http://supertech.csail.mit.edu/papers/steal.pdf
+
+Code overview - Thread Pool & Job System
+https://www.youtube.com/watch?v=Df-6ws_EZno
+
+while(running)
+{
+    Try to Lock and return True or False
+	True:
+	False: Push it to 
+}
+*/
+
+
+##HEADER
+
+
+#pragma once
+#include <thread>
+#include <functional>
+#include <future>
+#include <deque>
+#include <queue>
+#include <array>
+#include <tuple>
+
+#include<Windows.h>
+#include"Core\Common.h"
+#include<iostream>
+
+#pragma warning( push )
+#pragma warning( disable : 4244 )
+#pragma warning( disable : 4018 ) // Optimization off warning of mine
+
+#define BLOCK_SIZE    1024 * 100
+#define MY_WRAPPER
+
+static void* Wrap_MemoryBlock = malloc(BLOCK_SIZE * sizeof(char)); // nullptr;
+static uint16_t  Wrap_Offset{ 0 };
+
+
+extern std::atomic<uint32_t> Create;
+extern std::atomic<uint32_t> Delete;
+extern std::atomic<uint32_t> GotFuture;
+
+
+/* Non-blocking test of std::future to see if value is avalible yet */
+template<typename R>
+bool is_ready(std::future<R> const& f)
+{
+	return f.valid() ? f.wait_for(std::chrono::seconds(0)) == std::future_status::ready : false;
+}
+
+/// template<typename Function, typename ...Args>
+/// result_type = std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>;
+
+extern std::atomic<int> Function_Counter;
+//https://code.woboq.org/llvm/libcxx/include/type_traits.html
+
+/// Use this switch with Compiler Explorer inorder to allow it to compile: -std=c++17 -O3
+// MSVC Threadpool implementation for Concurrency
+// https://docs.microsoft.com/en-us/cpp/parallel/concrt/task-scheduler-concurrency-runtime?view=vs-2019
+#ifdef MY_WRAPPER
+
+struct Wrapper_Base
+{/// __declspec(novtable) USE THIS
+	virtual ~Wrapper_Base() {
+	}//Print("Base");
+
+	virtual void Invoke() = 0;
+	void operator()() 
+	{
+		Invoke();
+	}
+	/* Implement a Then, When_all and Deferred Function handling */
+
+
+	enum asyncStatus
+	{
+		Valid, Waiting, Busy, Submitted, Ready, Aquired
+	};
+
+	asyncStatus Status;
+};
+
+template<typename _Func, typename ...ARGS>
+struct asyncTask
+	: public Wrapper_Base
+{
+	using type = std::invoke_result_t<std::decay_t<_Func&>, std::decay_t<ARGS>...>;
+	using reference_type = type&;
+	using Fptr = type(*)(ARGS...);
+
+	Fptr Function;
+	std::tuple<ARGS...> Arguments;
+	std::promise<type> ReturnValue;
+
+	int RefCount{ 0 };
+	asyncTask(_Func&& _function, ARGS&&... _args) noexcept
+		:
+		Function(std::move(_function)),
+		Arguments(std::forward<ARGS>(_args)...)
+	{
+		Status = Valid;
+	}
+	virtual ~asyncTask() {  }//Print("Derived Destruct");
+
+	asyncTask(asyncTask&& _other) noexcept
+		:
+		Function(std::move(_other.Function)),
+		Arguments(std::forward<ARGS>(_other.Arguments)),
+		ReturnValue(std::move(_other.ReturnValue))
+	{
+		std::cout << "Called the Forward Function" << "\n";
+	}
+	asyncTask& operator=(asyncTask&& _other) noexcept
+	{
+		Function = std::move(_other.Function);
+		Arguments = std::forward<ARGS>(_other.Arguments);
+		ReturnValue = std::move(_other.ReturnValue);
+		std::cout << "Called Assignment Operator " << "\n";
+	}
+
+	virtual void Invoke()  override
+	{
+		 Status = Busy;
+		 auto result = std::apply(Function, Arguments);
+  		 ReturnValue.set_value(result);
+		 Status = Waiting;
+	}
+
+	std::future<type> get_future()
+	{
+		Status = Submitted;
+		++Create;
+		GotFuture++;
+		RefCount++;
+		return ReturnValue.get_future();
+	}
+
+	type get()
+	{
+		Status = Aquired;
+		ReturnValue.get();
+	}
+
+	bool is_ready()
+	{
+		return ReturnValue.valid() ? (ReturnValue.wait_for(std::chrono::seconds(0)) == std::future_status::ready) : false;
+	}
+	asyncTask(const asyncTask&) = delete;
+	asyncTask& operator=(const asyncTask& _other) = delete;
+};
+
+
+  typedef Wrapper_Base Worker_Function;
+
+
+// NOTE: https://riptutorial.com/cplusplus/example/15806/create-a-simple-thread-pool
+namespace Core
+{
+	namespace Threading
+	{
+
+		struct JobQueue
+		{
+		public:
+			JobQueue() = default;
+
+			std::condition_variable is_Ready;
+			std::mutex QueueMutex;
+			bool is_Done{ false };
+			void Done();
+
+			std::deque<Worker_Function*> TaskQueue;
+
+			bool Try_Pop(Worker_Function*& func);
+			bool pop(Worker_Function*& func);
+
+			bool try_push(Worker_Function *func)
+			{
+				{
+					std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+					if (!Lock)
+					{/* If our mutex is already locked simply return */
+						return false;
+					}
+					/* Else place on the back of our Queue*/
+					TaskQueue.push_back(std::move(func));//(func));std::move<_FUNC>
+				}/* Unlock the Mutex */
+				is_Ready.notify_one(); /* Tell the world about it */
+				return true;/* Lets Async know u*/
+			}
+			void push(Worker_Function* func)
+			{/* Adds a Function to our Queue */
+				{
+					std::unique_lock<std::mutex> Lock{ QueueMutex };
+					TaskQueue.emplace_back(std::move(func));//std::move<_FUNC> std::forward<_FUNC&>(&((Worker_Function *)
+				}
+			}
+		};
+
+		class ThreadPool
+		{
+			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 3};
+			std::vector<std::thread> Worker_Threads;
+			std::vector<JobQueue> ThreadQueue{ ThreadCount };
+			std::atomic<unsigned int> Index{ 0 };
+
+			ThreadPool();
+			~ThreadPool();
+
+			void Run(unsigned int _i);
+
+		public:
+
+			static ThreadPool &get()
+			{
+				static ThreadPool instance;
+				return instance;
+			}
+
+			template<typename _FUNC, typename...ARGS >
+			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type> //Wrapper_Base::future<typename  Wrapper<_FUNC, ARGS... >::type>
+			{// Accept arbitrary Function signature and arguments
+				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>( args)...);
+				auto result = _function->get_future();
+				
+				auto i = Index++;
+				int K = 1;
+				for (unsigned int n{ 0 }; n != ThreadCount * K; ++n) // K is Tunable 
+				{
+					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Worker_Function*>(_function)))
+					{
+						
+						return result;
+					}
+				}
+
+				ThreadQueue[i % ThreadCount].push(static_cast<Worker_Function*>(_function));
+				return result;
+			}
+			///===================================================================================================================================================================
+
+		};
+	}// End NS Threading
+}// End NS Core 
+
+			///===================================================================================================================================================================
+			///     template<typename _FUNC, typename...ARGS >
+			///     auto Async(asyncTask<_FUNC, ARGS... >  *_function)->std::future<typename asyncTask<_FUNC, ARGS... >::type> //Wrapper_Base::future<typename  Wrapper<_FUNC, ARGS... >::type>
+			///     {// Accept arbitrary Function signature and arguments
+			///     	auto i = Index++;
+			///     	int K = 1;
+			///     	for (unsigned int n{ 0 }; n != ThreadCount * K; ++n) // K is Tunable 
+			///     	{
+			///     		if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Worker_Function*>(_function)))
+			///     		{
+			///     			return _function->get_future();
+			///     		}
+			///     	}
+			///     
+			///     	ThreadQueue[i % ThreadCount].push(static_cast<Worker_Function*>(_function));
+			///     
+			///     	return _function->get_future();
+			///     }
+			///================================= EXPERIMENTAL ====================================================================================================================
+
+
+
+#else
+
+
+/// template<typename Function, typename ...Args>
+/// result_type = std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>;
+			// class _RET = std::result_of_t<_FUNC>,class _RET =std::result_of_t<_FUNC()>, 
+
+ //_FUNC&& _func, ARGS&&...args)->std::future<decltype(_func(args...))>//  //
+
+extern std::atomic<int> Function_Counter;
+//https://code.woboq.org/llvm/libcxx/include/type_traits.html
+
+
+typedef std::function<void()> Worker_Function;
+
+
+
+// NOTE: https://riptutorial.com/cplusplus/example/15806/create-a-simple-thread-pool
+namespace Core
+{
+	namespace Threading
+	{
+
+		struct JobQueue
+		{
+		public:
+			JobQueue() = default;
+
+			std::condition_variable is_Ready;
+			std::mutex QueueMutex;
+			bool is_Done{ false };
+			void Done();
+
+
+			std::deque<Worker_Function> TaskQueue;
+
+			bool Try_Pop(Worker_Function& func);
+			bool pop(Worker_Function& func);
+			template<typename _FUNC> bool try_push(_FUNC&& func)
+			{
+				{
+					std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+					if (!Lock)
+					{/* If our mutex is already locked simply return */
+						return false;
+					}
+					/* Else place on the back of our Queue*/
+					TaskQueue.emplace_back(std::forward<_FUNC>(func));
+				}
+				is_Ready.notify_one();
+				return true;
+			}
+			template<typename _FUNC> void push(_FUNC&& func)
+			{/* Adds a Function to our Queue */
+				{
+					std::unique_lock<std::mutex> Lock{ QueueMutex };
+					TaskQueue.emplace_back(std::forward<_FUNC>(func));//std::move<_FUNC> std::forward<_FUNC&>(&((Worker_Function *)
+				}
+			}
+	};
+		class ThreadPool
+		{
+			const unsigned int ThreadCount{ std::thread::hardware_concurrency() - 1 };
+			std::vector<std::thread> Worker_Threads;
+			std::vector<JobQueue> ThreadQueue{ ThreadCount };
+			std::atomic<unsigned int> Index{ 0 };
+
+			ThreadPool();
+			~ThreadPool();
+
+			void Run(unsigned int _i);
+		public:
+
+			static ThreadPool& get()
+			{
+				static ThreadPool instance;
+				return instance;
+			}
+			// class _RET = std::result_of_t<_FUNC>,class _RET =std::result_of_t<_FUNC()>, 
+
+ //_FUNC&& _func, ARGS&&...args)->std::future<decltype(_func(args...))>//  //
+
+			template<typename _FUNC, typename...ARGS >
+			auto Async(_FUNC&& _func, ARGS&&...args)->std::future<decltype(_func(args...))>//  //
+			{// Accept arbitrary Function signature and arguments
+				auto i = Index++;
+
+				auto task_PTR =
+					std::make_shared<std::packaged_task<decltype(_func(args...))()>>
+					(// Bind the argument and make a new packaged task to retrieve a future from on completion. 
+						std::bind
+						(
+							std::forward<_FUNC>(_func),
+							std::forward<ARGS>(args)...
+						)
+						);
+				//	if(_q[(i + n) % _count]
+				std::function<void()> wrapper_func = [task_PTR]()
+				{// Utilize std::functions type erasure to wrap the Task pointer
+					(*task_PTR)();
+				};
+
+
+				int K = 8;
+				for (unsigned int n{ 0 }; n != ThreadCount * K; ++n) // K is Tunable 
+				{
+					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(wrapper_func))
+					{
+						return task_PTR->get_future();
+					}
+				}
+
+				ThreadQueue[i % ThreadCount].push(wrapper_func);
+				return  task_PTR->get_future();
+			}
+		};
+}// End NS Threading
+}// End NS Core 
+
+#endif
+
+
+
+
+
+
+int TestFunctionA();
+int TestFunctionB(int _param);
+uint64_t TestFunctionLarge(uint64_t _p1, uint64_t _p2, uint64_t _p3, uint64_t _p4, uint64_t _p5);
+ 
+float TestFunctionC(float _paramA, int _paramB);
+
+std::string TestFunctionD(float _paramA, int _paramB);
+std::vector<uint32_t> TestFunctionE(int _paramA);
+std::vector<uint32_t> TestFunctionF(int _paramA);
+std::vector<uint32_t> TestFunctionG(int _paramA);
+std::vector<uint32_t> TestFunctionH(int _paramA);
+std::vector<uint32_t> TestFunctionI(int _paramA);
+std::vector<uint32_t> TestFunctionJ(int _paramA);
+
+uint64_t TestCompile(std::vector<std::vector<uint32_t>> _input);
+uint64_t Worker_TestFunction(size_t _count);
+
+
+
+
+template<typename _Ty, size_t _SZ>
+class ring_buffer
+{
+public:
+	using value_type = _Ty;
+	using reference = _Ty & ;
+	using pointer = const _Ty*;
+
+	ring_buffer() = default;
+
+	bool push_back(reference _element)
+	{/// Just deferring this function to make it compatible with older Queue system for Threadpool
+		return push(_element);
+	}
+	bool push(reference _element)
+	{// Adds new Element to Queue
+		std::atomic<size_t> OldWritePosition;/// = WritePosition.load();
+		std::atomic<size_t> NewWritePosition = NextElement(OldWritePosition);
+		if (NewWritePosition)/// == ReadPosition.load())
+		{/* If Read position and Write position are the same Buffer is Full */
+			return false;
+		}
+///		Data[OldWritePosition] = _element;
+		WritePosition = NewWritePosition;
+	}
+
+	/// WE MIGHT BE ABLE TO PACK THE READER AND WRITER INTO THE SAME ATOMIC INTEGER WHICH WILL REDUCE THE OVERHEAD
+	bool pop(reference _returnElement)
+	{/* Returns True if more elements in Queue*/
+		while (true)
+		{/* READER Multiple in Existance */
+			std::atomic<size_t> OldReadPosition = ReadPosition.load();
+
+			if (WritePosition.load() == OldReadPosition.load())
+			{// If attempting to read the same position again or buffer is full return false;
+				return false;
+			}
+
+			_returnElement = Data[OldReadPosition];// Perhaps std::move() would be better for performance
+			if (ReadPosition.compare_exchange_strong(OldReadPosition, NextElement(OldReadPosition)))
+			{
+				return true;
+			}
+		}
+	}
+
+	auto front()
+	{/// Possibly wrong currently a place holder to make the experimental ringbuffer compatible with older style of queue
+		return &Data[ReadPosition];
+	}
+	void pop_front() 
+	{/// Possibly wrong currently a place holder to make the experimental ringbuffer compatible with older style of queue
+		WritePosition = NextElement(WritePosition);
+	}
+	bool empty()
+	{/// Possibly wrong currently a place holder to make the experimental ringbuffer compatible with older style of queue
+		return (ReadPosition == WritePosition);
+	}
+
+	reference operator[](const int _offset)
+	{
+		return Data[_offset]; //[ReadPosition % BufferSize];
+	}
+
+	bool destroy()
+	{
+		delete[](Data);
+	}
+
+	size_t size()
+	{
+		return BufferSize;
+	}
+
+private:
+
+	std::array<std::atomic<_Ty*>, _SZ + 1> Data;
+
+	size_t NextElement(size_t _pos)
+	{
+		return ++_pos == BufferSize ? 0 : _pos;
+	}
+
+	size_t
+		ReadPosition{ 0 },
+		WritePosition{ 0 };
+	size_t Length, Size, Start, End, Elements;
+	size_t BufferSize = _SZ + 1;
+};
+
+#pragma warning( pop )
+
+//
+//pointer begin()
+//{
+//	return &Data[ReadPosition.location()];
+//}
+//pointer end()
+//{
+//	return &Data[WritePosition.location()];
+//}
+//
+//	using iterator = rbIterator<_Ty>;
+//iterator MyFirst() { return Data; }
+//iterator MyLast() { return Data; }
+//iterator MyEnd() { return MyLast(); }
+// _NODISCARD iterator begin() noexcept
+	// {	// return iterator for beginning of mutable sequence
+	// 	return (iterator(this->_Myfirst(), _STD addressof(this->_Get_data())));
+	// }
+
+
+
+/*
+		void make_Ready()//std::unique_lock<std::mutex>* _Lock)///, bool _At_thread_exit) Create a Defered signal so value is set when thread ends
+		{
+			//	_Has_stored_result = true;
+		///if (_At_thread_exit) { // notify at thread exit
+		///	_Cond._Register(*_Lock, &_Ready);
+		///}
+		///else { // notify immediately
+			isReady = true;
+			MutxCV.notify_all();
+		///}
+		}
+		*/
+
+
+
+
+		//type get()
+		//{ // block until ready then return the stored result or
+		//		// throw the stored exception
+		//	//future _Local{ std::move(*this) };
+		//	return type();// 0;//_STD move(_Local._Get_value());
+		//}
+		//std::future<std::invoke_result_t<_Func&, ARGS...>>& get_future()
+		//{
+		//	std::promise<std::invoke_result_t<_Func&, ARGS...>> result
+		//}
+
+		/*
+
+
+			_State_manager& operator=(const _State_manager& _Other) { // assign from _Other
+			_Copy_from(_Other);
+			return *this;
+		}
+
+		_State_manager& operator=(_State_manager&& _Other) { // assign from rvalue _Other
+			_Move_from(_Other);
+			return *this;
+		}
+
+		_NODISCARD bool valid() const noexcept { // return status
+			return _Assoc_state && !(_Get_only_once && _Assoc_state->_Already_retrieved());
+		}
+
+		void wait() const { // wait for signal
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Wait();
+		}
+			template <class _Clock, class _Dur>
+		future_status wait_until(const chrono::time_point<_Clock, _Dur>& _Abs_time) const { // wait until time point
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			return _Assoc_state->_Wait_until(_Abs_time);
+		}
+
+		_Ty& _Get_value() const { // return the stored result or throw stored exception
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			return _Assoc_state->_Get_value(_Get_only_once);
+		}
+
+		void _Set_value(const _Ty& _Val, bool _Defer) { // store a result
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Set_value(_Val, _Defer);
+		}
+
+		void _Set_value(_Ty&& _Val, bool _Defer) { // store a result
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Set_value(_STD forward<_Ty>(_Val), _Defer);
+		}
+		   void _Abandon() { // abandon shared state
+			if (_Assoc_state) {
+				_Assoc_state->_Abandon();
+			}
+		}
+
+		void _Set_exception(exception_ptr _Exc, bool _Defer) { // store a result
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Set_exception(_Exc, _Defer);
+		}
+
+		void _Swap(_State_manager& _Other) { // exchange with _Other
+			_STD swap(_Assoc_state, _Other._Assoc_state);
+		}
+		*/
+
+		//		        unique_lock<mutex> _Lock(_Mtx);
+		//    _Maybe_run_deferred_function(_Lock);
+		//    while (!_Ready) {
+		//        _Cond.wait(_Lock);
+		//    }
+		/* Likely will need this later down the line */
+	//template <>
+	//class future<void>
+	//{
+	//	using type = std::void_t<>;//_Ty;
+	//	//using reference_type = type&;
+	//	//using pointer_type = _Ty*;
+	//
+	//	future() noexcept = default;
+	//
+	//	/* construct from rvalue future object noexcept*/
+	//	future(future && _Other) : std::move(_Other) { }
+	//
+	//	/* assign from rvalue future object noexcept(put this back when everything is good to go)*/
+	//	future& operator=(future && _Right) { memmove(this, _Right, sizeof(future));	return *this; }
+	//	~future() noexcept = default;
+	//
+	//	/**/
+	//	reference_type& get()
+	//	{
+	//		while (!isReady) {}
+	//		return std::move(*Value);
+	//	}
+	//	/**/
+	//	inline void set(reference_type _value)
+	//	{/// maybe pass by value....
+	//	//	Value = _value;
+	//	//	isReady = true;
+	//	}
+	//
+	//	void wait()
+	//	{
+	//		/*
+	//		        unique_lock<mutex> _Lock(_Mtx);
+	//    _Maybe_run_deferred_function(_Lock);
+	//    while (!_Ready) {
+	//        _Cond.wait(_Lock);
+	//    }
+	//		*/
+	//		while (!isReady) {}
+	//	}
+	//	pointer_type Value = nullptr;
+	//
+	//	future(const future&) = delete;
+	//	future& operator=(const future&) = delete;
+	//};
+		//virtual future<void>& get_future() = 0;
+
+		//virtual void get_future() = 0;
+
+
+
+
+
+
+
+	/*
+	template<class _Ty>
+	struct future
+	{
+		using type = _Ty;
+		using pointer_type = _Ty*;
+
+		/// using reference_type = type&; Removed because of possible void call to this function. That would result in invalid type so either overload
+		/// This future Template with a <void> version or perhaps branch in our wrapper to never deal with the future if there is no return value anyway
+
+		future() noexcept = default;
+		~future() noexcept = default;
+
+		/* construct from rvalue future object noexcept*/
+		//future(future&& _Other)  {this = std::forward(_Other); } //std::move(_Other)
+
+		/* assign from rvalue future object noexcept(put this back when everything is good to go)*/
+		///future& operator=(future&& _Right) 
+		///{ ERROR
+		///	//memmove(*this, _Right, sizeof(future));	return *this; 
+		///	*this = std::forward(_Right);
+		///	return *this;
+		///}
+
+		/*reference_type
+		type get()
+		{
+			//std::unique_lock<std::mutex> value_Lock(Mutx);
+			while (!isReady) {}
+			return std::move(*Value);
+		}
+		/*
+		inline void set(type* _value)
+		{/// maybe pass by value....reference_type
+			Value = _value;
+			make_Ready();
+		}
+
+		/* Wait until the stored function returns and we are able to aquire its return value
+		void wait()
+		{
+		//	std::unique_lock<std::mutex> value_Lock(Mutx);
+			while (!isReady)
+			{
+				//Mutx_CV.wait(value_Lock);
+			}
+			make_Ready();
+		}
+		/* Signal to our threads that our Value is ready to be retrieved
+		void make_Ready()
+		{
+			TODO("Make This class non movable or assignable again currently commented out");
+			isReady = true;
+		///	Mutx_CV.notify_all();
+		}
+
+		bool isReady{ false };/// Just make this the CV but my hands are cold so lets get this shit done
+		pointer_type Value = nullptr;
+		///std::mutex Mutx;
+		///std::condition_variable Mutx_CV;
+		bool Retrieved{false};
+
+
+		///RETURN THESE AND MAKE THIS NON COPYABLE AGAIN!!!
+		///==================
+		//future(const future&) = delete;
+		//future& operator=(const future&) = delete;
+	};
+
+
+
+
+
+
+//future<type> ReturnValue;
+//future<type>& get_future()
+//{
+//	return ReturnValue;// std::move(ReturnValue);
+//}
+//	future<type> ReturnValue;
+//virtual void operator()() override
+//{
+//	Invoke();
+//}//	std::atomic<bool> isReady{ false };
+
+
+*/
+//    Wrapper() = default;
+//  static void* operator new(size_t _size)
+//  {
+//  	//std::cout << "Overloading new operator with size: " << _size << "\n";
+//  	//void* p = ::new Wrapper();// sizeof(
+//  	void* p = Allocate(_size);//alloca(size);//&Wrapper<_Func, ARGS...>)();
+////	Print("Place: " << p << "Memblock: " << Wrap_MemoryBlock << "Offset: " << Wrap_Offset);
+//  	return p;
+//  }
+//  
+//  static void operator delete(void* p)
+//  {
+//  //	std::cout << "Overloading delete operator " << "\n";
+//  //	free(p);
+//  }
+    
+
+
+
+====================================================================================================================================================================================
+                                                               #11/28															  															  
+															  #Threadpool.h															  															  
+====================================================================================================================================================================================
+
+private:
+JUST GARBAGE i WAS PLAYING WITH
+	static void Init()
+	{
+		if (!Wrap_MemoryBlock)
+		{
+			Wrap_MemoryBlock = malloc(BLOCK_SIZE * sizeof(char));
+		}
+	}
+	static void *Allocate(uint16_t _sz) 
+	{
+		if (Wrap_Offset + _sz > BLOCK_SIZE)
+		{
+			Wrap_Offset = _sz;
+			Print("==================Wrapped around=========================================");
+		}
+		else
+		{
+			Wrap_Offset += _sz;
+		}
+		return (void*)((char*)Wrap_MemoryBlock + (Wrap_Offset - _sz));
+	}
+	//		TODO("Overload new and delete to use a pool to Allocate on the stack if possible but unlikely. Create pool allocator with occassional defrag Event on the TP ");
+
+//pointer begin()
+//{
+//	return &Data[ReadPosition.location()];
+//}
+//pointer end()
+//{
+//	return &Data[WritePosition.location()];
+//}
+//
+//	using iterator = rbIterator<_Ty>;
+//iterator MyFirst() { return Data; }
+//iterator MyLast() { return Data; }
+//iterator MyEnd() { return MyLast(); }
+// _NODISCARD iterator begin() noexcept
+	// {	// return iterator for beginning of mutable sequence
+	// 	return (iterator(this->_Myfirst(), _STD addressof(this->_Get_data())));
+	// }
+
+
+
+/*
+		void make_Ready()//std::unique_lock<std::mutex>* _Lock)///, bool _At_thread_exit) Create a Defered signal so value is set when thread ends
+		{
+			//	_Has_stored_result = true;
+		///if (_At_thread_exit) { // notify at thread exit
+		///	_Cond._Register(*_Lock, &_Ready);
+		///}
+		///else { // notify immediately
+			isReady = true;
+			MutxCV.notify_all();
+		///}
+		}
+		*/
+
+
+
+
+		//type get()
+		//{ // block until ready then return the stored result or
+		//		// throw the stored exception
+		//	//future _Local{ std::move(*this) };
+		//	return type();// 0;//_STD move(_Local._Get_value());
+		//}
+		//std::future<std::invoke_result_t<_Func&, ARGS...>>& get_future()
+		//{
+		//	std::promise<std::invoke_result_t<_Func&, ARGS...>> result
+		//}
+
+		/*
+
+
+			_State_manager& operator=(const _State_manager& _Other) { // assign from _Other
+			_Copy_from(_Other);
+			return *this;
+		}
+
+		_State_manager& operator=(_State_manager&& _Other) { // assign from rvalue _Other
+			_Move_from(_Other);
+			return *this;
+		}
+
+		_NODISCARD bool valid() const noexcept { // return status
+			return _Assoc_state && !(_Get_only_once && _Assoc_state->_Already_retrieved());
+		}
+
+		void wait() const { // wait for signal
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Wait();
+		}
+			template <class _Clock, class _Dur>
+		future_status wait_until(const chrono::time_point<_Clock, _Dur>& _Abs_time) const { // wait until time point
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			return _Assoc_state->_Wait_until(_Abs_time);
+		}
+
+		_Ty& _Get_value() const { // return the stored result or throw stored exception
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			return _Assoc_state->_Get_value(_Get_only_once);
+		}
+
+		void _Set_value(const _Ty& _Val, bool _Defer) { // store a result
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Set_value(_Val, _Defer);
+		}
+
+		void _Set_value(_Ty&& _Val, bool _Defer) { // store a result
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Set_value(_STD forward<_Ty>(_Val), _Defer);
+		}
+		   void _Abandon() { // abandon shared state
+			if (_Assoc_state) {
+				_Assoc_state->_Abandon();
+			}
+		}
+
+		void _Set_exception(exception_ptr _Exc, bool _Defer) { // store a result
+			if (!valid()) {
+				_Throw_future_error(make_error_code(future_errc::no_state));
+			}
+
+			_Assoc_state->_Set_exception(_Exc, _Defer);
+		}
+
+		void _Swap(_State_manager& _Other) { // exchange with _Other
+			_STD swap(_Assoc_state, _Other._Assoc_state);
+		}
+		*/
+
+		//		        unique_lock<mutex> _Lock(_Mtx);
+		//    _Maybe_run_deferred_function(_Lock);
+		//    while (!_Ready) {
+		//        _Cond.wait(_Lock);
+		//    }
+		/* Likely will need this later down the line */
+	//template <>
+	//class future<void>
+	//{
+	//	using type = std::void_t<>;//_Ty;
+	//	//using reference_type = type&;
+	//	//using pointer_type = _Ty*;
+	//
+	//	future() noexcept = default;
+	//
+	//	/* construct from rvalue future object noexcept*/
+	//	future(future && _Other) : std::move(_Other) { }
+	//
+	//	/* assign from rvalue future object noexcept(put this back when everything is good to go)*/
+	//	future& operator=(future && _Right) { memmove(this, _Right, sizeof(future));	return *this; }
+	//	~future() noexcept = default;
+	//
+	//	/**/
+	//	reference_type& get()
+	//	{
+	//		while (!isReady) {}
+	//		return std::move(*Value);
+	//	}
+	//	/**/
+	//	inline void set(reference_type _value)
+	//	{/// maybe pass by value....
+	//	//	Value = _value;
+	//	//	isReady = true;
+	//	}
+	//
+	//	void wait()
+	//	{
+	//		/*
+	//		        unique_lock<mutex> _Lock(_Mtx);
+	//    _Maybe_run_deferred_function(_Lock);
+	//    while (!_Ready) {
+	//        _Cond.wait(_Lock);
+	//    }
+	//		*/
+	//		while (!isReady) {}
+	//	}
+	//	pointer_type Value = nullptr;
+	//
+	//	future(const future&) = delete;
+	//	future& operator=(const future&) = delete;
+	//};
+		//virtual future<void>& get_future() = 0;
+
+		//virtual void get_future() = 0;
+
+
+
+
+
+
+
+	/*
+	template<class _Ty>
+	struct future
+	{
+		using type = _Ty;
+		using pointer_type = _Ty*;
+
+		/// using reference_type = type&; Removed because of possible void call to this function. That would result in invalid type so either overload
+		/// This future Template with a <void> version or perhaps branch in our wrapper to never deal with the future if there is no return value anyway
+
+		future() noexcept = default;
+		~future() noexcept = default;
+
+		/* construct from rvalue future object noexcept*/
+		//future(future&& _Other)  {this = std::forward(_Other); } //std::move(_Other)
+
+		/* assign from rvalue future object noexcept(put this back when everything is good to go)*/
+		///future& operator=(future&& _Right) 
+		///{ ERROR
+		///	//memmove(*this, _Right, sizeof(future));	return *this; 
+		///	*this = std::forward(_Right);
+		///	return *this;
+		///}
+
+		/*reference_type
+		type get()
+		{
+			//std::unique_lock<std::mutex> value_Lock(Mutx);
+			while (!isReady) {}
+			return std::move(*Value);
+		}
+		/*
+		inline void set(type* _value)
+		{/// maybe pass by value....reference_type
+			Value = _value;
+			make_Ready();
+		}
+
+		/* Wait until the stored function returns and we are able to aquire its return value
+		void wait()
+		{
+		//	std::unique_lock<std::mutex> value_Lock(Mutx);
+			while (!isReady)
+			{
+				//Mutx_CV.wait(value_Lock);
+			}
+			make_Ready();
+		}
+		/* Signal to our threads that our Value is ready to be retrieved
+		void make_Ready()
+		{
+			TODO("Make This class non movable or assignable again currently commented out");
+			isReady = true;
+		///	Mutx_CV.notify_all();
+		}
+
+		bool isReady{ false };/// Just make this the CV but my hands are cold so lets get this shit done
+		pointer_type Value = nullptr;
+		///std::mutex Mutx;
+		///std::condition_variable Mutx_CV;
+		bool Retrieved{false};
+
+
+		///RETURN THESE AND MAKE THIS NON COPYABLE AGAIN!!!
+		///==================
+		//future(const future&) = delete;
+		//future& operator=(const future&) = delete;
+	};
+
+
+
+
+
+
+//future<type> ReturnValue;
+//future<type>& get_future()
+//{
+//	return ReturnValue;// std::move(ReturnValue);
+//}
+//	future<type> ReturnValue;
+//virtual void operator()() override
+//{
+//	Invoke();
+//}//	std::atomic<bool> isReady{ false };
+
+
+*/
+====================================================================================================================================================================================
+                                                               #11/28															  															  
+															  #Main.cpp															  															  
+====================================================================================================================================================================================
+
+/*
+		Function_Counter = 0;
+		Profiling::Timing::Profile_Timer<100> WrapperBenchmark;
+		{
+	    	std::vector<Wrapper_Base*> FunctionList;
+
+//auto A =  new Wrapper(TestFunctionE, std::move(LOOP_COUNT));
+//auto B =  new Wrapper(TestFunctionB, 1431);
+//auto C =  new Wrapper(TestFunctionD, 123.321f, 10);
+//auto D =  new Wrapper(TestFunctionA);
+//auto E =  new Wrapper(TestFunctionC, 3.14159f, 123);
+//auto F =  new Wrapper(TestFunctionF, std::move(LOOP_COUNT));
+//auto G =  new Wrapper(TestFunctionG, std::move(LOOP_COUNT));
+//auto H =  new Wrapper(TestFunctionH, std::move(LOOP_COUNT));
+//auto I =  new Wrapper(TestFunctionI, std::move(LOOP_COUNT));
+//auto J =  new Wrapper(TestFunctionJ, std::move(LOOP_COUNT));
+//auto K =  new Wrapper([](int)->int { Print("Lambda Function Function List calls"); return 11; }, 10000);
+
+			auto A = new(alloca(sizeof(Wrapper<decltype(TestFunctionE), int>)))       Wrapper(TestFunctionE, std::move(LOOP_COUNT));
+			auto B = new(alloca(sizeof(Wrapper<decltype(TestFunctionB), int >)))      Wrapper(TestFunctionB, 1431);
+			auto C = new(alloca(sizeof(Wrapper<decltype(TestFunctionD), float, int >))) Wrapper(TestFunctionD, 123.321f, 10);
+			auto D = new(alloca(sizeof(Wrapper<decltype(TestFunctionA)  >)))          Wrapper(TestFunctionA);
+			auto E = new(alloca(sizeof(Wrapper<decltype(TestFunctionC), float, int >))) Wrapper(TestFunctionC, 3.14159f, 123);
+			auto F = new(alloca(sizeof(Wrapper<decltype(TestFunctionF), int>)))       Wrapper(TestFunctionF, std::move(LOOP_COUNT));
+			auto G = new(alloca(sizeof(Wrapper<decltype(TestFunctionG), int>)))       Wrapper(TestFunctionG, std::move(LOOP_COUNT));
+			auto H = new(alloca(sizeof(Wrapper<decltype(TestFunctionH), int>)))       Wrapper(TestFunctionH, std::move(LOOP_COUNT));
+			auto I = new(alloca(sizeof(Wrapper<decltype(TestFunctionI), int>)))       Wrapper(TestFunctionI, std::move(LOOP_COUNT));
+			auto J = new(alloca(sizeof(Wrapper<decltype(TestFunctionJ), int>)))       Wrapper(TestFunctionJ, std::move(LOOP_COUNT));
+			auto K = new Wrapper([](int)->int { Print("Lambda Function Function List calls"); return 11; }, 10000);
+
+			FunctionList.emplace_back(A);
+			FunctionList.emplace_back(B);
+			FunctionList.emplace_back(C);
+			FunctionList.emplace_back(D);
+			FunctionList.emplace_back(E);
+			FunctionList.emplace_back(F);
+			FunctionList.emplace_back(G);
+			FunctionList.emplace_back(H);
+			FunctionList.emplace_back(I);
+			FunctionList.emplace_back(J);
+			FunctionList.emplace_back(K);
+
+
+			for (auto& F : FunctionList)
+			{
+				F->Invoke();
+			}
+			while (Function_Counter != 10) {/* Surely has passed but for completeness we will add  }
+			auto R1 = A->ReturnValue.get_future().get();
+			auto R2 = B->ReturnValue.get_future().get();
+			auto R3 = C->ReturnValue.get_future().get();
+			auto R4 = D->ReturnValue.get_future().get();
+			auto R5 = E->ReturnValue.get_future().get();
+			auto R6 = F->ReturnValue.get_future().get();
+			auto R7 = G->ReturnValue.get_future().get();
+			auto R8 = H->ReturnValue.get_future().get();
+			auto R9 = I->ReturnValue.get_future().get();
+			auto R10 = J->ReturnValue.get_future().get();
+			auto R11 = K->ReturnValue.get_future().get();
+
+			std::vector<std::vector<uint32_t>> Test;
+			Test.push_back(R1);
+			Test.push_back(R6);
+			Test.push_back(R7);
+			Test.push_back(R8);
+			Test.push_back(R9);
+			Test.push_back(R10);
+			Print("Wrapped: "<< R4 << " : " << TestCompile(Test));
+			//delete A; delete B; delete C; delete D; delete E; delete F; delete G; delete H; delete I; delete J;
+			delete K;
+			WrapperBenchmark.Stop();
+		}
+
+		std::cout << "  Wrapper Linear = " << WrapperBenchmark.Results / 1000.0f << " ms" << "\n"; // 0.020808  Difference of .000774
+		*/
+====================================================================================================================================================================================
+                                                               															  															  
+															  															  															  
+====================================================================================================================================================================================
