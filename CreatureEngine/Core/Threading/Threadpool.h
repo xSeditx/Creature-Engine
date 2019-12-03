@@ -7,6 +7,7 @@
 #include <array>
 #include <tuple>
 
+
 #include<Windows.h>
 #include"Core\Common.h"
 #include<iostream>
@@ -21,11 +22,11 @@
 static void* Wrap_MemoryBlock = malloc(BLOCK_SIZE * sizeof(char)); // nullptr;
 static uint16_t  Wrap_Offset{ 0 };
 
-
+///================ Test Code Deprecated ==============================
 extern std::atomic<uint32_t> Create;
 extern std::atomic<uint32_t> Delete;
 extern std::atomic<uint32_t> GotFuture;
-
+///====================================================================
 
 /* Non-blocking test of std::future to see if value is avalible yet */
 template<typename R>
@@ -39,144 +40,147 @@ namespace Core
 {
 	namespace Threading
 	{
-
-		struct Wrapper_Base
-		{/// __declspec(novtable) USE THIS
-			virtual ~Wrapper_Base() {
-			}//Print("Base");
-
-			virtual void Invoke() = 0;
-			void operator()()
-			{
-				Invoke();
-			}
-			/* Implement a Then, When_all and Deferred Function handling */
-
-			enum asyncStatus
-			{
-				Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
-			};
-
-			asyncStatus Status{ Empty };
-		};
-
-		template<typename _Func, typename ...ARGS>
-		struct asyncTask
-			: public Wrapper_Base
-		{
-			using type = std::invoke_result_t<std::decay_t<_Func&>, std::decay_t<ARGS>...>;
-			using reference_type = type&;
-			using Fptr = type(*)(ARGS...);
-
-			Fptr Function;
-			std::tuple<ARGS...> Arguments;
-			std::promise<type> ReturnValue;
-
-			int RefCount{ 0 };
-			asyncTask(_Func&& _function, ARGS&&... _args) noexcept
-				:
-				Function(std::move(_function)),
-				Arguments(std::forward<ARGS>(_args)...)
-			{
-				Status = Valid;
-			}
-			virtual ~asyncTask(){}
-
-			asyncTask(asyncTask&& _other) noexcept
-				:
-				Function(std::move(_other.Function)),
-				Arguments(std::forward<ARGS>(_other.Arguments)),
-				ReturnValue(std::move(_other.ReturnValue))
-			{
-				std::cout << "Called the Forward Function" << "\n";
-			}
-			asyncTask& operator=(asyncTask&& _other) noexcept
-			{
-				Function = std::move(_other.Function);
-				Arguments = std::forward<ARGS>(_other.Arguments);
-				ReturnValue = std::move(_other.ReturnValue);
-				std::cout << "Called Assignment Operator " << "\n";
-			}
-
-			virtual void Invoke()  override
-			{
-				Status = Busy;
-				auto result = std::apply(Function, Arguments);
-				ReturnValue.set_value(result);
-				Status = Waiting;
-			}
-
-			std::future<type> get_future()
-			{
-				Status = Submitted;
-				++Create;
-				GotFuture++;
-				RefCount++;
-				return ReturnValue.get_future();
-			}
-
-			type get()
-			{
-				Status = Aquired;
-				ReturnValue.get();
-			}
-
-			bool is_ready()
-			{
-				return ReturnValue.valid() ? (ReturnValue.wait_for(std::chrono::seconds(0)) == std::future_status::ready) : false;
-			}
-			asyncTask(const asyncTask&) = delete;
-			asyncTask& operator=(const asyncTask& _other) = delete;
-		};
-
-		struct JobQueue
-		{
-		public:
-			JobQueue() = default;
-
-			std::condition_variable is_Ready;
-			std::mutex QueueMutex;
-			bool is_Done{ false };
-			void Done();
-
-			std::deque<Wrapper_Base*> TaskQueue;
-
-			bool Try_Pop(Wrapper_Base*& func);
-			bool pop(Wrapper_Base*& func);
-
-			bool try_push(Wrapper_Base*func)
-			{
-				{
-					std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
-					if (!Lock)
-					{/* If our mutex is already locked simply return */
-						return false;
-					}
-					/* Else place on the back of our Queue*/
-					TaskQueue.push_back(std::move(func));//(func));std::move<_FUNC>
-				}/* Unlock the Mutex */
-				is_Ready.notify_one(); /* Tell the world about it */
-				return true;/* Lets Async know u*/
-			}
-			void push(Wrapper_Base* func)
-			{/* Adds a Function to our Queue */
-				{
-					std::unique_lock<std::mutex> Lock{ QueueMutex };
-					TaskQueue.emplace_back(std::move(func));//std::move<_FUNC> std::forward<_FUNC&>(&((Worker_Function *)
-				}
-			}
-		};
-
 		class ThreadPool
 		{
 			NO_COPY_OR_ASSIGNMENT(ThreadPool);
+
+
+			struct Wrapper_Base
+			{/// __declspec(novtable) USE THIS
+				virtual ~Wrapper_Base() {
+				}//Print("Base");
+
+				virtual void Invoke() = 0;
+				void operator()()
+				{
+					Invoke();
+				}
+				/* Implement a Then, When_all and Deferred Function handling */
+
+				enum asyncStatus
+				{
+					Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
+				};
+
+				asyncStatus Status{ Empty };
+			};
+
+			template<typename _Func, typename ...ARGS>
+			struct asyncTask
+				: public Wrapper_Base
+			{
+				using type = std::invoke_result_t<std::decay_t<_Func&>, std::decay_t<ARGS>...>;
+				using reference_type = type&;
+				using Fptr = type(*)(ARGS...);
+
+				Fptr Function;
+				std::tuple<ARGS...> Arguments;
+				std::promise<type> ReturnValue;
+
+				int RefCount{ 0 };
+				asyncTask(_Func&& _function, ARGS&&... _args) noexcept
+					:
+					Function(std::move(_function)),
+					Arguments(std::forward<ARGS>(_args)...)
+				{
+					Status = Valid;
+				}
+				virtual ~asyncTask() {}
+
+				asyncTask(asyncTask&& _other) noexcept
+					:
+					Function(std::move(_other.Function)),
+					Arguments(std::forward<ARGS>(_other.Arguments)),
+					ReturnValue(std::move(_other.ReturnValue))
+				{
+					std::cout << "Called the Forward Function" << "\n";
+				}
+				asyncTask& operator=(asyncTask&& _other) noexcept
+				{
+					Function = std::move(_other.Function);
+					Arguments = std::forward<ARGS>(_other.Arguments);
+					ReturnValue = std::move(_other.ReturnValue);
+					std::cout << "Called Assignment Operator " << "\n";
+				}
+
+				virtual void Invoke()  override
+				{
+					Status = Busy;
+					auto result = std::apply(Function, Arguments);
+					ReturnValue.set_value(result);
+					Status = Waiting;
+				}
+
+				std::future<type> get_future()
+				{
+					Status = Submitted;
+					++Create;
+					GotFuture++;
+					RefCount++;
+					return ReturnValue.get_future();
+				}
+
+				type get()
+				{
+					Status = Aquired;
+					ReturnValue.get();
+				}
+
+				bool is_ready()
+				{
+					return ReturnValue.valid() ? (ReturnValue.wait_for(std::chrono::seconds(0)) == std::future_status::ready) : false;
+				}
+				asyncTask(const asyncTask&) = delete;
+				asyncTask& operator=(const asyncTask& _other) = delete;
+			};
+
+			struct JobQueue
+			{
+			public:
+				JobQueue() = default;
+
+				std::condition_variable is_Ready;
+				std::mutex QueueMutex;
+				bool is_Done{ false };
+				void Done();
+
+				std::deque<Wrapper_Base*> TaskQueue;
+
+				bool Try_Pop(Wrapper_Base*& func);
+				bool pop(Wrapper_Base*& func);
+
+				bool try_push(Wrapper_Base* func)
+				{
+					{
+						std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+						if (!Lock)
+						{/* If our mutex is already locked simply return */
+							return false;
+						}
+						/* Else place on the back of our Queue*/
+						TaskQueue.push_back(std::move(func));//(func));std::move<_FUNC>
+					}/* Unlock the Mutex */
+					is_Ready.notify_one(); /* Tell the world about it */
+					return true;/* Lets Async know u*/
+				}
+				void push(Wrapper_Base* func)
+				{/* Adds a Function to our Queue */
+					{
+						std::unique_lock<std::mutex> Lock{ QueueMutex };
+						TaskQueue.emplace_back(std::move(func));//std::move<_FUNC> std::forward<_FUNC&>(&((Worker_Function *)
+					}
+				}
+			};
+
 
 			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 2};
 			std::vector<std::thread> Worker_Threads;
 			std::vector<JobQueue> ThreadQueue{ ThreadCount };
 			std::atomic<unsigned int> Index{ 0 };
 
-			ThreadPool(); ~ThreadPool();
+
+			ThreadPool();
+			~ThreadPool();
 
 			void Run(unsigned int _i);
 

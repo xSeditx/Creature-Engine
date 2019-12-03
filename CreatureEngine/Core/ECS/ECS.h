@@ -4,6 +4,7 @@
 /*=======================================================================*/
 
 
+
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                      Unknown_Engine ENGINE                            */
@@ -124,7 +125,7 @@ namespace Unknown_Engine
 			{
 				for_loop(i, Listeners.size())
 				{
-					const std::vector<idTag>& ComponentIDs = Listeners[i]->getComponentIDs();
+					const std::vector<idTag>& ComponentIDs = Listeners[i]->g_ComponentIDs();
 
 					for_loop(j, ComponentIDs.size())
 					{

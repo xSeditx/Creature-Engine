@@ -11,11 +11,12 @@ std::atomic<uint32_t> GotFuture{ 0 };
 #define SLEEP_TIME 0
 std::atomic<int> Function_Counter{ 0 };
 
+
 namespace Core
 {
 	namespace Threading
 	{
-		bool JobQueue::Try_Pop(Wrapper_Base*& func)
+		bool ThreadPool::JobQueue::Try_Pop(Wrapper_Base*& func)
 		{/* Try to aquire a function off the Queue to run */
 			std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
 			if (!Lock || TaskQueue.empty())
@@ -26,7 +27,7 @@ namespace Core
 		 	TaskQueue.pop_front();
 			return true;
 		}
-		bool JobQueue::pop(Wrapper_Base*& func)
+		bool ThreadPool::JobQueue::pop(Wrapper_Base*& func)
 		{
 			std::unique_lock<std::mutex> Lock{ QueueMutex };
 			while (TaskQueue.empty() && !is_Done)
@@ -41,7 +42,7 @@ namespace Core
 			TaskQueue.pop_front();
 			return true;
 		}
-		void JobQueue::Done()
+		void ThreadPool::JobQueue::Done()
 		{
 			{
 				std::unique_lock<std::mutex> Lock{ QueueMutex };

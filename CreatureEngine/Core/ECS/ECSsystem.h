@@ -2,6 +2,7 @@
 
 #include "ECScomponent.h"
 
+
 typedef size_t System_ID;
 
 class BaseSystem
