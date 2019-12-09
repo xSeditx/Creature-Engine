@@ -3,6 +3,7 @@
 std::vector<BaseComponent::Properties> BaseComponent::ComponentTypes;
 
 
+
 _static idTag BaseComponent::RegisterComponentType
 (
     ComponentCreateFunc _createfunc,
@@ -12,7 +13,9 @@ _static idTag BaseComponent::RegisterComponentType
 {
 	idTag results = static_cast<idTag>(ComponentTypes.size());
     ComponentTypes.push_back({ _createfunc ,_deletefunc ,_size });
+#ifdef _DEBUG
     ComponentTypes.back().DebugTypeID = static_cast<idTag>(ComponentTypes.size());
+#endif
     return results;
 }     
  

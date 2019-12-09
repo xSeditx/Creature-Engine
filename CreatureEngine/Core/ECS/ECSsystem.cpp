@@ -4,6 +4,7 @@
 
 
 
+
 bool BaseSystem::is_valid()
 {
     for_loop(i , ComponentFlags.size())

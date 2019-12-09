@@ -9,8 +9,8 @@ namespace OpenGL
 		:
 		BlockSize(sizeof(_Ty)),
 		Name(_name),
-		Slot(_slot),
-		Program(_program->GL_Handle)
+		Slot(_slot)
+	///	Program(_program->GL_Handle)
 	{
 		Index = fetchIndex(Name);
 		SetBinding(Slot);

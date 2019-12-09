@@ -1,12 +1,10 @@
 #pragma once
 
 
-#pragma once
-
 #include"Bitmap.h"
 #include"Core\Common.h"
 
-
+#include<vector>
 
 /*
 Texture Base Class
@@ -17,6 +15,9 @@ an Object of static Asset<T> type should be created in its place instead.
 */
 namespace Graphics
 {
+
+	struct Shader {};
+
 
 	class Texture
 	{
@@ -37,12 +38,12 @@ namespace Graphics
 
 		uint32_t
 			Type, // GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32 and GL_DEPTH_COMPONENT32F.
-			Format = GL_RGB,
+			Format{ GL_RGB },
 			WrapMode,
 			Filtering,
-			InternalFormat = GL_RGB;
+			InternalFormat{ GL_RGB };
 
-		GPUptr Handle = 0;
+		GPUptr Handle{ NULL };
 
 		void SetTarget(unsigned int param);
 
@@ -68,12 +69,11 @@ namespace Graphics
 
 
 
-
 	/*
 	TextureBufferObject
-	Accept a flat formated block of memory for sequential writing in the Shader
-	Discussion:
-	Should this be in the GLBuffers.h header instead of here as it functions more like a Buffer Object then a Texture Object
+    	Accept a flat formated block of memory for sequential writing in the Shader
+    	Discussion:
+    	Should this be in the GLBuffers.h header instead of here as it functions more like a Buffer Object then a Texture Object
 	*/
 
 	template<typename T>
@@ -91,22 +91,22 @@ namespace Graphics
 		std::vector<T> Data;
 	};
 
-	template<typename T>
-	TextureBufferObject<T>::TextureBufferObject(std::string _name, std::vector<T> _data)
+	template<typename _Ty>
+	TextureBufferObject<_Ty>::TextureBufferObject(std::string _name, std::vector<_Ty> _data)
 		:
 		Name(_name),
 		Data(_data)
 	{
 		glGenBuffers(1, &BufferID);
 		glBindBuffer(GL_TEXTURE_BUFFER, BufferID);
-		glBufferData(GL_TEXTURE_BUFFER, sizeof(T) * _data.size(), _data.data(), GL_STATIC_DRAW);
+		glBufferData(GL_TEXTURE_BUFFER, sizeof(_Ty) * _data.size(), _data.data(), GL_STATIC_DRAW);
 		glGenTextures(1, &TextureID);
 		glBindTexture(GL_TEXTURE_BUFFER, TextureID);
 		glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, BufferID);
 	}
 
-	template<typename T>
-	void TextureBufferObject<T>::Bind(GLuint _slot)
+	template<typename _Ty>
+	void TextureBufferObject<_Ty>::Bind(GLuint _slot)
 	{
 		UniformLocation = glGetUniformLocation(Shader::GetActiveShader()->GetName(), Name.c_str());
 		glUniform1i(UniformLocation, _slot);
@@ -114,4 +114,6 @@ namespace Graphics
 		glBindTexture(GL_TEXTURE_BUFFER, TextureID);
 	}
 }
+
+
 //http://ogldev.atspace.co.uk/www/tutorial25/tutorial25.html

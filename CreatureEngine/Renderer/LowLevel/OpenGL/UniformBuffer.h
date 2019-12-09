@@ -5,10 +5,11 @@ namespace OpenGL
 
 	class Shader{};
 
+
 	template<typename _Ty>
 	struct CREATURE_API ResidentUniformBufferObject final
 	{
-		ResidentUniformBufferObject() noexcept = default;
+		ResidentUniformBufferObject() NOEXCEPT = default;
 		ResidentUniformBufferObject(Shader *_program, const char *_name, unsigned int _slot) NOEXCEPT;
 
 		void Create() NOEXCEPT;

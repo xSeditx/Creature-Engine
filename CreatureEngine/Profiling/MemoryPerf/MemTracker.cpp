@@ -1,6 +1,7 @@
 #include"Profiling\MemoryPerf\MemTracker.h"
-#define _TRACK_MEMORY_ALLOCATIONS_
 
+#define _TRACK_MEMORY_ALLOCATIONS_
+#if 0
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
 All rights reserved.
@@ -36,7 +37,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* ---------------------------------------- includes */
 
-#ifdef _PROFILE_MEMORY
+//#ifdef _PROFILE_MEMORY
 
 #include <assert.h>
 #include <stdio.h>
@@ -111,7 +112,7 @@ namespace Profiling
 				<<	myRequestedSize << " byte " 
 				<<	myTypeName << "\n" 
 				<<	"In file " << myFilename
-				<<	" on Line " << myLineNum;
+				<<	" on Line " << myLineNum << " \n";
 
 		}
 
@@ -354,7 +355,7 @@ namespace Profiling
 
 			// Get the offset to the user chunk and return it.
 			UserChunk *pUser = GetUserAddress(pProlog);
-
+			
 			return pUser;
 		}
 
@@ -362,7 +363,7 @@ namespace Profiling
 
 		void Profiling::Memory::TrackFree(void *p)
 		{
-			std::cout << "Free:" << p << "\n";
+			std::cout << "Free: " << p << "\n";
 			// It's perfectly valid for "p" to be null; return if it is.
 			if (p == NULL) return;
 

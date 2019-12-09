@@ -1,9 +1,11 @@
 #pragma once
 #pragma message("Start of ECS.h")
 
+
 #include<vector>
 #include<utility>
 #include<unordered_map>
+#include<typeinfo>
 
 #include"Core\Common.h"
 

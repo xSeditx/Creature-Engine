@@ -1,4 +1,5 @@
 #pragma once
+
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
 All rights reserved.
@@ -9,7 +10,7 @@ are met:
 http://www.almostinfinite.com/memtrack.html
 */
 
-#ifdef _PROFILE_MEMORY
+#if 0
 
 #include <typeinfo>
 #include <cassert>
@@ -73,6 +74,9 @@ Region Allocators are only one to produce better results
 Region per thread
 Check local thread flag on Allocation(dynamic Scoping)!
 Metadata Bitmap at 2MB granularity
+
+c++ Memory Pool Allocator
+https://www.youtube.com/watch?v=ObN_DUN2QU4
 */
 
 #endif

@@ -2,6 +2,7 @@
 #include<string>
 //$(VCInstallDir)Auxiliary\VS\UnitTest\include
 
+
 #include"glad\glad.h"
 #include"GLFW\glfw3.h"
 
@@ -54,9 +55,6 @@ typedef glm::uint32 Uint32;
 typedef glm::uint64 Uint64;
 
 
-typedef int8_t byte;
-typedef uint8_t ubyte;
-
 // Object Tags
 typedef uint32_t idTag;
 typedef std::string  nameTag;
@@ -65,7 +63,7 @@ typedef std::string  nameTag;
 using GPUptr = uint64_t;
 
 // ===================================================================================================================================================
-
+#define Print(x) std::cout << x << "\n"
 
 #define NO_COPY_OR_ASSIGNMENT(Class_X)	void operator=(const Class_X&) = delete;\
 Class_X(const Class_X&) = delete
@@ -85,9 +83,50 @@ __pragma(message(#x))\
 
 #define for_loop(itr, count)     for(unsigned int itr{0}; itr < ((count)); ++itr)
 
-
+//
+//template<typename T, typename N, typename O>
+//T power(T x, N n, O op)
+//{
+//	if (n == 0) return op;//identity_element(op);
+//
+//	while ((n & 1) == 0) {
+//		n > 1;
+//		x = op(x, x);
+//	}
+//	T result = x;
+//	n >>= 1;
+//	while (n != 0)
+//	{
+//		x = op(x, x);
+//		if ((n & 1) != 0) result = op(result, x);
+//		n >> 1;
+//	}
+//	return result'
+//}
 
 /* Descriptor Defines to make code readability easier. Static tells in a CPP module if a function is defined as static 
 pure_Virtual tells if a function is pure virtual in plain english*/
 #define _static
 #define pure_virtual  0
+
+#define NO_WARNING
+
+#ifdef NO_WARNING
+#define OPTIMIZATION_OFF() 
+#define OPTIMIZATION_ON() 
+#else
+#define OPTIMIZATION_OFF()  __pragma(optimize("",off))\
+__pragma(message("WARNING: Global Optimization Disabled"))
+
+#define OPTIMIZATION_ON()  __pragma(optimize("", on))\
+__pragma(message("WARNING: Global Optimization Enabled"))
+#endif
+
+
+/*
+NOTES: 
+
+CppCon 2016: Jason Jurecka “Game engine using STD C++ 11"
+https://www.youtube.com/watch?v=8AjRD6mU96s
+
+*/
