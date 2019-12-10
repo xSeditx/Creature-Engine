@@ -16,10 +16,9 @@ an Object of static Asset<T> type should be created in its place instead.
 namespace Graphics
 {
 
-	struct Shader {};
+	///struct Shader {};
 
-
-	class Texture
+	class CREATURE_API Texture
 	{
 	public:
 		NO_COPY_OR_ASSIGNMENT(Texture);
@@ -77,7 +76,7 @@ namespace Graphics
 	*/
 
 	template<typename T>
-	struct TextureBufferObject
+	struct CREATURE_API TextureBufferObject
 	{
 		TextureBufferObject() = default;
 		TextureBufferObject(std::string _name, std::vector<T> _data);

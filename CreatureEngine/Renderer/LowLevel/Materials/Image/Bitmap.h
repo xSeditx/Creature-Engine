@@ -1,7 +1,7 @@
 #include"Core\Common.h"
 namespace Graphics
 {
-	class Bitmap
+	class CREATURE_API Bitmap
 	{
 	public:
 		/* Returns Image Width */

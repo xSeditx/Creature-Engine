@@ -55,7 +55,7 @@ namespace Profiling
 	{
 
 
-		class BlockHeader
+		class CREATURE_API BlockHeader
 		{
 		private:    // static member variables
 			static BlockHeader *ourFirstNode;

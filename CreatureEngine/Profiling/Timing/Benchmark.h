@@ -10,7 +10,7 @@ namespace Profiling
 	namespace Timing
 	{
 		template<size_t _SZ>
-		struct Profile_Timer
+		struct CREATURE_API Profile_Timer
 		{
 			/*We Define all in the Header as Inlining is a must for accurate results
 			*/

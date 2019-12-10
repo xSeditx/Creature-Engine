@@ -1,14 +1,17 @@
 #include<cstdint>
 #include<string>
+
 //$(VCInstallDir)Auxiliary\VS\UnitTest\include
+//$(Solution)..\Bin\glad\include
 
 
-#include"glad\glad.h"
-#include"GLFW\glfw3.h"
+//$(Solution)..\Bin
 
-#include "glm/glm.hpp"
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "glad/include/glad/glad.h"
+
+#include "glm/glm/glm.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
+#include "glm/glm/gtc/matrix_transform.hpp"
 
 
 /* Will determine if the Given class or structure is exportable */

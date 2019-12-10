@@ -27,14 +27,13 @@ using Entity_ID = unsigned int; /// Fix this shit where do I need it at Maybe ju
 typedef Component_Handle(*ComponentCreateFunc)(std::vector<uint8_t>&memory, EntityPTR entity, BaseComponent *comp);
 typedef void(*ComponentDeleteFunc)(BaseComponent* comp);
 
-
 typedef std::vector<std::pair<unsigned int, Entity_ID>> EntityHandle_t; // First is Index of the Pair in the Vector second is the Entities ID into the Component Entities
 typedef std::pair<Entity_ID, EntityHandle_t> Entity_t;/// A pair that is the Entities ID and the Entities Structure which is a vector of pairs of unsigned ints
 typedef std::unordered_map <Component_Handle, std::vector<uint8_t>> Component_map; /// A Map that has the Component ID as the key and a Vector of bytes for the Data 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-struct BaseComponent
+struct CREATURE_API BaseComponent
 {
     struct Properties
     {/// Might Make this Public| It neededs to be if I wish to debug the values.....
@@ -90,7 +89,9 @@ struct BaseComponent
 
 
 template<typename T>
-struct Component : public BaseComponent
+struct CREATURE_API Component
+	: 
+	public BaseComponent
 {
     static const ComponentCreateFunc Create_Function;
     static const ComponentDeleteFunc Delete_Function;

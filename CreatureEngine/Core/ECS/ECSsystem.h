@@ -5,7 +5,7 @@
 
 typedef size_t System_ID;
 
-class BaseSystem
+class CREATURE_API BaseSystem
 {
 public:
     enum
@@ -38,7 +38,7 @@ private:
     std::vector<unsigned int> ComponentFlags;
 };
 
-class SystemList
+class CREATURE_API SystemList
 {
 public:
     inline bool AddSystem(BaseSystem& _system)

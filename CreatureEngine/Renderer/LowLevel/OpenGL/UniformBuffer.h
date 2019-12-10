@@ -3,7 +3,7 @@
 namespace OpenGL
 {
 
-	class Shader{};
+	class Shader;
 
 
 	template<typename _Ty>

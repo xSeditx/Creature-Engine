@@ -76,7 +76,7 @@
     <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
@@ -136,6 +136,7 @@
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
     <ClCompile Include="Profiling\SystemInfo.cpp" />
     <ClCompile Include="Profiling\Timing\Benchmark.cpp" />
+    <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
   </ItemGroup>
@@ -150,9 +151,9 @@
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
     <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
-    <ClInclude Include="Renderer\Bitmap.h" />
+    <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h" />
+    <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
-    <ClInclude Include="Renderer\Texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

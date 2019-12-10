@@ -5,25 +5,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Header Files\ECS">
-      <UniqueIdentifier>{5fc7556b-f896-4cd9-a1d9-f273e5e1cf8d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Input">
-      <UniqueIdentifier>{9ba9d249-a2d4-48fa-bc84-f0400b500cbf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Profiling">
-      <UniqueIdentifier>{de454455-e827-495a-9680-28511af37030}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Image">
-      <UniqueIdentifier>{01dde56b-1d15-4321-b425-5fce2ff4e355}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\ECS">
       <UniqueIdentifier>{4c60fc77-fd15-4ff6-a24a-2130f63734cc}</UniqueIdentifier>
@@ -34,28 +18,28 @@
     <Filter Include="Source Files\Profiling">
       <UniqueIdentifier>{e37b9d64-d99d-4541-8a3b-872e7723478f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Profiling\Memory">
-      <UniqueIdentifier>{76051688-2de9-4499-b23d-78e4696b93d0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{15c459ae-c25d-40a7-a5f7-ef3213f4c71b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\System">
       <UniqueIdentifier>{76e9b95b-89c9-4a22-8178-40f7cc87a744}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\System">
-      <UniqueIdentifier>{d9db4766-aefb-41dc-8e86-a15183674704}</UniqueIdentifier>
+    <Filter Include="Source Files\Profiling\Benchmarking">
+      <UniqueIdentifier>{e8473adf-fc4f-423c-8798-aec3b2ed5d6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Profiling\Benchmarking\Memory">
+      <UniqueIdentifier>{76051688-2de9-4499-b23d-78e4696b93d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Profiling\Timing">
+      <UniqueIdentifier>{58a5e0a6-43a6-45f2-b2c7-9ea71e9f7036}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Profiling\Timing\Benchmark.cpp">
-      <Filter>Source Files\Profiling</Filter>
-    </ClCompile>
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp">
-      <Filter>Source Files\Profiling\Memory</Filter>
+      <Filter>Source Files\Profiling\Benchmarking\Memory</Filter>
     </ClCompile>
     <ClCompile Include="Core\ECS\ECS.cpp">
       <Filter>Source Files\ECS</Filter>
@@ -84,46 +68,52 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiling\Timing\Benchmark.cpp">
+      <Filter>Source Files\Profiling\Benchmarking</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Core\Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\ECS\ECS.h">
-      <Filter>Header Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\ECS\ECSsystem.h">
-      <Filter>Header Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\ECS\ECScomponent.h">
-      <Filter>Header Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\Bitmap.h">
-      <Filter>Header Files\Image</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\Texture.h">
-      <Filter>Header Files\Image</Filter>
-    </ClInclude>
-    <ClInclude Include="Profiling\Timing\Benchmark.h">
-      <Filter>Header Files\Profiling</Filter>
-    </ClInclude>
-    <ClInclude Include="Profiling\MemoryPerf\MemTracker.h">
-      <Filter>Header Files\Profiling</Filter>
-    </ClInclude>
-    <ClInclude Include="FrontEnd\GUI\EventSystem.h">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="FrontEnd\Input.h">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="Profiling\SystemInfo.h">
-      <Filter>Header Files\Profiling</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Threading\Threadpool.h">
-      <Filter>Header Files\System</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
       <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ECS\ECScomponent.h">
+      <Filter>Source Files\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ECS\ECSsystem.h">
+      <Filter>Source Files\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ECS\ECS.h">
+      <Filter>Source Files\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="FrontEnd\GUI\EventSystem.h">
+      <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="FrontEnd\Input.h">
+      <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling\SystemInfo.h">
+      <Filter>Source Files\Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling\MemoryPerf\MemTracker.h">
+      <Filter>Source Files\Profiling\Benchmarking\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\Threadpool.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Common.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling\Timing\Benchmark.h">
+      <Filter>Source Files\Profiling\Benchmarking</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
