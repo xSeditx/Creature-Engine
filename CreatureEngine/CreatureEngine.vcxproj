@@ -95,6 +95,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -126,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Bin\glad\src\glad.c" />
     <ClCompile Include="Core\ECS\ECS.cpp" />
     <ClCompile Include="Core\ECS\ECScomponent.cpp" />
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />

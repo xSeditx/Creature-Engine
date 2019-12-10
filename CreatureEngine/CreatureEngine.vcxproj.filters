@@ -74,6 +74,9 @@
     <ClCompile Include="Profiling\Timing\Benchmark.cpp">
       <Filter>Source Files\Profiling\Benchmarking</Filter>
     </ClCompile>
+    <ClCompile Include="..\Bin\glad\src\glad.c">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">

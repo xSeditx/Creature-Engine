@@ -53,7 +53,7 @@ int main()
 		LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
 		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
 
-		Profiling::Timing::Profile_Timer<100> Bench;
+//		Profiling::Timing::Profile_Timer<100> Bench;
 		{
 			std::vector<std::vector<uint32_t>> Test;
 
@@ -72,6 +72,7 @@ int main()
 			Print("Thread Pool Cluster");
 
 			std::vector<std::future<float>> Fut;
+			
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
 				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(i));
@@ -96,11 +97,11 @@ int main()
 			while (Function_Counter < 10) {/* SpinLock until every single function called returns as measured via the atomic int Function_Counter. */ }
 
 		 	Print("Threadpool: " << result);
- 			Bench.Stop();
+ //			Bench.Stop();
 		}
  
 		Function_Counter = 0;
-		Profiling::Timing::Profile_Timer<100> ThreadBM;
+//		Profiling::Timing::Profile_Timer<100> ThreadBM;
 		{
 			auto  TPTest5T = std::async(std::launch::async | std::launch::deferred, TestFunctionE, LOOP_COUNT);
 			auto  TPTest1T = std::async(std::launch::async | std::launch::deferred, TestFunctionB, 1431);
@@ -112,7 +113,6 @@ int main()
 			auto  TPTest8T = std::async(std::launch::async | std::launch::deferred, TestFunctionH, LOOP_COUNT);
 			auto  TPTest9T = std::async(std::launch::async | std::launch::deferred, TestFunctionI, LOOP_COUNT);
 			auto TPTest10T = std::async(std::launch::async | std::launch::deferred, TestFunctionJ, LOOP_COUNT);
-			auto TPTest11T = new  asyncTask([](int)->int { Print("Lambda Function Call std::Async"); return 11; }, 10000);
 
 			Print("Async Cluster");
 			std::vector<std::future<float>> Fut;
@@ -151,12 +151,12 @@ int main()
 			Test.push_back(TPTest10T.get());
 			Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
 
-			ThreadBM.Stop();
+//			ThreadBM.Stop();
 		}
 
 
 		Function_Counter = 0;
-		Profiling::Timing::Profile_Timer<100> LBench;
+//		Profiling::Timing::Profile_Timer<100> LBench;
 		{
 			auto Test5 = TestFunctionE(std::move(LOOP_COUNT));// .5ms
 			auto Test4 = TestFunctionD(123.321f, 10);
@@ -191,12 +191,12 @@ int main()
 			Test.push_back(Test10);
 			Print("Linear: " << Test4 << " : " << TestCompile(Test));
 
-			LBench.Stop();
+//			LBench.Stop();
 		}
 
-		std::cout << " Straight Linear = " << LBench.Results / 1000.0f << " ms" << "\n";//0.020034
-		std::cout << "     Thread Pool = " << Bench.Results / 1000.0f << " ms" << "\n";
-		std::cout << "      std::async = " << ThreadBM.Results / 1000.0f << " ms" << "\n";//0.020034
+//		std::cout << " Straight Linear = " << LBench.Results / 1000.0f << " ms" << "\n";//0.020034
+//		std::cout << "     Thread Pool = " << Bench.Results / 1000.0f << " ms" << "\n";
+//		std::cout << "      std::async = " << ThreadBM.Results / 1000.0f << " ms" << "\n";//0.020034
 		Sleep(1500);
 	}
 

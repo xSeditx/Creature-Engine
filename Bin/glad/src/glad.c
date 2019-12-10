@@ -624,7 +624,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glad/glad.h>
+#include <../Bin/glad/include/glad/glad.h>// The location of Glad.H has been changed for This specific project on 12/10/2019
 
 static void* get_proc(const char *namez);
 
