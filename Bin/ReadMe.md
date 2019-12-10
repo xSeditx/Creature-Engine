@@ -1,10 +1,10 @@
-## Libraries needed for Creature Engine 
+# Libraries needed for Creature Engine 
 
-# GLM
+## GLM
 ``` Vector Mathmatics ```
 
-# SOIL 
+## SOIL 
 ``` Image Loading ```
 
-# Glad
+## Glad
 ``` OpenGL Function Loading ```
