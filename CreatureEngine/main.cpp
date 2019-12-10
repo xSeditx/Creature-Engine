@@ -15,7 +15,7 @@
 using namespace Core;
 using namespace Threading;
 
-int LOOP_COUNT = 100;
+int LOOP_COUNT{ 100 };
 #include<string>
 
 void  P0R0()
