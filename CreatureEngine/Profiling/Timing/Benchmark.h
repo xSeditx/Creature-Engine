@@ -1,151 +1,133 @@
+#pragma once
+
+/*
+  =======================================================================================================================
+										 BENCHMARK TIMING MODULE
+  =======================================================================================================================
+	Module for Timing sections of the Code base. As the Timer Object is created it utilizes RAII to end testing on
+	Object deletion. Code is benchmarked by wrapping it in a scope. Data gathered via this means shall be output
+	to any number of Log methods designed to store a process the benchmarked data at a later time.
+  =======================================================================================================================
+*/
+
 #include<chrono>
 #include"Core/Common.h"
-typedef std::chrono::high_resolution_clock Clock;
-typedef std::chrono::time_point<std::chrono::system_clock> SystemClock;
-typedef std::chrono::time_point<std::chrono::steady_clock> SteadyClock;
-typedef std::chrono::duration<float> fDuration;
+#include"Timer.h"
+#include<unordered_map>
 
-
-
-using Milliseconds = std::chrono::milliseconds;
-using Microseconds = std::chrono::microseconds;
-using Nanoseconds  = std::chrono::nanoseconds;
-
-namespace Profiling
+namespace Timing
 {
-	namespace Timing
+	namespace Profiling
 	{
 
-		template<typename _Res = std::chrono::microseconds>
-		struct CREATURE_API Timer
+		struct CREATURE_API Profile_Timer
+			:
+			Timer<Nanoseconds>
 		{
-			using Resolution = std::chrono::microseconds;
+			Profile_Timer(std::string _name)
+				:
+				Name(_name)
+			{
+				Start();
+			}
+
+			~Profile_Timer()
+			{
+				uint64_t Results = Stop();
+
+				Print("==========================================");
+				Print("Name: " << Name.c_str());
+				Print("------------------------------------------");
+				Print("Duration: " << Results * 0.0000001 << "ms");
+				Print("Average: " << ((Accumulator[Name] += Results) / (++Samples[Name])) * 0.0000001 << "ms");
+				Print("========================================== \n ");
+			}
+
 
 			SteadyClock Start_Time;
-			SteadyClock Duration;
+			std::string Name;
 
-			Timer() = default;	~Timer() = default;
-
-			void Start()
-			{
-				Start_Time = Clock::now();
-			}
-			uint64_t Sample()
-			{
-			
-				return std::chrono::duration_cast <Resolution> (Clock::now() - Start_Time).count();
-			}
-			uint64_t Stop()
-			{
-				Duration = Clock::now();
-				return (Duration - Start_Time).count();
-			}
-			void Reset()
-			{
-				Start_Time = Clock::now();
-				Duration = Clock::now();
-			}
+			static std::unordered_map<std::string, uint64_t> Samples;
+			static std::unordered_map<std::string, uint64_t> Accumulator;
 		};
 
-
-
-		template < typename _Res  >
-		struct scoped_Timer
-			:
-			 Timer<>
-		{
-			using Resolution = _Res;
-			scoped_Timer(uint64_t* _storage)
-				:
-				Timer<_Res>(),
-				Storage(_storage)
-			{
-				Start_Time = Clock::now();
-			}
-
-			~scoped_Timer()
-			{
-				*Storage = (std::chrono::duration_cast <Resolution> (Clock::now() - Start_Time).count());
-			}
-
-			uint64_t* Storage;
-		};
-
-
-        template < typename _Res = std::chrono::microseconds >
-        struct functional_Timer
-        	: Timer< std::chrono::microseconds>
-        {
-        	using Resolution = std::chrono::microseconds;// = _Res...
-        
-        	functional_Timer(uint64_t _trigger)
-        		: 
-        		Timer<_Res>(),
-        		Trigger(_trigger)
-        	{}
-        
-        	template < typename _Func, typename ... ARGS >
-        	auto Update(_Func&& _function, ARGS&& ... _args)
-        	{
-        		if ((std::chrono::duration_cast <Resolution> (Clock::now() - Start_Time).count()) > Trigger)
-        		{
-        			Start_Time = Clock::now();
-        			return _function(_args...);
-        		}
-        		return false;
-        	}
-        
-        	uint64_t Trigger;
-        };
-        
-
-
-
-	// CREATURE_API
-		struct  Profile_Timer
-			:
-			scoped_Timer<Microseconds>
-		{
-			/*We Define all in the Header as Inlining is a must for accurate results
-			*/
-			Profile_Timer()
-				:
-				scoped_Timer<Microseconds>(&Results)
-			{}
-			~Profile_Timer()
-			{}
-
-		///void Stop()
-		///{
-		///	Result = (Clock::now().time_since_epoch() - Start_time.);
-		///}
-		///void Start()
-		///{
-		///	Start_Time = Clock::now();
-		///}
-		///uint64_t Sample()
-		///{
-		///	return std::chrono::duration_cast <Resolution> (Clock::now() - Start_Time).count();
-		///}
-		///uint64_t Stop()
-		///{
-		///	Duration = Clock::now();
-		///	return (Duration - Start_Time).count();
-		///}
-		///void Reset()
-		///{
-		///	Start_Time = Clock::now();
-		///	Duration = Clock::now();
-		///}
-
- 
-			//SystemClock End_time{ 0 };
-			uint64_t Samples;
-			uint64_t Results;
-			uint64_t Accumulator;
-			//static uint64_t SampleCounter;
-		};
-
-		//template<size_t _SZ>  uint64_t Profile_Timer<_SZ>::SampleCounter = _SZ;
 	}
 }
+	_static std::unordered_map<std::string, uint64_t> Timing::Profiling::Profile_Timer::Samples;
+	_static std::unordered_map<std::string, uint64_t> Timing::Profiling::Profile_Timer::Accumulator;
+
+
+
+
+
+
+
+
+
+/*
+========================================================================================================================================================================
+                                                          TRASH                                                
+========================================================================================================================================================================
+*/
+
+//0.0000001
+//template<size_t _SZ>  uint64_t Profile_Timer<_SZ>::SampleCounter = _SZ;
+///void Stop()
+///{
+///	Result = (Clock::now().time_since_epoch() - Start_time.);
+///}
+///void Start()
+///{
+///	Start_Time = Clock::now();
+///}
+///uint64_t Sample()
+///{
+///	return std::chrono::duration_cast <Resolution> (Clock::now() - Start_Time).count();
+///}
+///uint64_t Stop()
+///{
+///	Duration = Clock::now();
+///	return (Duration - Start_Time).count();
+///}
+///void Reset()
+///{
+///	Start_Time = Clock::now();
+///	Duration = Clock::now();
+///}
+
+
+//SystemClock End_time{ 0 };
+/*
+
+template<typename _Res = std::chrono::microseconds>
+struct CREATURE_API Timer
+{
+	using Resolution = std::chrono::microseconds;
+
+	SteadyClock Start_Time;
+	SteadyClock Duration;
+
+	Timer() = default;	~Timer() = default;
+
+	void Start()
+	{
+		Start_Time = Clock::now();
+	}
+	uint64_t Sample()
+	{
+
+		return std::chrono::duration_cast <Resolution> (Clock::now() - Start_Time).count();
+	}
+	uint64_t Stop()
+	{
+		Duration = Clock::now();
+		return (Duration - Start_Time).count();
+	}
+	void Reset()
+	{
+		Start_Time = Clock::now();
+		Duration = Clock::now();
+	}
+};
+
+*/

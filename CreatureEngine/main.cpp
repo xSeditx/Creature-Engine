@@ -53,8 +53,8 @@ int main()
 		LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
 		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
 
-//		Profiling::Timing::Profile_Timer<100> Bench;
 		{
+			Timing::Profiling::Profile_Timer Bench("My Threadpool");
 			std::vector<std::vector<uint32_t>> Test;
 
 			auto A = ThreadPool::get().Async(TestFunctionE, std::move(LOOP_COUNT));
@@ -70,15 +70,12 @@ int main()
 			auto K = ThreadPool::get().Async(TestFunctionJ, std::move(LOOP_COUNT));
 
 			Print("Thread Pool Cluster");
-
 			std::vector<std::future<float>> Fut;
-			
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
 				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(i));
 				Fut.push_back(std::forward<std::future<float>>(F));
-			}	
-
+			}
 			uint64_t result{ 0 };
 			int counter = Fut.size();
 			while (counter)
@@ -86,23 +83,21 @@ int main()
 				for (auto& F : Fut)
 				{
 					if (!is_ready(F)) continue;
-					result += F.get(); 
+					result += F.get();
 					--counter;
 				}
 			}
-
 			Print("End Thread Pool Cluster: " << result);
-
 
 			while (Function_Counter < 10) {/* SpinLock until every single function called returns as measured via the atomic int Function_Counter. */ }
 
-		 	Print("Threadpool: " << result);
- //			Bench.Stop();
+			Print("Threadpool: " << result);
 		}
- 
+
 		Function_Counter = 0;
-//		Profiling::Timing::Profile_Timer<100> ThreadBM;
 		{
+
+			Timing::Profiling::Profile_Timer ThreadBM("std::Async");
 			auto  TPTest5T = std::async(std::launch::async | std::launch::deferred, TestFunctionE, LOOP_COUNT);
 			auto  TPTest1T = std::async(std::launch::async | std::launch::deferred, TestFunctionB, 1431);
 			auto  TPTest4T = std::async(std::launch::async | std::launch::deferred, TestFunctionD, 123.321f, 10);
@@ -116,14 +111,11 @@ int main()
 
 			Print("Async Cluster");
 			std::vector<std::future<float>> Fut;
-	        for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
-	        {
-	        	auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, i);
+			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			{
+				auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, i);
 				Fut.push_back(std::move(TPTest4loop));
-	        }	
-			Print("End Async Cluster");
-
-
+			}
 			uint64_t result{ 0 };
 			int counter = Fut.size();
 			while (counter)
@@ -138,9 +130,12 @@ int main()
 					--counter;
 				}
 			}
+			Print("End Async Cluster");
+
 			Print("Async :" << result);
 			while (Function_Counter < 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
- }
+			}
+
 			std::vector<std::vector<uint32_t>> Test;
 
 			Test.push_back(TPTest5T.get());
@@ -149,15 +144,15 @@ int main()
 			Test.push_back(TPTest8T.get());
 			Test.push_back(TPTest9T.get());
 			Test.push_back(TPTest10T.get());
-			Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
+			///Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
 
-//			ThreadBM.Stop();
+			ThreadBM.Stop();
 		}
 
 
 		Function_Counter = 0;
-//		Profiling::Timing::Profile_Timer<100> LBench;
 		{
+			Timing::Profiling::Profile_Timer LBench("Linear Benchmark");
 			auto Test5 = TestFunctionE(std::move(LOOP_COUNT));// .5ms
 			auto Test4 = TestFunctionD(123.321f, 10);
 			auto Test1 = TestFunctionB(1431);
@@ -168,7 +163,6 @@ int main()
 			auto Test8 = TestFunctionH(std::move(LOOP_COUNT));// .32
 			auto Test9 = TestFunctionI(std::move(LOOP_COUNT));//2.8
 			auto Test10 = TestFunctionJ(std::move(LOOP_COUNT));//2.6
-			auto Test11 = [](int)->int { Print("Lambda Function Linear call"); return 11; };
 
 
 			while (Function_Counter > 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
@@ -177,10 +171,10 @@ int main()
 			uint64_t result{ 0 };
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
-				result += TestFunctionC( 123.321f, rand()% NUMBER_OF_THREADS);
+				result += TestFunctionC(123.321f, rand() % NUMBER_OF_THREADS);
 			}
 			Print("Linear :" << result);
-			
+
 
 			std::vector<std::vector<uint32_t>> Test;
 			Test.push_back(Test5);
@@ -189,14 +183,14 @@ int main()
 			Test.push_back(Test8);
 			Test.push_back(Test9);
 			Test.push_back(Test10);
-			Print("Linear: " << Test4 << " : " << TestCompile(Test));
+			///Print("Linear: " << Test4 << " : " << TestCompile(Test));
 
 //			LBench.Stop();
 		}
 
-//		std::cout << " Straight Linear = " << LBench.Results / 1000.0f << " ms" << "\n";//0.020034
-//		std::cout << "     Thread Pool = " << Bench.Results / 1000.0f << " ms" << "\n";
-//		std::cout << "      std::async = " << ThreadBM.Results / 1000.0f << " ms" << "\n";//0.020034
+		//		std::cout << " Straight Linear = " << LBench.Results / 1000.0f << " ms" << "\n";//0.020034
+		//		std::cout << "     Thread Pool = " << Bench.Results / 1000.0f << " ms" << "\n";
+		//		std::cout << "      std::async = " << ThreadBM.Results / 1000.0f << " ms" << "\n";//0.020034
 		Sleep(1500);
 	}
 
@@ -227,22 +221,22 @@ decltype(auto) apply_from_tuple(_FUNC&& _function, _TUPLE&& _tupleArguments)
 
 	return
 		apply_tuple_impl(std::forward<_FUNC>(_function),
-		std::forward<_TUPLE>(_tupleArguments),
-		std::make_index_sequence<tSize>());
+			std::forward<_TUPLE>(_tupleArguments),
+			std::make_index_sequence<tSize>());
 }
 
-/* 
+/*
 =====================================================================================================================
-									  NOTES:                                                                           
+									  NOTES:
 =====================================================================================================================
 Pragmas for C++ Compilers, Good resource
 https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
 
  Open STD:
- http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3857.pdf 
+ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3857.pdf
 
- 
-Physics Solver: 
+
+Physics Solver:
 https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
 
 

@@ -79,7 +79,7 @@
     <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(Solution)..\Bin\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -120,6 +120,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -137,7 +138,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
     <ClCompile Include="Profiling\SystemInfo.cpp" />
-    <ClCompile Include="Profiling\Timing\Benchmark.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
@@ -153,6 +153,7 @@
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
     <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
+    <ClInclude Include="Profiling\Timing\Timer.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />

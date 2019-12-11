@@ -71,9 +71,6 @@
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Profiling\Timing\Benchmark.cpp">
-      <Filter>Source Files\Profiling\Benchmarking</Filter>
-    </ClCompile>
     <ClCompile Include="..\Bin\glad\src\glad.c">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -117,6 +114,9 @@
     </ClInclude>
     <ClInclude Include="Profiling\Timing\Benchmark.h">
       <Filter>Source Files\Profiling\Benchmarking</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling\Timing\Timer.h">
+      <Filter>Source Files\Profiling\Timing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
