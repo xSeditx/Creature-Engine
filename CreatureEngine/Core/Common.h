@@ -1,5 +1,6 @@
 #include<cstdint>
 #include<string>
+#include<iostream>
 
 //$(VCInstallDir)Auxiliary\VS\UnitTest\include
 //$(Solution)..\Bin\glad\include

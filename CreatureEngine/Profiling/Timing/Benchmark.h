@@ -9,7 +9,6 @@
 	to any number of Log methods designed to store a process the benchmarked data at a later time.
   =======================================================================================================================
 */
-
 #include<chrono>
 #include"Core/Common.h"
 #include"Timer.h"

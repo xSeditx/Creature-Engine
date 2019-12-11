@@ -41,7 +41,7 @@ int   P0R1()
 	return 42;
 }
 
-#define NUMBER_OF_THREADS 2000
+#define NUMBER_OF_THREADS 12000
 
 
 int main()
@@ -73,11 +73,11 @@ int main()
 			std::vector<std::future<float>> Fut;
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
-				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(i));
+				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
 				Fut.push_back(std::forward<std::future<float>>(F));
 			}
-			uint64_t result{ 0 };
-			int counter = Fut.size();
+			float result{ 0 };
+			uint64_t counter = Fut.size();
 			while (counter)
 			{
 				for (auto& F : Fut)
@@ -113,11 +113,11 @@ int main()
 			std::vector<std::future<float>> Fut;
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
-				auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, i);
+				auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, rand() % NUMBER_OF_THREADS);
 				Fut.push_back(std::move(TPTest4loop));
 			}
-			uint64_t result{ 0 };
-			int counter = Fut.size();
+			float result{ 0 };
+			uint64_t counter = Fut.size();
 			while (counter)
 			{
 				for (auto& F : Fut)
@@ -145,8 +145,6 @@ int main()
 			Test.push_back(TPTest9T.get());
 			Test.push_back(TPTest10T.get());
 			///Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
-
-			ThreadBM.Stop();
 		}
 
 
@@ -168,13 +166,12 @@ int main()
 			while (Function_Counter > 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
 			}
 
-			uint64_t result{ 0 };
+			float result{ 0 };
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
 				result += TestFunctionC(123.321f, rand() % NUMBER_OF_THREADS);
 			}
 			Print("Linear :" << result);
-
 
 			std::vector<std::vector<uint32_t>> Test;
 			Test.push_back(Test5);

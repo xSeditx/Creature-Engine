@@ -16,7 +16,7 @@ namespace Core
 {
 	namespace Threading
 	{
-		bool ThreadPool::JobQueue::Try_Pop(Wrapper_Base*& func)
+		bool ThreadPool::JobQueue::try_Pop(Wrapper_Base*& func)
 		{/* Try to aquire a function off the Queue to run */
 			std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
 			if (!Lock || TaskQueue.empty())
@@ -76,7 +76,7 @@ namespace Core
 				Wrapper_Base* Func{ nullptr };
 				for (unsigned int N{ 0 }; N != ThreadCount; ++N)
 				{
-					if (ThreadQueue[static_cast<size_t>((_i + N) % ThreadCount)].Try_Pop(Func))
+					if (ThreadQueue[static_cast<size_t>((_i + N) % ThreadCount)].try_Pop(Func))
 					{
 						break;
 					}

@@ -1,7 +1,7 @@
 #include"Profiling\MemoryPerf\MemTracker.h"
 
 #define _TRACK_MEMORY_ALLOCATIONS_
-#if 0
+#if 1
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
 All rights reserved.
@@ -55,7 +55,7 @@ namespace Profiling
 	{
 
 
-		class CREATURE_API BlockHeader
+		class BlockHeader
 		{
 		private:    // static member variables
 			static BlockHeader *ourFirstNode;

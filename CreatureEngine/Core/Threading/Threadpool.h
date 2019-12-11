@@ -6,7 +6,7 @@
 #include <queue>
 #include <array>
 #include <tuple>
-
+#include <type_traits>
 
 #include<Windows.h>
 #include"Core\Common.h"
@@ -70,14 +70,12 @@ namespace Core
 				: public Wrapper_Base
 			{
 				using type = std::invoke_result_t<std::decay_t<_Func&>, std::decay_t<ARGS>...>;
-				using reference_type = type&;
 				using Fptr = type(*)(ARGS...);
-
 				Fptr Function;
+
 				std::tuple<ARGS...> Arguments;
 				std::promise<type> ReturnValue;
 
-				int RefCount{ 0 };
 				asyncTask(_Func&& _function, ARGS&&... _args) noexcept
 					:
 					Function(std::move(_function)),
@@ -85,7 +83,7 @@ namespace Core
 				{
 					Status = Valid;
 				}
-				virtual ~asyncTask() {}
+				virtual ~asyncTask() = default;
 
 				asyncTask(asyncTask&& _other) noexcept
 					:
@@ -103,7 +101,8 @@ namespace Core
 					std::cout << "Called Assignment Operator " << "\n";
 				}
 
-				virtual void Invoke()  override
+
+				virtual void Invoke() override
 				{
 					Status = Busy;
 					auto result = std::apply(Function, Arguments);
@@ -116,20 +115,10 @@ namespace Core
 					Status = Submitted;
 					++Create;
 					GotFuture++;
-					RefCount++;
+//					RefCount++;
 					return ReturnValue.get_future();
 				}
 
-				type get()
-				{
-					Status = Aquired;
-					ReturnValue.get();
-				}
-
-				bool is_ready()
-				{
-					return ReturnValue.valid() ? (ReturnValue.wait_for(std::chrono::seconds(0)) == std::future_status::ready) : false;
-				}
 				asyncTask(const asyncTask&) = delete;
 				asyncTask& operator=(const asyncTask& _other) = delete;
 			};
@@ -146,7 +135,7 @@ namespace Core
 
 				std::deque<Wrapper_Base*> TaskQueue;
 
-				bool Try_Pop(Wrapper_Base*& func);
+				bool try_Pop(Wrapper_Base*& func);
 				bool pop(Wrapper_Base*& func);
 
 				bool try_push(Wrapper_Base* func)
@@ -173,7 +162,7 @@ namespace Core
 			};
 
 
-			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 2};
+			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 3};
 			std::vector<std::thread> Worker_Threads;
 			std::vector<JobQueue> ThreadQueue{ ThreadCount };
 			std::atomic<unsigned int> Index{ 0 };

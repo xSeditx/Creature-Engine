@@ -92,8 +92,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\DELL\source\repos\CreatureEngine\CreatureEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\DELL\source\repos\CreatureEngine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Solution)CreatureEngine;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -151,16 +151,17 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine;C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Input.obj;EventSystem.obj;Benchmark.obj;ECS.obj;ECScomponent.obj;ECSsystem.obj;Memtracker.obj;SystemInfo.obj;OpenGL.obj</AdditionalDependencies>
+      <AdditionalDependencies>Input.obj;EventSystem.obj;ECS.obj;ECScomponent.obj;ECSsystem.obj;Memtracker.obj;SystemInfo.obj;OpenGL.obj;Threadpool.obj</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
