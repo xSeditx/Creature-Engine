@@ -1,7 +1,7 @@
 #include"Profiling\MemoryPerf\MemTracker.h"
 
 #define _TRACK_MEMORY_ALLOCATIONS_
-#if 1
+#if 0
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
 All rights reserved.

@@ -33,6 +33,9 @@
     <Filter Include="Source Files\Profiling\Timing">
       <UniqueIdentifier>{58a5e0a6-43a6-45f2-b2c7-9ea71e9f7036}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\System\Threading">
+      <UniqueIdentifier>{f7a18410-dda6-4711-ab3e-6120d49a7e74}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -59,9 +62,6 @@
     <ClCompile Include="Profiling\SystemInfo.cpp">
       <Filter>Source Files\Profiling</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Threading\Threadpool.cpp">
-      <Filter>Source Files\System</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -73,6 +73,12 @@
     </ClCompile>
     <ClCompile Include="..\Bin\glad\src\glad.c">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Threading\Threadpool.cpp">
+      <Filter>Source Files\System\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Threading\TestFunctions.cpp">
+      <Filter>Source Files\System\Threading</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -106,9 +112,6 @@
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h">
       <Filter>Source Files\Profiling\Benchmarking\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Threading\Threadpool.h">
-      <Filter>Source Files\System</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Common.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -117,6 +120,15 @@
     </ClInclude>
     <ClInclude Include="Profiling\Timing\Timer.h">
       <Filter>Source Files\Profiling\Timing</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Utility.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\Threadpool.h">
+      <Filter>Source Files\System\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Threading\TestFunctions.h">
+      <Filter>Source Files\System\Threading</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -132,6 +132,7 @@
     <ClCompile Include="Core\ECS\ECS.cpp" />
     <ClCompile Include="Core\ECS\ECScomponent.cpp" />
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
+    <ClCompile Include="Core\Threading\TestFunctions.cpp" />
     <ClCompile Include="Core\Threading\Threadpool.cpp" />
     <ClCompile Include="FrontEnd\GUI\EventSystem.cpp" />
     <ClCompile Include="FrontEnd\Input.cpp" />
@@ -147,7 +148,9 @@
     <ClInclude Include="Core\ECS\ECS.h" />
     <ClInclude Include="Core\ECS\ECScomponent.h" />
     <ClInclude Include="Core\ECS\ECSsystem.h" />
+    <ClInclude Include="Core\Threading\TestFunctions.h" />
     <ClInclude Include="Core\Threading\Threadpool.h" />
+    <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="FrontEnd\GUI\EventSystem.h" />
     <ClInclude Include="FrontEnd\Input.h" />
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />

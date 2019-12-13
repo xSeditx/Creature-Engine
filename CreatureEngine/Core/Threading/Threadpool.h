@@ -8,7 +8,6 @@
 #include <tuple>
 #include <type_traits>
 
-#include<Windows.h>
 #include"Core\Common.h"
 #include<iostream>
 
@@ -35,16 +34,16 @@ bool is_ready(std::future<R> const& f)
 	return f.valid() ? f.wait_for(std::chrono::seconds(0)) == std::future_status::ready : false;
 }
 
-extern std::atomic<int> Function_Counter;
 namespace Core
 {
 	namespace Threading
 	{
 		class ThreadPool
 		{
+		public:
 			NO_COPY_OR_ASSIGNMENT(ThreadPool);
 
-
+//
 			struct Wrapper_Base
 			{/// __declspec(novtable) USE THIS
 				virtual ~Wrapper_Base() {
@@ -66,10 +65,10 @@ namespace Core
 			};
 
 			template<typename _Func, typename ...ARGS>
-			struct asyncTask
-				: public Wrapper_Base
+			struct asyncTask final
+				: public Wrapper_Base 
 			{
-				using type = std::invoke_result_t<std::decay_t<_Func&>, std::decay_t<ARGS>...>;
+				using type = std::invoke_result_t<_Func, ARGS...>;// typename std::decay_t<_Func>, typename std::decay_t<ARGS>... > ; //std::invoke_result_t<_Func&, ARGS&...>;
 				using Fptr = type(*)(ARGS...);
 				Fptr Function;
 
@@ -78,7 +77,7 @@ namespace Core
 
 				asyncTask(_Func&& _function, ARGS&&... _args) noexcept
 					:
-					Function(std::move(_function)),
+					Function(std::forward<_Func>(_function)),
 					Arguments(std::forward<ARGS>(_args)...)
 				{
 					Status = Valid;
@@ -205,21 +204,6 @@ namespace Core
 
 
 
-int TestFunctionA();
-int TestFunctionB(int _param);
-uint64_t TestFunctionLarge(uint64_t _p1, uint64_t _p2, uint64_t _p3, uint64_t _p4, uint64_t _p5);
- 
-float TestFunctionC(float _paramA, int _paramB);
-
-std::string TestFunctionD(float _paramA, int _paramB);
-std::vector<uint32_t> TestFunctionE(int _paramA);
-std::vector<uint32_t> TestFunctionF(int _paramA);
-std::vector<uint32_t> TestFunctionG(int _paramA);
-std::vector<uint32_t> TestFunctionH(int _paramA);
-std::vector<uint32_t> TestFunctionI(int _paramA);
-std::vector<uint32_t> TestFunctionJ(int _paramA);
-
-uint64_t TestCompile(std::vector<std::vector<uint32_t>> _input);
-uint64_t Worker_TestFunction(size_t _count);
-
 #pragma warning( pop )
+
+

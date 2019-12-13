@@ -15,44 +15,49 @@
 using namespace Core;
 using namespace Threading;
 
-int LOOP_COUNT{ 100 };
+int LOOP_COUNT{ 1000000 };
 #include<string>
 
-void  P0R0()
-{
-	std::cout << "P0R0" << "\n";
-}
-float P1R1(int _param)
-{
-	std::cout << "P1R1: " << _param << "\n";
-	return static_cast<float>(_param * _param);
-}
-void  P1R0(int _param)
-{
-	std::cout << "P1R0:" << _param << "\n";
-}
-void  P2R0(int _param, int _param2)
-{
-	std::cout << "P1R0:" << _param << ":" << _param2 << "\n";
-}
-int   P0R1()
-{
-	std::cout << "P0R1" << "\n";
-	return 42;
+#define NUMBER_OF_THREADS 20000
+
+#include"Core/Threading/TestFunctions.h"
+
+//Nice
+///http://eel.is/c++draft/meta.trans.other
+auto func(char a, char b) {
+	return a + b;
 }
 
-#define NUMBER_OF_THREADS 12000
 
+std::array<float,10> TestVec(std::vector<uint32_t>& _input)
+{
+	return std::array<float, 10>();
+}
+int TestNot(int _input)
+{
+	return 10;
 
+}
+
+#include<utility>
 int main()
 {
-	while (true)
+ 	while (true)
 	{
-		//alloca()
-		Function_Counter = 0;
-		LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
-		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
+ 		TestAsyncSort SortTest(4096); // 262144);
+		
+		{
+			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
+			SortTest.LinearMergeSort();
+		}
+        {
+        	Timing::Profiling::Profile_Timer Bench("My Linear Bubble Sort");
+        	SortTest.LinearBubbleSort();
+        }
 
+		Function_Counter = 0;
+	//	LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
+		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
 		{
 			Timing::Profiling::Profile_Timer Bench("My Threadpool");
 			std::vector<std::vector<uint32_t>> Test;
@@ -76,20 +81,23 @@ int main()
 				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
 				Fut.push_back(std::forward<std::future<float>>(F));
 			}
-			float result{ 0 };
+			uint64_t result{ 0 };
 			uint64_t counter = Fut.size();
 			while (counter)
 			{
 				for (auto& F : Fut)
 				{
-					if (!is_ready(F)) continue;
-					result += F.get();
+					if (!is_ready(F))
+					{
+						continue;
+					}
+					result += (uint64_t)F.get();
 					--counter;
 				}
 			}
 			Print("End Thread Pool Cluster: " << result);
 
-			while (Function_Counter < 10) {/* SpinLock until every single function called returns as measured via the atomic int Function_Counter. */ }
+			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter.
 
 			Print("Threadpool: " << result);
 		}
@@ -116,7 +124,7 @@ int main()
 				auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, rand() % NUMBER_OF_THREADS);
 				Fut.push_back(std::move(TPTest4loop));
 			}
-			float result{ 0 };
+			uint64_t result{ 0 };
 			uint64_t counter = Fut.size();
 			while (counter)
 			{
@@ -126,16 +134,15 @@ int main()
 					{// if not ready yet, check the next  
 						continue;
 					}
-					result += F.get(); // it is ready 
+					result += (uint64_t)F.get(); // it is ready 
 					--counter;
 				}
 			}
+
 			Print("End Async Cluster");
-
 			Print("Async :" << result);
-			while (Function_Counter < 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
-			}
-
+			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+	
 			std::vector<std::vector<uint32_t>> Test;
 
 			Test.push_back(TPTest5T.get());
@@ -163,13 +170,13 @@ int main()
 			auto Test10 = TestFunctionJ(std::move(LOOP_COUNT));//2.6
 
 
-			while (Function_Counter > 10) {// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
-			}
+			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+			
 
-			float result{ 0 };
+			uint64_t result{ 0 };
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
-				result += TestFunctionC(123.321f, rand() % NUMBER_OF_THREADS);
+				result += (uint64_t)TestFunctionC(123.321f, rand() % NUMBER_OF_THREADS);
 			}
 			Print("Linear :" << result);
 
@@ -181,13 +188,7 @@ int main()
 			Test.push_back(Test9);
 			Test.push_back(Test10);
 			///Print("Linear: " << Test4 << " : " << TestCompile(Test));
-
-//			LBench.Stop();
 		}
-
-		//		std::cout << " Straight Linear = " << LBench.Results / 1000.0f << " ms" << "\n";//0.020034
-		//		std::cout << "     Thread Pool = " << Bench.Results / 1000.0f << " ms" << "\n";
-		//		std::cout << "      std::async = " << ThreadBM.Results / 1000.0f << " ms" << "\n";//0.020034
 		Sleep(1500);
 	}
 
@@ -197,30 +198,6 @@ int main()
 }
 OPTIMIZATION_ON()
 
-
-
-
-/*    Apply tuple to a function: https://cpppatterns.com/patterns/apply-tuple-to-function.html    */
-template<typename _FUNC, typename _TUPLE, size_t ..._SZ >
-auto apply_tuple_impl(_FUNC&& _function, _TUPLE&& _arguments, std::index_sequence<_SZ...>)
-->decltype((std::forward<_FUNC>(_function)(std::get<_SZ>(std::forward<_TUPLE>(_arguments))...)))/// Return was Decltype(auto) just auto and trailing return added to create zero/low cost abstraction
-{
-	return std::forward<_FUNC>(_function)(std::get<_SZ>(std::forward<_TUPLE>(_arguments))...);
-}
-
-template<typename _FUNC, typename _TUPLE>
-decltype(auto) apply_from_tuple(_FUNC&& _function, _TUPLE&& _tupleArguments)
-{
-	std::size_t constexpr tSize
-	{// Initialize tSize instead of using =
-		 std::tuple_size<typename std::remove_reference<_TUPLE>::type>::value
-	};
-
-	return
-		apply_tuple_impl(std::forward<_FUNC>(_function),
-			std::forward<_TUPLE>(_tupleArguments),
-			std::make_index_sequence<tSize>());
-}
 
 /*
 =====================================================================================================================
@@ -235,8 +212,6 @@ https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbc
 
 Physics Solver:
 https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
-
-
 
 =====================================================================================================================
 */

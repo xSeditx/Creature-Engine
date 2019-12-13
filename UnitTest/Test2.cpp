@@ -125,7 +125,7 @@ namespace UnitTest
 			auto D = Core::Threading::ThreadPool::get().Async([] { return 10; });
 			auto E = Core::Threading::ThreadPool::get().Async([] { return 10; });
 			auto K = A.get() + B.get() + C.get() + D.get() + E.get();
-		//	Assert::AreEqual(100,K);
+		 	Assert::AreEqual(100,K);
 		}
 	};
 }//End UnitTest NS

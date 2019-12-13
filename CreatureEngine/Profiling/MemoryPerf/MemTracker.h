@@ -10,7 +10,7 @@ are met:
 http://www.almostinfinite.com/memtrack.html
 */
 
-#if 1
+#if 0
 
 #include <typeinfo>
 #include <cassert>
