@@ -44,17 +44,24 @@ int main()
 {
  	while (true)
 	{
- 		TestAsyncSort SortTest(4096); // 262144);
+		TestAsyncSort SortTest( 4096); // 262144);64);//
 		
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
-			SortTest.LinearMergeSort();
+		 	SortTest.LinearMergeSort();
+		}
+		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
+			Timing::Profiling::Profile_Timer Bench("My Multithreaded Merge Sort");// Dont use the current Threaded Version its broke.
+			SortTest.AsyncMergeSort();
+			
 		}
         {
         	Timing::Profiling::Profile_Timer Bench("My Linear Bubble Sort");
         	SortTest.LinearBubbleSort();
         }
 
+
+#if _TEST_THREADPOOL_SPEED
 		Function_Counter = 0;
 	//	LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
 		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
@@ -190,14 +197,16 @@ int main()
 			///Print("Linear: " << Test4 << " : " << TestCompile(Test));
 		}
 		Sleep(1500);
+#endif //_TEST_THREADPOOL_SPEED
+
 	}
+
 
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();
 	return 0;
 }
-OPTIMIZATION_ON()
-
+ 
 
 /*
 =====================================================================================================================
