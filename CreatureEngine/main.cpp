@@ -189,7 +189,7 @@ int main()
 			Test.push_back(Test10);
 			///Print("Linear: " << Test4 << " : " << TestCompile(Test));
 		}
-		Sleep(1500);
+		Sleep(2500);
 	}
 
 	//	Profiling::Memory::TrackDumpBlocks();
