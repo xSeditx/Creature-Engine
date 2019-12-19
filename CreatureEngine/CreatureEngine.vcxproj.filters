@@ -130,5 +130,8 @@
     <ClInclude Include="Core\Threading\TestFunctions.h">
       <Filter>Source Files\System\Threading</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Defines.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

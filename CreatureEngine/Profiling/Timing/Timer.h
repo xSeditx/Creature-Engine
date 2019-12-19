@@ -1,5 +1,8 @@
-#include"Core/Common.h"
+#pragma once
+
 #include<chrono>
+
+#include"../../Core/Common.h"
 
 
 typedef std::chrono::high_resolution_clock Clock;

@@ -1,5 +1,6 @@
 #include<iostream>
 #include<Windows.h>
+#include<array>
 #pragma optimize( "", off )
 
 #define MY_WRAPPER
@@ -35,17 +36,23 @@ std::array<float,10> TestVec(std::vector<uint32_t>& _input)
 }
 int TestNot(int _input)
 {
+	Print("Called Test Not with a " << _input);
 	return 10;
-
 }
 
+
+
+//#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
+//https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
 #include<utility>
 int main()
 {
- 	while (true)
+			
+    while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);
-		
+		ThreadPool::get().Async(TestNot, 5);
+
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
 		 	//SortTest.LinearMergeSort();
