@@ -630,6 +630,8 @@
 #endif
 #define __gl_h_
 
+#pragma warning(push) // Sedit Edit
+#pragma warning( disable : 4005) // Tired of the Warning about APIENTRY from windows
 #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
 #define APIENTRY __stdcall
 #endif
@@ -637,6 +639,7 @@
 #ifndef APIENTRY
 #define APIENTRY
 #endif
+
 #ifndef APIENTRYP
 #define APIENTRYP APIENTRY *
 #endif

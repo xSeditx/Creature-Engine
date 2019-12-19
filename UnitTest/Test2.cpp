@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
+
 #include "../CreatureEngine/Profiling/MemoryPerf/MemTracker.h"
 #include "../CreatureEngine/Profiling/Timing/Benchmark.h"
 
@@ -16,7 +17,6 @@ namespace UnitTest
 	TEST_CLASS(MemoryTrackerTest)
 	{
 	public:
-
 		TEST_METHOD(TestPass)
 		{/* Wellness check*/
 			Assert::AreEqual(!true, false);	
@@ -90,12 +90,13 @@ namespace UnitTest
 		}
 	};
 //#endif
+#include <type_traits> 
 
 	TEST_CLASS(ThreadPoolTest)
 	{
-
+		/* Wellness check*/
 		TEST_METHOD(TestPass)
-		{/* Wellness check*/
+		{
 			Assert::AreEqual(!true, false);
 			Assert::AreNotEqual(true, false);
 		}
@@ -105,8 +106,8 @@ namespace UnitTest
 			//Assert::AreEqual(!true, false);
 			//Assert::AreNotEqual(true, false);
 			
-			//Core::Threading::ThreadPool::get();
-			//auto A = Core::Threading::ThreadPool::get().Async([] {int ret = 10; return ret; });
+			Core::Threading::ThreadPool::get();
+			auto A = Core::Threading::ThreadPool::get().Async([] {int ret = 10; return ret; });
 			//auto B = Core::Threading::ThreadPool::get().Async([] { return 10; });
 			//auto C = Core::Threading::ThreadPool::get().Async([] { return 10; });
 			//auto D = Core::Threading::ThreadPool::get().Async([] { return 10; });
@@ -114,21 +115,19 @@ namespace UnitTest
 			//auto K = A.get() + B.get() + C.get() + D.get() + E.get();
 		 	//Assert::AreEqual(100,K);
 		}
-
+		int LOOP_COUNT = 100000;
 		TEST_METHOD(TestThreadPool)
 		{
 			int NUMBER_OF_THREADS = 100;
-			int LOOP_COUNT = 100000;
+		
 			using TP = Core::Threading::ThreadPool;
 
-
-			bool A{ false };
-
-			A = [&]()->bool {
+			auto A = [&]()->bool// Return type
+			{
 				for_loop(Index, 10)
 				{
 					Function_Counter = 0;
-					Print("\n\n\n\n Loop Counter:  (X) FIX THIS iterations in the Worker Functions\n");
+					Print("\n\n Loop Counter:  (X) FIX THIS iterations in the Worker Functions\n");
 					{
 						Timing::Profiling::Profile_Timer Bench("My Threadpool");
 						std::vector<std::vector<uint32_t>> Test;
@@ -147,7 +146,7 @@ namespace UnitTest
 
 						Print("Thread Pool Cluster");
 						std::vector<std::future<float>> Fut;
-						for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+						for_loop (i, (uint32_t)NUMBER_OF_THREADS)
 						{
 							auto F = TP::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
 							Fut.push_back(std::forward<std::future<float>>(F));
@@ -168,19 +167,14 @@ namespace UnitTest
 						}
 						Print("End Thread Pool Cluster: " << result);
 
-						while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter.
-
 						Print("Threadpool: " << result);
 					}
 				}
 
 				return true;
 			};
-			Assert::IsTrue(A);
-
-			//);// End lambda
-
-
+			bool B = A();
+			Assert::IsTrue(B); // MAYBE LOL
 
 		}
 	};

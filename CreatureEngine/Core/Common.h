@@ -18,6 +18,7 @@
 
 
 #include"Defines.h"
+
 /* ===================================================================================================================================================
  *  STATE CONTROLLER FOR THE COMPILE TIME BEHAVIOR OF THE CREATURE GAME ENGINE 
  *  TRUE TURNS FEATURE ON
@@ -31,8 +32,19 @@
 #define NO_WARNINGS             TRUE
 
 /* Defines the level of Messages the user wishes to see */
-#define MESSAGE_LEVEL           OBJECT_CREATION
+#define MESSAGE_LEVEL           OBJECT_CREATION_MESSAGE
 
+/* Test block of code for testing Threadspools Speeds */
+#define  _TEST_THREADPOOL_SPEED   FALSE
+
+
+
+
+
+
+// ===================================================================================================================================================
+//  Declarations for Library Import and Exportation: [incomplete]
+// ===================================================================================================================================================
 
 /* Will determine if the Given class or structure is exportable */
 #define CREATURE_API
@@ -92,18 +104,74 @@ using GPUptr = uint64_t;
 Class_X(const Class_X&) = delete
 
 
+// with line number
+#define STRING2(x) #x
+#define STRING(x) STRING2(x)
+
 /*      TODO(_msg) gives us a Console Runtime Message as well as a Compile time Message reminding the user of their 
     Intent to fix or implement something */
-#define TODO(_msg) do{                                  \
-static bool _seenAlready = false;                       \
-if(!_seenAlready){                                      \
-_seenAlready = true;                                    \
-std::cout << "File: " << __FILE__ << "\n";              \
-std::cout << "Line: " << __LINE__ << "\n";              \
-std::cout << "Message: " << #_msg << "\n";              \
-__pragma(message(#_msg))                                \
-}                                                       \
-}while(0)
+
+#if MESSAGE_LEVEL >= TODO_MESSAGES
+#    define TODO(_msg) do{                                   \
+     static bool _seenAlready = false;                       \
+     if(!_seenAlready){                                      \
+     _seenAlready = true;                                    \
+     std::cout << "File: " << __FILE__ << "\n";              \
+     std::cout << "Line: " << __LINE__ << "\n";              \
+     std::cout << "Message: " << #_msg << "\n";              \
+     __pragma(message ("                    "))              \
+     __pragma(message ("TODO: " #_msg ))                     \
+	 __pragma(message ("Line: [ " STRING(__LINE__) " ]"))    \
+     __pragma(message ("File: -" __FILE__ " "))              \
+     __pragma(message ("                    "))              \
+	 }                                                       \
+     }while(0)
+#endif/* TODO MESSAGE */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Message Reminding user to fix a given section of code or Find a Better way */
+#if MESSAGE_LEVEL >= REFACTOR_MESSAGES
+#    define REFACTOR(_msg) do{                               \
+     static bool _seenAlready = false;                       \
+     if(!_seenAlready){                                      \
+     _seenAlready = true;                                    \
+     std::cout << "NOTE: " << #_msg << "\n";                 \
+     std::cout << "Refactor code at ";                       \
+     std::cout << "Line: " << __LINE__ << "\n";              \
+     std::cout << "File: " << __FILE__ << "\n";              \
+     __pragma(message(#_msg))                                \
+     }                                                       \
+     }while(0)
+#endif/* REFACTOR MESSAGE */
+
+
+/* Message warning user of possible size effects, defective code left in, Test blocks in use and any other possible use case for a compiler/console Warning */
+#if MESSAGE_LEVEL >= USER_WARNING_MESSAGES
+#    define WARN_ME(_msg) do{                                \
+     static bool _seenAlready = false;                       \
+     if(!_seenAlready){                                      \
+     _seenAlready = true;                                    \
+     std::cout << "~*!WARNING!*~: " << #_msg << " \n In";    \
+     std::cout << "File: " << __FILE__ << "\n";              \
+     std::cout << "Line: " << __LINE__ << "\n";              \
+     __pragma(message(#_msg))                                \
+     }                                                       \
+     }while(0)
+#endif/* WARNING MESSAGE */
+
 
 
 /* Iterative For-Next loop Ends when for(uint32_t Itr < Count) */

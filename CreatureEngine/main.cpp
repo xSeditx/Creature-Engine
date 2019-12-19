@@ -1,5 +1,6 @@
 #include<iostream>
 #include<Windows.h>
+#include<array>
 #pragma optimize( "", off )
 
 #define MY_WRAPPER
@@ -39,10 +40,15 @@ int TestNot(int _input)
 
 }
 
+
+
+//#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
+//https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
 #include<utility>
 int main()
 {
- 	while (true)
+			
+    while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);
 		
