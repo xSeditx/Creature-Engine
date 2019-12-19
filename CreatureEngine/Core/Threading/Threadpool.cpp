@@ -136,4 +136,17 @@ namespace Core
 ==========================================================================================================================================================================
                                                            Trash:
 ==========================================================================================================================================================================
+'
+
+
+
+_static const uint32_t           Core::Threading::ThreadPool::SThreadCount{ std::thread::hardware_concurrency() * 3 };
+_static std::atomic<uint32_t>    Core::Threading::ThreadPool::SIndex{ 0 };
+_static std::vector<std::thread> Core::Threading::ThreadPool::SWorker_Threads;
+_static std::vector<Core::Threading::ThreadPool::JobQueue>    Core::Threading::ThreadPool::SThreadQueue{ SThreadCount };
+//static const uint32_t           SThreadCount;
+//static std::vector<JobQueue>    SThreadQueue;
+//	static std::atomic<uint32_t>    SIndex;
+//	static std::vector<std::thread> SWorker_Threads;
+
 */

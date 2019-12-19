@@ -48,7 +48,16 @@
 #include <iostream>
 #include <type_traits> 
 
-#include"../Common.h"
+//#include"../Common.h"
+#ifndef CREATURE_API
+#    define CREATURE_API // Will determine export type later on
+#endif
+
+/* Denotes that Object Can not be Copied or Assigned */
+#ifndef NO_COPY_OR_ASSIGNMENT
+#    define NO_COPY_OR_ASSIGNMENT(Class_X)	void operator=(const Class_X&) = delete;\
+Class_X(const Class_X&) = delete
+#endif
 
 #pragma warning( push )
 #pragma warning( disable : 4244 ) // Type conversions
@@ -78,8 +87,6 @@ namespace Core
             // JAVID/HUHLIG IF I DO HAVE YOU REVIEWING THIS LATER WHAT DO YOU THINK ABOUT THE __declspec Below. Could it be useful? Not 100% sure what it does but it seems like it might be helpful in this case since the base class was just there to type erase
             /// __declspec(novtable) USE THIS MAYBE on Wrapper_base
 
-
-
             /*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various 
                 Function types the user may invoke. We store the Base class pointer in Queues to Erase the type 
                 While Polymorphically calling each Functions specific invoke method */
@@ -88,7 +95,7 @@ namespace Core
                 virtual ~Wrapper_Base() noexcept {}
 
 				/* Function responsible to properly invoking our derived class */
-				virtual void Invoke() noexcept = pure_virtual;
+				virtual void Invoke() noexcept = 0;
 
                 /* TODO: Implement a Then, When_all and Deferred Function handling */
                 /* Note: Must create my own Future inorder to make that happen I think */
@@ -176,6 +183,7 @@ namespace Core
 			};// End asyncTask Class
 
 
+        public:
 
             /*
              JOB QUEUE: Stores a Deque of Base Pointers to asyncTask Objects. 
@@ -223,7 +231,6 @@ namespace Core
             /* Initializes Thread and starts the Queue running */
             void Run(unsigned int _i);
             
-        public:
             
             /* Returns a singleton instance of our Threadpool */
             static ThreadPool &get()
@@ -234,7 +241,7 @@ namespace Core
         
             /* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
             template<typename _FUNC, typename...ARGS >
-            auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+             auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
             {// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
                 auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
@@ -255,7 +262,6 @@ namespace Core
                 ThreadQueue[i % ThreadCount].push(static_cast<Wrapper_Base*>(_function));
                 return result;
             }
-
         }; // End ThreadPool Class
 
     }// End NS Threading

@@ -36,8 +36,8 @@ std::array<float,10> TestVec(std::vector<uint32_t>& _input)
 }
 int TestNot(int _input)
 {
+	Print("Called Test Not with a " << _input);
 	return 10;
-
 }
 
 
@@ -51,7 +51,8 @@ int main()
     while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);
-		
+		ThreadPool::get().Async(TestNot, 5);
+
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
 		 	//SortTest.LinearMergeSort();
