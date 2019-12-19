@@ -124,6 +124,7 @@ int main()
 				auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, rand() % NUMBER_OF_THREADS);
 				Fut.push_back(std::move(TPTest4loop));
 			}
+
 			uint64_t result{ 0 };
 			uint64_t counter = Fut.size();
 			while (counter)
@@ -151,22 +152,22 @@ int main()
 			Test.push_back(TPTest8T.get());
 			Test.push_back(TPTest9T.get());
 			Test.push_back(TPTest10T.get());
-			///Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
+
 		}
 
 
 		Function_Counter = 0;
 		{
 			Timing::Profiling::Profile_Timer LBench("Linear Benchmark");
-			auto Test5 = TestFunctionE(std::move(LOOP_COUNT));// .5ms
-			auto Test4 = TestFunctionD(123.321f, 10);
-			auto Test1 = TestFunctionB(1431);
-			auto Test3 = TestFunctionA();
-			auto Test2 = TestFunctionC(3.14159f, 123);
-			auto Test6 = TestFunctionF(std::move(LOOP_COUNT));//.3
-			auto Test7 = TestFunctionG(std::move(LOOP_COUNT));//3.21
-			auto Test8 = TestFunctionH(std::move(LOOP_COUNT));// .32
-			auto Test9 = TestFunctionI(std::move(LOOP_COUNT));//2.8
+			auto Test5  = TestFunctionE(std::move(LOOP_COUNT));// .5ms
+			auto Test4  = TestFunctionD(123.321f, 10);
+			auto Test1  = TestFunctionB(1431);
+			auto Test3  = TestFunctionA();
+			auto Test2  = TestFunctionC(3.14159f, 123);
+			auto Test6  = TestFunctionF(std::move(LOOP_COUNT));//.3
+			auto Test7  = TestFunctionG(std::move(LOOP_COUNT));//3.21
+			auto Test8  = TestFunctionH(std::move(LOOP_COUNT));// .32
+			auto Test9  = TestFunctionI(std::move(LOOP_COUNT));//2.8
 			auto Test10 = TestFunctionJ(std::move(LOOP_COUNT));//2.6
 
 
@@ -187,7 +188,7 @@ int main()
 			Test.push_back(Test8);
 			Test.push_back(Test9);
 			Test.push_back(Test10);
-			///Print("Linear: " << Test4 << " : " << TestCompile(Test));
+
 		}
 		Sleep(2500);
 	}

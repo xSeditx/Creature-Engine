@@ -1,5 +1,5 @@
 #pragma once
-
+#include"../../Core/Common.h"
 /*
 Copyright (c) 2002, 2008 Curtis Bartley
 All rights reserved.
@@ -10,13 +10,18 @@ are met:
 http://www.almostinfinite.com/memtrack.html
 */
 
-#if 0
+#if 0 /// There is a serious error,Possibly from multithreading possibly not. The Previous Nodes are not being properly Allocated or deleted
+/// std::unique_lock Fixed the Issue however when I attempt to delete the memory that error still remains. 
 
 #include <typeinfo>
 #include <cassert>
 #include <iostream>
-
-
+#include <mutex>
+#ifdef _PRINT_MEM
+#    define Print_Memory_Info(x) std::cout << "Memory: " << x << "\n"
+#else
+#    define Print_Memory_Info(x)
+#endif
 
 #define MEMTRACK_NEW Profiling::Memory::MemStamp(__FILE__, __LINE__) * new
 #define new MEMTRACK_NEW
@@ -25,6 +30,10 @@ namespace Profiling
 {
 	namespace Memory
 	{ /* ---------------------------------------- class MemStamp */
+
+
+		extern std::mutex AllocationMutex;
+
 			class MemStamp
 			{
 			public:        // member variables
@@ -36,12 +45,12 @@ namespace Profiling
 					filename(_filename), 
 					lineNum(_lineNum) 
 				{
-					std::cout << "CREATED: " << "  Filename: " << _filename << " : Line:" << _lineNum << "\n";
+					Print_Memory_Info("CREATED: " << "  Filename: " << _filename << " : Line:" << _lineNum << "\n");
 				}
 
 				~MemStamp()
 				{ 
-					std::cout << "DESTROYED: " << "  Filename: " << filename << " : Line:" << lineNum << "\n";
+					Print_Memory_Info("DESTROYED: " << "  Filename: " << filename << " : Line:" << lineNum << "\n");
 				}
 			};
 

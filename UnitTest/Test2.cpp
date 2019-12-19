@@ -1,13 +1,14 @@
 
 #include "stdafx.h"
 #include "CppUnitTest.h"
+
 #include "../CreatureEngine/Profiling/MemoryPerf/MemTracker.h"
 #include "../CreatureEngine/Profiling/Timing/Benchmark.h"
 
 #include "../CreatureEngine/Core/Threading/Threadpool.h"
+#include"../CreatureEngine/Core/Threading/TestFunctions.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-
 
 namespace UnitTest
 {
@@ -21,7 +22,6 @@ namespace UnitTest
 			Assert::AreEqual(!true, false);	
 			Assert::AreNotEqual(true, false);
 		}
-
 		// TODO: Need to validate the Appropriate size of Memory is being allocated here
 		// This is not complete as it sits
 		TEST_METHOD(TestNewSize)
@@ -33,11 +33,10 @@ namespace UnitTest
 
 		TEST_METHOD(TestMemStamp)
 		{/* Check that the proper header information is being added to the Memory block */
-			Profiling::Memory::MemStamp *TestStamp = new Profiling::Memory::MemStamp(__FILE__, __LINE__);
-			Assert::AreEqual(TestStamp->lineNum, __LINE__ - 1);
-			Assert::AreEqual(TestStamp->filename, __FILE__);
+		///	Profiling::Memory::MemStamp *TestStamp = new Profiling::Memory::MemStamp(__FILE__, __LINE__);
+		///	Assert::AreEqual(TestStamp->lineNum, __LINE__ - 1);
+		///	Assert::AreEqual(TestStamp->filename, __FILE__);
 		}
-
 
 		TEST_METHOD(TestNewLocation)
 		{/* Test Operator new to ensure it is creating the new block where it is suppose to */
@@ -89,6 +88,109 @@ namespace UnitTest
 			int *TestAllocation = new int();
 		 
 		}
+	};
+//#endif
+
+	TEST_CLASS(ThreadPoolTest)
+	{
+
+		TEST_METHOD(TestPass)
+		{/* Wellness check*/
+			Assert::AreEqual(!true, false);
+			Assert::AreNotEqual(true, false);
+		}
+
+		TEST_METHOD(TestThreadCount)
+		{/* Wellness check*/
+			//Assert::AreEqual(!true, false);
+			//Assert::AreNotEqual(true, false);
+			
+			//Core::Threading::ThreadPool::get();
+			//auto A = Core::Threading::ThreadPool::get().Async([] {int ret = 10; return ret; });
+			//auto B = Core::Threading::ThreadPool::get().Async([] { return 10; });
+			//auto C = Core::Threading::ThreadPool::get().Async([] { return 10; });
+			//auto D = Core::Threading::ThreadPool::get().Async([] { return 10; });
+			//auto E = Core::Threading::ThreadPool::get().Async([] { return 10; });
+			//auto K = A.get() + B.get() + C.get() + D.get() + E.get();
+		 	//Assert::AreEqual(100,K);
+		}
+
+		TEST_METHOD(TestThreadPool)
+		{
+			int NUMBER_OF_THREADS = 100;
+			int LOOP_COUNT = 100000;
+			using TP = Core::Threading::ThreadPool;
+
+
+			bool A{ false };
+
+			A = [&]()->bool {
+				for_loop(Index, 10)
+				{
+					Function_Counter = 0;
+					Print("\n\n\n\n Loop Counter:  (X) FIX THIS iterations in the Worker Functions\n");
+					{
+						Timing::Profiling::Profile_Timer Bench("My Threadpool");
+						std::vector<std::vector<uint32_t>> Test;
+
+						auto A = TP::get().Async(TestFunctionE, std::move(LOOP_COUNT));
+						auto B = TP::get().Async(TestFunctionE, std::move(LOOP_COUNT));
+						auto C = TP::get().Async(TestFunctionB, 1431);
+						auto D = TP::get().Async(TestFunctionD, 123.321f, 10);
+						auto E = TP::get().Async(TestFunctionA);
+						auto F = TP::get().Async(TestFunctionC, 3.14159f, 123);
+						auto G = TP::get().Async(TestFunctionF, std::move(LOOP_COUNT));
+						auto H = TP::get().Async(TestFunctionG, std::move(LOOP_COUNT));
+						auto I = TP::get().Async(TestFunctionH, std::move(LOOP_COUNT));
+						auto J = TP::get().Async(TestFunctionI, std::move(LOOP_COUNT));
+						auto K = TP::get().Async(TestFunctionJ, std::move(LOOP_COUNT));
+
+						Print("Thread Pool Cluster");
+						std::vector<std::future<float>> Fut;
+						for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+						{
+							auto F = TP::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
+							Fut.push_back(std::forward<std::future<float>>(F));
+						}
+						uint64_t result{ 0 };
+						uint64_t counter = Fut.size();
+						while (counter)
+						{
+							for (auto& F : Fut)
+							{
+								if (!is_ready(F))
+								{
+									continue;
+								}
+								result += (uint64_t)F.get();
+								--counter;
+							}
+						}
+						Print("End Thread Pool Cluster: " << result);
+
+						while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter.
+
+						Print("Threadpool: " << result);
+					}
+				}
+
+				return true;
+			};
+			Assert::IsTrue(A);
+
+			//);// End lambda
+
+
+
+		}
+	};
+}//End UnitTest NS
+
+
+
+
+
+
 
 // TODO: void *TrackMalloc(size_t size);
 // TODO: void  TrackFree(void *p);
@@ -103,29 +205,97 @@ namespace UnitTest
 //	myTypeName = typeName;
 //}
 
-	};
-//#endif
-	TEST_CLASS(ThreadPoolTest)
-	{
 
-		TEST_METHOD(TestPass)
-		{/* Wellness check*/
-			Assert::AreEqual(!true, false);
-			Assert::AreNotEqual(true, false);
-		}
 
-		TEST_METHOD(TestThreadCount)
-		{/* Wellness check*/
-			//Assert::AreEqual(!true, false);
-			//Assert::AreNotEqual(true, false);
-			Core::Threading::ThreadPool::get();
-			auto A = Core::Threading::ThreadPool::get().Async([] {int ret = 10; return ret; });
-			auto B = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			auto C = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			auto D = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			auto E = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			auto K = A.get() + B.get() + C.get() + D.get() + E.get();
-		 	Assert::AreEqual(100,K);
-		}
-	};
-}//End UnitTest NS
+
+
+			//		Function_Counter = 0;
+			//		{
+			//
+			//			Timing::Profiling::Profile_Timer ThreadBM("std::Async");
+			//			auto  TPTest5T = std::async(std::launch::async | std::launch::deferred, TestFunctionE, LOOP_COUNT);
+			//			auto  TPTest1T = std::async(std::launch::async | std::launch::deferred, TestFunctionB, 1431);
+			//			auto  TPTest4T = std::async(std::launch::async | std::launch::deferred, TestFunctionD, 123.321f, 10);
+			//			auto  TPTest3T = std::async(std::launch::async | std::launch::deferred, TestFunctionA);
+			//			auto  TPTest2T = std::async(std::launch::async | std::launch::deferred, TestFunctionC, 3.14159f, 123);
+			//			auto  TPTest6T = std::async(std::launch::async | std::launch::deferred, TestFunctionF, LOOP_COUNT);
+			//			auto  TPTest7T = std::async(std::launch::async | std::launch::deferred, TestFunctionG, LOOP_COUNT);
+			//			auto  TPTest8T = std::async(std::launch::async | std::launch::deferred, TestFunctionH, LOOP_COUNT);
+			//			auto  TPTest9T = std::async(std::launch::async | std::launch::deferred, TestFunctionI, LOOP_COUNT);
+			//			auto TPTest10T = std::async(std::launch::async | std::launch::deferred, TestFunctionJ, LOOP_COUNT);
+			//
+			//			Print("Async Cluster");
+			//			std::vector<std::future<float>> Fut;
+			//			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			//			{
+			//				auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, rand() % NUMBER_OF_THREADS);
+			//				Fut.push_back(std::move(TPTest4loop));
+			//			}
+			//
+			//			uint64_t result{ 0 };
+			//			uint64_t counter = Fut.size();
+			//			while (counter)
+			//			{
+			//				for (auto& F : Fut)
+			//				{
+			//					if (!is_ready(F))
+			//					{// if not ready yet, check the next  
+			//						continue;
+			//					}
+			//					result += (uint64_t)F.get(); // it is ready 
+			//					--counter;
+			//				}
+			//			}
+			//
+			//			Print("End Async Cluster");
+			//			Print("Async :" << result);
+			//			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+			//
+			//			std::vector<std::vector<uint32_t>> Test;
+			//
+			//			Test.push_back(TPTest5T.get());
+			//			Test.push_back(TPTest6T.get());
+			//			Test.push_back(TPTest7T.get());
+			//			Test.push_back(TPTest8T.get());
+			//			Test.push_back(TPTest9T.get());
+			//			Test.push_back(TPTest10T.get());
+			//
+			//		}
+			//
+			//
+			//		Function_Counter = 0;
+			//		{
+			//			Timing::Profiling::Profile_Timer LBench("Linear Benchmark");
+			//			auto Test5 = TestFunctionE(std::move(LOOP_COUNT));// .5ms
+			//			auto Test4 = TestFunctionD(123.321f, 10);
+			//			auto Test1 = TestFunctionB(1431);
+			//			auto Test3 = TestFunctionA();
+			//			auto Test2 = TestFunctionC(3.14159f, 123);
+			//			auto Test6 = TestFunctionF(std::move(LOOP_COUNT));//.3
+			//			auto Test7 = TestFunctionG(std::move(LOOP_COUNT));//3.21
+			//			auto Test8 = TestFunctionH(std::move(LOOP_COUNT));// .32
+			//			auto Test9 = TestFunctionI(std::move(LOOP_COUNT));//2.8
+			//			auto Test10 = TestFunctionJ(std::move(LOOP_COUNT));//2.6
+			//
+			//
+			//			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
+			//
+			//
+			//			uint64_t result{ 0 };
+			//			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
+			//			{
+			//				result += (uint64_t)TestFunctionC(123.321f, rand() % NUMBER_OF_THREADS);
+			//			}
+			//			Print("Linear :" << result);
+			//
+			//			std::vector<std::vector<uint32_t>> Test;
+			//			Test.push_back(Test5);
+			//			Test.push_back(Test6);
+			//			Test.push_back(Test7);
+			//			Test.push_back(Test8);
+			//			Test.push_back(Test9);
+			//			Test.push_back(Test10);
+			//
+			//		}
+			//		Sleep(2500);
+			//	

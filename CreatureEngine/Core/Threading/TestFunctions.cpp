@@ -304,7 +304,7 @@ int SortGroupAsync(int *_input, int _start, int _size)
 void TestAsyncSort::AsyncBubbleSort()//TestFunctionC, 3.14159f, 123);//
 {
  	uint16_t GroupCount = std::thread::hardware_concurrency();
-	int Groupsize = MTtest.size() / GroupCount;// Only dealing with perfectly divisible Counts for now
+	int Groupsize = (int)MTtest.size() / GroupCount;// Only dealing with perfectly divisible Counts for now
 	int Elm{ 0 };
 
 	std::vector<std::vector<int>> Temps;
@@ -312,7 +312,7 @@ void TestAsyncSort::AsyncBubbleSort()//TestFunctionC, 3.14159f, 123);//
 	for_loop(j, GroupCount)
 	{
 		Temps.push_back(std::vector<int>());
-		for_loop(i, Groupsize)
+		for_loop(i, (uint32_t)Groupsize)
 		{
 			Temps[j].push_back(MTtest[Elm]);
  			++Elm;
