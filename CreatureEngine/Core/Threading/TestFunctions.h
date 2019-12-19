@@ -54,8 +54,8 @@ struct TestAsyncSort
 	{
 		for_loop(i, _size)
 		{
-			MTtest.push_back(rand() % _size); //-i);//  );//
-			STtest.push_back(rand() % _size); // rand() % );//
+			MTtest.push_back(i);//rand() % _size); //-i);//  );//
+			STtest.push_back(i);//rand() % _size); // rand() % );//
 		}
 	}
 	void AsyncBubbleSort();
@@ -63,12 +63,25 @@ struct TestAsyncSort
 
 	void AsyncMergeSort();
 	void LinearMergeSort();
+
+
+	uint64_t MTSwapSort();
 	std::vector<int> MTtest;
 	std::vector<int> STtest;
 };
 
-
-
+template<typename _Ty>
+bool Test_Sort(std::vector<_Ty> _input)
+{
+	for_loop (i, _input.size()-1)
+	{
+		if(_input[i] > _input[i + 1])
+		{
+			return false;
+		}
+	}
+	return true;
+}
 
 
 

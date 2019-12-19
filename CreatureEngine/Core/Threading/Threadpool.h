@@ -194,8 +194,8 @@ namespace Core
 				}
 			};
 
-
-			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 1};
+			static uint32_t Number_of_Threads;
+			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 3};
 			std::vector<std::thread> Worker_Threads;
 			std::vector<JobQueue> ThreadQueue{ ThreadCount };
 			std::atomic<unsigned int> Index{ 0 };

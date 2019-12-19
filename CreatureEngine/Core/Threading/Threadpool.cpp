@@ -13,6 +13,7 @@ namespace Core
 {
 	namespace Threading
 	{
+		_static uint32_t  ThreadPool::Number_of_Threads;
 		bool ThreadPool::JobQueue::try_Pop(Wrapper_Base*& func)
 		{/* Try to aquire a function off the Queue to run */
 			std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
@@ -50,6 +51,7 @@ namespace Core
 
 		ThreadPool::ThreadPool()
 		{
+			Number_of_Threads = ThreadCount;
 			for (int N{ 0 }; N < ThreadCount; ++N)
 			{
 				Worker_Threads.emplace_back([&, N] {Run(N); });
