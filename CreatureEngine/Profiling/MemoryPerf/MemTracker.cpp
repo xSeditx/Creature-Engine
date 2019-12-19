@@ -54,6 +54,8 @@ namespace Profiling
 	namespace Memory
 	{
 
+		std::mutex AllocationMutex;
+
 
 		class BlockHeader
 		{
@@ -100,19 +102,19 @@ namespace Profiling
 			myFilename = "[unknown]";
 			myLineNum = 0;
 			myTypeName = "[unknown]";
-			std::cout << "Requesting Block Size: " << _requestedSize << "\n";
+			Print_Memory_Info("Requesting Block Size: " << _requestedSize );
 		}
 
 		/* ---------------------------------------- BlockHeader destructor */
 
 		BlockHeader::~BlockHeader()
 		{
-			std::cout 
+			Print_Memory_Info(
 				<< "BlockHeader Destroy: " 
 				<<	myRequestedSize << " byte " 
 				<<	myTypeName << "\n" 
 				<<	"In file " << myFilename
-				<<	" on Line " << myLineNum << " \n";
+				<<	" on Line " << myLineNum );
 
 		}
 
@@ -136,6 +138,7 @@ namespace Profiling
 			// If we have at least one node in the list ...        
 			if (ourFirstNode != NULL)
 			{
+				TODO("ERROR MEMORY 1 : Active Error right here Assert Randomly is triggered. Probably Mulithreading Error");
 				// ... make the new node the first node's predecessor.
 				assert(ourFirstNode->myPrevNode == NULL);
 				ourFirstNode->myPrevNode = node;
@@ -158,6 +161,13 @@ namespace Profiling
 			// If target node is the first node in the list...
 			if (ourFirstNode == node)
 			{
+				TODO
+				(
+					"ERROR MEMORY 1:Appears to be triggered by the samething in which added and removing nodes fails \n \
+                     for whatever reason. It is highly possible it is happening because of the multithreaded aspect \n \
+                     of myprogram come to think of it!"
+                );
+
 				// ... make the target node's successor the first node.
 				assert(ourFirstNode->myPrevNode == NULL);
 				ourFirstNode = node->myNextNode;
@@ -337,7 +347,7 @@ namespace Profiling
 
 		void *Profiling::Memory::TrackMalloc(size_t size)
 		{
-			std::cout << "Malloc: " << size << " Bytes \n";
+			Print_Memory_Info("Malloc: " << size << " Bytes");
 			// Allocate the memory, including space for the prolog.
 			PrologChunk *pProlog = (PrologChunk *)malloc(SIZE_PrologChunk + size);
 
@@ -363,7 +373,7 @@ namespace Profiling
 
 		void Profiling::Memory::TrackFree(void *p)
 		{
-			std::cout << "Free: " << p << "\n";
+			Print_Memory_Info("Free: " << p );
 			// It's perfectly valid for "p" to be null; return if it is.
 			if (p == NULL) return;
 
@@ -584,8 +594,10 @@ namespace Profiling
     
     void *operator new(size_t size)
     {
-    	void *p = Profiling::Memory::TrackMalloc(size);
+		std::unique_lock<std::mutex>(AllocationMutex);
+		void *p = Profiling::Memory::TrackMalloc(size);
     	if (p == NULL) throw std::bad_alloc();
+ 
     	return p;
     }
     
@@ -593,15 +605,19 @@ namespace Profiling
     
     void operator delete(void *p)
     {
-    	Profiling::Memory::TrackFree(p);
+		std::unique_lock<std::mutex>(AllocationMutex);
+		Profiling::Memory::TrackFree(p);
+ 
     }
     
     /* ---------------------------------------- operator new[] */
     
     void *operator new[](size_t size)
     {
-    	void *p = Profiling::Memory::TrackMalloc(size);
+		std::unique_lock<std::mutex>(AllocationMutex);
+		void *p = Profiling::Memory::TrackMalloc(size);
     	if (p == NULL) throw std::bad_alloc();
+ 
     	return p;
     }
     
@@ -609,7 +625,8 @@ namespace Profiling
     
     void operator delete[](void *p)
     {
-    	Profiling::Memory::TrackFree(p);
+		std::unique_lock<std::mutex>(AllocationMutex);
+		Profiling::Memory::TrackFree(p);
     }
 
 #endif

@@ -51,7 +51,7 @@
 #include <tuple>
 #include <type_traits>
 
-#include"Core\Common.h"
+#include"../Common.h"
 #include<iostream>
 
 #pragma warning( push )
