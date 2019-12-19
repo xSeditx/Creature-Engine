@@ -2,17 +2,36 @@
 #include<string>
 #include<iostream>
 
+// PATHS for includes
 //$(VCInstallDir)Auxiliary\VS\UnitTest\include
 //$(Solution)..\Bin\glad\include
-
-
 //$(Solution)..\Bin
 
-#include "glad/include/glad/glad.h"
+/* OpenGL Function Loader */
+#include "../../Bin/glad/include/glad/glad.h"
 
-#include "glm/glm/glm.hpp"
-#include "glm/glm/gtc/type_ptr.hpp"
-#include "glm/glm/gtc/matrix_transform.hpp"
+/* Math Library GLM for vectors */
+#include "../../Bin/glm/glm/glm.hpp"
+#include "../../Bin/glm/glm/gtc/type_ptr.hpp"
+#include "../../Bin/glm/glm/gtc/matrix_transform.hpp"
+
+
+
+#include"Defines.h"
+/* ===================================================================================================================================================
+ *  STATE CONTROLLER FOR THE COMPILE TIME BEHAVIOR OF THE CREATURE GAME ENGINE 
+ *  TRUE TURNS FEATURE ON
+ *  FALSE SHUTS IT OFF
+ *  ===================================================================================================================================================
+ */
+
+/* Turns optimizations on or off for a given section when TRUE */
+#define OPTIMIZATION_CONTROLER  FALSE
+/* Prevent the output of pandentic messages and TODOs */
+#define NO_WARNINGS             TRUE
+
+/* Defines the level of Messages the user wishes to see */
+#define MESSAGE_LEVEL           OBJECT_CREATION
 
 
 /* Will determine if the Given class or structure is exportable */
@@ -27,12 +46,9 @@
 // ===================================================================================================================================================
 // TYPES FOR OUR ENGINE
 // ===================================================================================================================================================
-///  Naming Convention. [sign][precision][type][modifier]
-///  ex: iVec2 Integer of Vec type with 2 members
-///  ex: Uint8 Unsigned Integer 8 bytes
-
-
-
+//  Naming Convention. [sign][precision][type][modifier]
+//  ex: iVec2 Integer of Vec type with 2 members
+//  ex: Uint8 Unsigned Integer 8 bytes
 
 // Float Vectors
 typedef glm::vec2   Vec2;
@@ -67,63 +83,53 @@ typedef std::string  nameTag;
 using GPUptr = uint64_t;
 
 // ===================================================================================================================================================
+/* Outputs Info to the Console. Replacing later with more proper Logging Function */
 #define Print(x) std::cout << x << "\n"
 
+
+/* Denotes that Object Can not be Copied or Assigned */
 #define NO_COPY_OR_ASSIGNMENT(Class_X)	void operator=(const Class_X&) = delete;\
 Class_X(const Class_X&) = delete
 
 
-#define TODO(x) do{\
-static bool _seenAlready = false;\
-if(!_seenAlready){\
-_seenAlready = true;\
-std::cout << "File: " << __FILE__ << "\n"; \
-std::cout << "Line: " << __LINE__ << "\n"; \
-std::cout << "Message: " << #x << "\n"; \
-__pragma(message(#x))\
-}\
+/*      TODO(_msg) gives us a Console Runtime Message as well as a Compile time Message reminding the user of their 
+    Intent to fix or implement something */
+#define TODO(_msg) do{                                  \
+static bool _seenAlready = false;                       \
+if(!_seenAlready){                                      \
+_seenAlready = true;                                    \
+std::cout << "File: " << __FILE__ << "\n";              \
+std::cout << "Line: " << __LINE__ << "\n";              \
+std::cout << "Message: " << #_msg << "\n";              \
+__pragma(message(#_msg))                                \
+}                                                       \
 }while(0)
 
 
-#define for_loop(itr, count)     for(unsigned int itr{0}; itr < ((count)); ++itr)
+/* Iterative For-Next loop Ends when for(uint32_t Itr < Count) */
+#define for_loop(itr, count)     for(uint32_t itr{0}; itr < ((count)); ++itr)
 
-//
-//template<typename T, typename N, typename O>
-//T power(T x, N n, O op)
-//{
-//	if (n == 0) return op;//identity_element(op);
-//
-//	while ((n & 1) == 0) {
-//		n > 1;
-//		x = op(x, x);
-//	}
-//	T result = x;
-//	n >>= 1;
-//	while (n != 0)
-//	{
-//		x = op(x, x);
-//		if ((n & 1) != 0) result = op(result, x);
-//		n >> 1;
-//	}
-//	return result'
-//}
 
 /* Descriptor Defines to make code readability easier. Static tells in a CPP module if a function is defined as static 
 pure_Virtual tells if a function is pure virtual in plain english*/
 #define _static
 #define pure_virtual  0
 
-#define NO_WARNING
 
-#ifdef NO_WARNING
-#define OPTIMIZATION_OFF() 
-#define OPTIMIZATION_ON() 
+/* Control Block for Optimization Controller */
+#if OPTIMIZATION_CONTROLER
+#    define OPTIMIZATION_OFF() 
+#    define OPTIMIZATION_ON() 
 #else
-#define OPTIMIZATION_OFF()  __pragma(optimize("",off))\
-__pragma(message("WARNING: Global Optimization Disabled"))
-
-#define OPTIMIZATION_ON()  __pragma(optimize("", on))\
-__pragma(message("WARNING: Global Optimization Enabled"))
+#    if NO_WARNINGS
+#        define OPTIMIZATION_OFF()  __pragma(optimize("",off))
+#        define OPTIMIZATION_ON()  __pragma(optimize("", on))
+#    else
+#        define OPTIMIZATION_OFF()  __pragma(optimize("",off))\
+             __pragma(message("WARNING: Global Optimization Disabled"))
+#        define OPTIMIZATION_ON()  __pragma(optimize("", on))\
+             __pragma(message("WARNING: Global Optimization Enabled"))
+#    endif
 #endif
 
 

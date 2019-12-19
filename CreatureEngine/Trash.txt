@@ -5,6 +5,11 @@
 															  #Reason: Unable to access these due to Threadpool managing and owning asyncTask Objects
 ====================================================================================================================================================================================
 
+This was removed as it appears to not be needed. Try to keep this in mind because it may have been more proper than now current method
+// typename std::decay_t<_Func>, typename std::decay_t<ARGS>... > ; //std::invoke_result_t<_Func&, ARGS&...>;
+
+
+
 
 
 

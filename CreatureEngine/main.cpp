@@ -48,16 +48,16 @@ int main()
 		
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
-		 	SortTest.LinearMergeSort();
+		 	//SortTest.LinearMergeSort();
 		}
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
 			Timing::Profiling::Profile_Timer Bench("My Multithreaded Sort");// Dont use the current Threaded Version its broke.
-			auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
+			//auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
 			//Print(A);
 		}
         {
         	Timing::Profiling::Profile_Timer Bench("My Linear Bubble Sort");
-        	SortTest.LinearBubbleSort();
+        	//SortTest.LinearBubbleSort();
         }
 
 

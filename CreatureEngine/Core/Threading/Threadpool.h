@@ -41,12 +41,11 @@
  /*=======================================================================*/
 
 
-
 #include <thread>
 #include <functional>
 #include <future>
 #include <deque>
-#include <queue>
+//#include <queue>
 #include <array>
 #include <tuple>
 #include <type_traits>
@@ -61,38 +60,48 @@
 #define BLOCK_SIZE    1024 * 100
 #define MY_WRAPPER
 
-static void* Wrap_MemoryBlock = malloc(BLOCK_SIZE * sizeof(char)); // nullptr;
-static uint16_t  Wrap_Offset{ 0 };
-
-/* Non-blocking test of std::future to see if value is avalible yet */
-template<typename R>
-bool is_ready(std::future<R> const& f)
+//TODO: Should wrap this in a Namespace somewhere
+/*      Non-blocking test of std::future to see if value is avalible yet
+    NOTE: Performance of this is not the best use sparingly our outside of hot loops */
+template<typename _R>
+bool is_ready(std::future<_R> const& _fut)
 {
-	return f.valid() ? f.wait_for(std::chrono::seconds(0)) == std::future_status::ready : false;
+	return _fut.valid() ? _fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready : false;
 }
+
+
 
 namespace Core
 {
 	namespace Threading
 	{
-		class ThreadPool
+		class CREATURE_API ThreadPool
 		{
 		public:
-			NO_COPY_OR_ASSIGNMENT(ThreadPool);
+            NO_COPY_OR_ASSIGNMENT(ThreadPool);
+            
+			// JAVID IF I DO HAVE YOU REVIEWING THIS LATER WHAT DO YOU THINK ABOUT THE __declspec Below. Could it be useful?
+            /// __declspec(novtable) USE THIS MAYBE on Wrapper_base
 
-//
-			struct Wrapper_Base
-			{/// __declspec(novtable) USE THIS
-				virtual ~Wrapper_Base() {
-				}//Print("Base");
+			/*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various 
+			    Function types the user may invoke. We store the Base class pointer in Queues to Erase the type 
+			    While Polymorphically calling each Functions specific invoke method */
+            struct Wrapper_Base
+			{
+				virtual ~Wrapper_Base(){}
 
-				virtual void Invoke() = 0;
+				/* Function responsible to properly invoking our derived class */
+				virtual void Invoke() = pure_virtual;
+
+				/* Call our virtual Invoke method */
 				void operator()()
 				{
 					Invoke();
 				}
-				/* Implement a Then, When_all and Deferred Function handling */
+				/* TODO: Implement a Then, When_all and Deferred Function handling */
+				/* Note: Must create my own Future inorder to make that happen I think */
 
+				/* Mainly for Debug information Gives the Current status of a Function passed into our Queue */
 				enum asyncStatus
 				{
 					Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
@@ -100,37 +109,46 @@ namespace Core
 
 				asyncStatus Status{ Empty };
 			};
+            
 
-			template<typename _Func, typename ...ARGS>
-			struct asyncTask final
+			/*      ASYNC TASK: Object Binds Function Pointers as well as Arguments into a single unit 
+			    and stores its return value inside of an std::promise<_Rty> With _Rty being functions return type */
+            template<typename _Func, typename ...ARGS>
+            struct asyncTask final
 				: public Wrapper_Base 
 			{
-				using type = std::invoke_result_t<_Func, ARGS...>;// typename std::decay_t<_Func>, typename std::decay_t<ARGS>... > ; //std::invoke_result_t<_Func&, ARGS&...>;
-				using Fptr = type(*)(ARGS...);
-				Fptr Function;
+				using type = std::invoke_result_t<_Func, ARGS...>;         // Return type of our function
+				using Fptr = type(*)(ARGS...);                             // Function pointer type for our function
+				Fptr Function;                                             // Pointer to our Function
+																           
+				std::tuple<ARGS...> Arguments;                             // Tuple which Binds the Parameters to the Function call
+				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
+																           
+				virtual ~asyncTask() = default;                            // Virtual destructor to ensure proper Deallocation of object
 
-				std::tuple<ARGS...> Arguments;
-				std::promise<type> ReturnValue;
 
+				/* Accepts Functions and their arguments */
 				asyncTask(_Func&& _function, ARGS&&... _args) noexcept
 					:
 					Function(std::forward<_Func>(_function)),
 					Arguments(std::forward<ARGS>(_args)...)
-				{
+				{// Signals to user the object is now completed and valid
 					Status = Valid;
 				}
-				virtual ~asyncTask() = default;
 
+
+				/*      Possibly not needed but created Move and Assignment Operators just in case. 
+				    NOTE: May possibly remove in the future */
 				asyncTask(asyncTask&& _other) noexcept
 					:
 					Function(std::move(_other.Function)),
 					Arguments(std::forward<ARGS>(_other.Arguments)),
 					ReturnValue(std::move(_other.ReturnValue))
-				{
+				{// This test has shown it never gets called throughout the objects lifetime
 					std::cout << "Called the Forward Function" << "\n";
 				}
 				asyncTask& operator=(asyncTask&& _other) noexcept
-				{
+				{// Nor does this
 					Function = std::move(_other.Function);
 					Arguments = std::forward<ARGS>(_other.Arguments);
 					ReturnValue = std::move(_other.ReturnValue);
@@ -138,6 +156,8 @@ namespace Core
 				}
 
 
+				/*     Calls the Objects Stored function along with its parameters using std::apply
+				    Sets the value of the Promise and signals to the User that the value is waiting */
 				virtual void Invoke() override
 				{
 					Status = Busy;
@@ -146,93 +166,99 @@ namespace Core
 					Status = Waiting;
 				}
 
+				/*      To ensure familiarity and usability get_future works to retrieve the 
+				    std::future object associated with the return values std::promise */
 				std::future<type> get_future()
 				{
 					Status = Submitted;
 					return ReturnValue.get_future();
 				}
 
-				asyncTask(const asyncTask&) = delete;
-				asyncTask& operator=(const asyncTask& _other) = delete;
+				asyncTask(const asyncTask&) = delete;                      // Prevent copying
+				asyncTask& operator=(const asyncTask& _other) = delete;    // Prevent Assignment
 			};
+            
+			/*
+			 JOB QUEUE: Stores a Deque of Base Pointers to asyncTask Objects. 
+			 Pointers are pushed and popped off the stack and properly deallocated after no longer needed */
+            struct JobQueue
+            {
+            public:
+                JobQueue() = default;
+                
+                std::deque<Wrapper_Base*> TaskQueue;
+                std::condition_variable is_Ready;
+                std::mutex QueueMutex;
+                bool is_Done{ false };
+                
+                /* Triggers the Threadpool to shut down when the application ends or user ask it to */
+                void Done();
+                
+                /* Try to Pop a function off the Queue if it fails return false */
+                bool try_Pop(Wrapper_Base*& func);
+                
+                /* Pop function from Queue if fails wait for it */
+                bool pop(Wrapper_Base*& func);
+                
+                /* Attempts to add a function to the Queue if unable to lock return false */
+                bool try_push(Wrapper_Base* func);
+                
+                /* Adds a Function to our Queue */
+                void push(Wrapper_Base* func);
+            };
+            
+            
+            const uint32_t           ThreadCount    {  std::thread::hardware_concurrency() * 3};
+            std::vector<JobQueue>    ThreadQueue    { ThreadCount };
+            std::atomic<uint32_t>    Index          { 0 };
+            std::vector<std::thread> Worker_Threads;
+            
+			/*
+			 * Create a set number of Threads and Add Job Queues to the Threadpool 
+			 *     NOTE: May Possibly add a Number here to create a specific number of threads */
+            ThreadPool();
 
-			struct JobQueue
-			{
-			public:
-				JobQueue() = default;
+			/* Properly shuts down our Threadpool and joins any Threads running */
+            ~ThreadPool();
+            
+            /* Initializes Thread and starts the Queue running */
+            void Run(unsigned int _i);
+            
+        public:
+			
+			/* Returns a singleton instance of our Threadpool */
+        	static ThreadPool &get()
+        	{
+        	    static ThreadPool instance;
+        	    return instance;
+        	}
+        
 
-				std::condition_variable is_Ready;
-				std::mutex QueueMutex;
-				bool is_Done{ false };
-				void Done();
+			/* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
+        	template<typename _FUNC, typename...ARGS >
+        	auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
-				std::deque<Wrapper_Base*> TaskQueue;
+				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
+				auto result = _function->get_future();                                                           // Get the future of our async task for later use
+				auto i = Index++;                                                                                // Ensure fair work distribution
 
-				bool try_Pop(Wrapper_Base*& func);
-				bool pop(Wrapper_Base*& func);
+				int Attempts = 5;
+				for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // K is Tunable for better work distribution
+				{// Cycle over all Queues K times and attempt to push our function to one of them
 
-				bool try_push(Wrapper_Base* func)
-				{
-					{
-						std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
-						if (!Lock)
-						{/* If our mutex is already locked simply return */
-							return false;
-						}
-						/* Else place on the back of our Queue*/
-						TaskQueue.push_back(std::move(func));//(func));std::move<_FUNC>
-					}/* Unlock the Mutex */
-					is_Ready.notify_one(); /* Tell the world about it */
-					return true;/* Lets Async know u*/
-				}
-				void push(Wrapper_Base* func)
-				{/* Adds a Function to our Queue */
-					{
-						std::unique_lock<std::mutex> Lock{ QueueMutex };
-						TaskQueue.emplace_back(std::move(func));//std::move<_FUNC> std::forward<_FUNC&>(&((Worker_Function *)
-					}
-				}
-			};
-
-			static uint32_t Number_of_Threads;
-			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 3};
-			std::vector<std::thread> Worker_Threads;
-			std::vector<JobQueue> ThreadQueue{ ThreadCount };
-			std::atomic<unsigned int> Index{ 0 };
-
-
-			ThreadPool();
-			~ThreadPool();
-
-			void Run(unsigned int _i);
-
-		public:
-			static ThreadPool &get()
-			{
-				static ThreadPool instance;
-				return instance;
-			}
-
-			template<typename _FUNC, typename...ARGS >
-			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
-			{// Accept arbitrary Function signature and arguments into a Work pool for Asynchronous execution
-				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);
-				auto result = _function->get_future();
-				
-				auto i = Index++;
-				int K = 5;
-				for (unsigned int n{ 0 }; n != ThreadCount * K; ++n) // K is Tunable 
-				{
 					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Wrapper_Base*>(_function)))
-					{
+					{// If succeeded return our functions Future
 						return result;
 					}
 				}
 
+				// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
 				ThreadQueue[i % ThreadCount].push(static_cast<Wrapper_Base*>(_function));
 				return result;
 			}
 		};
+
 	}// End NS Threading
 }// End NS Core 
 
@@ -241,3 +267,119 @@ namespace Core
 #pragma warning( pop )
 
 
+/*
+==========================================================================================================================================================================
+														   NOTES:
+==========================================================================================================================================================================
+
+
+Learning C++
+https://riptutorial.com/Download/cplusplus.pdf
+
+
+Performance Analysis of Multithreaded Sorting Algorithms
+http://www.diva-portal.org/smash/get/diva2:839729/FULLTEXT02
+
+
+Programming with Threads
+Parallel Sorting
+https://cseweb.ucsd.edu/classes/fa13/cse160-a/Lectures/Lec02.pdf
+
+
+Double Check Locking is Fixed
+https://preshing.com/20130930/double-checked-locking-is-fixed-in-cpp11/
+
+
+Intel Game Engine Design:
+https://software.intel.com/en-us/articles/designing-the-framework-of-a-parallel-game-engine
+
+
+Faster STD::FUNCTION Implementation
+https://github.com/skarupke/std_function/blob/master/function.h
+
+
+Lock Free Ring Buffer
+https://github.com/tempesta-tech/blog/blob/master/lockfree_rb_q.cc
+
+
+Lock-Free Programming
+https://www.cs.cmu.edu/~410-s05/lectures/L31_LockFree.pdf
+
+
+A Fast Lock-Free Queue for C++
+http://moodycamel.com/blog/2013/a-fast-lock-free-queue-for-c++
+
+
+Introduction to Multithreaded Algorithms
+http://ccom.uprrp.edu/~ikoutis/classes/algorithms_12/Lectures/MultithreadedAlgorithmsApril23-2012.pdf
+
+
+A Thread Pool with C++11
+http://progsch.net/wordpress/?p=81
+
+
+Parallelizing the Naughty Dog Engine
+https://www.gdcvault.com/play/1022186/Parallelizing-the-Naughty-Dog-Engine
+
+
+C++11 threads, affinity and hyperthreading
+https://eli.thegreenplace.net/2016/c11-threads-affinity-and-hyperthreading/
+
+
+Thread pool worker implementation
+https://codereview.stackexchange.com/questions/60363/thread-pool-worker-implementation
+
+
+Thread pool implementation using c++11 threads
+https://github.com/mtrebi/thread-pool
+
+
+C++11 Multithreading – Part 8: std::future , std::promise and Returning values from Thread
+https://thispointer.com/c11-multithreading-part-8-stdfuture-stdpromise-and-returning-values-from-thread/
+
+
+CppCon 2015: Fedor Pikus PART 2 “Live Lock-Free or Deadlock (Practical Lock-free Programming) ”
+Queue
+https://www.youtube.com/watch?v=1obZeHnAwz4&t=3055s
+
+
+Thread Pool Implementation on Github:
+https://github.com/mtrebi/thread-pool/blob/master/README.md#queue
+
+
+Threadpool with documentation:
+https://www.reddit.com/r/cpp/comments/9lvji0/c_threadpool_with_documentation/
+
+
+Original White paper on Work stealing Queues:
+http://supertech.csail.mit.edu/papers/steal.pdf
+
+
+Code overview - Thread Pool & Job System
+https://www.youtube.com/watch?v=Df-6ws_EZno
+
+
+Type Traits Reference
+https://code.woboq.org/llvm/libcxx/include/type_traits.html
+
+Aquiring results of a templated function:
+template<typename Function, typename ...Args>
+result_type = std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>;
+
+MSVC Threadpool implementation for Concurrency:
+https://docs.microsoft.com/en-us/cpp/parallel/concrt/task-scheduler-concurrency-runtime?view=vs-2019
+
+
+Simple Threadpool Implementation:
+https://riptutorial.com/cplusplus/example/15806/create-a-simple-thread-pool
+
+
+Use this switch with Compiler Explorer inorder to allow it to compile: -std=c++17 -O3
+
+
+//template<typename _F, typename ...ARGS>
+//uint16_t Wrapper<_F, ARGS...>::Offset{ 0 };
+
+https://www.youtube.com/watch?v=zULU6Hhp42w&list=PLl8Qc2oUMko_FMAaK7WY4ly0ikLFrYCE3&index=4
+
+*/

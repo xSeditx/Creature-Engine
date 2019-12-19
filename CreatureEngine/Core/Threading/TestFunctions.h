@@ -184,3 +184,26 @@ std::vector<_Ty>  Bubble_sort(std::vector<_Ty> _input)
 
 
 
+/*
+==========================================================================================================================================================================
+                                                           NOTES:                                                                      
+==========================================================================================================================================================================
+
+Learning C++
+https://riptutorial.com/Download/cplusplus.pdf
+
+Performance Analysis of Multithreaded Sorting Algorithms
+http://www.diva-portal.org/smash/get/diva2:839729/FULLTEXT02
+
+Programming with Threads
+Parallel Sorting
+https://cseweb.ucsd.edu/classes/fa13/cse160-a/Lectures/Lec02.pdf
+
+Double Check Locking is Fixed
+https://preshing.com/20130930/double-checked-locking-is-fixed-in-cpp11/
+
+Science:
+
+Telepathic Twins
+https://mobile.abc.net.au/news/2018-07-25/telepathic-communication-a-matter-of-time-hybrid-world-adelaide/10029312?pfmredir=sm&fbclid=IwAR0xOL1dGuHb0xorDmJHir-K1KEdR9LuUhgVeGKYmkEhHFAcM9INnIQBv48
+*/

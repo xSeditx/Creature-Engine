@@ -1,5 +1,4 @@
 #pragma once
-
 /*
   =======================================================================================================================
 										 BENCHMARK TIMING MODULE
@@ -9,10 +8,12 @@
 	to any number of Log methods designed to store a process the benchmarked data at a later time.
   =======================================================================================================================
 */
+
 #include<chrono>
-#include"Core/Common.h"
-#include"Timer.h"
 #include<unordered_map>
+#include"../../Core/Common.h"
+
+#include"Timer.h"
 
 namespace Timing
 {
@@ -52,13 +53,10 @@ namespace Timing
 
 	}
 }
-	_static std::unordered_map<std::string, uint64_t> Timing::Profiling::Profile_Timer::Samples;
-	_static std::unordered_map<std::string, uint64_t> Timing::Profiling::Profile_Timer::Accumulator;
 
 
-
-
-
+_static std::unordered_map<std::string, uint64_t> Timing::Profiling::Profile_Timer::Samples;
+_static std::unordered_map<std::string, uint64_t> Timing::Profiling::Profile_Timer::Accumulator;
 
 
 
