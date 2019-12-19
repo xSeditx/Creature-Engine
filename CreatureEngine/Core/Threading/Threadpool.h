@@ -1,4 +1,47 @@
 #pragma once
+/*=======================================================================
+					 # ThreadPool Module  #
+
+	 Handles the Acceptance and dispatching of Asynchronous Function 
+  calls via Threaded Queues which store pointers to functions and
+  systematically keeps every core of the CPU busy at all times. As soon
+  as one function returns another is popped from a stack and ran and the 
+  user synchronizes these efforts via a future object which becomes valid
+  with the return value after the desired function has been properly
+  run.
+
+ =======================================================================*/
+
+
+ /*************************************************************************/
+ /*                       This file is part of:                           */
+ /*                       Creature Game Engine                            */
+ /*              https://github.com/xSeditx/Creature-Engine               */
+ /*************************************************************************/
+ /* Copyright (c) 2019 Sedit                                              */
+ /*                                                                       */
+ /* Permission is hereby granted, free of charge, to any person obtaining */
+ /* a copy of this software and associated documentation files (the       */
+ /* "Software"), to deal in the Software without restriction, including   */
+ /* without limitation the rights to use, copy, modify, merge, publish,   */
+ /* distribute, sublicense, and/or sell copies of the Software, and to    */
+ /* permit persons to whom the Software is furnished to do so, subject to */
+ /* the following conditions:                                             */
+ /*                                                                       */
+ /* The above copyright notice and this permission notice shall be        */
+ /* included in all copies or substantial portions of the Software.       */
+ /*                                                                       */
+ /* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+ /* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+ /* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+ /* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+ /* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+ /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+ /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+ /*=======================================================================*/
+
+
+
 #include <thread>
 #include <functional>
 #include <future>
@@ -20,12 +63,6 @@
 
 static void* Wrap_MemoryBlock = malloc(BLOCK_SIZE * sizeof(char)); // nullptr;
 static uint16_t  Wrap_Offset{ 0 };
-
-///================ Test Code Deprecated ==============================
-extern std::atomic<uint32_t> Create;
-extern std::atomic<uint32_t> Delete;
-extern std::atomic<uint32_t> GotFuture;
-///====================================================================
 
 /* Non-blocking test of std::future to see if value is avalible yet */
 template<typename R>
@@ -112,9 +149,6 @@ namespace Core
 				std::future<type> get_future()
 				{
 					Status = Submitted;
-					++Create;
-					GotFuture++;
-//					RefCount++;
 					return ReturnValue.get_future();
 				}
 
@@ -161,7 +195,7 @@ namespace Core
 			};
 
 
-			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 3};
+			const unsigned int ThreadCount{  std::thread::hardware_concurrency() * 1};
 			std::vector<std::thread> Worker_Threads;
 			std::vector<JobQueue> ThreadQueue{ ThreadCount };
 			std::atomic<unsigned int> Index{ 0 };
@@ -186,7 +220,7 @@ namespace Core
 				auto result = _function->get_future();
 				
 				auto i = Index++;
-				int K = 1;
+				int K = 5;
 				for (unsigned int n{ 0 }; n != ThreadCount * K; ++n) // K is Tunable 
 				{
 					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Wrapper_Base*>(_function)))
