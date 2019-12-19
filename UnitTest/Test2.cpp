@@ -92,6 +92,17 @@ namespace UnitTest
 //#endif
 #include <type_traits> 
 
+	int TestTPpass(int _in)
+	{
+		std::cout << "TestTPass:" << _in << "\n";
+		return 1;
+	}
+	int TestTPfail(int _in)
+	{
+		std::cout << "TestTfail:" << _in << "\n";
+	    return 0;
+	}
+		
 	TEST_CLASS(ThreadPoolTest)
 	{
 		/* Wellness check*/
@@ -124,54 +135,15 @@ namespace UnitTest
 
 			auto A = [&]()->bool// Return type
 			{
-				for_loop(Index, 10)
-				{
-					Function_Counter = 0;
-					Print("\n\n Loop Counter:  (X) FIX THIS iterations in the Worker Functions\n");
-					{
-						Timing::Profiling::Profile_Timer Bench("My Threadpool");
-						std::vector<std::vector<uint32_t>> Test;
-
-						auto A = TP::get().Async(TestFunctionE, std::move(LOOP_COUNT));
-						auto B = TP::get().Async(TestFunctionE, std::move(LOOP_COUNT));
-						auto C = TP::get().Async(TestFunctionB, 1431);
-						auto D = TP::get().Async(TestFunctionD, 123.321f, 10);
-						auto E = TP::get().Async(TestFunctionA);
-						auto F = TP::get().Async(TestFunctionC, 3.14159f, 123);
-						auto G = TP::get().Async(TestFunctionF, std::move(LOOP_COUNT));
-						auto H = TP::get().Async(TestFunctionG, std::move(LOOP_COUNT));
-						auto I = TP::get().Async(TestFunctionH, std::move(LOOP_COUNT));
-						auto J = TP::get().Async(TestFunctionI, std::move(LOOP_COUNT));
-						auto K = TP::get().Async(TestFunctionJ, std::move(LOOP_COUNT));
-
-						Print("Thread Pool Cluster");
-						std::vector<std::future<float>> Fut;
-						for_loop (i, (uint32_t)NUMBER_OF_THREADS)
-						{
-							auto F = TP::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
-							Fut.push_back(std::forward<std::future<float>>(F));
-						}
-						uint64_t result{ 0 };
-						uint64_t counter = Fut.size();
-						while (counter)
-						{
-							for (auto& F : Fut)
-							{
-								if (!is_ready(F))
-								{
-									continue;
-								}
-								result += (uint64_t)F.get();
-								--counter;
-							}
-						}
-						Print("End Thread Pool Cluster: " << result);
-
-						Print("Threadpool: " << result);
-					}
-				}
-
-				return true;
+				bool k{ false };
+				std::vector<int> i;
+				i.push_back(10);
+				std::cout << "Something" << i.size() << "\n";
+				i[-10000] = 22;
+				auto A = TP::get().Async(TestTPpass, std::move(19));
+				auto B = TP::get().Async(TestTPfail, std::move(42));
+				k = true;
+				return k;
 			};
 			bool B = A();
 			Assert::IsTrue(B); // MAYBE LOL
@@ -185,6 +157,53 @@ namespace UnitTest
 
 
 
+
+
+//for_loop(Index, 10)
+//{
+//	Function_Counter = 0;
+//	Print("\n\n Loop Counter:  (X) FIX THIS iterations in the Worker Functions\n");
+//	{
+//		Timing::Profiling::Profile_Timer Bench("My Threadpool");
+//		std::vector<std::vector<uint32_t>> Test;
+//
+//		auto A = TP::get().Async(TestFunctionE, std::move(LOOP_COUNT));
+//		auto B = TP::get().Async(TestFunctionE, std::move(LOOP_COUNT));
+//		auto C = TP::get().Async(TestFunctionB, 1431);
+//		auto D = TP::get().Async(TestFunctionD, 123.321f, 10);
+//		auto E = TP::get().Async(TestFunctionA);
+//		auto F = TP::get().Async(TestFunctionC, 3.14159f, 123);
+//		auto G = TP::get().Async(TestFunctionF, std::move(LOOP_COUNT));
+//		auto H = TP::get().Async(TestFunctionG, std::move(LOOP_COUNT));
+//		auto I = TP::get().Async(TestFunctionH, std::move(LOOP_COUNT));
+//		auto J = TP::get().Async(TestFunctionI, std::move(LOOP_COUNT));
+//		auto K = TP::get().Async(TestFunctionJ, std::move(LOOP_COUNT));
+//
+//		Print("Thread Pool Cluster");
+//		std::vector<std::future<float>> Fut;
+//		for_loop (i, (uint32_t)NUMBER_OF_THREADS)
+//		{
+//			auto F = TP::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
+//			Fut.push_back(std::forward<std::future<float>>(F));
+//		}
+//		uint64_t result{ 0 };
+//		uint64_t counter = Fut.size();
+//		while (counter)
+//		{
+//			for (auto& F : Fut)
+//			{
+//				if (!is_ready(F))
+//				{
+//					continue;
+//				}
+//				result += (uint64_t)F.get();
+//				--counter;
+//			}
+//		}
+//		Print("End Thread Pool Cluster: " << result);
+//		Print("Threadpool: " << result);
+//	}
+//}
 
 // TODO: void *TrackMalloc(size_t size);
 // TODO: void  TrackFree(void *p);

@@ -77,8 +77,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\DELL\source\repos\CreatureEngine\CreatureEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\CreatureEngine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\DELL\source\repos\Creature-Engine\CreatureEngine;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -108,7 +108,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>EventSystem.obj;Benchmark.obj;ECS.obj;ECScomponent.obj;ECSsystem.obj;Memtracker.obj;SystemInfo.obj;OpenGL.obj</AdditionalDependencies>
+      <AdditionalDependencies>EventSystem.obj;ECS.obj;ECScomponent.obj;ECSsystem.obj;Memtracker.obj;SystemInfo.obj;OpenGL.obj</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

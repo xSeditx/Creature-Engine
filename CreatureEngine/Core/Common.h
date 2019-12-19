@@ -208,3 +208,26 @@ CppCon 2016: Jason Jurecka “Game engine using STD C++ 11"
 https://www.youtube.com/watch?v=8AjRD6mU96s
 
 */
+
+
+
+
+
+
+
+
+
+/*
+==========================================================================================================================================================================
+														   NOTES:
+==========================================================================================================================================================================
+
+Preprocessor Directives (push/pop
+https://docs.microsoft.com/en-us/cpp/preprocessor/pop-macro?view=vs-2019
+Push/Pop Macros
+#pragma push_macro("Y") / #pragma pop_macro("X")
+
+vtordisp(On/Off)
+
+https://docs.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=vs-2019
+*/

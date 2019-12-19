@@ -138,6 +138,7 @@ namespace Core
 ==========================================================================================================================================================================
 '
 
+REASONS: Really want to make the Threadpool::Async(Func, Args...) Static but idk if I can without it breaking
 
 
 _static const uint32_t           Core::Threading::ThreadPool::SThreadCount{ std::thread::hardware_concurrency() * 3 };

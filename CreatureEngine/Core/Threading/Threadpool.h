@@ -241,7 +241,7 @@ namespace Core
         
             /* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
             template<typename _FUNC, typename...ARGS >
-             auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+            auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
             {// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
                 auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
