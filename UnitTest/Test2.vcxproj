@@ -77,8 +77,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\DELL\source\repos\Creature-Engine\CreatureEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Solution)CreatureEngine;$(IncludePath)</IncludePath>
+    <LibraryPath>$(Solution)CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -93,7 +93,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(Solution)CreatureEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine\x64\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(Solution)CreatureEngine\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

@@ -67,12 +67,57 @@ Class_X(const Class_X&) = delete
 
 //TODO: Should wrap this in a Namespace somewhere
 /*      Non-blocking test of std::future to see if value is avalible yet
-    NOTE: Performance of this is not the best use sparingly our outside of hot loops */
+    NOTE: Performance of this is not the best use sparingly our outside of hot loops 
+*/
 template<typename _R>
 bool is_ready(std::future<_R> const& _fut)
 {
     return _fut.valid() ? _fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready : false;
 }
+
+
+/*
+TODO: Implement a Fork Join and/or a custom future<> object
+co-routine co-await, co-yeild co-return
+promise.get_return_object() 
+promise.initial_suspend()
+promise.final_suspend
+ 
+ If the Promise type defines a placement form of operator new that takes additional parameters, and they match an argument list where the first argument is the size requested (of type std::size_t)
+ await_transform
+ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1745r0.pdf
+ template<
+	typename AsyncWriteStream,
+	typename ConstBufferSequence,
+	typename WriteHandler>
+void async_write(
+	AsyncWriteStream & s,
+	const ConstBufferSequence & buffers,
+	WriteHandler handler);
+*/
+
+
+
+ 
+template<class _Fret>
+struct arg_type
+{
+	using type = _Fret;
+};
+template<class _Fret>
+struct arg_type<_Fret&>
+{	// type for functions returning reference to T
+	using type = _Fret*;
+};
+template<>
+struct arg_type<void>
+{	// type for functions returning void
+	using type = int;
+};
+
+ 
+
+
 
 
 
@@ -83,7 +128,7 @@ namespace Core
         class CREATURE_API ThreadPool
         {
             NO_COPY_OR_ASSIGNMENT(ThreadPool);
-            
+    
             // JAVID/HUHLIG IF I DO HAVE YOU REVIEWING THIS LATER WHAT DO YOU THINK ABOUT THE __declspec Below. Could it be useful? Not 100% sure what it does but it seems like it might be helpful in this case since the base class was just there to type erase
             /// __declspec(novtable) USE THIS MAYBE on Wrapper_base
 
@@ -137,7 +182,9 @@ namespace Core
 				virtual void Invoke() noexcept override
 				{
 					Status = Busy;
-					auto result = std::apply(Function, Arguments);
+					using Return_t = typename arg_type<type>::type;
+					auto result = static_cast<Return_t>(std::apply(Function, Arguments));
+					
 					ReturnValue.set_value(result);
 					Status = Waiting;
 				}
@@ -171,11 +218,14 @@ namespace Core
 					std::cout << "Called Assignment Operator " << "\n";
 				}
 
+
+
+
 			private:
 				using Fptr = type(*)(ARGS...);                             // Function pointer type for our function
 				Fptr Function;                                             // Pointer to our Function
 				std::tuple<ARGS...> Arguments;                             // Tuple which Binds the Parameters to the Function call
-				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
+				std::promise<typename arg_type<type>::type> ReturnValue;                  // Return Value of our function stored as a Promise
 
                 asyncTask(const asyncTask&) = delete;                      // Prevent copying
                 asyncTask& operator=(const asyncTask& _other) = delete;    // Prevent Assignment
@@ -241,7 +291,7 @@ namespace Core
         
             /* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
             template<typename _FUNC, typename...ARGS >
-            auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+            auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename arg_type<typename asyncTask<_FUNC, ARGS... >::type>::type>
             {// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
                 auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
@@ -276,7 +326,8 @@ namespace Core
 ==========================================================================================================================================================================
                                                            NOTES:
 ==========================================================================================================================================================================
-
+Vittorio Romeo passing functions to functions
+https://vittorioromeo.info/index/blog/passing_functions_to_functions.html
 
 Learning C++
 https://riptutorial.com/Download/cplusplus.pdf

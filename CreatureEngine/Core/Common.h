@@ -16,6 +16,11 @@
 #include "../../Bin/glm/glm/gtc/matrix_transform.hpp"
 
 
+#if !_HAS_CXX17
+#    error Program needs C++ 17 standard to proceed. Please enable C++ 17 to continue.  ProjectProperties-> C/C++->Languages-> C++ Language Standard ISO C++ 17 Standard
+#    error Please enable C++ 17 to continue.  ProjectProperties-> C/C++->Languages-> C++ Language Standard ISO C++ 17 Standard
+#    error ProjectProperties-> C/C++->Languages-> C++ Language Standard ISO C++ 17 Standard
+#endif
 
 #include"Defines.h"
 

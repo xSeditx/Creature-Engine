@@ -3,52 +3,56 @@
 
 
 
-//
-//template<typename T, typename N, typename O>
-//T power(T x, N n, O op)
-//{
-//	if (n == 0) return op;//identity_element(op);
-//
-//	while ((n & 1) == 0) {
-//		n > 1;
-//		x = op(x, x);
-//	}
-//	T result = x;
-//	n >>= 1;
-//	while (n != 0)
-//	{
-//		x = op(x, x);
-//		if ((n & 1) != 0) result = op(result, x);
-//		n >> 1;
-//	}
-//	return result'
-//}
 
-/*    Apply tuple to a function: https://cpppatterns.com/patterns/apply-tuple-to-function.html    */
-template<typename _FUNC, typename _TUPLE, size_t ..._SZ >
-auto apply_tuple_impl(_FUNC&& _function, _TUPLE&& _arguments, std::index_sequence<_SZ...>)
-->decltype((std::forward<_FUNC>(_function)(std::get<_SZ>(std::forward<_TUPLE>(_arguments))...)))/// Return was Decltype(auto) just auto and trailing return added to create zero/low cost abstraction
+
+/* Test class for making a latch object for C++ 17
+ * User will wait on a Latch to count down from a specific
+ * Value and will unlock the blocked Critical section the moment
+ * Our Latch reaches a predetermined state
+ * ~* INCOMPLETE *~
+ */
+#include<mutex>
+#include<atomic>
+struct Latch
 {
-	return std::forward<_FUNC>(_function)(std::get<_SZ>(std::forward<_TUPLE>(_arguments))...);
-}
 
-template<typename _FUNC, typename _TUPLE>
-decltype(auto) apply_from_tuple(_FUNC&& _function, _TUPLE&& _tupleArguments)
-{
-	std::size_t constexpr tSize
-	{// Initialize tSize instead of using =
-		 std::tuple_size<typename std::remove_reference<_TUPLE>::type>::value
-	};
+	bool is_Ready() {}
+	void Decrement() {
+		--Counter;
+		if (Counter <= 0)
+		{
+			CV.notify_all();
+		}
+	}
+	void Wait()
+	{
+		{
+			std::unique_lock<std::mutex> _Lock{ Mutx };
+			_Lock.lock();
+			CV.wait(_Lock, Ready());
+		}
+	}
+	void Decrement_and_Wait()
+	{
+		Decrement();
+		Wait();
+	}
+	bool Ready() { return isReady; }
+	bool isReady{ false };
+	std::atomic<uint32_t> Counter;
+	std::condition_variable CV;
+	std::mutex Mutx;
+};
 
-	return
-		apply_tuple_impl(std::forward<_FUNC>(_function),
-			std::forward<_TUPLE>(_tupleArguments),
-			std::make_index_sequence<tSize>());
-}
 
 
-
-
+/*
+ * Lock Free / Allocation Free RingBuffer
+ * At Object Creation time user Supplies the size of the 
+ * RingBuffer and the Implementation handles wrapping and
+ * Thread safety from that point on.
+ * ~* INCOMPLETE *~
+ */
 template<typename _Ty, size_t _SZ>
 class ring_buffer
 {
@@ -138,3 +142,53 @@ private:
 	size_t Length, Size, Start, End, Elements;
 	size_t BufferSize = _SZ + 1;
 };
+
+
+
+
+
+
+
+//
+//template<typename T, typename N, typename O>
+//T power(T x, N n, O op)
+//{
+//	if (n == 0) return op;//identity_element(op);
+//
+//	while ((n & 1) == 0) {
+//		n > 1;
+//		x = op(x, x);
+//	}
+//	T result = x;
+//	n >>= 1;
+//	while (n != 0)
+//	{
+//		x = op(x, x);
+//		if ((n & 1) != 0) result = op(result, x);
+//		n >> 1;
+//	}
+//	return result'
+//}
+
+/*    Apply tuple to a function: https://cpppatterns.com/patterns/apply-tuple-to-function.html    */
+template<typename _FUNC, typename _TUPLE, size_t ..._SZ >
+auto apply_tuple_impl(_FUNC&& _function, _TUPLE&& _arguments, std::index_sequence<_SZ...>)
+->decltype((std::forward<_FUNC>(_function)(std::get<_SZ>(std::forward<_TUPLE>(_arguments))...)))/// Return was Decltype(auto) just auto and trailing return added to create zero/low cost abstraction
+{
+	return std::forward<_FUNC>(_function)(std::get<_SZ>(std::forward<_TUPLE>(_arguments))...);
+}
+
+template<typename _FUNC, typename _TUPLE>
+decltype(auto) apply_from_tuple(_FUNC&& _function, _TUPLE&& _tupleArguments)
+{
+	std::size_t constexpr tSize
+	{// Initialize tSize instead of using =
+		 std::tuple_size<typename std::remove_reference<_TUPLE>::type>::value
+	};
+
+	return
+		apply_tuple_impl(std::forward<_FUNC>(_function),
+			std::forward<_TUPLE>(_tupleArguments),
+			std::make_index_sequence<tSize>());
+}
+

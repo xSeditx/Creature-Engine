@@ -40,7 +40,11 @@ int TestNot(int _input)
 	return 10;
 }
 
-
+void TESTR0P1(int _a)
+{
+	Print("Parameter: " << _a);
+	return;
+}
 
 //#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
 //https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
@@ -51,8 +55,9 @@ int main()
     while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);
-		ThreadPool::get().Async(TestNot, 5);
-
+		//ThreadPool::get().Async(TestNot, 5);
+		ThreadPool::get().Async(TESTR0P1, 42);
+		
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
 		 	//SortTest.LinearMergeSort();
@@ -93,7 +98,7 @@ int main()
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
 				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
-				Fut.push_back(std::forward<std::future<float>>(F));
+///				Fut.push_back(std::forward<std::future<float>>(F));
 			}
 			uint64_t result{ 0 };
 			uint64_t counter = Fut.size();

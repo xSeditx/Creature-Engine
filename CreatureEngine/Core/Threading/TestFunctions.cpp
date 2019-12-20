@@ -438,7 +438,7 @@ std::vector<std::mutex*> Mutexs;
  	std::vector<std::future<int>> Futs;
  	for(int g = 0; g <  Groupcount; ++g)
  	{
- 		Futs.push_back(Core::Threading::ThreadPool::get().Async(SortG, MTtest));
+/// 		Futs.push_back(Core::Threading::ThreadPool::get().Async(SortG, MTtest));
  	}
  
  	for (auto &F : Futs)
