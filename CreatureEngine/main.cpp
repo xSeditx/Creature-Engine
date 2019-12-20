@@ -37,27 +37,26 @@ std::array<float,10> TestVec(std::vector<uint32_t>& _input)
 int TestNot(int _input)
 {
 	Print("Called Test Not with a " << _input);
-	return 10;
+	return 42;
 }
 
-void TESTR0P1(int _a)
-{
-	Print("Parameter: " << _a);
-	return;
-}
+//#include <intrin.h>
+
+// Getting the Stack frame caller
+// https://social.msdn.microsoft.com/Forums/vstudio/en-US/da4e85c5-407e-4a57-87e7-14bf994504d9/error-asm-keyword-not-supported-on-this-architecture?forum=vcgeneral
+// void * memoryAllocator = _ReturnAddress();
 
 //#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
 //https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
 #include<utility>
 int main()
 {
-			
+
     while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);
-		//ThreadPool::get().Async(TestNot, 5);
-		ThreadPool::get().Async(TESTR0P1, 42);
-		
+		ThreadPool::get().Async(TestNot, 5);
+
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
 		 	//SortTest.LinearMergeSort();
@@ -98,7 +97,7 @@ int main()
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
 				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
-///				Fut.push_back(std::forward<std::future<float>>(F));
+				Fut.push_back(std::forward<std::future<float>>(F));
 			}
 			uint64_t result{ 0 };
 			uint64_t counter = Fut.size();

@@ -1,3 +1,27 @@
+ ==================================================================================================================================================================================
+            #12/19															  															  
+            #Threadpool.h		
+            #Reason: Move constructor and Move Assign were never called so they are unneeded
+====================================================================================================================================================================================
+Perhaps I will want them later because I considered moving the object around but currently managing its Pointer to base has been relatively effective
+
+/*      Possibly not needed but created Move and Assignment Operators just in case.
+	NOTE: May remove in the future as neither of these are ever calls and the user is incapable of */
+asyncTask(asyncTask&& _other) noexcept
+	:
+	Function(std::move(_other.Function)),
+	Arguments(std::forward<ARGS>(_other.Arguments)),
+	ReturnValue(std::move(_other.ReturnValue))
+{// This test has shown it never gets called throughout the objects lifetime
+	std::cout << "Called the Forward Function" << "\n";
+}
+asyncTask& operator=(asyncTask&& _other) noexcept
+{// Nor does this
+	Function = std::move(_other.Function);
+	Arguments = std::forward<ARGS>(_other.Arguments);
+	ReturnValue = std::move(_other.ReturnValue);
+	std::cout << "Called Assignment Operator " << "\n";
+}
 
  ==================================================================================================================================================================================
                                                                #11/28															  															  
@@ -9,6 +33,10 @@ This was removed as it appears to not be needed. Try to keep this in mind becaus
 // typename std::decay_t<_Func>, typename std::decay_t<ARGS>... > ; //std::invoke_result_t<_Func&, ARGS&...>;
 
 
+
+
+//template<typename _F, typename ...ARGS>
+//uint16_t Wrapper<_F, ARGS...>::Offset{ 0 };
 
 
 

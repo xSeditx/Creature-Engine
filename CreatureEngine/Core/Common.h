@@ -1,3 +1,8 @@
+#pragma once
+#ifndef COMMON_H
+#define COMMON_H
+
+
 #include<cstdint>
 #include<string>
 #include<iostream>
@@ -55,11 +60,12 @@
 #define CREATURE_API
 
 /* Calling convention of the API */
-#define CREATURE_CALL 
-
+#define CREATURE_CALL   __stdcall
+#define Creature_Call   __stdcall 
 /* For turning off exceptions on optimization */
 #define NOEXCEPT noexcept
 
+#define NO_VTABLE __declspec(novtable) 
 // ===================================================================================================================================================
 // TYPES FOR OUR ENGINE
 // ===================================================================================================================================================
@@ -104,9 +110,12 @@ using GPUptr = uint64_t;
 #define Print(x) std::cout << x << "\n"
 
 
-/* Denotes that Object Can not be Copied or Assigned */
-#define NO_COPY_OR_ASSIGNMENT(Class_X)	void operator=(const Class_X&) = delete;\
-Class_X(const Class_X&) = delete
+/* Denotes that Object Can not be Copied or Assigned or moved */
+
+#define NO_COPY_OR_ASSIGNMENT(Class_X) Class_X(const Class_X&) = delete;\
+									   Class_X& operator=(const Class_X&) = delete;\
+									   Class_X(Class_X&&) = delete;\
+									   Class_X& operator=(Class_X&&) = delete;
 
 
 // with line number
@@ -196,11 +205,11 @@ pure_Virtual tells if a function is pure virtual in plain english*/
 #else
 #    if NO_WARNINGS
 #        define OPTIMIZATION_OFF()  __pragma(optimize("",off))
-#        define OPTIMIZATION_ON()  __pragma(optimize("", on))
+#        define OPTIMIZATION_ON()   __pragma(optimize("", on))
 #    else
 #        define OPTIMIZATION_OFF()  __pragma(optimize("",off))\
              __pragma(message("WARNING: Global Optimization Disabled"))
-#        define OPTIMIZATION_ON()  __pragma(optimize("", on))\
+#        define OPTIMIZATION_ON()   __pragma(optimize("", on))\
              __pragma(message("WARNING: Global Optimization Enabled"))
 #    endif
 #endif
@@ -235,4 +244,19 @@ Push/Pop Macros
 vtordisp(On/Off)
 
 https://docs.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=vs-2019
+
+
+
+
+Github Markdown Cheat
+https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf
+
+
+
+
 */
+
+
+
+
+#endif// COMMON_H
