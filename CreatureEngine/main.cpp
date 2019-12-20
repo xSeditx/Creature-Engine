@@ -37,17 +37,21 @@ std::array<float,10> TestVec(std::vector<uint32_t>& _input)
 int TestNot(int _input)
 {
 	Print("Called Test Not with a " << _input);
-	return 10;
+	return 42;
 }
 
+//#include <intrin.h>
 
+// Getting the Stack frame caller
+// https://social.msdn.microsoft.com/Forums/vstudio/en-US/da4e85c5-407e-4a57-87e7-14bf994504d9/error-asm-keyword-not-supported-on-this-architecture?forum=vcgeneral
+// void * memoryAllocator = _ReturnAddress();
 
 //#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
 //https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
 #include<utility>
 int main()
 {
-			
+
     while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);

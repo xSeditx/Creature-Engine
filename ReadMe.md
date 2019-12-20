@@ -16,7 +16,7 @@ ___
 
 * Entity Component System : Added 10/9/2019 <br>
 
-* ThreadPool <br>
+* ThreadPool: Added 11/19/2019 <br>
 > Scheduler <br>
 > Event Handler : Added 10/12/2019(incomplete) <br>
 

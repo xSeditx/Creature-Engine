@@ -1,4 +1,7 @@
 #pragma once
+#ifndef THREADPOOL_H
+#define THREADPOOL_H
+
 /*=======================================================================
                      # ThreadPool Module  #
 
@@ -48,16 +51,24 @@
 #include <iostream>
 #include <type_traits> 
 
-//#include"../Common.h"
+#include"../Common.h" // Comment out this header to stand alone
+
+//  Defines Which allow Threadpool.h and .cpp to stand along from Common.h If desired
 #ifndef CREATURE_API
 #    define CREATURE_API // Will determine export type later on
 #endif
-
 /* Denotes that Object Can not be Copied or Assigned */
 #ifndef NO_COPY_OR_ASSIGNMENT
 #    define NO_COPY_OR_ASSIGNMENT(Class_X)	void operator=(const Class_X&) = delete;\
 Class_X(const Class_X&) = delete
 #endif
+#ifndef NO_VTABLE
+#    define NO_VTABLE __declspec(novtable) 
+#endif
+//======================================================================================
+
+
+
 
 #pragma warning( push )
 #pragma warning( disable : 4244 ) // Type conversions
@@ -73,6 +84,21 @@ bool is_ready(std::future<_R> const& _fut)
 {
     return _fut.valid() ? _fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready : false;
 }
+/* 
+ *TODO: Implement a Then, When_all and Deferred Function handling 
+ *Note: Must create my own Promise/ Future inorder to make that happen I think
+ *       Possibly derive from std::future and build on that would be possible
+ *TODO: Call Chains where user can Generate Call chains and trees for execution without interference
+ * Possible co-Routine functionality to handle recursive and nested Task Calls                                                                                                                         
+ */
+
+
+ /* Will be used later so Threadpool can accept functions that return void
+	template<typename _Ty> struct FixReturn       { using type = _Ty ;}
+	template<typename _Ty> struct FixReturn<_Ty&> { using type = _Ty*;}
+	template<>             struct FixReturn<>     { using type = int ;}
+ */
+
 
 
 
@@ -84,33 +110,23 @@ namespace Core
         {
             NO_COPY_OR_ASSIGNMENT(ThreadPool);
             
-            // JAVID/HUHLIG IF I DO HAVE YOU REVIEWING THIS LATER WHAT DO YOU THINK ABOUT THE __declspec Below. Could it be useful? Not 100% sure what it does but it seems like it might be helpful in this case since the base class was just there to type erase
-            /// __declspec(novtable) USE THIS MAYBE on Wrapper_base
-
             /*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various 
                 Function types the user may invoke. We store the Base class pointer in Queues to Erase the type 
                 While Polymorphically calling each Functions specific invoke method */
-            struct Wrapper_Base
+            struct NO_VTABLE Wrapper_Base 
             {
                 virtual ~Wrapper_Base() noexcept {}
 
 				/* Function responsible to properly invoking our derived class */
 				virtual void Invoke() noexcept = 0;
 
-                /* TODO: Implement a Then, When_all and Deferred Function handling */
-                /* Note: Must create my own Future inorder to make that happen I think */
-
 				/* Mainly for Debug information Gives the Current status of a Function passed into our Queue */
 				enum asyncStatus
 				{
 					Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
 				} Status{ Empty };
-
             }; // End Wrapper_Base Class
             
-
-
-
             /*      ASYNC TASK: Object Binds Function Pointers as well as Arguments into a single unit 
                 and stores its return value inside of an std::promise<_Rty> With _Rty being functions return type */
             template<typename _Func, typename ...ARGS>
@@ -152,34 +168,17 @@ namespace Core
 				}
 
 
-
-				/*      Possibly not needed but created Move and Assignment Operators just in case.
-					NOTE: May remove in the future as neither of these are ever calls and the user is incapable of */
-				asyncTask(asyncTask&& _other) noexcept
-					:
-					Function(std::move(_other.Function)),
-					Arguments(std::forward<ARGS>(_other.Arguments)),
-					ReturnValue(std::move(_other.ReturnValue))
-				{// This test has shown it never gets called throughout the objects lifetime
-					std::cout << "Called the Forward Function" << "\n";
-				}
-				asyncTask& operator=(asyncTask&& _other) noexcept
-				{// Nor does this
-					Function = std::move(_other.Function);
-					Arguments = std::forward<ARGS>(_other.Arguments);
-					ReturnValue = std::move(_other.ReturnValue);
-					std::cout << "Called Assignment Operator " << "\n";
-				}
-
 			private:
 				using Fptr = type(*)(ARGS...);                             // Function pointer type for our function
-				Fptr Function;                                             // Pointer to our Function
-				std::tuple<ARGS...> Arguments;                             // Tuple which Binds the Parameters to the Function call
+				const Fptr Function;                                       // Pointer to our Function
+				const std::tuple<ARGS...> Arguments;                       // Tuple which Binds the Parameters to the Function call
+				
 				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
 
                 asyncTask(const asyncTask&) = delete;                      // Prevent copying
+				asyncTask(asyncTask&& _other) = delete;                    // Prevent move   
                 asyncTask& operator=(const asyncTask& _other) = delete;    // Prevent Assignment
-
+				asyncTask& operator=(asyncTask&& _other) = delete;         // Prevent move assignment
 			};// End asyncTask Class
 
 
@@ -268,8 +267,9 @@ namespace Core
 }// End NS Core 
 
 
-
 #pragma warning( pop )
+#endif// THREADPOOL_H
+
 
 
 /*
@@ -277,80 +277,73 @@ namespace Core
                                                            NOTES:
 ==========================================================================================================================================================================
 
-
-Learning C++
-https://riptutorial.com/Download/cplusplus.pdf
-
-
-Performance Analysis of Multithreaded Sorting Algorithms
-http://www.diva-portal.org/smash/get/diva2:839729/FULLTEXT02
-
-
-Programming with Threads
-Parallel Sorting
-https://cseweb.ucsd.edu/classes/fa13/cse160-a/Lectures/Lec02.pdf
-
-
-Double Check Locking is Fixed
-https://preshing.com/20130930/double-checked-locking-is-fixed-in-cpp11/
-
-
-Intel Game Engine Design:
-https://software.intel.com/en-us/articles/designing-the-framework-of-a-parallel-game-engine
-
-
-Faster STD::FUNCTION Implementation
-https://github.com/skarupke/std_function/blob/master/function.h
-
-
-Lock Free Ring Buffer
-https://github.com/tempesta-tech/blog/blob/master/lockfree_rb_q.cc
-
-
-Lock-Free Programming
-https://www.cs.cmu.edu/~410-s05/lectures/L31_LockFree.pdf
-
-
-A Fast Lock-Free Queue for C++
-http://moodycamel.com/blog/2013/a-fast-lock-free-queue-for-c++
-
-
-Introduction to Multithreaded Algorithms
-http://ccom.uprrp.edu/~ikoutis/classes/algorithms_12/Lectures/MultithreadedAlgorithmsApril23-2012.pdf
-
-
-A Thread Pool with C++11
-http://progsch.net/wordpress/?p=81
-
-
 Parallelizing the Naughty Dog Engine
 https://www.gdcvault.com/play/1022186/Parallelizing-the-Naughty-Dog-Engine
-
-
-C++11 threads, affinity and hyperthreading
-https://eli.thegreenplace.net/2016/c11-threads-affinity-and-hyperthreading/
-
-
-Thread pool worker implementation
-https://codereview.stackexchange.com/questions/60363/thread-pool-worker-implementation
-
-
-Thread pool implementation using c++11 threads
-https://github.com/mtrebi/thread-pool
-
-
-C++11 Multithreading – Part 8: std::future , std::promise and Returning values from Thread
-https://thispointer.com/c11-multithreading-part-8-stdfuture-stdpromise-and-returning-values-from-thread/
-
 
 CppCon 2015: Fedor Pikus PART 2 “Live Lock-Free or Deadlock (Practical Lock-free Programming) ”
 Queue
 https://www.youtube.com/watch?v=1obZeHnAwz4&t=3055s
 
+Code overview - Thread Pool & Job System
+https://www.youtube.com/watch?v=Df-6ws_EZno
+
+Better Code Concurrency
+https://www.youtube.com/watch?v=zULU6Hhp42w&list=PLl8Qc2oUMko_FMAaK7WY4ly0ikLFrYCE3&index=4
+
+GotW #95: Thread Safety and Synchronization
+https://herbsutter.com/2014/01/06/gotw-95-thread-safety-and-synchronization/
 
 Thread Pool Implementation on Github:
 https://github.com/mtrebi/thread-pool/blob/master/README.md#queue
 
+Thread pool implementation using c++11 threads
+https://github.com/mtrebi/thread-pool
+
+Faster STD::FUNCTION Implementation
+https://github.com/skarupke/std_function/blob/master/function.h
+
+Lock Free Ring Buffer
+https://github.com/tempesta-tech/blog/blob/master/lockfree_rb_q.cc
+
+
+
+Learning C++
+https://riptutorial.com/Download/cplusplus.pdf
+
+Performance Analysis of Multithreaded Sorting Algorithms
+http://www.diva-portal.org/smash/get/diva2:839729/FULLTEXT02
+
+Double Check Locking is Fixed
+https://preshing.com/20130930/double-checked-locking-is-fixed-in-cpp11/
+
+Intel Game Engine Design:
+https://software.intel.com/en-us/articles/designing-the-framework-of-a-parallel-game-engine
+
+Programming with Threads
+Parallel Sorting
+https://cseweb.ucsd.edu/classes/fa13/cse160-a/Lectures/Lec02.pdf
+
+Lock-Free Programming
+https://www.cs.cmu.edu/~410-s05/lectures/L31_LockFree.pdf
+
+Introduction to Multithreaded Algorithms
+http://ccom.uprrp.edu/~ikoutis/classes/algorithms_12/Lectures/MultithreadedAlgorithmsApril23-2012.pdf
+
+A Fast Lock-Free Queue for C++
+http://moodycamel.com/blog/2013/a-fast-lock-free-queue-for-c++
+
+
+A Thread Pool with C++11
+http://progsch.net/wordpress/?p=81
+
+C++11 threads, affinity and hyperthreading
+https://eli.thegreenplace.net/2016/c11-threads-affinity-and-hyperthreading/
+
+Thread pool worker implementation
+https://codereview.stackexchange.com/questions/60363/thread-pool-worker-implementation
+
+C++11 Multithreading – Part 8: std::future , std::promise and Returning values from Thread
+https://thispointer.com/c11-multithreading-part-8-stdfuture-stdpromise-and-returning-values-from-thread/
 
 Threadpool with documentation:
 https://www.reddit.com/r/cpp/comments/9lvji0/c_threadpool_with_documentation/
@@ -359,17 +352,8 @@ https://www.reddit.com/r/cpp/comments/9lvji0/c_threadpool_with_documentation/
 Original White paper on Work stealing Queues:
 http://supertech.csail.mit.edu/papers/steal.pdf
 
-
-Code overview - Thread Pool & Job System
-https://www.youtube.com/watch?v=Df-6ws_EZno
-
-
 Type Traits Reference
 https://code.woboq.org/llvm/libcxx/include/type_traits.html
-
-Aquiring results of a templated function:
-template<typename Function, typename ...Args>
-result_type = std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>;
 
 MSVC Threadpool implementation for Concurrency:
 https://docs.microsoft.com/en-us/cpp/parallel/concrt/task-scheduler-concurrency-runtime?view=vs-2019
@@ -381,10 +365,11 @@ https://riptutorial.com/cplusplus/example/15806/create-a-simple-thread-pool
 
 Use this switch with Compiler Explorer inorder to allow it to compile: -std=c++17 -O3
 
+Aquiring results of a templated function:
+template<typename Function, typename ...Args>
+result_type = std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>;
 
-//template<typename _F, typename ...ARGS>
-//uint16_t Wrapper<_F, ARGS...>::Offset{ 0 };
-
-https://www.youtube.com/watch?v=zULU6Hhp42w&list=PLl8Qc2oUMko_FMAaK7WY4ly0ikLFrYCE3&index=4
 
 */
+
+

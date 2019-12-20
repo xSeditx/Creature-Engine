@@ -138,3 +138,65 @@ private:
 	size_t Length, Size, Start, End, Elements;
 	size_t BufferSize = _SZ + 1;
 };
+
+
+
+
+
+
+
+
+struct do_something_helper
+{
+	do_something_helper()
+	{
+		// do something first (e.g. take a lock)
+	}
+	~do_something_helper()
+	{
+		// do something after (e.g. release a lock)
+	}
+};
+
+template<typename T>
+T Foo(T(*Func)())
+{
+	do_something_helper _dummy_helper; // constructor called here
+
+	return Func();
+	// destructor called here
+}
+
+template< typename Pre, typename Post >
+struct scope_guard
+{
+	scope_guard(Pre&& pre, Post&& post)
+		: _post(std::forward< Post >(post))
+	{
+		pre();
+	}
+	~scope_guard()
+	{
+		_post();
+	}
+
+	Post _post;
+};
+
+template< typename Pre, typename Post >
+scope_guard< Pre, Post > make_scope_guard(Pre&& pre, Post&& post)
+{
+	return scope_guard< Pre, Post >(std::forward< Pre >(pre), std::forward< Post >(post));
+}
+
+template<typename T>
+T Foo(T(*Func)())
+{
+	auto do_something_helper =
+		make_scope_guard(
+			[]() { /* do something first (e.g. take a lock) */ },
+			[]() { /* do something after (e.g. release a lock) */ }
+	);
+
+	return Func();
+}
