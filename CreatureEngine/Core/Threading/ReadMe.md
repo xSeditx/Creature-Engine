@@ -22,7 +22,7 @@ ___
 
 *Step 1)a:* Async(Function, Args...) is called, Returns an std::future<Func_return_type> to the user.                       <br> 
 *Step 2)a:* Async Wraps the Function and its Arguments into an new asyncTask(Function, Args...); 				            <br> 
-*       b:* Try_Push is called with a Pointer to the base class of asyncTask : Wrapper_Base 					            <br> 
+       *b:* Try_Push is called with a Pointer to the base class of asyncTask : Wrapper_Base 					            <br> 
 *Step 3)a:* Try_Push attemps to Add Function to our JobQueue. If we can not Lock it we return False; 			            <br> 
                 else we push the Function pointer into the Queue and Notify the Condition Variable that it can	            <br> 
                 stop waiting it now has work to do																            <br> 
@@ -35,9 +35,10 @@ ___
 *Step 2)* Try_Pop(Wrapper_Base*& _func) is in a For Loop which goes over all the Queues looking for work.					 <br> 
               If it finds it it Returns a pointer to Work through _func.													 <br> 
         																													 <br> 
-*Step 3)* If it fails to find anything in the other threads Pop(Wrapper_Base *& _func) is called 							 <br> 
+*Step 3)* <p>If it fails to find anything in the other threads Pop(Wrapper_Base *& _func) is called 							 <br> 
               Pop checks to make sure Quit has not been called and checks his own Queue for work. If there is no			 <br> 
-              Work Pop waits on a Conditional lock to conserve CPU power while there is not Jobs							 <br> 
+              Work Pop waits on a Conditional lock to conserve CPU power while there is not Jobs</p>							 <br> 
+			                                                                                                                 <br> 
 *Step 4)* If Queue is Empty and Quit Signal has been given Pop returns False to Run and Run breaks out of 					 <br> 
               Its Infinite Loop when Pop fails to return a function which triggers the Shut down Sequence of the 			 <br> 
               ThreadPool
