@@ -133,5 +133,8 @@
     <ClInclude Include="Core\Defines.h">
       <Filter>Source Files\System</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Threading\Future.h">
+      <Filter>Source Files\System\Threading</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

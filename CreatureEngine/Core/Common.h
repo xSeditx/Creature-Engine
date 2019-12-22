@@ -45,7 +45,7 @@
 #define MESSAGE_LEVEL           OBJECT_CREATION_MESSAGE
 
 /* Test block of code for testing Threadspools Speeds */
-#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
+///#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
 
 
 

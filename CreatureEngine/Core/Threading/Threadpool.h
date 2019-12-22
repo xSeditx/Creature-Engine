@@ -53,6 +53,11 @@
 
 #include"../Common.h" // Comment out this header to stand alone
 
+#define DEBUGPrint(x)   DEBUGMutex.lock();\
+std::cout << x << std::endl;\
+DEBUGMutex.unlock();
+
+
 //  Defines Which allow Threadpool.h and .cpp to stand along from Common.h If desired
 #ifndef CREATURE_API
 #    define CREATURE_API // Will determine export type later on
@@ -106,16 +111,18 @@ namespace Core
 {
     namespace Threading
     {
+		extern std::mutex DEBUGMutex;
+
         class CREATURE_API ThreadPool
         {
             NO_COPY_OR_ASSIGNMENT(ThreadPool);
             
-            /*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various 
+            /*      Executor: Allows us to make a polymorphic object and derive from it with the various 
                 Function types the user may invoke. We store the Base class pointer in Queues to Erase the type 
                 While Polymorphically calling each Functions specific invoke method */
-            struct NO_VTABLE Wrapper_Base 
+            struct NO_VTABLE Executor
             {
-                virtual ~Wrapper_Base() noexcept {}
+                virtual ~Executor() noexcept {}
 
 				/* Function responsible to properly invoking our derived class */
 				virtual void Invoke() noexcept = 0;
@@ -131,7 +138,7 @@ namespace Core
                 and stores its return value inside of an std::promise<_Rty> With _Rty being functions return type */
             template<typename _Func, typename ...ARGS>
             struct asyncTask final
-                : public Wrapper_Base 
+                : public Executor
             {
 			public:													   
 				using type = std::invoke_result_t<_Func, ARGS...>;         // Return type of our function
@@ -153,6 +160,7 @@ namespace Core
 				virtual void Invoke() noexcept override
 				{
 					Status = Busy;
+					
 					auto result = std::apply(Function, Arguments);
 					ReturnValue.set_value(result);
 					Status = Waiting;
@@ -190,27 +198,35 @@ namespace Core
             struct JobQueue
             {
             public:
-                JobQueue() = default;
+                JobQueue()
+					:
+					idTag(queue_ID++)
+				{}
                 
-                std::deque<Wrapper_Base*> TaskQueue;
+                std::deque<Executor*> TaskQueue;
                 std::condition_variable is_Ready;
-                std::mutex QueueMutex;
-                bool is_Done{ false };
+				std::mutex QueueMutex;
+				bool is_Done{ false };
                 
                 /* Triggers the Threadpool to shut down when the application ends or user ask it to */
                 void Done();
                 
                 /* Try to Pop a function off the Queue if it fails return false */
-                bool try_Pop(Wrapper_Base*& func);
+                bool try_Pop(Executor*& func);
                 
                 /* Pop function from Queue if fails wait for it */
-                bool pop(Wrapper_Base*& func);
+                bool pop(Executor*& func);
                 
                 /* Attempts to add a function to the Queue if unable to lock return false */
-                bool try_push(Wrapper_Base* func);
+                bool try_push(Executor* func);
                 
                 /* Adds a Function to our Queue */
-                void push(Wrapper_Base* func);
+                void push(Executor* func);
+
+				uint32_t g_ID() { return idTag; }
+			private:
+				uint32_t idTag;
+				static uint32_t queue_ID;
             };
             
             
@@ -238,29 +254,99 @@ namespace Core
                 return instance;
             }
         
+
+
+
+
+
+			enum class launch_policy
+			{
+				immediate,
+				async,
+				deferred
+			};
             /* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
             template<typename _FUNC, typename...ARGS >
-            auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+            auto Async(launch_policy _policy, _FUNC&& _func, ARGS&&... args)->std::future<typename std::invoke_result_t<std::decay_t<_FUNC>, std::decay_t <ARGS>...>>
             {// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
-                auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
-                auto result = _function->get_future();                                                           // Get the future of our async task for later use
-                auto i = Index++;                                                                                // Ensure fair work distribution
+				switch (_policy)
+				{
+				case launch_policy::async:
+				{
+						auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
+						auto result = _function->get_future();                                                           // Get the future of our async task for later use
+						auto i = Index++;                                                                                // Ensure fair work distribution
 
-                int Attempts = 5;
-                for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // K is Tunable for better work distribution
-                {// Cycle over all Queues K times and attempt to push our function to one of them
+						int Attempts = 5;
+						for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // K is Tunable for better work distribution
+						{// Cycle over all Queues K times and attempt to push our function to one of them
 
-                    if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Wrapper_Base*>(_function)))
-                    {// If succeeded return our functions Future
-                        return result;
-                    }
-                }
+							if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Executor*>(_function)))
+							{// If succeeded return our functions Future
+								return result;
+							}
+						}
 
-                // In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
-                ThreadQueue[i % ThreadCount].push(static_cast<Wrapper_Base*>(_function));
-                return result;
+						// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
+						ThreadQueue[i % ThreadCount].push(static_cast<Executor*>(_function));
+						return result;
+					}
+
+				case launch_policy::immediate:
+				return Execute_Immediately(std::forward <_FUNC>( _func), std::forward<ARGS>(args)...);
+					break;
+
+				}
             }
+			/// NOTE: invoke_result_t = template<class... _Types>{	using type = decltype(std::invoke(std::declval<_Types>()...)); }
+
+			template<typename _Func, typename...ARGS >
+			inline std::future<std::invoke_result_t<std::decay_t<_Func>, std::decay_t<ARGS>...>>
+			 Async( _Func&& _func, ARGS&&... args)
+			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
+				static_assert(std::is_invocable<_Func, ARGS...>::value, "Template param <_Func> is not callable with arguments <ARGS...> ");
+				return (Async(launch_policy::async, 
+					std::forward<_Func>(_func), 
+					std::forward<ARGS>(args)...
+				));
+			}
+
+			/// STL Async. 
+//template<class _Fty, class... _ArgTypes>
+//	inline std::future<std::invoke_result_t<std::decay_t<_Fty>, std::decay_t<_ArgTypes>...>>
+//	std::async(_Fty&& _Fnarg, _ArgTypes&&... _Args)
+//{	// return a future object whose associated asynchronous state
+//	// manages a callable object launched with default policy
+//	return (_STD async(launch::async | launch::deferred,
+//		_STD forward<_Fty>(_Fnarg),
+//		_STD forward<_ArgTypes>(_Args)...
+//	));
+//}
+
+
+
+
+//->std::future<typename std::invoke_result_t<_Func,ARGS...>>
+			template<typename _Func, typename...ARGS >
+			auto Execute_Immediately( _Func&& _func, ARGS&&... args)->std::future<typename std::invoke_result_t<_Func, ARGS...>>
+			{
+				using type = std::invoke_result_t<_Func, ARGS...>;
+				std::promise<type> Promise;
+				std::future<type> result;
+				result = Promise.get_future();
+				std::thread Thr = std::thread(
+					[&]()
+				{
+					Promise.set_value(_func(args...));
+				}
+				);
+				return result;
+			}
+
+
+
+
         }; // End ThreadPool Class
 
     }// End NS Threading
@@ -271,6 +357,21 @@ namespace Core
 #endif// THREADPOOL_H
 
 
+
+
+
+/*
+==========================================================================================================================================================================
+                                                  Future Implementations:
+==========================================================================================================================================================================
+
+Type of executor	Where, when and how
+System	             Any thread in the process.
+Thread pool	         Any thread in the pool, and nowhere else.
+Strand	             Not concurrent with any other function object sharing the strand, and in FIFO order.
+Future / Promise	 Any thread. Capture any exceptions thrown by the function object and store them in the promise.
+
+*/
 
 /*
 ==========================================================================================================================================================================

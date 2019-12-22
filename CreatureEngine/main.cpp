@@ -23,6 +23,8 @@ int LOOP_COUNT{ 1000000 };
 
 #include"Core/Threading/TestFunctions.h"
 
+// Actor Framework
+//http://www.actor-framework.org/pdf/manual.pdf
 //Nice
 ///http://eel.is/c++draft/meta.trans.other
 auto func(char a, char b) {
@@ -49,9 +51,11 @@ int TestNot(int _input)
 //#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
 //https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
 #include<utility>
+
+#include"Core/Threading/Future.h"
 int main()
 {
-
+https://www.youtube.com/watch?v=9TVvpgHJElU&feature=emb_logo
     while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);
@@ -59,18 +63,12 @@ int main()
 
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
-		 	//SortTest.LinearMergeSort();
+		 	SortTest.LinearMergeSort();
 		}
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
 			Timing::Profiling::Profile_Timer Bench("My Multithreaded Sort");// Dont use the current Threaded Version its broke.
-			//auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
-			//Print(A);
+			SortTest.AsyncMergeSort(); 
 		}
-        {
-        	Timing::Profiling::Profile_Timer Bench("My Linear Bubble Sort");
-        	//SortTest.LinearBubbleSort();
-        }
-
 
 #if _TEST_THREADPOOL_SPEED
 		Function_Counter = 0;
@@ -212,27 +210,27 @@ int main()
 
 	}
 
-
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();
 	return 0;
+
+//	std::promise<_Ty>
 }
  
-			//SortTest.AsyncMergeSort();
-
+ 
 /*
 =====================================================================================================================
 									  NOTES:
 =====================================================================================================================
-Pragmas for C++ Compilers, Good resource
-https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
+ Pragmas for C++ Compilers, Good resource
+ https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
 
  Open STD:
  http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3857.pdf
 
 
-Physics Solver:
-https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
+ Physics Solver:
+ https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
 
 =====================================================================================================================
 */

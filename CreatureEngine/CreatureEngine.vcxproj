@@ -149,6 +149,7 @@
     <ClInclude Include="Core\ECS\ECS.h" />
     <ClInclude Include="Core\ECS\ECScomponent.h" />
     <ClInclude Include="Core\ECS\ECSsystem.h" />
+    <ClInclude Include="Core\Threading\Future.h" />
     <ClInclude Include="Core\Threading\TestFunctions.h" />
     <ClInclude Include="Core\Threading\Threadpool.h" />
     <ClInclude Include="Core\Utility.h" />
