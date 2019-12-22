@@ -339,6 +339,13 @@ void TestAsyncSort::LinearMergeSort()
 
 
 
+
+
+
+
+
+
+
 /* Merge Two Arrays into a single output array */
 std::vector<int> AMerge(std::vector<int> _A, std::vector<int> _B)
 {
@@ -366,6 +373,44 @@ std::vector<int> AMerge(std::vector<int> _A, std::vector<int> _B)
 	}
 	return result;
 }
+
+/*Multithreaded Threaded Merge sort */
+std::vector<int> MTMerge_sort(std::vector<int>& _input)
+{
+    if (_input.size() <= 1)
+    {
+    	return _input;
+    }
+    std::vector<int> Left, Right;
+    
+    uint32_t Half = (uint32_t)(_input.size() * .5);
+    std::move(_input.begin()       , _input.begin() + Half, std::back_inserter(Left));
+    std::move(_input.begin() + Half, _input.end()         , std::back_inserter(Right));
+    
+    auto L = Core::Threading::ThreadPool::get().Async(MTMerge_sort, Left);// (std::vector<int>)
+    auto R = Core::Threading::ThreadPool::get().Async(MTMerge_sort, Right);// (std::vector<int>)
+    auto Lv = L.get();
+    auto Rv = R.get();
+    
+	return AMerge(Lv, Rv);
+}
+void TestAsyncSort::AsyncMergeSort()
+{
+	MTtest = MTMerge_sort(MTtest);
+}
+
+
+	//ThreadMTMerge_sort(MTtest,std::move( prom));fut = prom.get_future();
+
+//auto L =std::async(MTMerge_sort, Left); //
+//auto L = std::thread(MTMerge_sort, (std::vector<int>)Left);
+//auto R =std::async(MTMerge_sort, Right);//
+//auto R = std::thread(MTMerge_sort, (std::vector<int>)Right);
+
+
+
+
+
 //bool Try_Swap(std::vector<int>& _input, int _i)
 //{
 //	for_loop(j, _input.size())
@@ -450,11 +495,7 @@ std::vector<std::mutex*> Mutexs;
 }
 //
 //
-///for_loop(g, Groupcount)
-///{	std::vector<int> Groups;
-///	Groups.push_back(g);
-///}
-///
+ 
 //	int Groupsize = MTtest.size() / Groupcount;// Number of elements per group
 //	int Left_over = MTtest.size() % Groupcount;// Remainder that is nondivisible
 
@@ -488,68 +529,35 @@ std::vector<std::mutex*> Mutexs;
 ///	}
 ///}
 /// DOES NOT WORK
-/*Multithreaded Threaded Merge sort */
-//void ThreadMTMerge_sort(std::vector<int> _input, std::promise<std::vector<int>> _result)
-//{
-//	if (_input.size() <= 1)
-//	{
-//		_result.set_value(_input);
-//		return;
-//	}
-//	std::vector<int> Left, Right;
-//
-//	uint32_t Half = (uint32_t)(_input.size() * .5);
-//
-//	std::move(_input.begin(), _input.begin() + Half, std::back_inserter(Left));
-//	std::move(_input.begin() + Half, _input.end(), std::back_inserter(Right));
-//
-//	std::promise<std::vector<int>> L;
-//	std::thread(ThreadMTMerge_sort, &Left, &L);
-//
-//	std::promise<std::vector<int>> R;
-//	std::thread(ThreadMTMerge_sort, &Right, &R);
-//
-//	auto Lv = L.get_future();
-//	auto Rv = R.get_future();
-//	_result.set_value(AMerge(Lv.get(), Rv.get()));
-//	return;
-//}
-//
+/*Multithreaded Threaded Merge sort 
+void ThreadMTMerge_sort(std::vector<int> _input, std::promise<std::vector<int>> _result)
+{
+	if (_input.size() <= 1)
+	{
+		_result.set_value(_input);
+		return;
+	}
+	std::vector<int> Left, Right;
+
+	uint32_t Half = (uint32_t)(_input.size() * .5);
+
+	std::move(_input.begin(), _input.begin() + Half, std::back_inserter(Left));
+	std::move(_input.begin() + Half, _input.end(), std::back_inserter(Right));
+
+	std::promise<std::vector<int>> L;
+	std::thread(ThreadMTMerge_sort, &Left, &L);
+
+	std::promise<std::vector<int>> R;
+	std::thread(ThreadMTMerge_sort, &Right, &R);
+
+	auto Lv = L.get_future();
+	auto Rv = R.get_future();
+	_result.set_value(AMerge(Lv.get(), Rv.get()));
+	return;
+}*/
 
 
-/*Multithreaded Threaded Merge sort */
-std::vector<int> MTMerge_sort(std::vector<int>& _input)
-{
-//      if (_input.size() <= 1)
-//      {
-//      	return _input;
-//      }
-//      std::vector<int> Left, Right;
-//      
-//      uint32_t Half = (uint32_t)(_input.size() * .5);
-//      
-//      std::move(_input.begin(), _input.begin() + Half, std::back_inserter(Left));
-//      std::move(_input.begin() + Half, _input.end(), std::back_inserter(Right));
-//      
-//      	auto L = Core::Threading::ThreadPool::get().Async(MTMerge_sort, Left);// (std::vector<int>)
-//      //auto L =std::async(MTMerge_sort, Left); //
-//      //auto L = std::thread(MTMerge_sort, (std::vector<int>)Left);
-//      auto R = Core::Threading::ThreadPool::get().Async(MTMerge_sort, Right);// (std::vector<int>)
-//      //auto R =std::async(MTMerge_sort, Right);//
-//      //auto R = std::thread(MTMerge_sort, (std::vector<int>)Right);
-//      
-//      auto Lv = 0;// L.get();
-//      auto Rv = 0;// R.get();
-//      
-	return std::vector<int>(); //AMerge(L.get(), R.get());
-}
-void TestAsyncSort::AsyncMergeSort()
-{
-//    std::promise<std::vector<int>> prom;
-//    auto fut = prom.get_future();
-//    ThreadMTMerge_sort(MTtest,std::move( prom));
-//    MTtest = fut.get();//MTMerge_sort(MTtest);
-}
+
 
 
 

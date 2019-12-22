@@ -37,7 +37,7 @@
 #define NO_WARNINGS             TRUE
 
 /* Defines the level of Messages the user wishes to see */
-#define MESSAGE_LEVEL           OBJECT_CREATION_MESSAGE
+#define MESSAGE_LEVEL           FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE
 
 /* Test block of code for testing Threadspools Speeds */
 #define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
@@ -138,19 +138,6 @@ using GPUptr = uint64_t;
 #endif/* TODO MESSAGE */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Message Reminding user to fix a given section of code or Find a Better way */
 #if MESSAGE_LEVEL >= REFACTOR_MESSAGES
 #    define REFACTOR(_msg) do{                               \
@@ -161,7 +148,12 @@ using GPUptr = uint64_t;
      std::cout << "Refactor code at ";                       \
      std::cout << "Line: " << __LINE__ << "\n";              \
      std::cout << "File: " << __FILE__ << "\n";              \
-     __pragma(message(#_msg))                                \
+     __pragma(message("                    "))               \
+     __pragma(message("Note : " #_msg))                      \
+     __pragma(message("Refactor Code at "))                  \
+     __pragma(message("Line: [ " STRING(__LINE__) " ]"))     \
+     __pragma(message("File: -" __FILE__ " "))               \
+     __pragma(message("                    "))               \
      }                                                       \
      }while(0)
 #endif/* REFACTOR MESSAGE */
@@ -176,12 +168,41 @@ using GPUptr = uint64_t;
      std::cout << "~*!WARNING!*~: " << #_msg << " \n In";    \
      std::cout << "File: " << __FILE__ << "\n";              \
      std::cout << "Line: " << __LINE__ << "\n";              \
-     __pragma(message(#_msg))                                \
+     __pragma(message("                    "))               \
+     __pragma(message("~*!WARNING!*~: " #_msg))              \
+     __pragma(message("User Generated Warning at "))         \
+     __pragma(message("Line: [ " STRING(__LINE__) " ]"))     \
+     __pragma(message("File: -" __FILE__ " "))               \
+     __pragma(message("                    "))               \
      }                                                       \
      }while(0)
 #endif/* WARNING MESSAGE */
 
+#define TRACE_DEPTH 100000
+/* Message warning user of possible size effects, defective code left in, Test blocks in use and any other possible use case for a compiler/console Warning */
+#if MESSAGE_LEVEL >=FUNCTION_TRACE_MESSAGES
+#    define _Trace(_msg, _level) do{                         \
+     if( _level < TRACE_DEPTH){                              \
+     static bool _seenAlready = false;                       \
+     if(!_seenAlready){                                      \
+     _seenAlready = true;                                    \
+     std::cout << "~*!WARNING!*~: " << #_msg << " \n In";    \
+     __pragma(message("                    "))               \
+     __pragma(message("Function " __FUNCTION__))             \
+     __pragma(message("Line: [ " STRING(__LINE__) " ]"))     \
+     __pragma(message("File: -" __FILE__ " "))               \
+     __pragma(message("                    "))               \
+     }}                                                      \
+     }while(0)                                               
+     
+#endif/* WARNING MESSAGE */
 
+
+//     std::cout << "File: " << __FILE__ << "\n";              \
+//   __pragma(message("~*!WARNING!*~: " #_msg))              \
+//   if(this){ std::cout << typeid(*this).name() << "\n" ;}  \
+//   std::cout << "Line: " << __LINE__ << "\n";              \
+//
 
 /* Iterative For-Next loop Ends when for(uint32_t Itr < Count) */
 #define for_loop(itr, count)     for(uint32_t itr{0}; itr < ((count)); ++itr)
@@ -210,6 +231,10 @@ pure_Virtual tells if a function is pure virtual in plain english*/
 #endif
 
 
+
+
+#define Concat(x,y) x##y
+#define paster( n ) printf_s( "token" #n " = %d", token##n )
 /*
 NOTES: 
 

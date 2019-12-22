@@ -89,7 +89,14 @@ bool is_ready(std::future<_R> const& _fut)
  *Note: Must create my own Promise/ Future inorder to make that happen I think
  *       Possibly derive from std::future and build on that would be possible
  *TODO: Call Chains where user can Generate Call chains and trees for execution without interference
- * Possible co-Routine functionality to handle recursive and nested Task Calls                                                                                                                         
+ * Possible co-Routine functionality to handle recursive and nested Task Calls 
+ * It may be possible to implement a recursive Mutex and/or Condition Variable so that execution of
+ * a function can be suspended and the Queue unlocked so that subsequent calls to our Threadpool 
+ * can be made. This should allow recursive functions or Functions that call other functions
+ * because currently if our functions make further threadpool calls it ties up a slot on our 
+ * Threadpool and if that number reaches a level greater than the number of threads we have then
+ * our program will Lock as it waits for functions to return which can never return until those in the
+ * Queue waiting return.
  */
 
 
@@ -113,9 +120,9 @@ namespace Core
             /*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various 
                 Function types the user may invoke. We store the Base class pointer in Queues to Erase the type 
                 While Polymorphically calling each Functions specific invoke method */
-            struct NO_VTABLE Wrapper_Base 
+            struct NO_VTABLE Executor
             {
-                virtual ~Wrapper_Base() noexcept {}
+                virtual ~Executor() noexcept {}
 
 				/* Function responsible to properly invoking our derived class */
 				virtual void Invoke() noexcept = 0;
@@ -131,7 +138,7 @@ namespace Core
                 and stores its return value inside of an std::promise<_Rty> With _Rty being functions return type */
             template<typename _Func, typename ...ARGS>
             struct asyncTask final
-                : public Wrapper_Base 
+                : public Executor
             {
 			public:													   
 				using type = std::invoke_result_t<_Func, ARGS...>;         // Return type of our function
@@ -191,33 +198,33 @@ namespace Core
             {
             public:
                 JobQueue() = default;
-                
-                std::deque<Wrapper_Base*> TaskQueue;
                 std::condition_variable is_Ready;
+                
+                std::deque<Executor*> TaskQueue;
                 std::mutex QueueMutex;
                 bool is_Done{ false };
-                
+
                 /* Triggers the Threadpool to shut down when the application ends or user ask it to */
                 void Done();
                 
                 /* Try to Pop a function off the Queue if it fails return false */
-                bool try_Pop(Wrapper_Base*& func);
+                bool try_Pop(Executor*& _func);
                 
                 /* Pop function from Queue if fails wait for it */
-                bool pop(Wrapper_Base*& func);
+                bool pop(Executor*& _func);
                 
                 /* Attempts to add a function to the Queue if unable to lock return false */
-                bool try_push(Wrapper_Base* func);
+                bool try_push(Executor* _func);
                 
                 /* Adds a Function to our Queue */
-                void push(Wrapper_Base* func);
+                void push(Executor* _func);
             };
             
             
             const uint32_t           ThreadCount    {  std::thread::hardware_concurrency() * 3};
             std::vector<JobQueue>    ThreadQueue    { ThreadCount };
+            std::vector<std::thread> Worker_Threads; // Each Thread contains is responsible for an instance of Run which owns a specific Queue
             std::atomic<uint32_t>    Index          { 0 };
-            std::vector<std::thread> Worker_Threads;
             
             /*
              * Create a set number of Threads and Add Job Queues to the Threadpool 
@@ -230,6 +237,10 @@ namespace Core
             /* Initializes Thread and starts the Queue running */
             void Run(unsigned int _i);
             
+            /*  Since C++11, initialization of function scope static variables is thread safe :
+            the first tread calling get_name() will initialize ptr_name, 
+            blocking other threads until the initialization is completed. All subsequent calls will use the initialized value.
+            Source: https://stackoverflow.com/questions/27181645/is-publishing-of-magic-statics-thread-safe 				*/
             
             /* Returns a singleton instance of our Threadpool */
             static ThreadPool &get()
@@ -251,14 +262,14 @@ namespace Core
                 for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // K is Tunable for better work distribution
                 {// Cycle over all Queues K times and attempt to push our function to one of them
 
-                    if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Wrapper_Base*>(_function)))
+                    if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Executor*>(_function)))
                     {// If succeeded return our functions Future
                         return result;
                     }
                 }
 
                 // In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
-                ThreadQueue[i % ThreadCount].push(static_cast<Wrapper_Base*>(_function));
+                ThreadQueue[i % ThreadCount].push(static_cast<Executor*>(_function));
                 return result;
             }
         }; // End ThreadPool Class

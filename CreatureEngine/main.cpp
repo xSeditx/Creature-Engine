@@ -40,6 +40,7 @@ int TestNot(int _input)
 	return 42;
 }
 
+
 //#include <intrin.h>
 
 // Getting the Stack frame caller
@@ -51,7 +52,7 @@ int TestNot(int _input)
 #include<utility>
 int main()
 {
-
+	_Trace("Testing Trace Macro", 100000);
     while (true)
 	{
 		TestAsyncSort SortTest(64);// 4096); // 262144);
@@ -59,11 +60,12 @@ int main()
 
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
-		 	//SortTest.LinearMergeSort();
+		 	SortTest.LinearMergeSort();
 		}
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
 			Timing::Profiling::Profile_Timer Bench("My Multithreaded Sort");// Dont use the current Threaded Version its broke.
-			//auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
+			//SortTest.AsyncMergeSort();
+//auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
 			//Print(A);
 		}
         {
