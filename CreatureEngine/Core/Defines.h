@@ -20,9 +20,9 @@
 #define  TODO_MESSAGES                 50
 #define  REFACTOR_MESSAGES             80
 #define  OBJECT_CREATION_MESSAGE      100
-
-#define NOMINMAX
-
+#define  FUNCTION_TRACE_MESSAGES      110 // The most Pandentic Message logging to date outputting every function the user happens to place it in
+#define  NOMINMAX
+ 
 
 
 

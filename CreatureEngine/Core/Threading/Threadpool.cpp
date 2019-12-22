@@ -6,14 +6,11 @@
 
 
 
-_static uint32_t Core::Threading::ThreadPool::JobQueue::queue_ID{0};
-
 
 namespace Core
 {
     namespace Threading
     {
-		std::mutex DEBUGMutex;
 
 		/* ============================================================
 		 *                    Initializer                                    
@@ -38,31 +35,26 @@ namespace Core
 			while (true)
 			{// Constantly run until application or user shuts it down
 
-				Executor* Func{ nullptr };
-				int QueID{ -1 };
+				Executor* Function{ nullptr };
+
 				for (unsigned int N{ 0 }; N != ThreadCount; ++N)
 				{// Cycle over all available Queues until one returns some work 
 
-					if (ThreadQueue[static_cast<size_t>((_i + N) % ThreadCount)].try_Pop(Func))
+					if (ThreadQueue[static_cast<size_t>((_i + N) % ThreadCount)].try_Pop(Function))
 					{// If Queue N succeeded at returning a function break the for loop and run the function
-						QueID = ThreadQueue[static_cast<size_t>((_i + N) % ThreadCount)].g_ID();
 						break;
 					}
 				}
 
-				if (!Func && !ThreadQueue[_i].pop(Func))
+				if (!Function && !ThreadQueue[_i].pop(Function))
 				{// If there is no Function and the Queue fails to Pop it means that it is quiting time
 					break;
 				}
-				if (QueID == -1)QueID = ThreadQueue[_i].g_ID();
-				DEBUGPrint("Running: " << QueID );
-				Func->Invoke();  // Invoke the returned function 
-				delete &(*Func); // Destroy the Object which our Async Class Allocated
-				DEBUGPrint("Finished: " << QueID);
-
+				Function->Invoke();  // Invoke the returned function 
+				delete &(*Function); // Destroy the Object which our Async Class Allocated
 			}
 		}
-		bool ThreadPool::JobQueue::try_Pop(Executor*& func)
+		bool ThreadPool::JobQueue::try_Pop(Executor*& _func)
 		{// Try to pop a function off the Queue if it fails return false
 
 			/* ~   CRITICAL SECTION   ~ */
@@ -73,12 +65,11 @@ namespace Core
 				return false;
 			}
 
-			DEBUGPrint("Popped " << g_ID());
-			func = std::move(TaskQueue.front());
+			_func = std::move(TaskQueue.front());
 			TaskQueue.pop_front();
 			return true;
 		}
-		bool ThreadPool::JobQueue::pop(Executor*& func)
+		bool ThreadPool::JobQueue::pop(Executor*& _func)
 		{ /*  Pop function from Queue if previous Try pops failed wait on it
 
               Entire Scope is protected by the Queue Mutex */
@@ -94,9 +85,8 @@ namespace Core
 			{// If Task Queue is empty and we are done, return false to Initiate shut down process
 				return false;
 			}
-
-			DEBUGPrint("Popped " << g_ID());
-			func = std::move(TaskQueue.front());
+			// Move the pointer to the function pointer from our Queue into our _func object
+			_func = std::move(TaskQueue.front());
 			TaskQueue.pop_front();
 			return true;
 		}
@@ -106,7 +96,7 @@ namespace Core
 		/* ============================================================
 		 *                    Submitters                                
 		 * ============================================================ */
-		bool ThreadPool::JobQueue::try_push(Executor* func)
+		bool ThreadPool::JobQueue::try_push(Executor* _func)
 		{// Attempts to add a function to the Queue if unable to lock return false 
 
 			{/* ~   CRITICAL SECTION   ~ */
@@ -117,22 +107,20 @@ namespace Core
 					return false;
 				}
 
-				DEBUGPrint("Pushed " << g_ID());
-				TaskQueue.push_back(std::move(func));    // Else place on the back of our Queue
+				TaskQueue.push_back(std::move(_func));    // Else place on the back of our Queue
 
 			}/* ~ END CRITICAL SECTION ~ */              // Unlock the Mutex 
 
 			is_Ready.notify_one();                       // Tell the world about it 
 			return true;                                 // Lets Async know you succeeded
 		}
-		void ThreadPool::JobQueue::push(Executor* func)
+		void ThreadPool::JobQueue::push(Executor* _func)
 		{// Adds a Function to our Queue
 
 			{/* ~   CRITICAL SECTION   ~ */
 
-				DEBUGPrint("Pushed " << g_ID());
 				std::unique_lock<std::mutex> Lock{ QueueMutex };
-				TaskQueue.emplace_back(std::move(func));
+				TaskQueue.emplace_back(std::move(_func));
 
 			}/* ~ END CRITICAL SECTION ~ */
 		}
