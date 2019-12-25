@@ -28,6 +28,7 @@
 #endif
 
 #include"Defines.h"
+#include <Unknwnbase.h>
 
 /* ===================================================================================================================================================
  *  STATE CONTROLLER FOR THE COMPILE TIME BEHAVIOR OF THE CREATURE GAME ENGINE 
@@ -236,8 +237,6 @@ pure_Virtual tells if a function is pure virtual in plain english*/
 #endif
 
 
-
-
 #define Concat(x,y) x##y
 #define paster( n ) printf_s( "token" #n " = %d", token##n )
 /*
@@ -249,7 +248,21 @@ https://www.youtube.com/watch?v=8AjRD6mU96s
 */
 
 
-
+#define CON_DarkBlue 1
+#define CON_DarkGreen 2
+#define CON_Darkteal 3
+#define CON_DarkRed 4
+#define CON_DarkPurple 5
+#define CON_DarkYellow 6
+#define CON_Grey 7
+#define CON_DarkGrey 8
+#define CON_Blue 9
+#define CON_Green 10
+#define CON_Teal 11
+#define CON_Red 12
+#define CON_Purple 13
+#define CON_Yellow 14
+#define CON_White 15
 
 
 

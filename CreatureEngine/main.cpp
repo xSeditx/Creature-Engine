@@ -40,7 +40,8 @@ int TestNot(int _input)
 	return 42;
 }
 
-
+#define _TEST_THREADPOOL_SPEED    1
+//
 //#include <intrin.h>
 
 // Getting the Stack frame caller
@@ -49,28 +50,56 @@ int TestNot(int _input)
 
 //#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
 //https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
+
+int TestRecursion(int _param)
+{
+	_param--;
+	Print("Recursion " << _param);
+	if(_param > 0)
+	{
+		auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
+		E.get();
+	}
+	Print("Exit " << _param);
+
+	return 65;
+}
+
+
+
+
+
+
+
 #include<utility>
 int main()
 {
 	_Trace("Testing Trace Macro", 100000);
+
+	auto E = ThreadPool::get().Async(TestRecursion, 15);
+	auto R = ThreadPool::get().Async(TestRecursion, 15);
+
+	E.get();
+	R.get();
+	//	while (true) {}
+
     while (true)
 	{
-		TestAsyncSort SortTest(64);// 4096); // 262144);
-		ThreadPool::get().Async(TestNot, 5);
+		TestAsyncSort SortTest( 4096); // 262144);//
 
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
 		 	SortTest.LinearMergeSort();
 		}
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
-			Timing::Profiling::Profile_Timer Bench("My Multithreaded Sort");// Dont use the current Threaded Version its broke.
-			//SortTest.AsyncMergeSort();
+			Timing::Profiling::Profile_Timer Bench("My MT Merge Sort");// Dont use the current Threaded Version its broke.
+			SortTest.AsyncMergeSort();
 //auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
 			//Print(A);
 		}
         {
-        	Timing::Profiling::Profile_Timer Bench("My Linear Bubble Sort");
-        	//SortTest.LinearBubbleSort();
+        	Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
+        	//SortTest.StdMergeSort();
         }
 
 
@@ -226,15 +255,17 @@ int main()
 =====================================================================================================================
 									  NOTES:
 =====================================================================================================================
-Pragmas for C++ Compilers, Good resource
-https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
+ Pragmas for C++ Compilers, Good resource
+ https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
 
  Open STD:
  http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3857.pdf
 
+ Actor based system
+ http://www.actor-framework.org/pdf/manual.pdf
 
-Physics Solver:
-https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
+ Physics Solver:
+ https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
 
 =====================================================================================================================
 */

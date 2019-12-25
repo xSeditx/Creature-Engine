@@ -1,5 +1,3 @@
-
-
 #if 0
 #pragma  once
 #include<chrono>
@@ -309,3 +307,25 @@ namespace Core
 // v
 
 #endif 
+
+
+
+
+
+/*
+==========================================================================================================================================================================
+														   NOTES:
+==========================================================================================================================================================================
+
+https://en.cppreference.com/w/cpp/thread/yield
+
+ Promise implementation
+ https://github.com/arlettedata/promise/blob/master/promise.h
+
+  Future Implementation
+ https://github.com/mongodb/mongo/blob/master/src/mongo/util/future.h
+
+  C++ Threading Primatives from Scratch
+ https://www.youtube.com/watch?v=9TVvpgHJElU&feature=emb_logo
+
+*/

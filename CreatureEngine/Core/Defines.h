@@ -28,13 +28,6 @@
 
 
 
-
-
-
-
-
-
-
    /*      Old School Macro definition of Min Max. Works with all types that have overloaded <> Operators
 	   WARNING: CAN CAUSE MAJOR ISSUES IF STD::MIX/MAX HAS BEEN USED */
 #ifndef NOMINMAX

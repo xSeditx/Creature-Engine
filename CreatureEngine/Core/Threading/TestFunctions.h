@@ -56,6 +56,7 @@ struct TestAsyncSort
 		{
 			MTtest.push_back(i);//rand() % _size); //-i);//  );//
 			STtest.push_back(i);//rand() % _size); // rand() % );//
+			STDtest.push_back(i);
 		}
 	}
 	void AsyncBubbleSort();
@@ -63,11 +64,13 @@ struct TestAsyncSort
 
 	void AsyncMergeSort();
 	void LinearMergeSort();
-
+	void StdMergeSort();
 
 	uint64_t MTSwapSort();
 	std::vector<int> MTtest;
 	std::vector<int> STtest;
+	std::vector<int> STDtest;
+
 };
 
 template<typename _Ty>

@@ -295,7 +295,8 @@ int SortGroupAsync(int *_input, int _start, int _size)
 		}
 	}
 	return (float)0.0f;
-}void TestAsyncSort::LinearBubbleSort()
+}
+void TestAsyncSort::LinearBubbleSort()
 {
  	SortGroup(STtest);
 }
@@ -329,23 +330,22 @@ void TestAsyncSort::AsyncBubbleSort()//TestFunctionC, 3.14159f, 123);//
 	}
 }
 
+
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
 void TestAsyncSort::LinearMergeSort()
 {
+	STtest = Randomize(STtest);
 	STtest = Merge_sort(STtest);
 }
+OPTIMIZATION_ON()
 
+OPTIMIZATION_OFF()
 
+OPTIMIZATION_ON()
 
-
-
-
-
-
-
-
-
-
-
+OPTIMIZATION_OFF()
 /* Merge Two Arrays into a single output array */
 std::vector<int> AMerge(std::vector<int> _A, std::vector<int> _B)
 {
@@ -373,9 +373,11 @@ std::vector<int> AMerge(std::vector<int> _A, std::vector<int> _B)
 	}
 	return result;
 }
+OPTIMIZATION_ON()
 
+OPTIMIZATION_OFF()
 /*Multithreaded Threaded Merge sort */
-std::vector<int> MTMerge_sort(std::vector<int>& _input)
+std::vector<int> MTMerge_sort(std::vector<int> _input)
 {
     if (_input.size() <= 1)
     {
@@ -387,18 +389,57 @@ std::vector<int> MTMerge_sort(std::vector<int>& _input)
     std::move(_input.begin()       , _input.begin() + Half, std::back_inserter(Left));
     std::move(_input.begin() + Half, _input.end()         , std::back_inserter(Right));
     
-    auto L = Core::Threading::ThreadPool::get().Async(MTMerge_sort, Left);// (std::vector<int>)
-    auto R = Core::Threading::ThreadPool::get().Async(MTMerge_sort, Right);// (std::vector<int>)
+    auto L = Core::Threading::ThreadPool::get().Async(MTMerge_sort, (std::vector<int>)Left);// 
+    auto R = Core::Threading::ThreadPool::get().Async(MTMerge_sort, (std::vector<int>)Right);// (std::vector<int>)
     auto Lv = L.get();
     auto Rv = R.get();
     
 	return AMerge(Lv, Rv);
 }
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
 void TestAsyncSort::AsyncMergeSort()
 {
+	MTtest = Randomize(MTtest);
 	MTtest = MTMerge_sort(MTtest);
 }
 
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+
+/*Multithreaded Threaded Merge sort */
+std::vector<int> STDMerge_sort(std::vector<int> _input)
+{
+	if (_input.size() <= 1)
+	{
+		return _input;
+	}
+	std::vector<int> Left, Right;
+
+	uint32_t Half = (uint32_t)(_input.size() * .5);
+	std::move(_input.begin(), _input.begin() + Half, std::back_inserter(Left));
+	std::move(_input.begin() + Half, _input.end(), std::back_inserter(Right));
+
+	auto L = std::async(STDMerge_sort, Left);//
+	auto R = std::async(STDMerge_sort, Right);// (std::vector<int>)
+	auto Lv = L.get();
+	auto Rv = R.get();
+
+	return AMerge(Lv, Rv);
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
+void TestAsyncSort::StdMergeSort()
+{
+	STDtest = Randomize(STDtest);
+	STDtest = STDMerge_sort(STDtest);
+}
+OPTIMIZATION_ON()
+
+OPTIMIZATION_OFF()
 
 	//ThreadMTMerge_sort(MTtest,std::move( prom));fut = prom.get_future();
 

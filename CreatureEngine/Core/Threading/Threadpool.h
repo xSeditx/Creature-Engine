@@ -53,6 +53,11 @@
 
 #include"../Common.h" // Comment out this header to stand alone
 
+
+
+
+
+
 //  Defines Which allow Threadpool.h and .cpp to stand along from Common.h If desired
 #ifndef CREATURE_API
 #    define CREATURE_API // Will determine export type later on
@@ -68,12 +73,9 @@ Class_X(const Class_X&) = delete
 //======================================================================================
 
 
-
-
 #pragma warning( push )
 #pragma warning( disable : 4244 ) // Type conversions
 #pragma warning( disable : 4018 ) // Optimization off warning of mine
-
 
 
 //TODO: Should wrap this in a Namespace somewhere
@@ -116,13 +118,14 @@ namespace Core
         class CREATURE_API ThreadPool
         {
             NO_COPY_OR_ASSIGNMENT(ThreadPool);
-            
-            /*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various 
+			std::thread::id Main_ThreadID{ std::this_thread::get_id() }; // Thread ID of the Main Thread
+			static std::atomic<int> RunningThreads;
+			/*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various
                 Function types the user may invoke. We store the Base class pointer in Queues to Erase the type 
                 While Polymorphically calling each Functions specific invoke method */
             struct NO_VTABLE Executor
             {
-                virtual ~Executor() noexcept {}
+				virtual ~Executor() noexcept = default;
 
 				/* Function responsible to properly invoking our derived class */
 				virtual void Invoke() noexcept = 0;
@@ -165,7 +168,6 @@ namespace Core
 					Status = Waiting;
 				}
 
-
 				/*      To ensure familiarity and usability get_future works to retrieve the
 					std::future object associated with the return values std::promise */
 				std::future<type> get_future() noexcept
@@ -174,12 +176,11 @@ namespace Core
 					return ReturnValue.get_future();
 				}
 
-
 			private:
 				using Fptr = type(*)(ARGS...);                             // Function pointer type for our function
+
 				const Fptr Function;                                       // Pointer to our Function
-				const std::tuple<ARGS...> Arguments;                       // Tuple which Binds the Parameters to the Function call
-				
+				const std::tuple<ARGS...> Arguments;                       // Tuple which Binds the Parameters to the Function call				
 				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
 
                 asyncTask(const asyncTask&) = delete;                      // Prevent copying
@@ -197,7 +198,9 @@ namespace Core
             struct JobQueue
             {
             public:
-                JobQueue() = default;
+ 				std::thread::id ThreadID{ std::this_thread::get_id() };
+
+				JobQueue() = default;
                 std::condition_variable is_Ready;
                 
                 std::deque<Executor*> TaskQueue;
@@ -241,21 +244,30 @@ namespace Core
             the first tread calling get_name() will initialize ptr_name, 
             blocking other threads until the initialization is completed. All subsequent calls will use the initialized value.
             Source: https://stackoverflow.com/questions/27181645/is-publishing-of-magic-statics-thread-safe 				*/
-            
-            /* Returns a singleton instance of our Threadpool */
-            static ThreadPool &get()
-            {
-                static ThreadPool instance;
-                return instance;
-            }
-        
-            /* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
-            template<typename _FUNC, typename...ARGS >
-            auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
-            {// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
-                auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
+			/* Returns a singleton instance of our Threadpool */
+			static ThreadPool& get()
+			{
+				static ThreadPool instance;
+				return instance;
+			}
+
+
+			/* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
+			template<typename _FUNC, typename...ARGS >
+			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
+
+				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
                 auto result = _function->get_future();                                                           // Get the future of our async task for later use
+				
+				if (Main_ThreadID != std::this_thread::get_id())                // If this is being call from one of the Threadpool Threads.
+				{// If not our main thread run now
+					_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
+					delete& (*_function);                                                                        // Destroy the Object which our Async Class Allocated
+					return result;
+				}
+
                 auto i = Index++;                                                                                // Ensure fair work distribution
 
                 int Attempts = 5;
@@ -287,6 +299,11 @@ namespace Core
 ==========================================================================================================================================================================
                                                            NOTES:
 ==========================================================================================================================================================================
+
+Executors proposal
+https://github.com/chriskohlhoff/executors
+
+
 
 Parallelizing the Naughty Dog Engine
 https://www.gdcvault.com/play/1022186/Parallelizing-the-Naughty-Dog-Engine
