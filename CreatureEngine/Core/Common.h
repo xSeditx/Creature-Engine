@@ -114,10 +114,12 @@ using GPUptr = uint64_t;
 /* Denotes that Object Can not be Copied or Assigned or moved */
 
 #define NO_COPY_OR_ASSIGNMENT(Class_X) Class_X(const Class_X&) = delete;\
-									   Class_X& operator=(const Class_X&) = delete;\
-									   Class_X(Class_X&&) = delete;\
-									   Class_X& operator=(Class_X&&) = delete;
+									   Class_X& operator=(const Class_X&) = delete
 
+#define  NO_COPY_ASSIGNMENT_OR_MOVE(Class_X)  NO_COPY_OR_ASSIGNMENT(Class_X);\
+                                                 Class_X(Class_X&&) = delete;\
+									             Class_X& operator=(Class_X&&) = delete;
+                                         
 
 // with line number
 #define STRING2(x) #x
@@ -136,6 +138,7 @@ using GPUptr = uint64_t;
      std::cout << "Message: " << #_msg << "\n";              \
      __pragma(message ("                    "))              \
      __pragma(message ("TODO: " #_msg ))                     \
+     __pragma(message(_msg) )                                \
 	 __pragma(message ("Line: [ " STRING(__LINE__) " ]"))    \
      __pragma(message ("File: -" __FILE__ " "))              \
      __pragma(message ("                    "))              \
@@ -194,6 +197,7 @@ using GPUptr = uint64_t;
      _seenAlready = true;                                    \
      std::cout << "~*!WARNING!*~: " << #_msg << " \n In";    \
      __pragma(message("                    "))               \
+     __pragma(message("~*!WARNING!*~: " _msg))               \
      __pragma(message("Function " __FUNCTION__))             \
      __pragma(message("Line: [ " STRING(__LINE__) " ]"))     \
      __pragma(message("File: -" __FILE__ " "))               \
@@ -248,6 +252,11 @@ https://www.youtube.com/watch?v=8AjRD6mU96s
 */
 
 
+//======================================================================================
+//========================= DEBUG INFOMATION ======================================================
+#include<Windows.h>
+
+
 #define CON_DarkBlue 1
 #define CON_DarkGreen 2
 #define CON_Darkteal 3
@@ -264,11 +273,40 @@ https://www.youtube.com/watch?v=8AjRD6mU96s
 #define CON_Yellow 14
 #define CON_White 15
 
+extern HANDLE hConsole;
+#define SetColor(x) SetConsoleTextAttribute(hConsole, x);
+
+#ifdef _DEBUG
+#    define DEBUGPrint(col, x) {DEBUGMutex.lock();\
+                                SetColor(col);\
+                                std::thread::id CurrentThread = std::this_thread::get_id();\
+                                std::cout <<  x << " : " << CurrentThread<< std::endl;\
+                                SetColor(7);\
+                                DEBUGMutex.unlock();}
+#else
+#    define DEBUGPrint(col,x)
+#endif
+#include<mutex>
+extern std::mutex DEBUGMutex;
+
+//======================================================================================
+
+
+#define _EQUALS_        ==
+#define _NOT_EQUAL_TO_    !=
 
 
 
+#define TEST_UNIT(x)   assert((x) == true);\
+DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 
-
+#if _DEBUG
+/*Basic Macro does as appears and only allows code to appear on Debug Builds */
+#    define DEBUG_CODE(_code)   _code
+#else
+/* Code Currently turned off */
+#    define DEBUG_CODE(_code)   
+#endif
 /*
 ==========================================================================================================================================================================
 														   NOTES:

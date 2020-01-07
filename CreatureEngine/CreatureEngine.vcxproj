@@ -96,6 +96,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,6 +122,9 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -139,6 +143,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
     <ClCompile Include="Profiling\SystemInfo.cpp" />
+    <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
@@ -156,11 +161,13 @@
     <ClInclude Include="FrontEnd\GUI\EventSystem.h" />
     <ClInclude Include="FrontEnd\Input.h" />
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
+    <ClInclude Include="Profiling\RenderUtilities.h" />
     <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
     <ClInclude Include="Profiling\Timing\Timer.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

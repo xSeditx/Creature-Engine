@@ -1,331 +1,756 @@
-#if 0
-#pragma  once
+#pragma once
 #include<chrono>
 #include<mutex>
-#include<condition_variable>
-	namespace Experimental
-		{
-namespace Core
+#include<stack>
+
+#include<string>
+#include"../Common.h"
+extern std::stack<std::string> CS;
+template<typename _Ty>
+struct Tracer
 {
-	namespace Threading
+	Tracer(_Ty* _callingobject, std::string _name)
+		:
+		Type(typeid(*_callingobject).name()),
+		Object(_callingobject),
+		Function(_name),
+		Address(*((uint64_t*)&_callingobject))//
 	{
-	
-			template<typename _Ty>
-			struct _associated_state
-			{
-			public:
-				enum class future_status
-				{
-					ready,
-					timeout,
-					deferred
-				};
-
-				//using _State_type = _Ty;
-				////using _Mydel = _Deleter_base<_Ty>;
-				//
-				//_associated_state(_Mydel* _Dp = nullptr)
-				//	: _Refs(1),	// non-atomic initialization
-				//	_Retrieved(false),
-				//	_Ready(false),
-				//	_Has_stored_result(false),
-				//	_Running(false),
-				//{	// construct
-				//// TODO: _Associated_state ctor assumes _Ty is default constructible
-				//}
-
-				virtual ~_associated_state() noexcept;
-				void _Retain();
-				void _Release();
-
-			private:
-				uint64_t _Refs;
-
-			public:
-				virtual void _Wait();
-
-				struct _Test_ready
-				{	// wraps _Associated_state
-					_Test_ready(const _associated_state* _St)
-						: _State(_St) {}
-
-					bool operator()() const {}
-					const _associated_state* _State;
-				};
-
-				template<class _Rep, class _Per> future_status _Wait_for(const std::chrono::duration<_Rep, _Per>& _Rel_time);
-				template<class _Clock, class _Dur> future_status _Wait_until(const std::chrono::time_point<_Clock, _Dur>& _Abs_time);
-
-				virtual _Ty& _Get_value(bool _Get_only_once);
-				void _Set_value(const _Ty& _Val, bool _At_thread_exit);
-				void _Set_value_raw(const _Ty& _Val, std::unique_lock<std::mutex>* _Lock, bool _At_thread_exit);
-				void _Set_value(_Ty&& _Val, bool _At_thread_exit);
-				void _Set_value_raw(_Ty&& _Val, std::unique_lock<std::mutex>* _Lock, bool _At_thread_exit);
-				void _Set_value(bool _At_thread_exit);
-				void _Set_value_raw(std::unique_lock<std::mutex>* _Lock, bool _At_thread_exit);
-
-				bool _Is_ready() const;
-				bool _Is_ready_at_thread_exit() const;
-				bool _Already_has_stored_result() const;
-				bool _Already_retrieved() const;
-				void _Abandon();
-			protected:
-				void _Make_ready_at_thread_exit();
-				void _Maybe_run_deferred_function(std::unique_lock<std::mutex>& _Lock);
-
-			public:
-				_Ty _Result;
-
-				std::mutex _Mtx;
-				std::condition_variable _Cond;
-				bool _Retrieved;
-				int _Ready;
-				bool _Ready_at_thread_exit;
-				bool _Has_stored_result;
-				bool _Running;
-
-			private:
-				virtual bool _Has_deferred_function() const noexcept;
-				virtual void _Run_deferred_function(std::unique_lock<std::mutex>&);
-				virtual void _Do_notify(std::unique_lock<std::mutex>* _Lock, bool _At_thread_exit);
-
-				void _Delete_this();
-	 		public:
-				_associated_state(const _associated_state&) = delete;
-				_associated_state& operator=(const _associated_state&) = delete;
-			};
-
-			template<typename _Ty>
-			struct _state_manager
-			{
-			public:
-				_state_manager();
-				_state_manager(_associated_state<_Ty>* _New_state, bool _Get_once);
-				_state_manager(const _state_manager& _Other, bool _Get_once = false);
-				_state_manager(_state_manager&& _Other, bool _Get_once = false);
-
-				~_state_manager() noexcept;
-				_state_manager& operator=(const _state_manager& _Other);
-				_state_manager& operator=(_state_manager&& _Other);
-				[[nodiscard]] bool valid() const noexcept;
-				void wait() const;
-
-				//template<class _Rep, class _Per> future_status wait_for(const std::chrono::duration<_Rep, _Per>& _Rel_time) const;
-				//template<class _Clock, class _Dur> future_status wait_until(const std::chrono::time_point<_Clock, _Dur>& _Abs_time) const;
-				_Ty& _Get_value() const;
-				void _Set_value(const _Ty& _Val, bool _Defer);
-				void _Set_value(_Ty&& _Val, bool _Defer);
-
-				void _Abandon();
-				void _Swap(_state_manager& _Other);
-				_associated_state<_Ty>* _Ptr() const;
-				void _Copy_from(const _state_manager& _Other);
-				void _Move_from(_state_manager& _Other);
-				bool _Is_ready() const;
-				bool _Is_ready_at_thread_exit() const
-			private:
-				_associated_state<_Ty>* _Assoc_state;
-				bool _Get_Once;
-			};
-
-			template<typename _Ty>
-			struct Shared_State
-			{
-			public:
-				enum class future_status
-				{
-					ready,
-					timeout,
-					deferred
-				};
-
-				Shared_State() {}
-
-				void Set_Value(_Ty&& _val) {
-					std::unique_lock<std::mutex> Lock(Mtx);
-					Value = std::forward(_val);
-				}
-
-				void Wait()
-				{
-					std::unique_lock<std::mutex> Lock(Mtx); //_Maybe_run_deferred_function(_Lock);
-					while (!_Ready)
-					{
-						CV.wait(Lock);
-					}
-				}
-				struct Test {
-					Test(Shared_State* _state) : State(_state){}
-					bool operator()() const	{ return (State->_Ready != 0);	}
-					Shared_State *State;
-				}
-
-
-				template<class _Rep, class _Per>
-				future_status wait_for(	const std::chrono::duration<_Rep, _Per>& _Rel_time)
-				{	// wait for duration
-					std::unique_lock<std::mutex> Lock(Mtx);
-					//if (_Has_deferred_function())return (future_status::deferred);
-					if (CV.wait_for(Lock, _Rel_time, Test(this)))
-					{
-						return (future_status::ready);
-					}
-					return (future_status::timeout);
-				}
-
-				bool is_Ready() { return _Ready }
-				std::mutex Mtx;
-				std::condition_variable CV;
-				_Ty& Value;
-				uint64_t RefCounter{ 0 };
-				bool _Retrieved{ false };
-				bool _Ready{false};
-				bool _Ready_at_thread_exit{ false };
-				bool _Has_stored_result{ false };
-				bool _Running{ false };
-
-
-			private:
-  
-			};
-
-			template<typename _Ty>
-			struct promise
-			{
-				//Member functions
-				
-				///constructs/* the promise object*/
-				promise();
-				promise(promise&& _other) noexcept
-					:
-					_MyPromise(std::move(_other))
-				{}
-
-				promise(const promise& other) = delete;
-
-				/* promise(_associated_state<_Ty>* _State_ptr):_State(_State_ptr, false),_Future_retrieved(false){} */
- 
-				promise(Shared_State<_Ty>* _State_ptr)
-					:
-					_MyPromise(_State_ptr, false),
-					_Retrieved(false)
-				{	// construct from associated asynchronous state object
-				}
-
-
- 
-
-				Shared_State<_Ty>
-
-				//(destructor)/*destructs the promise object*/
-				promise() = default;
-
-				promise& operator=(promise&& other) noexcept;/*assigns the shared state*/
-				promise& operator=(const promise& rhs) = delete;
-
-				void swap(promise& other) noexcept;/*swaps two promise objects*/
-
-
-			///Getting the result
-				[[nodiscard]] future<_Ty> get_future();/*returns a future associated with the promised result
-													   return (future<_Ty>(_MyPromise._Get_state_for_future(), _Nil()));*/
-
-													   ///Setting the result
-				void set_value(const _Ty& _Val)
-				{/*sets the result to specific value
-											   _MyPromise._Get_state_for_set()._Set_value(_Val, false);*/
-				}
-
-				/*sets the result to specific value while delivering the notification only at thread exit*/
-				void set_value_at_thread_exit(const _Ty& value);
-				void set_value_at_thread_exit(_Ty&& value);
-
- 			private:
-				Shared_State<_Ty> _MyPromise;
-				bool _Retrieved;
-			};
-
-
-			template<typename _Ty>
-			struct future
-				: public _state_manager<_Ty>
-			{
-				/// Types
-				using _myBase = _state_manager<_Ty>;
-				using type = _Ty;
-
-				///Member functions
-				/// C TOR
-				future() noexcept;/*Default constructor.Constructs a std::future with no shared state.After construction, valid() == false.*/
-				future(future&& other) noexcept;/* Move constructor.Constructs a std::future with the shared state of other using move semantics.After construction, other.valid() == false.*/
-				future(const future& other) = delete;/*future is not CopyConstructible.*/
-				/// PARAMS
-				/*other	-	another std::future to acquire shared state from*/
-
-				///------------------------
-				~future() = default;/*Releases any shared state.This means*/
-				/* if the return object or provider holds the last reference to its shared state,
-				the shared state is destroyed; and the return object or provider gives up its reference to
-				its shared state;
-				these actions will not block for the shared state to become ready,
-				except that it may block if all of the following are true:
-				the shared state was created by a call to std::async, the shared state is not yet ready, and this was the last reference to the shared state*/
-
-
-				future& operator=(future&& other) noexcept
-				{/* other	-	a std::future that will transfer state to *this*/
-					*this = std::forward<future>(_other);
-					return this;
-				};
-				future& operator=(const future& other) = delete;
-
-				/// Getting the Results
-				/*returns the result*/                                                                      /*Return value*/
-				type get();       //    (member only of generic future template)               // The value v stored in the shared state, as std::move(v).
-				type& get();      //    (member only of future<T&> template specialization)    // The reference stored as value in the shared state.
-				void get();       //    (member only of future<void> template specialization)  // Nothing. 
-
-				///State
-				bool valid() const noexcept { return true; }/*checks if the future has a shared state*/ /*RETURN: true if *this refers to a shared state, otherwise false.*/
-				void wait() const {}/*waits for the result to become available Block*/
-
-				template< class Rep, class Period >
-				void wait_for(const std::chrono::duration<Rep, Period>& timeout_duration) const {} /* waits for the result, returns if it is not available for the specified timeout duration*/
-
-
-				template< class Clock, class Duration >
-				future_status wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time) const
-				{}
-				/*waits for the result, returns if it is not available until specified time point has been reached
-											It blocks until specified timeout_time has been reached or the result becomes available, whichever comes first. */
-			};
-		}
+		Print( "\n Enter " + _name + " \n Type: " << Type << "\n Object: " << Address);
+		CS.push("Object: " + std::to_string(Address) + " Enter " + _name);
 	}
+	~Tracer()
+	{
+		Print("\n Exit " << Function << " \n Type: " << Type << " \n Object: " << Address);
+		CS.push({ "Object: " + std::to_string(Address) +  " Exit " + Function });
+	}
+	std::string Function;
+	std::string Type;
+	uint64_t Address;
+	_Ty* Object;
+};
+#define DPrint(col, x) DEBUGPrint(col,"\n Message: " << x);// Tracer Tra(this,__FUNCTION__ )
+
+
+struct _PlaceHolder {};
+using Lock_t = std::unique_lock<std::mutex>;
+ 
+enum class future_status
+{ // names for timed wait function returns
+	ready,
+	timeout,
+	deferred
+};
+template<typename _Ty>
+void Deleter(_Ty* _object)
+{
+	delete *_object;
 }
 
-//return (new _Task_async_state<_Ret>(_STD forward<_Fty>(_Fnarg)));
-// v
+/*
+ * ===============================================================================
+ *                        State<_Ty>
+ *     Container for an Asynchronous Shared state
+ *     Values are Created and Stored Via Promise<_Ty>
+ *     Values Retrieved using a Future<_Ty>
+ * ===============================================================================
+*/
+template<typename _Ty>
+struct State
+{
+	struct testReady
+	{ // Functor Test for SharedState object
+		testReady(const State* _St)
+			: tempState(_St)
+		{}
+		bool operator()() const
+		{
+			return State->Ready != 0;
+		}
+		const State* tempState;
+	};
 
-#endif 
 
+	using State_type = _Ty;
+	State() noexcept
+		:
+		//atomicReferenceCount(1), // non-atomic initialization
+		RefCount(1),
+		Retrieved(false), Ready(false), Ready_at_Thread_Exit(false), hasResult(false),
+		Running(false)
+	{
+		DPrint(CON_Green, "Creating State Default CTOR");
+	}
+	virtual ~State() noexcept
+	{
+		DPrint(CON_Red, "State dtor");
+		if (hasResult && !Ready)
+		{
+			CV._Unregister(Mtx);
+		}
+	}
+
+	//===================== REFERENCE COUNTER ======================================
+
+	void _Retain()
+	{ // increment reference count
+		//_MT_INCR(atomicReferenceCount);
+		++RefCount;
+	}
+	void _Release()
+	{ // decrement reference count and destroy when zero
+		DPrint(CON_Red, "Deleting State via Release");
+		--RefCount;
+		//if (_MT_DECR(atomicReferenceCount) == 0) {
+		//	delete this;//_Delete_this();
+		//}
+	}
+	//uint64_t atomicReferenceCount;
+ 	std::atomic<uint32_t> RefCount{ 0 };
+	//===============================================================================
+	//====================== Suspending =============================================
+
+	void wait() {
+		Lock_t Lock(Mtx);
+		RunDeferred();/// This is where I can Implement part of the Call chain
+		while (!Ready)
+		{
+			CV.wait(Lock);
+		}
+	}
+	template <class   _Rep, class _Per> void   wait_for(const std::chrono::duration  <  _Rep, _Per>& _relTime) {}
+	template <class _Clock, class _Dur>	void wait_until(const std::chrono::time_point<_Clock, _Dur>& _Abs_time) {}
+	//===============================================================================
+
+	//==================== GET && SET ===============================================
+
+	void swap(State<_Ty>& _other)
+	{
+		std::swap(*this, _other);
+	}
+
+	_Ty& get_value()
+	{
+		Lock_t Lock(Mtx);
+		if (getOnce && Retrieved)
+		{
+			Print("Error:  Attempting to retrieve SharedState multiple times ");
+			__debugbreak();
+		}
+
+		Retrieved = true;
+		CheckDeferredFunction(Lock);
+		while (!Ready)
+		{
+			CV.wait(Lock);
+		}
+		return Value;
+	}
+	void set_value(const _Ty& _val)
+	{ // store a result
+		Lock_t Lock(Mtx);
+		set_raw_value(_val, &Lock);
+	}
+	void set_raw_value(const _Ty& _val, Lock_t* _lock) {
+		if (hasResult)
+		{
+			Print("Value for Promise already set");
+			__debugbreak();
+		}
+		Value = _val;
+		Notify(_lock);
+	}
+	void set_value(const _Ty&& _val)
+	{ // store a result
+		Lock_t Lock(Mtx);
+		set_raw_value(std::forward<_Ty>(_val), &Lock);
+	}
+	void set_raw_value(const _Ty&& _val, Lock_t* _lock) {
+		if (hasResult)
+		{
+			Print("Value for Promise already set");
+			__debugbreak();
+		}
+		Value = std::forward<_Ty>(_val);
+		Notify(_lock);
+	}
+	//===============================================================================
+
+	//====================== SIGNALS ================================================
+
+	virtual void Notify(Lock_t* _lock)
+	{ // notify waiting threads
+		///CV._Register(*_lock, (int*)&Ready); when we setup at thread exit
+
+		hasResult = true;
+		Ready = true;
+		CV.notify_all();
+	}
+	bool isReady() { return Ready; }
+	bool alreadyRetrieved() { return Retrieved; }
+	bool isReadyatThreadExit() { return Ready_at_Thread_Exit; }
+
+	void makeReady() { Ready = true; }
+	void makeReadyatThreadExit() { Ready_at_Thread_Exit = true; }
+	//===============================================================================
+
+	//================= BEHAVIOUR && MEMORY =========================================
+	static State<_Ty>& make_New() { DPrint(CON_Green, "make_New() called in State"); return new State<_Ty>(); }
+
+	virtual void RunDeferred(Lock_t&) { }// Print("This is where we might be able to place call chains or co-routine like functions"); }// Derive behavior
+	void CheckDeferredFunction(Lock_t& _lock)
+	{
+		if (!Running)
+		{ // run the function
+			Running = true;
+			RunDeferred(_lock);
+		}
+	}
+	void Abandon()
+	{
+		Lock_t _Lock{ Mtx };
+		if (!hasResult)
+		{
+			Print("Error: Deleting State before function has returned");
+			__debugbreak();
+		}
+	}
+	void DeleteThis()
+	{
+		DPrint(CON_Red, "DeleteThis called from State");
+		delete this;
+	}
+	//===============================================================================
+
+	_Ty Value;
+
+	std::mutex Mtx;
+	std::condition_variable CV;
+
+	bool Retrieved{ false };
+	bool Ready{ false };// int if i wish to have multiple states for ready or perhaps an enum that can be converted to an int
+	bool Ready_at_Thread_Exit{ false };
+	bool hasResult;
+	bool Running;
+	bool getOnce{ false };
+
+	State(const State&) = delete;
+	State& operator=(const State&) = delete;
+
+};
 
 
 
 
 /*
-==========================================================================================================================================================================
-														   NOTES:
-==========================================================================================================================================================================
-
-https://en.cppreference.com/w/cpp/thread/yield
-
- Promise implementation
- https://github.com/arlettedata/promise/blob/master/promise.h
-
-  Future Implementation
- https://github.com/mongodb/mongo/blob/master/src/mongo/util/future.h
-
-  C++ Threading Primatives from Scratch
- https://www.youtube.com/watch?v=9TVvpgHJElU&feature=emb_logo
-
+ * ===============================================================================
+ *                        SharedState<_Ty>
+ *     Helper class which Manages the creation, Movement and Destruction of
+ *     our Promise/Future State
+ * ===============================================================================
 */
+template<typename _Ty>
+struct SharedState
+{
+	std::mutex Mtx;
+
+	/* Default construction */
+	SharedState()
+		:
+		MyState(nullptr),
+		getOnce(false)
+	{
+		DPrint(CON_DarkGreen, "Shared State CTOR");
+	}
+	/* Construct from a State */
+	SharedState(State<_Ty>* _new_State)
+		:
+		MyState(_new_State),
+		getOnce(false)
+	{
+		DPrint(CON_Green, "Shared State from State pointer");
+	}
+	/* Construct my Copying anothers State */
+	SharedState(const SharedState& _other)// was const SharedState&
+	{  
+		DPrint(CON_Blue, "Shared State copy ctor");
+		Copy(_other);
+		getOnce = true;
+	}
+	/* Construct by Moving a State to this Location */
+	SharedState(SharedState&& _other)// was const SharedState&
+		:
+		MyState(nullptr)
+	{  
+		DPrint(CON_Blue, "Shared State move ctor");
+		Move(_other);
+		getOnce = true;
+	}
+	/* Destructor Releases Reference to this State */
+	virtual ~SharedState() noexcept
+	{
+		DPrint(CON_Red, "Shared State destructor");
+				Lock_t Lock(Mtx);
+		if (MyState)
+		{
+			MyState->_Release();
+			if (MyState->RefCount == 0)
+			{
+				delete MyState;
+			}
+		}
+	}
+	/* Copies other State to this one */
+	SharedState& operator=(const SharedState& _other)
+	{ // assign from _Other
+		Copy(_other);
+		return *this;
+	}
+	/* Assigns this state by moving it to this Location */
+	SharedState& operator=(SharedState&& _other)
+	{ // assign from rvalue _Other
+		Move(_other);
+		return *this;
+	}
+
+
+	//===============================================================================
+	/* Test to see if the State exist and has not been Retrieved already when getOnce 
+	was requested */
+	bool valid()
+	{
+		return MyState && !(getOnce && MyState->alreadyRetrieved());
+	}
+	//=========================================================================== 
+
+
+	//====================== SUSPENDERS ============================================= 
+	/* Suspends Threads execution until Future State is fullfilled */
+	void wait() const
+	{
+		if (!valid())
+		{
+			Print("Waiting on Future with No State");
+			__debugbreak();
+		}
+		MyState->wait();
+	}
+	/* Wait on a Future State until a given amount of time has passed 
+	INCOMPLETE PLEASE FINISH */
+	template <class   _Rep, class _Per> void   wait_for(const std::chrono::duration<_Rep, _Per>& _relTime) {}
+	/* Waits on a Future State until an Absolute time is reached 
+	INCOMPLETE PLEASE FINISH */
+	template <class _Clock, class _Dur> void wait_until(const std::chrono::time_point<_Clock, _Dur>& _Abs_time) {}
+	//===============================================================================
+
+	//======================= GET && SET =================================================
+	/* Retrieves the value Associated with our Promise */
+	_Ty& get_value()   
+	{
+		if (!valid())
+		{
+			Print("Error:  State Not Valid. ");
+			__debugbreak();
+		}
+		return MyState->get_value();
+	}
+	/* Sets the Value in our Future State */
+	void set_value(const _Ty& _val)
+	{ 
+		if (!valid()) {
+			Print("No State in the Promise to set");
+			__debugbreak();
+		}
+		MyState->set_value(_val);
+	}
+	/* Sets the Value in our Future State via forward reference */
+	void set_value(_Ty&& _val)
+	{  
+		if (!valid())
+		{
+			Print("No State in the Promise to set");
+			__debugbreak();
+		}
+		MyState->set_value(std::forward<_Ty>(_val));
+	}
+	//===============================================================================
+	/* Throws away this Reference to our */
+	/// Properly Manage the Reference Count I believe this is incorrect
+	void Abandon()
+	{
+		DPrint(CON_DarkRed, "Abandon called on Shared State");
+		if (MyState)
+		{
+			MyState->Abandon();
+		}
+	}
+	/* Get a pointer to our Shared State object */
+	State<_Ty>* _Pointer() const
+	{
+		return MyState;
+	}
+	//===============================================================================
+
+
+	//===============================================================================
+	/* Swap two State Objects from _other preserving Reference count */
+	void Swap(SharedState& _other)
+	{
+		std::swap(MyState, _other.MyState);
+	}
+	/* Copies _other State object into this Shared State Tracking our Reference */
+	void Copy(const SharedState& _other)
+	{
+		if (this != std::addressof(_other))
+		{
+			if (MyState)
+			{// If we hold a State Release its Reference
+				MyState->_Release();
+			}
+			if (_other.MyState)
+			{// Copy the Object
+				_other.MyState->_Retain();
+				MyState = _other.MyState;
+				getOnce = _other.getOnce;
+			}
+			else
+			{// If other was empty leave this empty as well
+				MyState = nullptr;
+			}
+		}
+	}
+	/* Move _other State into this Container */
+	void Move(SharedState& _other)
+	{
+		if (this != std::addressof(_other))
+		{
+			if (MyState)
+			{// Decrement the Reference if it exist
+				MyState->_Release();
+			}
+			MyState = _other.MyState;
+			_other.MyState = nullptr;
+			getOnce = _other.getOnce;
+		}
+	}
+
+	//===============================================================================
+
+	//=================== SIGNALS && STATE ==========================================
+	/* Test if our Promise has set the State for our future */
+	bool isReady()
+	{
+		/// Possibly minor optimization removing Test for Null State
+		return MyState && MyState->isReady();
+	}
+
+	/* Tells if our Promise should be filled when our Thread Exits */
+	bool isReadyatThreadExit()
+	{
+		return MyState->isReady_at_Thread_Exit();
+	}
+	//===============================================================================
+
+	State<_Ty>* MyState { nullptr }; // State to be Created by our Promise and monitored by our Future
+	bool getOnce; // Flag to denote if value should only be aquired once
+};
+
+
+
+
+/*
+ * ===============================================================================
+ *                        Future<_Ty> 
+ *     Monitors a Promise Object and returns the value once our
+ *     Promise has been Fullfilled
+ * ===============================================================================
+*/
+template<typename _Ty>
+struct Future
+	:
+	public SharedState<_Ty>
+{
+	using BaseClass = SharedState<_Ty>;
+	/* Default Future */
+	Future() noexcept
+	{
+		DPrint(CON_Green, "Future default ctor");
+	}
+	/* Destructor */
+	~Future() noexcept {
+		DPrint(CON_Red, "Future destructor");
+	}
+	/* Moves _other into this Location */
+	Future(Future&& _other) noexcept
+		:
+		BaseClass(std::move(_other))
+	{
+		DPrint(CON_Blue, "Future move constructor");
+	}// construct from rvalue future object
+	/* Allows us to CopyConstruct our Shared state without copying Future */
+	Future(const BaseClass& _state, _PlaceHolder)
+		:
+		BaseClass(_state)
+	{ // construct from associated asynchronous state object
+		DPrint(CON_Yellow, "Future from SharedState ctor");
+	}
+	/* Assignment by moving _rhv into this */
+	Future& operator=(Future&& _rhv) noexcept
+	{
+		BaseClass::operator=(std::move(_rhv));
+		return *this;
+	}
+	/* Retreives the Value set by our Promise on completion */
+	_Ty get()
+	{ 
+		Future Local{ std::move(*this) };
+		return std::move(Local.get_value());
+	}
+
+	Future(const Future&) = delete;
+	Future& operator=(const Future&) = delete;
+};
+
+
+
+
+/*
+ * ===============================================================================
+ *                        Future<_Ty&>
+ *     Monitors a Promise Object and returns the value once our
+ *     Promise has been Fullfilled
+ * ===============================================================================
+*/
+template<typename _Ty>
+struct Future<_Ty&>
+	:
+	public SharedState<_Ty*>
+{
+	using BaseClass = SharedState<_Ty*>;
+	/* Default Future */
+	Future() noexcept {
+		DPrint(CON_Green, "Future of Reference default ctor");
+		State<_Ty> TempState;
+	}
+	/* Destructor */
+	~Future() noexcept {
+		DPrint(CON_Red, "Future of Reference destructor");
+	}
+	/* Moves Constructs from _other into this Location */
+	Future(Future&& _other) noexcept
+		:
+		BaseClass(std::move(_other))
+	{ 
+		DPrint(CON_Blue, "Future of Reference move ctor");
+	}
+	/* Allows us to CopyConstruct our Shared state without copying Future */
+	Future(const BaseClass& _state, _PlaceHolder)
+		:
+		BaseClass(_state)
+	{
+		DPrint(CON_DarkBlue, "Future of Reference from SharedState constructor");
+	} 
+	/* Constructs by moving _rhv into this */
+	Future& operator=(Future&& _rhv) noexcept
+	{
+		BaseClass::operator=(std::move(_rhv));
+		return *this;
+	}
+	/* Retreives the Value set by our Promise on completion */
+	_Ty& get()
+	{ // block until ready then return the stored result or throw the stored exception
+		Future Local{ std::move(*this) };
+		return *Local.get_value();
+	}
+
+	Future(const Future&) = delete;
+	Future& operator=(const Future&) = delete;
+};
+
+
+
+
+/*
+ * ===============================================================================
+ *                        Promise<_Ty>
+ *     Creates an Object which will contain a valid value sometime in the Future
+ *     Pair with a Future<_Ty> to aquire our Promise value later on
+ * ===============================================================================
+*/
+template<typename _Ty>
+struct Promise
+{
+	/* Default Constructor */
+	Promise()
+		:
+		_MyPromise(new State<_Ty>)
+	{
+		DPrint(CON_Green, "Promise Default ctor");
+	}
+	/* Constructs by moving _Other to this location */
+	Promise(Promise&& _other) noexcept
+		:
+		_MyPromise(std::move(_other._MyPromise))
+	{
+		DPrint(CON_Blue, "Promise move ctor");
+	}
+	/* Assigns _other to this Promise */
+	Promise& operator=(Promise&& _other) noexcept/*Move assignment operator. First, abandons the shared state (as in ~promise()),  then assigns the shared state of other as if by executing std::promise(std::move(other)).swap(*this).*/
+	{
+		Promise(std::move(_other)).Swap(*this);
+		return *this;
+	}
+	/* Destroys our Object */
+	~Promise() noexcept
+	{
+		DPrint(CON_Red, "Promise destructor");
+		if (_MyPromise.valid() && !_MyPromise.isReady())
+		{
+			Print("Promise Destroyed before function returned");
+			__debugbreak();
+		}
+	}
+	/* Swaps other promise with this one */
+	void Swap(Promise& _other) noexcept
+	{
+		_MyPromise.Swap(_other._MyPromise);
+	}
+	/* Our Associated Future<> Object */
+	[[nodiscard]] Future<_Ty> get_future()
+	{
+		return Future<_Ty>(_MyPromise, _PlaceHolder());
+	}
+	/* Sets the value of our Promise */
+	void set_value(const _Ty& _value)
+	{
+		_MyPromise.set_value(_value);
+	}
+	/* Sets the value of our Promise by forwarding value to it */
+	void set_value(_Ty&& _value)
+	{
+		_MyPromise.set_value(std::forward<_Ty>(_value));
+	}
+
+
+	SharedState<_Ty> _MyPromise;
+
+	Promise(const Promise&) = delete;
+	Promise& operator = (const Promise&) = delete;
+};
+
+
+
+
+/*
+ * ===============================================================================
+ *                        Promise<_Ty>
+ *     Creates an Object which will contain a valid value sometime in the Future
+ *     Pair with a Future<_Ty> to aquire our Promise value later on
+ * ===============================================================================
+*/
+template<typename _Ty>
+struct Promise<_Ty&>
+{
+	/* Default Constructor */
+	Promise()
+		:
+		_MyPromise(new State<_Ty*>())
+	{
+		DPrint(CON_Green, "Promise of Reference default ctor");
+	}
+	/* Constructs by moving _Other to this location */
+	Promise(Promise&& _other) noexcept
+		:
+		_MyPromise(std::move(_other._MyPromise))
+	{
+		DPrint(CON_Blue, "Promise of Reference Move ctor");
+	}
+	/* Assigns _other to this Promise */
+	Promise& operator=(Promise&& _other) noexcept/*Move assignment operator. First, abandons the shared state (as in ~promise()),  then assigns the shared state of other as if by executing std::promise(std::move(other)).swap(*this).*/
+	{
+		Promise(std::move(_other)).Swap(*this);
+		return *this;
+	}
+	/* Destroys our Object */
+	~Promise() noexcept
+	{
+		DPrint(CON_Red,"Promise of Reference destructor");
+		if (_MyPromise.valid() && !_MyPromise.isReady())
+		{
+			Print("Promise Destroyed before function returned");
+			__debugbreak();
+		}
+	}
+	/* Swaps other promise with this one */
+	void Swap(Promise& _other) noexcept
+	{
+		_MyPromise.Swap(_other._MyPromise);
+	}
+	/* Our Associated Future<> Object */
+	[[nodiscard]] Future<_Ty&> get_future()
+	{
+		return Future<_Ty&>(_MyPromise, _PlaceHolder());
+	}
+	/* Sets the value of our Promise */
+	void set_value(_Ty& _value)
+	{
+		_MyPromise.set_value(&_value);
+	}
+
+	SharedState<_Ty*> _MyPromise;
+
+	Promise(const Promise&) = delete;
+	Promise& operator = (const Promise&) = delete;
+};
+
+
+///======================================================================================================================================================
+// ALTERNATIVE WHICH DERIVES FROM STD::PROMISE AND FUTURE FOR WRITING CO_ROUTINE LIKE FUNCTIONS
+///======================================================================================================================================================
+
+
+
+template<typename _Ty>
+struct myFuture
+	: public std::future<_Ty>
+{
+	using BaseClass = std::future<_Ty>;
+	myFuture(BaseClass& _other)
+		:
+		BaseClass(_other)
+	{}
+	//	bool await_ready();
+	//	void await_suspend(std::coroutine_handle<>);
+	_Ty await_resume();
+};
+
+template<typename _Ty>
+struct myPromise
+	:public std::promise<_Ty>
+{
+	myFuture<_Ty>& get_future()
+	{
+		return myFuture<_Ty>(std::future<_Ty>());
+	}
+};
+
+
+
+
+
+///co_await, co_yield and co_return. 
+
+template<typename _Ty>
+struct promise_type
+{
+	Promise<_Ty> _MyPromise;
+	Future<_Ty> get_return_object() {
+		return _MyPromise.get_future();
+	}
+	bool initial_suspend() const {
+		return false;
+	}
+	bool final_suspend() const {
+		return false;
+	}
+};

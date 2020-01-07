@@ -80,6 +80,9 @@
     <ClCompile Include="Core\Threading\TestFunctions.cpp">
       <Filter>Source Files\System\Threading</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
@@ -135,6 +138,12 @@
     </ClInclude>
     <ClInclude Include="Core\Threading\Future.h">
       <Filter>Source Files\System\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiling\RenderUtilities.h">
+      <Filter>Source Files\Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h">
+      <Filter>Source Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

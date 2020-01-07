@@ -521,8 +521,9 @@ std::vector<std::mutex*> Mutexs;
  		Mutexs.push_back(new std::mutex());
  	}
  
- 	std::vector<std::future<int>> Futs;
- 	for(int g = 0; g <  Groupcount; ++g)
+	std::vector<std::future<int>> Futs;
+	//std::vector<Future<int>> Futs;
+	for(int g = 0; g <  Groupcount; ++g)
  	{
  		Futs.push_back(Core::Threading::ThreadPool::get().Async(SortG, MTtest));
  	}

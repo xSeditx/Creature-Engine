@@ -12,7 +12,7 @@
 #include"Profiling\Timing\Benchmark.h"
 
 #include"Core\Common.h"
-
+#include"../CreatureEngine/Renderer/LowLevel/OpenGL/OpenGL.h"
 using namespace Core;
 using namespace Threading;
 
@@ -65,27 +65,35 @@ int TestRecursion(int _param)
 	return 65;
 }
 
+#include<stack>
+std::stack<std::string> CS;
+
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+std::mutex DEBUGMutex;
 
 
-
-
-
+bool TEST_PROFILE_WINDOW();
 
 #include<utility>
+#include"Profiling/RenderUtilities.h"
 int main()
-{
-	_Trace("Testing Trace Macro", 100000);
+{	
+	OpenGL::InitOpenGL();
+	GLuint GL_Handle{ 0 };
+	glGenTextures(1, &GL_Handle);
+	Print("Passed");
+	TEST_UNIT(TEST_PROFILE_WINDOW());
 
-	auto E = ThreadPool::get().Async(TestRecursion, 15);
-	auto R = ThreadPool::get().Async(TestRecursion, 15);
+	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
+	DEBUGPrint(CON_Red, "Testing Print");
+	//auto E = ThreadPool::get().Async(TestRecursion, 15);
+	//auto R = ThreadPool::get().Async(TestRecursion, 15);
+	//E.get();
+	//R.get();
 
-	E.get();
-	R.get();
-	//	while (true) {}
-
-    while (true)
+	while (true)
 	{
-		TestAsyncSort SortTest( 4096); // 262144);//
+TestAsyncSort SortTest( 1024);// 4096); //262144);//
 
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
@@ -94,8 +102,6 @@ int main()
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
 			Timing::Profiling::Profile_Timer Bench("My MT Merge Sort");// Dont use the current Threaded Version its broke.
 			SortTest.AsyncMergeSort();
-//auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
-			//Print(A);
 		}
         {
         	Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
@@ -125,10 +131,12 @@ int main()
 
 			Print("Thread Pool Cluster");
 			std::vector<std::future<float>> Fut;
+			//std::vector<Future<float>> Fut;
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
 			{
 				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
-				Fut.push_back(std::forward<std::future<float>>(F));
+				//Fut.push_back(std::forward<std::future<float>>(F));
+				///Fut.push_back(std::forward<Future<float>>(F));
 			}
 			uint64_t result{ 0 };
 			uint64_t counter = Fut.size();
@@ -251,6 +259,41 @@ int main()
  
 			//SortTest.AsyncMergeSort();
 
+
+/*
+Great List of Compiler Directives.
+Likely can eliminate verything else in this Comment because of this
+https://assets.ctfassets.net/9pcn2syx7zns/61QggiXm0CGYmsJEUfwjld/682ad1c09e795402d3c5f10c009985ad/preprocessor.pdf
+
+
+int _inp(ushort _port);                          Reads a Port
+int _outp(unsigned short port, int databyte)    Writes to a Port
+
+#pragma auto_inline( [ { on | off } ] )
+
+#pragma loop( hint_parallel( n ) )
+#pragma loop( no_vector )
+#pragma loop( ivdep )
+
+#pragma omp [directive]
+             parallel      Defines a parallel region, which is code that will be executed by multiple threads in parallel.
+             for           Causes the work done in a for loop inside a parallel region to be divided among threads.
+             sections      Identifies code sections to be divided among all threads.
+             single        Lets you specify that a section of code should be executed on a single thread, not necessarily the master thread.
+             
+             For master and synchronization:
+             Directive     Description
+             
+             master        Specifies that only the master thread should execute a section of the program.
+             critical      Specifies that code is only executed on one thread at a time.
+             barrier       Synchronizes all threads in a team; all threads pause at the barrier, until all threads execute the barrier.
+             atomic        Specifies that a memory location that will be updated atomically.
+             flush         Specifies that all threads have the same view of memory for all shared objects.
+             ordered       Specifies that code under a parallelized for loop should be executed like a sequential loop.
+             
+             threadprivate Specifies that a variable is private to a thread.
+*/
+
 /*
 =====================================================================================================================
 									  NOTES:
@@ -267,6 +310,10 @@ int main()
  Physics Solver:
  https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
 
+
+
+ Advanced Programming with Microsoft Quick C
+ https://books.google.com/books?id=IjCjBQAAQBAJ&pg=PA41&lpg=PA41&dq=%23pragma+check_stack(+%5B%7B+on+%7C+off+%7D%5D+)+what+does+it+do&source=bl&ots=44JLKNArHT&sig=ACfU3U3eSXG1JpiNDv9IgKbrUv3ByJrJqw&hl=en&sa=X&ved=2ahUKEwj3rrKygeTmAhVxkuAKHbx8C1YQ6AEwAXoECAkQAQ#v=onepage&q=%23pragma%20check_stack(%20%5B%7B%20on%20%7C%20off%20%7D%5D%20)%20what%20does%20it%20do&f=false
 =====================================================================================================================
 */
 
@@ -275,3 +322,40 @@ int main()
 
 
 
+bool TEST_PROFILE_WINDOW()
+{
+	void *DestructorTest;
+	{
+		Profiling::DisplayWindow Test({ 0,0 }, { 2,150 });
+		{	// TEST SET PIXEL
+
+			Test.setPixel(1, 1, 0xffffffff);
+		}
+		{	// TEST UPDATE
+
+			Test.Update(1);
+			if (Test.getPixel(1, 2) _NOT_EQUAL_TO_ 0xffffffff)return false;
+		}
+		{	// REPEATEDLY TEST TO ENSURE UPDATE IS MOVING THE VALUES DOWN
+
+			Test.Update(1);
+			if (Test.getPixel(1, 3) _NOT_EQUAL_TO_ 0xffffffff)return false;
+			Test.Update(1);
+			if (Test.getPixel(1, 4) _NOT_EQUAL_TO_ 0xffffffff)return false;
+			Test.Update(1);
+			if (Test.getPixel(1, 5) _NOT_EQUAL_TO_ 0xffffffff)return false;
+			Test.Update(1);
+			if (Test.getPixel(1, 6) _NOT_EQUAL_TO_ 0xffffffff)return false;
+			Test.Update(1);
+			if (Test.getPixel(1, 7) _NOT_EQUAL_TO_ 0xffffffff)return false;
+			Test.Update(1);
+			if (Test.getPixel(1, 8) _NOT_EQUAL_TO_ 0xffffffff)return false;
+		}
+		{	// TEST TO MAKE SURE IT IS NOT LEAVING A VALUE BEHIMD AND IS NOT JUST SETTING NEW VALUE
+
+			if (Test.getPixel(1, 7) _EQUALS_ 0xffffffff)return false;
+		}
+	}
+
+	return true;
+}

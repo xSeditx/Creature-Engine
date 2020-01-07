@@ -46,6 +46,7 @@ uint64_t Worker_TestFunction(size_t _count);
 
 
 #include<utility>
+// Change the name of this ASAP Range is a TERRIBLE name for a Variable
 #define  Range   1000
 struct TestAsyncSort
 {

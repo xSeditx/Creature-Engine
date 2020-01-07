@@ -31,6 +31,43 @@ namespace Graphics
 		/* Create a Texture from a Bitmap*/
 		Texture(Bitmap &image);
 
+		/* Create a Texture other */
+		Texture(Texture&& _other)
+			:
+			Picture(std::move(_other.Picture)),
+			GL_Handle(std::move(_other.GL_Handle)),
+			Target(std::move(_other.Target)),
+			Type(std::move(_other.Type)),
+			Format(std::move(_other.Format)),
+			WrapMode(std::move(_other.WrapMode)),
+			Filtering(std::move(_other.Filtering)),
+			InternalFormat(std::move(_other.InternalFormat)),
+			Handle(std::move(_other.Handle))
+		{
+			DEBUGPrint(CON_Red, " I believe I messed this up but do not really have time to think about this right now");
+		}
+
+		/* Assign this Texture from other*/
+		Texture& operator =(Texture&& _other)
+		{
+			DEBUGPrint(CON_Red, " I believe I messed this up but do not really have time to think about this right now");
+			return _other;
+		}
+
+		void Update(uint8_t *_memory)
+		{
+			/* Depending on if we are using Bindldess TYextures or not determines how we update this */
+REFACTOR("Change this for Bindless Textures later on. Odds are we should instead generate two sets of Texture code for the Engine\
+ such that a simple preprocessor directive can determine which functiosns we are using. If runtime is needed than we will\
+ need to load up the texture functions as pointers so their functionality can be assigned inside of an Init function somewhere,\
+ ALSO: Likely should make it update Bitmap then Texture but currently Bitmap contains original");
+
+			Bind();
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Picture->Width(), Picture->Height(), GL_RGBA, GL_UNSIGNED_BYTE, _memory);
+			Unbind();
+  		}
+
+
 		Bitmap *Picture;
 		uint32_t GL_Handle{ 0 };
 		uint32_t Target{ GL_TEXTURE_2D };
@@ -55,8 +92,17 @@ namespace Graphics
 		void SetWrapY(unsigned int param);
 
 		//	OpenGL has a particular syntax for writing its color format enumerants.It looks like this: GL_[components?][size?][type?]
-		inline void Bind();
-		inline void Unbind();
+
+		inline void Bind()
+		{
+			glBindTexture(Target, GL_Handle);
+		}
+		inline void Unbind()
+		{
+			glBindTexture(Target, 0);
+		}
+
+
 		inline void MipmapOn();
 		inline void MipmapOff();
 

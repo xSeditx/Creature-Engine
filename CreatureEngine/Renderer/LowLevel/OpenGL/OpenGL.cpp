@@ -24,6 +24,12 @@ namespace OpenGL
 	//======================================================
 	void InitOpenGL()
 	{
+
+
+
+	
+
+		Print(gladLoadGL());
 		RenderPair TestObject =
 		{
 			Material

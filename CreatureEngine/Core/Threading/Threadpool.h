@@ -50,10 +50,8 @@
 #include <tuple>
 #include <iostream>
 #include <type_traits> 
-
+//#include "Future.h"
 #include"../Common.h" // Comment out this header to stand alone
-
-
 
 
 
@@ -77,7 +75,8 @@ Class_X(const Class_X&) = delete
 #pragma warning( disable : 4244 ) // Type conversions
 #pragma warning( disable : 4018 ) // Optimization off warning of mine
 
-
+extern std::vector<int*> DebugStack;
+extern int DebugCounter;
 //TODO: Should wrap this in a Namespace somewhere
 /*      Non-blocking test of std::future to see if value is avalible yet
     NOTE: Performance of this is not the best use sparingly our outside of hot loops */
@@ -86,6 +85,12 @@ bool is_ready(std::future<_R> const& _fut)
 {
     return _fut.valid() ? _fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready : false;
 }
+//template<typename _R>
+//bool is_ready(Future<_R> & _fut)
+//{
+//	return _fut.valid();
+//}
+
 /* 
  *TODO: Implement a Then, When_all and Deferred Function handling 
  *Note: Must create my own Promise/ Future inorder to make that happen I think
@@ -108,16 +113,19 @@ bool is_ready(std::future<_R> const& _fut)
 	template<>             struct FixReturn<>     { using type = int ;}
  */
 
-
-
+#include<csetjmp>
+#define PRINT_Thread(x)   Print(x);\
+                          std::thread::id CurrentThread = std::this_thread::get_id();\
+                          Print("Current Thread " << CurrentThread << "Launched Thread: " << LaunchThread)
 
 namespace Core
 {
     namespace Threading
     {
         class CREATURE_API ThreadPool
-        {
-            NO_COPY_OR_ASSIGNMENT(ThreadPool);
+        {  
+			NO_COPY_OR_ASSIGNMENT(ThreadPool);
+
 			std::thread::id Main_ThreadID{ std::this_thread::get_id() }; // Thread ID of the Main Thread
 			static std::atomic<int> RunningThreads;
 			/*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various
@@ -135,6 +143,8 @@ namespace Core
 				{
 					Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
 				} Status{ Empty };
+
+				std::thread::id LaunchThread{ std::this_thread::get_id() };
             }; // End Wrapper_Base Class
             
             /*      ASYNC TASK: Object Binds Function Pointers as well as Arguments into a single unit 
@@ -142,7 +152,9 @@ namespace Core
             template<typename _Func, typename ...ARGS>
             struct asyncTask final
                 : public Executor
-            {
+            {	
+				NO_COPY_OR_ASSIGNMENT(asyncTask);
+
 			public:													   
 				using type = std::invoke_result_t<_Func, ARGS...>;         // Return type of our function
 
@@ -155,22 +167,30 @@ namespace Core
                     Arguments(std::forward<ARGS>(_args)...)
                 {// Signals to user the object is now completed and valid
                     Status = Valid;
+					Print(*typeid(this).name());
+					PRINT_Thread("Creating Async from thread ");
                 }
-
-
+ 
 				/*     Calls the Objects Stored function along with its parameters using std::apply
 					Sets the value of the Promise and signals to the User that the value is waiting */
 				virtual void Invoke() noexcept override
 				{
+					PRINT_Thread("Invoking Async that was launched From: ");
 					Status = Busy;
 					auto result = std::apply(Function, Arguments);
-					ReturnValue.set_value(result);
+					set_return(result);
 					Status = Waiting;
+				}
+
+				void set_return(type& _value)
+				{
+					ReturnValue.set_value(_value);
+					PRINT_Thread("Can Execute Paused Function here: " );
 				}
 
 				/*      To ensure familiarity and usability get_future works to retrieve the
 					std::future object associated with the return values std::promise */
-				std::future<type> get_future() noexcept
+				auto get_future() noexcept
 				{
 					Status = Submitted;
 					return ReturnValue.get_future();
@@ -182,13 +202,65 @@ namespace Core
 				const Fptr Function;                                       // Pointer to our Function
 				const std::tuple<ARGS...> Arguments;                       // Tuple which Binds the Parameters to the Function call				
 				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
-
-                asyncTask(const asyncTask&) = delete;                      // Prevent copying
-				asyncTask(asyncTask&& _other) = delete;                    // Prevent move   
-                asyncTask& operator=(const asyncTask& _other) = delete;    // Prevent Assignment
-				asyncTask& operator=(asyncTask&& _other) = delete;         // Prevent move assignment
+				//Promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
 			};// End asyncTask Class
+			
+			/*     SUSPEND: Attempt at making a Fork point so the current location of the program is pushed to the 
+			    Threadpool to allow the child function to return first
 
+			*********INCOMPLETE*********/
+			template<typename _Func, typename ...ARGS>
+            struct Suspend final
+				: public Executor
+            {	
+				NO_COPY_OR_ASSIGNMENT(Suspend);
+
+				using child_type = std::invoke_result_t<_Func, ARGS...>;
+            	virtual ~Suspend() noexcept = default;                   // Virtual destructor to ensure proper Deallocation of object
+				std::jmp_buf* Context{}; // This thing gets in the way with Cryptic Error message if not properly initialize so I am using pointer
+				int Return{ -1 };
+            	/* Pushes current Threads execution to our Queue */
+				Suspend(std::jmp_buf* _context, _Func&& _function, ARGS&&... _args) noexcept
+					:
+					Context( _context ),
+					Function(std::forward<_Func>(_function)),
+					Arguments(std::forward<ARGS>(_args)...)
+
+            	{ 
+					Status = Valid;
+					PRINT_Thread("Suspend Thread: ");
+				}
+
+            	/* Returns Execution to where previously suspend */
+            	virtual void Invoke() noexcept override
+            	{
+					PRINT_Thread("Suspend Thread Invoke: ");
+ 				    Status = Waiting;
+				    auto result = std::apply(Function, Arguments); // Can not continue on until function returns which goes into result
+					ReturnValue.set_value(result);// Result sets the return value of the future. Our main thread is allowed to Run now...
+
+            	}
+            
+				auto get_future() noexcept
+				{ 
+					PRINT_Thread("Getting the Future of the Suspended Task ");
+					Status = Submitted;
+
+					return ReturnValue.get_future();
+				}
+
+				void set_return(child_type& _value)
+				{
+					PRINT_Thread("Setting Value of the Suspended Task. ");
+					ReturnValue.set_value(_value);
+				}
+
+            private:
+				using Fptr = child_type(*)(ARGS...);                    // Function pointer type for our function
+				const Fptr Function;                                    // Pointer to our Child Function
+				const std::tuple<ARGS...> Arguments;                    // Tuple which Binds the Parameters to the Child Function call				
+				std::promise<child_type> ReturnValue;                   // Return Value of our function stored as a Promise
+            };
 
         public:
 
@@ -198,11 +270,11 @@ namespace Core
             struct JobQueue
             {
             public:
- 				std::thread::id ThreadID{ std::this_thread::get_id() };
+ 				std::thread::id QueueID{ std::this_thread::get_id() };
 
 				JobQueue() = default;
+
                 std::condition_variable is_Ready;
-                
                 std::deque<Executor*> TaskQueue;
                 std::mutex QueueMutex;
                 bool is_Done{ false };
@@ -221,10 +293,24 @@ namespace Core
                 
                 /* Adds a Function to our Queue */
                 void push(Executor* _func);
+
+
+
+				/* Try to Pop a function off the BACK OF the Queue if it fails return false */
+				bool try_Pop_back(Executor*& _func);            // Lower Priority Function
+
+				/* Pop function from Queue if fails wait for it */
+				bool pop_back(Executor*& _func);                // Lower Priority Function
+
+				/* Attempts to add a function to the FRONT OF the Queue if unable to lock return false */
+				bool try_push_front(Executor* _func);           // Higher Priority Function
+
+				/* Adds a Function to the FRONT OF our Queue */
+				void push_front(Executor* _func);               // Higher Priority Function
             };
             
             
-            const uint32_t           ThreadCount    {  std::thread::hardware_concurrency() * 3};
+			const uint32_t           ThreadCount{ std::thread::hardware_concurrency() };// *3 };
             std::vector<JobQueue>    ThreadQueue    { ThreadCount };
             std::vector<std::thread> Worker_Threads; // Each Thread contains is responsible for an instance of Run which owns a specific Queue
             std::atomic<uint32_t>    Index          { 0 };
@@ -252,26 +338,28 @@ namespace Core
 				return instance;
 			}
 
-
 			/* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
 			template<typename _FUNC, typename...ARGS >
 			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
 			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
+				auto i = Index++;  
+				auto ThreadID = std::this_thread::get_id();
+
 				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
-                auto result = _function->get_future();                                                           // Get the future of our async task for later use
-				
-				if (Main_ThreadID != std::this_thread::get_id())                // If this is being call from one of the Threadpool Threads.
-				{// If not our main thread run now
+				auto result = _function->get_future();                                                           // Get the future of our async task for later use
+
+				//===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
+				if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
+                {// If not our main thread run now
 					_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
-					delete& (*_function);                                                                        // Destroy the Object which our Async Class Allocated
-					return result;
-				}
-
-                auto i = Index++;                                                                                // Ensure fair work distribution
-
+                     delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
+                     return result;
+                }
+				//======================================================================================================================================
+                                                                                                                 // Ensure fair work distribution
                 int Attempts = 5;
-                for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // K is Tunable for better work distribution
+                for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // Attempts is Tunable for better work distribution
                 {// Cycle over all Queues K times and attempt to push our function to one of them
 
                     if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Executor*>(_function)))
@@ -293,17 +381,24 @@ namespace Core
 #pragma warning( pop )
 #endif// THREADPOOL_H
 
-
-
-/*
+ 
+ 
+ 
+ 
+ 
+ 
+ /*
 ==========================================================================================================================================================================
                                                            NOTES:
 ==========================================================================================================================================================================
+Co-Routine Specs
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0057r2.pdf
 
 Executors proposal
 https://github.com/chriskohlhoff/executors
 
-
+Very similar work stealer to this one.
+https://codereview.stackexchange.com/questions/169377/work-stealing-queue
 
 Parallelizing the Naughty Dog Engine
 https://www.gdcvault.com/play/1022186/Parallelizing-the-Naughty-Dog-Engine
@@ -399,5 +494,17 @@ result_type = std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>;
 
 
 */
+
+
+
+
+
+
+
+
+
+
+
+
 
 

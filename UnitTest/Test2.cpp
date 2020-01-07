@@ -9,6 +9,10 @@
 #include "../CreatureEngine/Core/Threading/Threadpool.h"
 #include"../CreatureEngine/Core/Threading/TestFunctions.h"
 
+#include"../CreatureEngine/Profiling/RenderUtilities.h"
+
+#include <type_traits> 
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace UnitTest
@@ -90,7 +94,6 @@ namespace UnitTest
 		}
 	};
 //#endif
-#include <type_traits> 
 
 	int TestTPpass(int _in)
 	{
@@ -102,54 +105,101 @@ namespace UnitTest
 		std::cout << "TestTfail:" << _in << "\n";
 	    return 0;
 	}
-		
-	TEST_CLASS(ThreadPoolTest)
+//	
+//TEST_CLASS(ThreadPoolTest)
+//{
+//	/* Wellness check*/
+//	TEST_METHOD(TestPass)
+//		{
+//			Assert::AreEqual(!true, false);
+//			Assert::AreNotEqual(true, false);
+//		}
+//
+//	TEST_METHOD(TestThreadCount)
+//	{/* Wellness check*/
+//		//Assert::AreEqual(!true, false);
+//		//Assert::AreNotEqual(true, false);
+//		
+//		Core::Threading::ThreadPool::get();
+//		auto A = Core::Threading::ThreadPool::get().Async([] {int ret = 10; return ret; });
+//		//auto B = Core::Threading::ThreadPool::get().Async([] { return 10; });
+//		//auto C = Core::Threading::ThreadPool::get().Async([] { return 10; });
+//		//auto D = Core::Threading::ThreadPool::get().Async([] { return 10; });
+//		//auto E = Core::Threading::ThreadPool::get().Async([] { return 10; });
+//		//auto K = A.get() + B.get() + C.get() + D.get() + E.get();
+//	 	//Assert::AreEqual(100,K);
+//	}
+//	int LOOP_COUNT = 100000;
+//	TEST_METHOD(TestThreadPool)
+//	{
+//		int NUMBER_OF_THREADS = 100;
+//	
+//		using TP = Core::Threading::ThreadPool;
+//
+//		auto A = [&]()->bool// Return type
+//		{
+//			bool k{ false };
+//			std::vector<int> i;
+//			i.push_back(10);
+//			std::cout << "Something" << i.size() << "\n";
+//			i[-10000] = 22;
+//			auto A = TP::get().Async(TestTPpass, std::move(19));
+//			auto B = TP::get().Async(TestTPfail, std::move(42));
+//			k = true;
+//			return k;
+//		};
+//		bool B = A();
+//		Assert::IsTrue(B); // MAYBE LOL
+//
+//	}
+//};
+
+
+
+
+	TEST_CLASS(BenchmarkRender)
 	{
-		/* Wellness check*/
-		TEST_METHOD(TestPass)
+		TEST_METHOD(CreateMemoryBlock)
 		{
-			Assert::AreEqual(!true, false);
-			Assert::AreNotEqual(true, false);
+			uint32_t
+				PosX = 0,
+				PosY = 0;
+			uint32_t
+				SizeX = 50,
+				SizeY = 150;
+
+
+			Profiling::DisplayWindow MemoryBlock =
+				Profiling::DisplayWindow({ PosX,PosY }, { SizeX , SizeY });
+
+			Assert::AreEqual(MemoryBlock.size(), SizeX * SizeY * sizeof(uint32_t));
 		}
 
-		TEST_METHOD(TestThreadCount)
-		{/* Wellness check*/
-			//Assert::AreEqual(!true, false);
-			//Assert::AreNotEqual(true, false);
-			
-			Core::Threading::ThreadPool::get();
-			auto A = Core::Threading::ThreadPool::get().Async([] {int ret = 10; return ret; });
-			//auto B = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			//auto C = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			//auto D = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			//auto E = Core::Threading::ThreadPool::get().Async([] { return 10; });
-			//auto K = A.get() + B.get() + C.get() + D.get() + E.get();
-		 	//Assert::AreEqual(100,K);
-		}
-		int LOOP_COUNT = 100000;
-		TEST_METHOD(TestThreadPool)
+		TEST_METHOD(ColorUnion)
 		{
-			int NUMBER_OF_THREADS = 100;
-		
-			using TP = Core::Threading::ThreadPool;
+			uint32_t
+				PosX = 0,
+				PosY = 0;
+			uint32_t
+				SizeX = 1,
+				SizeY = 50;
 
-			auto A = [&]()->bool// Return type
-			{
-				bool k{ false };
-				std::vector<int> i;
-				i.push_back(10);
-				std::cout << "Something" << i.size() << "\n";
-				i[-10000] = 22;
-				auto A = TP::get().Async(TestTPpass, std::move(19));
-				auto B = TP::get().Async(TestTPfail, std::move(42));
-				k = true;
-				return k;
-			};
-			bool B = A();
-			Assert::IsTrue(B); // MAYBE LOL
+
+			Profiling::DisplayWindow MemoryBlock =
+				Profiling::DisplayWindow({ PosX,PosY }, { SizeX , SizeY });
+			MemoryBlock.setPixel(0, 0, 0xFFFFFFFF);
+			MemoryBlock.Update(1);
+			Assert::AreEqual(0xFFFFFFFF , (unsigned int)MemoryBlock.getPixel(0, 1));
+			MemoryBlock.Update(1);
+			Assert::AreEqual(0xFFFFFFFF , (unsigned int)MemoryBlock.getPixel(0, 2));
+			MemoryBlock.Update(1);
+			Assert::AreEqual(0xFFFFFFFF , (unsigned int)MemoryBlock.getPixel(0, 3));
+
+
 
 		}
 	};
+
 }//End UnitTest NS
 
 
