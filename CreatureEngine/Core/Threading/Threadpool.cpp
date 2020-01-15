@@ -146,8 +146,8 @@ namespace Core
 		{// Attempts to add a function to the Queue if unable to lock return false 
 
 			{/* ~   CRITICAL SECTION   ~ */
-
 				std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+				if (_func->LaunchThread == QueueID) Print("Job Pushed to Thread it was Launched from. Possible Error if Recursive Call made ");
 				if (!Lock)
 				{// If our mutex is already locked simply return 
 					return false;
@@ -163,8 +163,10 @@ namespace Core
 		{// Adds a Function to our Queue
 
 			{/* ~   CRITICAL SECTION   ~ */
-
 				std::unique_lock<std::mutex> Lock{ QueueMutex };
+
+				if (_func->LaunchThread == QueueID) Print("Job Pushed to Thread it was Launched from. Possible Error if Recursive Call made ");
+
 				TaskQueue.emplace_back(std::move(_func));
 
 			}/* ~ END CRITICAL SECTION ~ */

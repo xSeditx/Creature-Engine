@@ -2,7 +2,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+/*
 
+
+*/
 #include<cstdint>
 #include<string>
 #include<iostream>
@@ -43,7 +46,7 @@
 #define NO_WARNINGS             TRUE
 
 /* Defines the level of Messages the user wishes to see */
-#define MESSAGE_LEVEL           FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE
+#define MESSAGE_LEVEL           USER_WARNING_MESSAGES//TODO_MESSAGES//FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE
 
 /* Test block of code for testing Threadspools Speeds */
 ///#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
@@ -144,6 +147,8 @@ using GPUptr = uint64_t;
      __pragma(message ("                    "))              \
 	 }                                                       \
      }while(0)
+#else
+#    define TODO(_msg)
 #endif/* TODO MESSAGE */
 
 
@@ -165,6 +170,8 @@ using GPUptr = uint64_t;
      __pragma(message("                    "))               \
      }                                                       \
      }while(0)
+#else
+#    define REFACTOR(_msg)
 #endif/* REFACTOR MESSAGE */
 
 
@@ -185,6 +192,8 @@ using GPUptr = uint64_t;
      __pragma(message("                    "))               \
      }                                                       \
      }while(0)
+#else
+#    define WARN_ME(_msg)                                
 #endif/* WARNING MESSAGE */
 
 #define TRACE_DEPTH 100000
@@ -204,8 +213,9 @@ using GPUptr = uint64_t;
      __pragma(message("                    "))               \
      }}                                                      \
      }while(0)                                               
-     
-#endif/* WARNING MESSAGE */
+#else
+#    define _Trace(_msg, _level)  
+#endif/* TRACE THE IN AND OUTS OF FUNCTIONS */
 
 
 //     std::cout << "File: " << __FILE__ << "\n";              \
@@ -292,8 +302,13 @@ extern std::mutex DEBUGMutex;
 //======================================================================================
 
 
-#define _EQUALS_        ==
+#define _EQUALS_          ==
 #define _NOT_EQUAL_TO_    !=
+#define _OR_              ||
+#define _AND_             &&
+#define pure_virtual      0
+
+#define _static 
 
 
 
@@ -307,6 +322,81 @@ DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 /* Code Currently turned off */
 #    define DEBUG_CODE(_code)   
 #endif
+
+
+
+
+
+
+//#define _STACK_TRACE_
+
+/* Trace calls in and our of specified functions 
+
+This will likely become so much more in which ALL of our function calls will be wrapped in a method that traces their creation and destruction so when desired 
+we will have more functionality for tracking the stack and functions while easily being capable of turning it off at will
+*/
+#ifdef _STACK_TRACE_
+#    define trace_IN(x)   std::cout << "IN: "<< x << typeid(this).name() << "\n"
+#    define trace_OUT(x)  std::cout <<"OUT: "<< x << typeid(this).name() << "\n"
+#else
+#    define trace_IN(x)   
+#    define trace_OUT(x)  
+#endif
+
+
+
+
+ /*
+Idk how to handle this yet in a platform independent way so we will cast a void * to the Native Application Instance for now, 
+In this case a Windows HINSTANCE
+*/
+#define  GetInstance() (HINSTANCE)Application::get().OSInstance 
+
+///================================================================================================================
+///================= SIMPLE ERROR HANDLING ========================================================================
+///================================================================================================================
+/* Later on we will use this Error flag as a global that is checked as we will be turning off Exceptions. Should make
+my Error handling module before moving forward with this project */
+//struct ErrorMessage
+//{
+//	ErrorMessage(uint32_t _error, uint32_t _level)
+//		:
+//		Level(_level),
+//		ErrorNumber(_error)
+//	{
+//		GetSystemTime(Time);
+//	}
+//	uint32_t Level;
+//	uint32_t ErrorNumber;
+//	LPSYSTEMTIME Time;
+//
+//	static bool isError() { return !Errors.empty(); }
+//	static void RaiseException(uint32_t _error, uint32_t _level)
+//	{
+//		Errors.push({ _error, _level });
+//	}
+//	static bool GetError(ErrorMessage& _msg)
+//	{
+//		if (isError())
+//		{
+//			_msg = Errors.top();
+//			Errors.pop();
+//		}
+//		return Errors.empty();
+//	}
+//	static std::stack<ErrorMessage> Errors;
+//	friend std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg);
+//};
+//std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg);
+//
+//std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg)
+//{
+//	os << "Error: " << _msg.ErrorNumber << "\n At: " << _msg.Time << "\n ";
+//	return os;
+//}
+
+
+
 /*
 ==========================================================================================================================================================================
 														   NOTES:

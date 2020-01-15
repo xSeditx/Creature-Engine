@@ -76,13 +76,37 @@ bool TEST_PROFILE_WINDOW();
 
 #include<utility>
 #include"Profiling/RenderUtilities.h"
+#include"FrontEnd/Window.h"
+#include"Core/Application.h"
+
+
+class App
+	: public Application
+{
+	virtual void OnCreate() {}
+	virtual void OnStart() {}
+//	virtual void OnRun(); /// Differs from start in that it can resume execution; Possibly change to Resume later or something
+//	virtual void OnPause();
+//	virtual void OnSleep();
+//	virtual void OnEnd();
+
+};
+
+
+//https://en.cppreference.com/w/cpp/compiler_support
 int main()
-{	
-	OpenGL::InitOpenGL();
-	GLuint GL_Handle{ 0 };
-	glGenTextures(1, &GL_Handle);
-	Print("Passed");
-	TEST_UNIT(TEST_PROFILE_WINDOW());
+{
+
+	App MyApp;
+	MyApp.Init();
+	MyApp.Run();
+	MyApp.End();
+
+//  OpenGL::InitOpenGL();
+//  GLuint GL_Handle{ 0 };
+//  glGenTextures(1, &GL_Handle);
+//  Print("Passed");
+//	TEST_UNIT(TEST_PROFILE_WINDOW());
 
 	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
 	DEBUGPrint(CON_Red, "Testing Print");
@@ -97,11 +121,11 @@ TestAsyncSort SortTest( 1024);// 4096); //262144);//
 
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
-		 	SortTest.LinearMergeSort();
+		// 	SortTest.LinearMergeSort();
 		}
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
 			Timing::Profiling::Profile_Timer Bench("My MT Merge Sort");// Dont use the current Threaded Version its broke.
-			SortTest.AsyncMergeSort();
+		//	SortTest.AsyncMergeSort();
 		}
         {
         	Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
@@ -324,7 +348,6 @@ int _outp(unsigned short port, int databyte)    Writes to a Port
 
 bool TEST_PROFILE_WINDOW()
 {
-	void *DestructorTest;
 	{
 		Profiling::DisplayWindow Test({ 0,0 }, { 2,150 });
 		{	// TEST SET PIXEL

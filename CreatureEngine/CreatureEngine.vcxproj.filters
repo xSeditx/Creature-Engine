@@ -36,6 +36,9 @@
     <Filter Include="Source Files\System\Threading">
       <UniqueIdentifier>{f7a18410-dda6-4711-ab3e-6120d49a7e74}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Graphics\Window">
+      <UniqueIdentifier>{d1db1727-55b4-4ce6-9fac-043dc9d817cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -52,12 +55,6 @@
     </ClCompile>
     <ClCompile Include="Core\ECS\ECSsystem.cpp">
       <Filter>Source Files\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="FrontEnd\GUI\EventSystem.cpp">
-      <Filter>Source Files\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="FrontEnd\Input.cpp">
-      <Filter>Source Files\Input</Filter>
     </ClCompile>
     <ClCompile Include="Profiling\SystemInfo.cpp">
       <Filter>Source Files\Profiling</Filter>
@@ -83,6 +80,9 @@
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Application.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
@@ -102,12 +102,6 @@
     </ClInclude>
     <ClInclude Include="Core\ECS\ECS.h">
       <Filter>Source Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="FrontEnd\GUI\EventSystem.h">
-      <Filter>Source Files\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="FrontEnd\Input.h">
-      <Filter>Source Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Profiling\SystemInfo.h">
       <Filter>Source Files\Profiling</Filter>
@@ -144,6 +138,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h">
       <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Application.h">
+      <Filter>Source Files\System</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

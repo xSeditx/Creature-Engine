@@ -54,7 +54,12 @@
 #include"../Common.h" // Comment out this header to stand alone
 
 
-
+/*
+THREADING PATTERNS:
+ Pipeline: Lock stepped
+ Dedicated Thread
+ Schedular: What is neing done here
+*/
 
 //  Defines Which allow Threadpool.h and .cpp to stand along from Common.h If desired
 #ifndef CREATURE_API
@@ -167,15 +172,15 @@ namespace Core
                     Arguments(std::forward<ARGS>(_args)...)
                 {// Signals to user the object is now completed and valid
                     Status = Valid;
-					Print(*typeid(this).name());
-					PRINT_Thread("Creating Async from thread ");
+					//Print(*typeid(this).name());
+					//PRINT_Thread("Creating Async from thread ");
                 }
  
 				/*     Calls the Objects Stored function along with its parameters using std::apply
 					Sets the value of the Promise and signals to the User that the value is waiting */
 				virtual void Invoke() noexcept override
 				{
-					PRINT_Thread("Invoking Async that was launched From: ");
+					//PRINT_Thread("Invoking Async that was launched From: ");
 					Status = Busy;
 					auto result = std::apply(Function, Arguments);
 					set_return(result);
@@ -185,7 +190,7 @@ namespace Core
 				void set_return(type& _value)
 				{
 					ReturnValue.set_value(_value);
-					PRINT_Thread("Can Execute Paused Function here: " );
+					//PRINT_Thread("Can Execute Paused Function here: " );
 				}
 
 				/*      To ensure familiarity and usability get_future works to retrieve the
@@ -338,40 +343,89 @@ namespace Core
 				return instance;
 			}
 
+
+#if 1
 			/* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
+			///<Possibly to avoid Code bloat Make Async create the asynTask and Future and cast the task to Executionwer before sending it to the rest of the function to process>
+			///<This way it will only duplicate the Async code and not the rest when not needed>
 			template<typename _FUNC, typename...ARGS >
 			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
 			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
-				auto i = Index++;  
-				auto ThreadID = std::this_thread::get_id();
 
 				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
 				auto result = _function->get_future();                                                           // Get the future of our async task for later use
-
-				//===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
-				if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
-                {// If not our main thread run now
-					_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
-                     delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
-                     return result;
-                }
-				//======================================================================================================================================
-                                                                                                                 // Ensure fair work distribution
-                int Attempts = 5;
-                for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // Attempts is Tunable for better work distribution
-                {// Cycle over all Queues K times and attempt to push our function to one of them
-
-                    if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Executor*>(_function)))
-                    {// If succeeded return our functions Future
-                        return result;
-                    }
-                }
-
-                // In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
-                ThreadQueue[i % ThreadCount].push(static_cast<Executor*>(_function));
+				Submit(static_cast<Executor*>(_function));
                 return result;
             }
+
+			void Submit(Executor *_task)
+			{
+				auto i = Index++;  
+				auto ThreadID = std::this_thread::get_id();
+
+				//===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
+				//if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
+				//{// If not our main thread run now
+				//	_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
+				//	delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
+				//	return result;
+				//}
+				//======================================================================================================================================
+																												 // Ensure fair work distribution
+				int Attempts = 5;
+				for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // Attempts is Tunable for better work distribution
+				{// Cycle over all Queues K times and attempt to push our function to one of them
+
+					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(_task))
+					{// If succeeded return our functions Future
+						return;
+					}
+				}
+
+				// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
+				ThreadQueue[i % ThreadCount].push(_task);
+				return;
+			}
+#else
+			/* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
+///<Possibly to avoid Code bloat Make Async create the asynTask and Future and cast the task to Executionwer before sending it to the rest of the function to process>
+///<This way it will only duplicate the Async code and not the rest when not needed>
+			template<typename _FUNC, typename...ARGS >
+			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
+
+
+				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
+				auto result = _function->get_future();                                                           // Get the future of our async task for later use
+				auto i = Index++;
+				auto ThreadID = std::this_thread::get_id();
+
+				//===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
+				//if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
+				//{// If not our main thread run now
+				//	_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
+				//	delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
+				//	return result;
+				//}
+				//======================================================================================================================================
+																												 // Ensure fair work distribution
+				int Attempts = 5;
+				for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // Attempts is Tunable for better work distribution
+				{// Cycle over all Queues K times and attempt to push our function to one of them
+
+					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Executor*>(_function)))
+					{// If succeeded return our functions Future
+						return result;
+					}
+				}
+
+				// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
+				ThreadQueue[i % ThreadCount].push(static_cast<Executor*>(_function));
+				return result;
+			}
+
+#endif
         }; // End ThreadPool Class
 
     }// End NS Threading
@@ -493,9 +547,16 @@ template<typename Function, typename ...Args>
 result_type = std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>;
 
 
+
+
+Events can be used in place of Locks and CV:
+Event.workAvalible;
+
+workAvalible.signal();
+
+Signaled: Threads pass through
+Reset:    Threads Wait
 */
-
-
 
 
 
