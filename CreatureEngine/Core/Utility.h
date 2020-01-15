@@ -200,3 +200,17 @@ T Foo(T(*Func)())
 
 	return Func();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

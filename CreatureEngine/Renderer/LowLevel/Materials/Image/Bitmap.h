@@ -4,6 +4,12 @@ namespace Graphics
 	class CREATURE_API Bitmap
 	{
 	public:
+		/* Default because we are creating custom constructors */
+		Bitmap() = default;
+
+		/* Create a Bitmap from a Memory  block */
+		Bitmap(void* _memory, Vec2 _dimensions);
+
 		/* Returns Image Width */
 		uint32_t Width() { return Size.x; }
 

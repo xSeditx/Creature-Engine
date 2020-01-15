@@ -11,7 +11,7 @@
 typedef uint32_t MsgType;
 typedef uint32_t WindowID;// This will likely change to a pointer, or some other form later on.
 //============================================================
-class Window;
+//class Window;
 
 namespace HumanInterface
 {

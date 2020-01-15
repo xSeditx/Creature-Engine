@@ -78,7 +78,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(Solution)CreatureEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>$(Solution)CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -93,7 +93,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(Solution)CreatureEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>$(Solution)CreatureEngine\x64\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -168,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Useless.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

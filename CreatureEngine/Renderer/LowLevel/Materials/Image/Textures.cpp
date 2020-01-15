@@ -166,15 +166,7 @@ namespace Graphics
 	{
 		glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, param);
 	}
-	// State Handler
-	void Texture::Bind()
-	{
-		glBindTexture(Target, GL_Handle);
-	}
-	void Texture::Unbind()
-	{
-		glBindTexture(Target, 0);
-	}
+	
 	// MipMapping
 	void Texture::MipmapOn()
 	{
