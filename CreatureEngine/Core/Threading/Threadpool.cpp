@@ -3,18 +3,45 @@
 #pragma warning( push )
 #pragma warning( disable : 4244 )
 #pragma warning( disable : 4018 ) // Optimization off warning of mine
+__forceinline void* GetLineAddress()
+{
+	return std::move(_ReturnAddress());
+}
+//__forceinline void* GetAddressLocation()
+//{
+//	return _AddressOfReturnAddress();
+//}
+//__forceinline void  SetAddress(void* _address)
+//{
+//
+//}
+//
+
+int TestJump(int _p)
+{
+	int iE{ _p };
+	++iE;
+	Print("Jumped into the Test Function Param = " << _p);
+	return iE;
+}
 
 namespace Core
 {
     namespace Threading
     {
 		_static std::atomic<int> ThreadPool::RunningThreads{ 0 };
+		_static ThreadPool ThreadPool::instance;
 
 		/* ============================================================
 		 *                    Initializer                                    
 		 * ============================================================ */
 		ThreadPool::ThreadPool()
 		{// Create a set number of Threads and Add Job Queues to the Threadpool 
+
+			void* Add = GetLineAddress();// Stops the compiler from erasing the Function
+			void* Addof = GetAddressLocation();
+			Print("Address: " << Add << " : " << Addof);
+
 
 			for (int N{ 0 }; N < ThreadCount; ++N)
 			{// Creates and Runs Schedular
@@ -27,9 +54,8 @@ namespace Core
 		/* ============================================================
 		 *                    Executors                                     
 		 * ============================================================ */
-		void ThreadPool::Run(unsigned int _i)
+		void ThreadPool::Run(uint32_t _i)
 		{ // Initializes Thread and starts the Queue running 
-			Print("Running: "<<_i);
 			while (true)
 			{// Constantly run until application or user shuts it down
 
@@ -48,11 +74,31 @@ namespace Core
 				{// If there is no Function and the Queue fails to Pop it means that it is quiting time
 					break;
 				}
-				++RunningThreads;
 				Function->Invoke();  // Invoke the returned function
-				--RunningThreads;
 				delete &(*Function); // Destroy the Object which our Async Class Allocated
 			}
+		}
+		bool ThreadPool::JobQueue::pop_back(Executor*& _func)
+		{
+			/*Entire Scope is protected by the Queue Mutex
+			Odds are I do not needs to do all the other stuff since
+			It will only be used when Recursion takes place * /
+
+				/* ~   CRITICAL SECTION   ~ */
+			std::unique_lock<std::mutex> Lock{ QueueMutex };
+			while (TaskQueue.empty() && !is_Done)
+			{// If Queue is Empty and we are not Done Wait until there is work to do
+				is_Ready.wait(Lock);
+			}
+			if (TaskQueue.empty())
+			{// If Task Queue is empty and we are done, return false to Initiate shut down process
+				return false;
+			}
+			// Move the pointer to the function pointer from our Queue into our _func object
+
+			_func = std::move(TaskQueue.back());
+			TaskQueue.pop_back();
+			return true;
 		}
  		bool ThreadPool::JobQueue::try_Pop(Executor*& _func)
 		{// Try to pop a function off the Queue if it fails return false
@@ -93,6 +139,32 @@ namespace Core
 		/* ============================================================
 		 *                    Submitters                                
 		 * ============================================================ */
+		bool ThreadPool::JobQueue::try_push_front(Executor* _func)
+		{// Attempts to add a function to the Queue if unable to lock return false 
+
+			{/* ~   CRITICAL SECTION   ~ */
+
+				std::unique_lock<std::mutex> Lock{ QueueMutex, std::try_to_lock };
+				if (!Lock)
+				{// If our mutex is already locked simply return 
+					return false;
+				}
+				TaskQueue.push_front(std::move(_func));    // Else place on the back of our Queue
+
+			}/* ~ END CRITICAL SECTION ~ */              // Unlock the Mutex 
+
+			is_Ready.notify_one();                       // Tell the world about it 
+			return true;                                 // Lets Async know you succeeded
+		}
+
+		void ThreadPool::JobQueue::push_front(Executor* _func)
+		{// Adds a Function to our Queue
+			{/* ~   CRITICAL SECTION   ~ */
+				std::unique_lock<std::mutex> Lock{ QueueMutex };
+				TaskQueue.emplace_front(std::move(_func));
+			}/* ~ END CRITICAL SECTION ~ */
+			is_Ready.notify_one();                       // Why did I not have this before?
+		}
 		bool ThreadPool::JobQueue::try_push(Executor* _func)
 		{// Attempts to add a function to the Queue if unable to lock return false 
 
@@ -155,6 +227,9 @@ namespace Core
 	}// End NS Threading
 }// End NS Core
 
+
+ 
+ 
 #pragma warning( pop )
 
 
@@ -167,8 +242,10 @@ namespace Core
 */
 
 
+//_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
+//delete& (*_function);                                                                        // Destroy the Object which our Async Class Allocated
+//return result;
 //DEBUGPrint(CON_DarkRed, "Created Queue: ");
-
 //======================================================================================
 //========================= DEBUG INFOMATION ======================================================
 // #include<Windows.h>

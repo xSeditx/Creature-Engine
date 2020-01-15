@@ -68,19 +68,23 @@ int TestRecursion(int _param)
 
 
 
-
+int TestThen(int _p)
+{
+	Print(_p);
+	return _p - 1;
+}
 
 
 #include<utility>
 int main()
 {
 	_Trace("Testing Trace Macro", 100000);
-
-	auto E = ThreadPool::get().Async(TestRecursion, 15);
-	auto R = ThreadPool::get().Async(TestRecursion, 15);
-
-	E.get();
-	R.get();
+	
+	 
+	//auto E = ThreadPool::get().Async(TestRecursion, 10);
+//	auto R = ThreadPool::get().Async(TestRecursion, 15);
+ 
+//	R.get();
 	//	while (true) {}
 
     while (true)
@@ -94,19 +98,17 @@ int main()
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
 			Timing::Profiling::Profile_Timer Bench("My MT Merge Sort");// Dont use the current Threaded Version its broke.
 			SortTest.AsyncMergeSort();
-//auto A = SortTest.MTSwapSort();//MTAdd(std::vector<int>& _input);
-			//Print(A);
 		}
-        {
-        	Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
-        	//SortTest.StdMergeSort();
+		{
+			Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
+			//SortTest.StdMergeSort();
         }
 
 
 #if _TEST_THREADPOOL_SPEED
 		Function_Counter = 0;
 	//	LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
-		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
+		Print("\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
 		{
 			Timing::Profiling::Profile_Timer Bench("My Threadpool");
 			std::vector<std::vector<uint32_t>> Test;
@@ -275,3 +277,18 @@ int main()
 
 
 
+//   TEST THEN CHAINED ASYNC CALLS
+//auto A = ThreadPool::get().Async(TestThen, 10).
+//	then(TestThen, 9).
+//	then(TestThen, 8).
+//	then(TestThen, 7).
+//	then(TestThen, 6).
+//	then(TestThen, 5);
+//auto B = ThreadPool::get().Async(TestThen, 4).
+//	then(TestThen, 3).
+//	then(TestThen, 2).
+//	then(TestThen, 1).
+//	then(TestThen, 0).
+//	then(TestThen, -1).
+//	then(TestThen, -2);
+//Print("Chain Result" << A.get());

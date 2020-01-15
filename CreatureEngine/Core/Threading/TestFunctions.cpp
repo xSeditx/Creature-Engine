@@ -389,10 +389,13 @@ std::vector<int> MTMerge_sort(std::vector<int> _input)
     std::move(_input.begin()       , _input.begin() + Half, std::back_inserter(Left));
     std::move(_input.begin() + Half, _input.end()         , std::back_inserter(Right));
     
+	// This needs to Run the Function, Store this Location... Then jump back here after the child returns
     auto L = Core::Threading::ThreadPool::get().Async(MTMerge_sort, (std::vector<int>)Left);// 
+	auto Lv = L.get(); /// Maybe it would be better if I Invoke the Continuation in the get() as that would ensure 
     auto R = Core::Threading::ThreadPool::get().Async(MTMerge_sort, (std::vector<int>)Right);// (std::vector<int>)
-    auto Lv = L.get();
-    auto Rv = R.get();
+	Print(" Waiting on MergeSort Left, size: " << _input.size());
+	Print(" Waiting on MergeSort Right, size: " << _input.size());
+	auto Rv = R.get(); /// That specific future call has returned already
     
 	return AMerge(Lv, Rv);
 }
@@ -524,7 +527,7 @@ std::vector<std::mutex*> Mutexs;
  	std::vector<std::future<int>> Futs;
  	for(int g = 0; g <  Groupcount; ++g)
  	{
- 		Futs.push_back(Core::Threading::ThreadPool::get().Async(SortG, MTtest));
+// 		Futs.push_back(Core::Threading::ThreadPool::get().Async(SortG, MTtest));
  	}
  
  	for (auto &F : Futs)
