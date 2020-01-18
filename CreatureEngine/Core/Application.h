@@ -1,22 +1,20 @@
 #pragma once
 
+#include<queue>
 #include<string>
 #include<cstdint>
-
-#include<queue>
-#include<unordered_map>
+#include<iostream>
 #include<Windows.h>
 #include<windowsx.h>
-#include<iostream>
+#include<unordered_map>
 
-#include"../Renderer/LowLevel/OpenGL/OpenGL.h"
 #include"../Core/Common.h"
+#include"../Renderer/LowLevel/OpenGL/OpenGL.h"
 
-#pragma comment(lib, "OpenGL32.lib")
-#pragma comment(lib, "glu32.lib")
 using MsgType = uint32_t;
 
 using Event = MSG;
+
 struct Listener
 {
 public:
@@ -113,7 +111,8 @@ private:
 		/* Sets Window Height*/
 		void s_Height(int _y) const noexcept { Size.y; }
 		/* Sets Window Title */
-		void s_Title(std::string _name) { Title = _name; }
+		void s_Title(std::string _name);
+
 		/* Sets Window Dimensions */
 		void s_Size(Vec2 _size) noexcept
 		{
@@ -154,8 +153,7 @@ private:
 
 		HDC g_DeviceContext() { return DeviceContext; }
 
-
-	private:
+ 	private:
 		uint32_t BasicShader;
 
 		Window* Parent = nullptr;
@@ -182,7 +180,7 @@ private:
 
  	private:
 
-		void CreateDefaultShader();
+		void create_DefaultShader();
 
 		struct EventHandler
 		{
@@ -324,36 +322,6 @@ public:
 
 
 
-/*
-typedef struct tagPIXELFORMATDESCRIPTOR
-{
-	WORD  nSize;
-	WORD  nVersion;
-	DWORD dwFlags;
-	BYTE  iPixelType;
-	BYTE  cColorBits;
-	BYTE  cRedBits;
-	BYTE  cRedShift;
-	BYTE  cGreenBits;
-	BYTE  cGreenShift;
-	BYTE  cBlueBits;
-	BYTE  cBlueShift;
-	BYTE  cAlphaBits;
-	BYTE  cAlphaShift;
-	BYTE  cAccumBits;
-	BYTE  cAccumRedBits;
-	BYTE  cAccumGreenBits;
-	BYTE  cAccumBlueBits;
-	BYTE  cAccumAlphaBits;
-	BYTE  cDepthBits;
-	BYTE  cStencilBits;
-	BYTE  cAuxBuffers;
-	BYTE  iLayerType;
-	BYTE  bReserved;
-	DWORD dwLayerMask;
-	DWORD dwVisibleMask;
-	DWORD dwDamageMask;
-} PIXELFORMATDESCRIPTOR*/
 
 
 
@@ -626,3 +594,49 @@ Application::Window::Event::Event(MsgType msg)
 			bool Handled() { return (ID == 0); }
 		};
 */
+
+/*	{// OpenGL Rendering Context Scope
+		//  wglCreateContext	    Creates a new rendering context.
+		//  WglMakeCurrent	        Sets a thread's current rendering context.
+		//  WglGetCurrentContext	Obtains a handle to a thread's current rendering context.
+		//  WglGetCurrentDC      	Obtains a handle to the device context associated with a thread's current rendering context.
+		//  WglDeleteContext	    Deletes a rendering context.
+
+		GL_Context = wglCreateContext(DeviceContext);
+		if (!wglMakeCurrent(DeviceContext, GL_Context))
+		{
+			std::cout << "Making Current Rendering Context Failed" << "\n";
+		}
+		if (!GL_Context)
+		{
+			MessageBox
+			(/// Turn all this into a Macro for Clearity
+				NULL,
+				"GL Context Creation Failed  "
+				"Cannot Create Renderer",
+				"Error",
+				MB_OK
+			);
+		}
+
+		if (!gladLoadGL())
+		{// If the Loading of OpenGL functions fails report it and exit
+			int error_code = glad_glGetError();
+			std::cout << "Failed to initialize GLAD" << error_code << std::endl;
+			__debugbreak();
+		};
+
+		Title = std::string("OPENGL VERSION ") + std::string((char*) glGetString(GL_VERSION));
+		SetWindowTextA
+		(
+			Handle,
+			Title.c_str()
+		);
+
+		//  wglCreateContext	    Creates a new rendering context.
+		//  WglMakeCurrent	        Sets a thread's current rendering context.
+		//  WglGetCurrentContext	Obtains a handle to a thread's current rendering context.
+		//  WglGetCurrentDC      	Obtains a handle to the device context associated with a thread's current rendering context.
+		//  WglDeleteContext	    Deletes a rendering context.
+	}*/
+
