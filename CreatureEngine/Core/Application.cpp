@@ -547,7 +547,7 @@ bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _r
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (uMsg == WM_DESTROY)[[unlikely]]
+	if (uMsg == WM_DESTROY) 
 	{
 		Application::get().Terminate();
 	}
