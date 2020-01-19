@@ -13,7 +13,7 @@
 namespace Graphics
 {
 
-	Texture::Texture(std::string file)
+	Texture::Texture(std::string file) noexcept 
 		:
 		Type(0),
 		Picture(nullptr),
@@ -21,7 +21,7 @@ namespace Graphics
 	{
 		///TextureID = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y | SOIL_FLAG_TEXTURE_REPEATS);
 	}
-	Texture::Texture(Bitmap& image)
+	Texture::Texture(Bitmap& image) noexcept
 		:
 		Picture(&image),
 		Type(0),

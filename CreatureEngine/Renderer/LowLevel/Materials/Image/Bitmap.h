@@ -1,4 +1,5 @@
-#include"Core\Common.h"
+#include"../../../../Core/Common.h"
+
 namespace Graphics
 {
 	class CREATURE_API Bitmap

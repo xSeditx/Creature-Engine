@@ -62,7 +62,12 @@ private:
 
 				struct
 				{//TODO: Union to Access Buttons as Array might be useful as well
-					bool Left, Right, Center, X1, X2;
+					bool 
+						Left{ false },
+						Right{ false },
+						Center{ false }, 
+						X1{ false }, 
+						X2{ false };
 				}Buttons;
 
 				void Hide() { Print("Hide Mouse"); }

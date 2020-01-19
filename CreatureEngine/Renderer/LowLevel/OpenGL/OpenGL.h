@@ -14,7 +14,7 @@ namespace OpenGL
 
 	CREATURE_API enum Pixel_flags
 	{
-		null = 0,
+		Null = 0,
 		Stereo = PFD_STEREO,
 		Generic = PFD_GENERIC_FORMAT,
 		GDI_Support = PFD_SUPPORT_GDI,
@@ -132,7 +132,7 @@ namespace OpenGL
 	/* Sets a specific Hint for OpenGL */
 	CREATURE_API void set_Hint(Hint_t _hint, Mode_t _mode);
 
-
+	/* Enable State feature for OpenGL */
 	CREATURE_API bool isBlendEnabled();
 	CREATURE_API bool isCullEnabled();
 	CREATURE_API bool isDepthClampEnabled();
@@ -149,6 +149,7 @@ namespace OpenGL
 	CREATURE_API bool isStencilTestEnabled();
 	CREATURE_API bool isSeemlessTextureCubemapEnabled();
 
+	/* Disables states for OpenGL */
 	CREATURE_API void  EnableBlending();
 	CREATURE_API void  EnableColorLogicOperation();
 	CREATURE_API void  EnableCulling();

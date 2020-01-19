@@ -115,7 +115,7 @@ namespace OpenGL
 
 
 
-
+	/* Far from complete */
 	struct DeviceContext_t
 	{
 		DeviceContext_t() {}
@@ -123,7 +123,7 @@ namespace OpenGL
 		int PixelFormat{ 0 };
 		Pixel_flags Flags{ OpenGL_Support };
 
-		HDC DeviceContext;
+		HDC DeviceContext{ nullptr };
 		PFD PixelForma;
 		PIXELFORMATDESCRIPTOR PixelFormatDescriptor;
 

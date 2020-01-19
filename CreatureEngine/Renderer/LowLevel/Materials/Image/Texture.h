@@ -26,13 +26,13 @@ namespace Graphics
 		Texture() = default;
 
 		/* Load Texture from Image file*/
-		Texture(std::string file);
+		Texture(std::string file) noexcept;
 
 		/* Create a Texture from a Bitmap*/
-		Texture(Bitmap &image);
+		Texture(Bitmap &image) noexcept;
 
 		/* Create a Texture other */
-		Texture(Texture&& _other)
+		Texture(Texture&& _other) noexcept
 			:
 			Picture(std::move(_other.Picture)),
 			GL_Handle(std::move(_other.GL_Handle)),
@@ -48,7 +48,7 @@ namespace Graphics
 		}
 
 		/* Assign this Texture from other*/
-		Texture& operator =(Texture&& _other)
+		Texture& operator =(Texture&& _other) noexcept
 		{
 			DEBUGPrint(CON_Red, " I believe I messed this up but do not really have time to think about this right now");
 			return _other;
@@ -68,7 +68,7 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
   		}
 
 
-		Bitmap *Picture;
+		Bitmap *Picture{ nullptr };
 		uint32_t GL_Handle{ 0 };
 		uint32_t Target{ GL_TEXTURE_2D };
 
@@ -108,8 +108,8 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
 		void Render(int _x, int _y, int _w, int _h);
 	private:
-		bool MipmapComplete;
-		bool ImageFormatComplete;
+		bool MipmapComplete{ false };
+		bool ImageFormatComplete{ false };
 	};
 
 
