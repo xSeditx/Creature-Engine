@@ -330,18 +330,30 @@ DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 
 //#define _STACK_TRACE_
 
-/* Trace calls in and our of specified functions 
+/* Trace calls in and our of specified functions
 
-This will likely become so much more in which ALL of our function calls will be wrapped in a method that traces their creation and destruction so when desired 
+This will likely become so much more in which ALL of our function calls will be wrapped in a method that traces their creation and destruction so when desired
 we will have more functionality for tracking the stack and functions while easily being capable of turning it off at will
 */
+//#define _STACK_TRACE_
 #ifdef _STACK_TRACE_
-#    define trace_IN(x)   std::cout << "IN: "<< x << typeid(this).name() << "\n"
-#    define trace_OUT(x)  std::cout <<"OUT: "<< x << typeid(this).name() << "\n"
+#    define trace_IN(x)   std::cout << "IN: "<< x << typeid(*this).name() << "\n"
+#    define trace_OUT(x)  std::cout <<"OUT: "<< x << typeid(*this).name() << "\n"
+#    define trace(x)      { trace_IN(x);
+#    define Return(x)       return x; } trace_OUT(0);
 #else
 #    define trace_IN(x)   
 #    define trace_OUT(x)  
+#    define trace(x)
+#    define Return(x)       return x;
 #endif
+
+
+#define   UNLIKELY   //[[unlikely]]
+
+
+
+ 
 
 
 

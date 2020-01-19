@@ -45,8 +45,11 @@ USAGE:
 	 //const GLubyte *extensions = glGetString(GL_EXTENSIONS);
 	 //Print(extensions);
 	 Print("");
-	 Print("OpenGL Version: " << glGetString(GL_VERSION));
-	 Print("Renderer: " << glGetString(GL_RENDERER));
+	 Print("Vendor: " << OpenGL::get_Vendor());
+	 Print("Renderer: " << OpenGL::get_Renderer());
+	 Print("OpenGL Version: " << OpenGL::get_Version());
+	 Print("GLSL Version: " << OpenGL::get_GLSL_version());
+
 	// Print("Current Context: "; Print(glGetCurrentContext()));
 
 	 //-------------------------------------------------------------------------------------------------------------
@@ -252,54 +255,12 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	}
 
 	/// Create OpenGL Rendering Context
-	{// OpenGL Rendering Context Scope
-		//  wglCreateContext	    Creates a new rendering context.
-		//  WglMakeCurrent	        Sets a thread's current rendering context.
-		//  WglGetCurrentContext	Obtains a handle to a thread's current rendering context.
-		//  WglGetCurrentDC      	Obtains a handle to the device context associated with a thread's current rendering context.
-		//  WglDeleteContext	    Deletes a rendering context.
-
-		GL_Context = wglCreateContext(DeviceContext);
-		if (!wglMakeCurrent(DeviceContext, GL_Context))
-		{
-			std::cout << "Making Current Rendering Context Failed" << "\n";
-		}
-		if (!GL_Context)
-		{
-			MessageBox
-			(/// Turn all this into a Macro for Clearity
-				NULL,
-				"GL Context Creation Failed  "
-				"Cannot Create Renderer",
-				"Error",
-				MB_OK
-			);
-		}
-
-		if (!gladLoadGL())
-		{// If the Loading of OpenGL functions fails report it and exit
-			int error_code = glad_glGetError();
-			std::cout << "Failed to initialize GLAD" << error_code << std::endl;
-			__debugbreak();
-		};
-
-		Title = std::string("OPENGL VERSION ") + std::string((char*)"3.0"); ///glGetString(GL_VERSION));
-		SetWindowTextA
-		(
-			Handle,
-			Title.c_str()
-		);
-
-		//  wglCreateContext	    Creates a new rendering context.
-		//  WglMakeCurrent	        Sets a thread's current rendering context.
-		//  WglGetCurrentContext	Obtains a handle to a thread's current rendering context.
-		//  WglGetCurrentDC      	Obtains a handle to the device context associated with a thread's current rendering context.
-		//  WglDeleteContext	    Deletes a rendering context.
-	}
+	GL_Context = OpenGL::create_OpenGLContext(DeviceContext);
+	s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));
 
 	/// Set Window State
 	{
-		SetForegroundWindow(Handle);                      // Slightly Higher Priority
+		SetForegroundWindow(Handle);                           // Slightly Higher Priority
 		SetFocus(Handle);
 		ShowWindow(Handle, SW_SHOW);
 		UpdateWindow(Handle);
@@ -308,11 +269,11 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	/// Set OpenGL State
 	{
 		glShadeModel(GL_SMOOTH);
-		glClearColor(0.0f, 0.0f, 1.0f, 0.0f);                   // Black Background
-		glClearDepth(1.0f);                         // Depth Buffer Setup
-		glEnable(GL_DEPTH_TEST);                        // Enables Depth Testing
-		glDepthFunc(GL_LEQUAL);                         // The Type Of Depth Test To Do
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);          // Really Nice Perspective Calculations
+		glClearColor(0.0f, 0.0f, 1.0f, 0.0f);                  // Black Background
+		glClearDepth(1.0f);                                    // Depth Buffer Setup
+		glEnable(GL_DEPTH_TEST);                               // Enables Depth Testing
+		glDepthFunc(GL_LEQUAL);                                // The Type Of Depth Test To Do
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);     // Really Nice Perspective Calculations
 		glViewport(0, 0, _width, _height);
 	}
 
@@ -329,7 +290,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 #endif
 	}
-	CreateDefaultShader();
+	create_DefaultShader();
 }
 Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, std::string _name, DWORD _flags)
 	:
@@ -337,36 +298,38 @@ Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, 
 {
 	Parent = _parent;
 }
+
 void Application::Window::Sync()
 {//Display the contents of the back buffer to the Screen (*note:future at VSync if Specified) 
-
 	SwapBuffers(DeviceContext);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void Application::Window::CLS()
 {// Clear the Contents of the BackBuffer 
 	 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}       // Clear The Screen And The Depth Buffer
+}        
 void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)             // Resize And Initialize The GL Window
 {/// NOTE :https://stackoverflow.com/questions/692742/how-do-you-programmatically-resize-and-move-windows-with-the-windows-api
-	if (!this)return;
-	if (_height <= 0)                              // Prevent A Divide By Zero By
+	if (!this)
 	{
-		_height = 1;                           // Making Height Equal One
+		return;
+	}
+	if (_height <= 0)                                 
+	{// Prevent A Divide By Zero By
+		_height = 1;                                   
 	}
 
 	Size = { (float)_width,(float)_height };
 
-	 glViewport(0, 0, _width, _height);                    // Reset The Current Viewport
-	 glMatrixMode(GL_PROJECTION);
-	 glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
-	 glLoadIdentity();                           // Reset The Projection Matrix
-	 
-	///// Calculate The Aspect Ratio Of The Window
-	 gluPerspective(45.0f, (GLfloat)_width / (GLfloat)_height, 0.1f, 100.0f);
-	 
-	 glMatrixMode(GL_MODELVIEW);                     // Select The Modelview Matrix
-	 glLoadIdentity();                           // Reset The Modelview Matrix
+	glViewport(0, 0, _width, _height);               // Reset The Current Viewport
+	glMatrixMode(GL_PROJECTION);                     // Select The Projection Matrix
+	glLoadIdentity();                                // Reset The Projection Matrix
+	
+	//// Calculate The Aspect Ratio Of The Window
+	gluPerspective(45.0f, (GLfloat)_width / (GLfloat)_height, 0.1f, 100.0f);
+	
+	glMatrixMode(GL_MODELVIEW);                      // Select The Modelview Matrix
+	glLoadIdentity();                                // Reset The Modelview Matrix
 
 	MoveWindow
 	(
@@ -378,7 +341,16 @@ void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)       
 		true
 	);
 }
-void Application::Window::CreateDefaultShader()
+void Application::Window::s_Title(std::string _name)
+{
+	Title = _name;
+	SetWindowTextA
+	(
+		Handle,
+		Title.c_str()
+	);
+}
+void Application::Window::create_DefaultShader()
 {
 	// Create the shaders
 	uint32_t ERR = 0;
@@ -533,10 +505,10 @@ void Application::PostMSG ( Event _msg)
 void Application::Dispatch( Event _msg) 
 {
 	getWindow().Messenger().Dispatch(_msg);
-}
-bool Application::PeekMSG ( Event& _msg)
+} ///This is a test of my Trace macro
+bool Application::PeekMSG ( Event& _msg) trace(1)
 {
-	return getWindow().Messenger().PeekMSG(_msg);
+	Return( getWindow().Messenger().PeekMSG(_msg));
 }
 bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _rangemax, int _handlingflags)
 {
@@ -547,7 +519,7 @@ bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _r
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (uMsg == WM_DESTROY) 
+	if (uMsg == WM_DESTROY) UNLIKELY
 	{
 		Application::get().Terminate();
 	}

@@ -83,12 +83,12 @@ bool TEST_PROFILE_WINDOW();
 class App
 	: public Application
 {
-	virtual void OnCreate() {}
-	virtual void OnStart() {}
-//	virtual void OnRun(); /// Differs from start in that it can resume execution; Possibly change to Resume later or something
-//	virtual void OnPause();
-//	virtual void OnSleep();
-//	virtual void OnEnd();
+	virtual void OnCreate()
+	{
+ 	}
+	virtual void OnStart()
+	{
+	}
 
 };
 
@@ -99,6 +99,11 @@ int main()
 
 	App MyApp;
 	MyApp.Init();
+	iVec2 r = OpenGL::get_MaximumViewportDimensions();
+	Print("Max Viewport Dimensions: " << r.x << " : " << r.y);
+	iVec4 vp = OpenGL::get_Viewport();
+ 	Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w );
+
 	MyApp.Run();
 	MyApp.End();
 
