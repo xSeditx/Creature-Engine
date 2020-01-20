@@ -37,52 +37,71 @@ ViewMatrixStack;       |  - Current View Matrix Stack.
 ProjectionMatrixStack; |  - Current Projection Matrix Stack.
 
 
-											|  - Viewport
-											|  ------------------
-  static Viewport *Camera;                  |  - Static Currently Active Camera
-  ________									|
-  PRIVATE:									|
-  ________									|
-											|  - Vec3
-											|  ------------------
-  Position,									|  - Current Position state
-  Rotation,									|  - Current Rotation state
-  Forward,									|  - Current Forward Vector the direction the Camera is facing
-  Right,									|  - Current Right facing Vector
-  Up;                                       |  - Current Up Vector
-											|  - Matrix
-											|  -----------
-  Matrix Identity = Matrix(1.0f);           |  - Returns an Identity Matrix
+ Data Member |   Viewport
+-------------|-------------------
+  static Viewport *Camera; |  Static Currently Active Camera Instance
+
+___						
+  PRIVATE:									
+___
+
+#### Vec3
+ Data Memeber | Description
+-----------------------------|-------
+  Position,    |    Current Position state
+  Rotation,    |    Current Rotation state
+  Forward,     |    Current Forward Vector the direction the Camera is facing
+  Right,       |    Current Right facing Vector
+  Up;          |    Current Up Vector
 
 
-________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-================================================================================================================================================================================================================================
-  API:
+#### Matrix
+
+ Data Members |  Description
+--------------|-------------
+  Matrix Identity = Matrix(1.0f);  |    Returns an Identity Matrix
+
+
+<hr>
+
+
+====
+### API:
+====
+
    Viewport(Vec3 positon, Vec3 Rotation);
    --------------------------------------
-   void PushProjectionMatrix();               -  Pushes the Current Camera Projection Matrix to the Stack
-   void PushViewMatrix();                     -  Pushes the Current Camera View Matrix to the Stack
-   void PopProjectionMatrix();	              -  Pop the Current Camera Projection Matrix to the Stack setting the previous Matrix as the current
-   void PopViewMatrix();		              -  Pop the Current Camera View Matrix to the Stack setting the previous Matrix as the current
-   //=======================================================================================================================================================
-   // FUNCTIONS FOR THE CAMERA CLASS
-   //=======================================================================================================================================================
-   Matrix GetViewMatrix();                    - Return Current Active ViewMatrix
-   void Update();				              - Updates the Transforms for Camera Location
-   void Bind();					              - Sets the Uniforms of the Currently Active Shader for the Projection and Model Matrices
-   void Unbind();				              - Currently Nothing
-   void Render();				              - FUTURE: Render The Scene Associate with the Camera here, possibly shadow mapping but that might get contained in the Light class
-   void Rotate(float pitch, float yaw);       - Set the current Rotation of the Camera
-   void MoveForward(float speed);			  - Move the current Position Forward at @param Speed
-   void MoveBack(float speed);				  - Move the current Position back at @param Speed
-   void MoveLeft(float speed);				  - Move the current Position Left at @param Speed
-   void MoveRight(float speed);				  - Move the current Position Right at @param Speed
-   //=======================================================================================================================================================
-   void RotateX(GLfloat Angle);				  - Apply X Axis Rotation
-   void RotateY(GLfloat Angle);				  - Apply Y Axis Rotation
-   void RotateZ(GLfloat Angle);				  - Apply Z Axis Rotation
-   void Translate(Vec3 pos);				  - Apply Transform for the Current Position
-   void Set_ViewMatrix(Matrix mat);           - Set the Current view Matrix via @param Matrix mat
-   void Set_ProjectionMatrix(Matrix mat);     - Set the Current Projection Matrix via @param Matrix mat
-=================================================================================================================================================================
 
+
+    Method |  Description
+-----------|---------------
+   void PushProjectionMatrix();| Pushes the Current Camera Projection Matrix to the Stack
+   void PushViewMatrix();      | Pushes the Current Camera View Matrix to the Stack
+   void PopProjectionMatrix(); | Pop the Current Camera Projection Matrix to the Stack setting the previous Matrix as the current
+   void PopViewMatrix();       | Pop the Current Camera View Matrix to the Stack setting the previous Matrix as the current
+ 
+
+____
+#### FUNCTIONS FOR THE CAMERA CLASS
+____
+
+
+ 
+   Public Function                        |        Description
+------------------------------------------|-------------------------------
+Matrix GetViewMatrix();                   |    Return Current Active ViewMatrix
+void Update();				              |    Updates the Transforms for Camera Location
+void Bind();					          |    Sets the Uniforms of the Currently Active Shader for the Projection and Model Matrices
+void Unbind();				              |    Currently Nothing
+void Render();                            |    FUTURE: Render The Scene Associate with the Camera here, possibly shadow mapping but that might get contained in the Light class
+void Rotate(float pitch, float yaw);      |    Set the current Rotation of the Camera
+void MoveForward(float speed);            |    Move the current Position Forward at @param Speed
+void MoveBack(float speed);               |    Move the current Position back at @param Speed
+void MoveLeft(float speed);               |    Move the current Position Left at @param Speed
+void MoveRight(float speed);	          |    Move the current Position Right at @param Speed
+void RotateX(GLfloat Angle);	          |    Apply X Axis Rotation
+void RotateY(GLfloat Angle);	          |    Apply Y Axis Rotation
+void RotateZ(GLfloat Angle);	          |    Apply Z Axis Rotation
+void Translate(Vec3 pos);	              |    Apply Transform for the Current Position
+void Set_ViewMatrix(Matrix mat);          |    Set the Current view Matrix via @param Matrix mat
+void Set_ProjectionMatrix(Matrix mat);    |    Set the Current Projection Matrix via @param Matrix mat
