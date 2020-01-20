@@ -148,6 +148,7 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +174,7 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

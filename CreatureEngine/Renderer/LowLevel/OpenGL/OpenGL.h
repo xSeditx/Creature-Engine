@@ -234,6 +234,29 @@ namespace OpenGL
 
 
 
+/* 
+int Shader::GetCSMaxBlocks()
+{//	data returns one value, the maximum number of active shader storage blocks that may be accessed by a compute shader.
+	int results = 0;
+	glGetIntegerv(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, &results);
+	return results;
+}
+int Shader::GetMaxShaderStorageBlocks()
+{//	data returns one value, the maximum total number of active shader storage blocks that may be accessed by all active shaders.
+	int results = 0;
+	glGetIntegerv(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, &results);
+	return results;
+}
+	int GetCSMaxBlocks();
+	int GetMaxShaderStorageBlocks();
+
+
+
+*/
+
+
+
+
 
 
 //		data returns one value, the name of the program object that is currently active, or 0 if no program object is active.See glUseProgram.

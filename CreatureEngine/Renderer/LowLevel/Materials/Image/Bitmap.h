@@ -18,7 +18,7 @@ namespace Graphics
 		uint32_t Height() { return Size.y; }
 
 		/* Return the total size in Bytes for our entire Image */
-		size_t size() { return static_cast<int64_t>(Size.x * Size.y * BytesPerPixel); }
+		size_t size() { return  ((size_t)Size.x * (size_t)Size.y * (size_t)BytesPerPixel); }
 
 		/* Return pointer to Raw data */
 		uint8_t* Data()            { return rawData; }

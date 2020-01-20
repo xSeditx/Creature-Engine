@@ -98,7 +98,7 @@ namespace Profiling
 
 		size_t size()
 		{
-			return static_cast<size_t>(Size.x * Size.y) * sizeof(uint32_t);
+			return ((size_t)Size.x * (size_t)Size.y) * sizeof(uint32_t);
 		}
 
 	private:

@@ -48,6 +48,9 @@
     <Filter Include="Source Files\Graphics\Camera">
       <UniqueIdentifier>{42b9264f-4777-41d5-8a5c-8cac2f2f0cc8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Graphics\Renderer\Shader">
+      <UniqueIdentifier>{33765486-aa39-4767-b84f-ba7aab571e21}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -100,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp">
       <Filter>Source Files\Graphics\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp">
+      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +177,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h">
       <Filter>Source Files\Graphics\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h">
+      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

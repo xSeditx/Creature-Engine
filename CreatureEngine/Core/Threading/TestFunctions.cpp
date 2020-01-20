@@ -96,7 +96,7 @@ std::vector<uint64_t> TestFunctionF(int _paramA)
 	{
 		double A = sqrt(i*i);
 		//		std::cout << "F: " << A ;
-		result += static_cast<uint64_t>(_paramA * i + A);
+		result += static_cast<uint64_t>(_paramA) * (uint64_t)i + A;
 		SomethingAllocated.push_back(result);
 	}
 	Sleep(SLEEP_TIME);
@@ -118,7 +118,7 @@ std::vector<uint64_t> TestFunctionG(int _paramA)
 	{
 		double A = sqrt(i*i);
 		//		std::cout << "G: " << A ;
-		result += static_cast<uint64_t>((_paramA * i) / pow(A, i));
+		result += (uint64_t)(((uint64_t)_paramA * (uint64_t)i) / pow(A, i));
 		SomethingAllocated.push_back(result);
 	}
 	Sleep(SLEEP_TIME);
@@ -184,7 +184,7 @@ std::vector<uint64_t> TestFunctionJ(int _paramA)
 		A = pow(i, _paramA) / i;
 		if (A == B)C = i;
 		Worker_Print("J: " << A << ":");
-		uint64_t result = A * C;
+		uint64_t result = (uint64_t)(A * (uint64_t)C);// Marked this to prevent the overflow will it work
 		SomethingAllocated.push_back(result);
 	}
 	Sleep(SLEEP_TIME);
@@ -198,7 +198,7 @@ uint64_t Worker_TestFunction(size_t _count)
 {
 	int B = rand() % _count;
 	int C{ 0 };
-	for (int64_t i{ 0 }; i < _count; ++i)
+	for (uint64_t i{ 0 }; i < _count; ++i)
 	{
 		std::cout << i << ":";
 		if (!((i + 1) % (B + 1)))C++;
