@@ -29,12 +29,12 @@ ___
 ProjectionMatrix;   |Current Projection Matrix
 ViewMatrix;    | Current ViewMatrix
 
-#### std::stack<Matrix>
+#### std::stack\<Matrix\>
 
   Data Member |  Description
 --------------|----------------------
-  std::stack<Matrix> ViewMatrixStack;       |  - Current View Matrix Stack.
-  std::stack<Matrix> ProjectionMatrixStack; |  - Current Projection Matrix Stack.
+ViewMatrixStack;       |  - Current View Matrix Stack.
+ProjectionMatrixStack; |  - Current Projection Matrix Stack.
 
 
 											|  - Viewport
