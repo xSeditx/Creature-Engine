@@ -67,20 +67,6 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 			Unbind();
   		}
 
-
-		Bitmap *Picture{ nullptr };
-		uint32_t GL_Handle{ 0 };
-		uint32_t Target{ GL_TEXTURE_2D };
-
-		uint32_t
-			Type, // GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32 and GL_DEPTH_COMPONENT32F.
-			Format{ GL_RGB },
-			WrapMode,
-			Filtering,
-			InternalFormat{ GL_RGB };
-
-		GPUptr Handle{ NULL };
-
 		void SetTarget(unsigned int param);
 
 		void SetFiltering(unsigned int param);
@@ -108,6 +94,21 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
 		void Render(int _x, int _y, int _w, int _h);
 	private:
+
+		Bitmap *Picture{ nullptr };
+		uint32_t GL_Handle{ 0 };
+		uint32_t Target{ GL_TEXTURE_2D };
+
+		uint32_t
+			Type{ GL_DEPTH_COMPONENT32F }, //GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32 and GL_DEPTH_COMPONENT32F.
+			Format{ GL_RGB },
+			WrapMode{ GL_REPEAT },
+			Filtering{ GL_LINEAR },
+			InternalFormat{ GL_RGB };
+
+		GPUptr Handle{ NULL };
+
+
 		bool MipmapComplete{ false };
 		bool ImageFormatComplete{ false };
 	};

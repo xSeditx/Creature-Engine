@@ -144,7 +144,11 @@
     <ClCompile Include="Profiling\SystemInfo.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,7 +169,12 @@
     <ClInclude Include="Profiling\Timing\Timer.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -135,7 +135,7 @@ namespace OpenGL
 		int PixelFormat;
 		PIXELFORMATDESCRIPTOR PixelFormatDescriptor;
 		uint32_t _flags{ 0 };
-		HDC DeviceContext{ 0 };
+		HDC DeviceContext{ nullptr };
 
 		memset(&PixelFormatDescriptor, 0, sizeof(PixelFormatDescriptor));
 		PixelFormatDescriptor.nSize = sizeof(PixelFormatDescriptor);
@@ -144,6 +144,7 @@ namespace OpenGL
 		PixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
 		PixelFormatDescriptor.cColorBits = 32;
 
+#pragma warning(suppress : 4996) 
 		PixelFormat =
 			ChoosePixelFormat
 			(
@@ -163,7 +164,7 @@ namespace OpenGL
 			);
 			__debugbreak();
 		}
-
+#pragma warning(suppress : 4996) 
 		if (SetPixelFormat(DeviceContext, PixelFormat, &PixelFormatDescriptor) == FALSE)
 		{
 			MessageBox
@@ -177,6 +178,7 @@ namespace OpenGL
 			__debugbreak();
 		}
 
+#pragma warning(suppress : 4996) 
 		DescribePixelFormat
 		(
 			DeviceContext,
@@ -205,16 +207,6 @@ namespace OpenGL
 	void set_ActiveTexture(uint32_t _slot)
 	{
 		glActiveTexture(_slot);
-	}
-	int  get_CurrentShader()
-	{
-		int result{ 0 };
-		glGetIntegerv(GL_CURRENT_PROGRAM, &result);
-		return result;
-	}
-	void set_Shader(uint32_t _program)
-	{
-		glUseProgram(_program);
 	}
 
 	int  get_RecommendedIndices()

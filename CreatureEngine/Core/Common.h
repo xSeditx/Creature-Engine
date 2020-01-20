@@ -52,16 +52,29 @@
 ///#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
 
 
-
-
-
+//  Arithmetic overflow: Using operator Just pain in the ass warning about using Integer inside of [] brackets and mostly shit like that.
+//  Check it every now and then but mostly keep this off
+#pragma warning( disable : 26451 ) 
 
 // ===================================================================================================================================================
 //  Declarations for Library Import and Exportation: [incomplete]
 // ===================================================================================================================================================
 
+#ifdef DLL_CONFIG
+#    ifdef MY_EXPORTS
+#    define CREATURE_API __declspec(dllexport)
+#else
+#    define CREATURE_API __declspec(dllimport)
+#endif
+#    else
+#    define CREATURE_API // What goes here?
+#endif
+
+#define EXPORT comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
+
+
 /* Will determine if the Given class or structure is exportable */
-#define CREATURE_API
+
 
 /* Calling convention of the API */
 #define CREATURE_CALL   __stdcall
@@ -354,9 +367,13 @@ we will have more functionality for tracking the stack and functions while easil
 
 
  
+#define  _GL(_code)    _code
+#define _GL3(_code)    _code
+#define _GL4(_code)    _code
 
 
-
+#define RADIANS(x)            ((x) * 0.01745329251)
+#define DEGREES(x)            ((x) * 57.2957795131)
 
  /*
 Idk how to handle this yet in a platform independent way so we will cast a void * to the Native Application Instance for now, 

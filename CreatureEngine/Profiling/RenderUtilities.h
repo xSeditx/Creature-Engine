@@ -25,7 +25,7 @@ namespace Profiling
 		}
 	private:
 		std::atomic_flag Flag{ ATOMIC_FLAG_INIT };
-	   _Ty Value;
+		_Ty Value{ 0 };
 	};
 
 
@@ -41,8 +41,8 @@ namespace Profiling
 			:
 			Size(_size),
 			Position(_position),
-			ReadBuffer(new Pixel[static_cast<size_t>(_size.x * _size.y)]),
-			WriteBuffer(new Pixel[static_cast<size_t>(_size.x * _size.y)])
+			ReadBuffer (new Pixel[static_cast<size_t>(_size.x) * static_cast<size_t>(_size.y)]),
+			WriteBuffer(new Pixel[static_cast<size_t>(_size.x) * static_cast<size_t>(_size.y)])
 		{
 			memset(ReadBuffer, 0, size());
 			memset(WriteBuffer, 0, size());
@@ -98,7 +98,7 @@ namespace Profiling
 
 		size_t size()
 		{
-			return static_cast<size_t>(Size.x * Size.y) * sizeof(uint32_t);
+			return ((size_t)Size.x * (size_t)Size.y) * sizeof(uint32_t);
 		}
 
 	private:

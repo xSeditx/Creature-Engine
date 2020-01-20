@@ -36,8 +36,20 @@
     <Filter Include="Source Files\System\Threading">
       <UniqueIdentifier>{f7a18410-dda6-4711-ab3e-6120d49a7e74}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Graphics\Window">
-      <UniqueIdentifier>{d1db1727-55b4-4ce6-9fac-043dc9d817cd}</UniqueIdentifier>
+    <Filter Include="Source Files\Graphics\Renderer">
+      <UniqueIdentifier>{4b0d588c-cf0d-4d66-877d-2b1c5ef98f3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Image">
+      <UniqueIdentifier>{ed460fd1-21ca-4e4f-a46b-282e171cba42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Buffers">
+      <UniqueIdentifier>{e9431067-58e1-498e-83e9-11c87b682d47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Camera">
+      <UniqueIdentifier>{42b9264f-4777-41d5-8a5c-8cac2f2f0cc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Renderer\Shader">
+      <UniqueIdentifier>{33765486-aa39-4767-b84f-ba7aab571e21}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -62,12 +74,6 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="..\Bin\glad\src\glad.c">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -77,23 +83,32 @@
     <ClCompile Include="Core\Threading\TestFunctions.cpp">
       <Filter>Source Files\System\Threading</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Application.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp">
+      <Filter>Source Files\Graphics\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp">
+      <Filter>Source Files\Graphics\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp">
+      <Filter>Source Files\Graphics\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp">
+      <Filter>Source Files\Graphics\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp">
+      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Core\ECS\ECScomponent.h">
       <Filter>Source Files\ECS</Filter>
     </ClInclude>
@@ -141,6 +156,30 @@
     </ClInclude>
     <ClInclude Include="Core\Application.h">
       <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h">
+      <Filter>Source Files\Graphics\Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h">
+      <Filter>Source Files\Graphics\Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
+      <Filter>Source Files\Graphics\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h">
+      <Filter>Source Files\Graphics\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h">
+      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

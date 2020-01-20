@@ -27,12 +27,12 @@ float TestFunctionC(float _paramA, int _paramB);
 //float SortGroup(uint32_t _input);
 
 std::string TestFunctionD(float _paramA, int _paramB);
-std::vector<uint32_t> TestFunctionE(int _paramA);
-std::vector<uint32_t> TestFunctionF(int _paramA);
-std::vector<uint32_t> TestFunctionG(int _paramA);
-std::vector<uint32_t> TestFunctionH(int _paramA);
-std::vector<uint32_t> TestFunctionI(int _paramA);
-std::vector<uint32_t> TestFunctionJ(int _paramA);
+std::vector<uint64_t> TestFunctionE(int _paramA);
+std::vector<uint64_t> TestFunctionF(int _paramA);
+std::vector<uint64_t> TestFunctionG(int _paramA);
+std::vector<uint64_t> TestFunctionH(int _paramA);
+std::vector<uint64_t> TestFunctionI(int _paramA);
+std::vector<uint64_t> TestFunctionJ(int _paramA);
 
 void  P0R0();
 float P1R1(int _param);
@@ -40,7 +40,7 @@ void  P1R0(int _param);
 void  P2R0(int _param, int _param2);
 int   P0R1();
 
-uint64_t TestCompile(std::vector<std::vector<uint32_t>> _input);
+uint64_t TestCompile(std::vector<std::vector<uint64_t>> _input);
 uint64_t Worker_TestFunction(size_t _count);
 
 

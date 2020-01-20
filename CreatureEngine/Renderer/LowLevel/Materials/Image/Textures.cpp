@@ -19,6 +19,7 @@ namespace Graphics
 		Picture(nullptr),
 		ImageFormatComplete(false)
 	{
+		WARN_ME("SOIL Load on the Texture constructor is Deactivated right now");
 		///TextureID = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y | SOIL_FLAG_TEXTURE_REPEATS);
 	}
 	Texture::Texture(Bitmap& image) noexcept
