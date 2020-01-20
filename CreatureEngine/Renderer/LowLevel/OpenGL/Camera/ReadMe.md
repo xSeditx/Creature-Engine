@@ -13,8 +13,7 @@ ___
 
     Data Members                            |    Description and Type
 --------------------------------------------|----------------------------------------
-											|  Floating points
-											|  ---------------
+	 TYPE                                   |  Floating points
   FOV                                       |  - Field of view in Degrees
   AspectRatio                               |  - Aspect Ratio of the Screen
   Near,                                     |  - Near clipping range
