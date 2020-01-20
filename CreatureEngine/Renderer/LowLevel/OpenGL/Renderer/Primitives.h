@@ -1,5 +1,5 @@
 #pragma once
-
+#include<map>
 #include"../OpenGL.h"
 
 #include"Core/Common.h"
@@ -247,11 +247,13 @@ class DebugQuad : public Mesh
 public:
 	DebugQuad()
 	{
+	}
+	DebugQuad(Vec4* _vertices)
+	{
 		VAO = new VertexArrayObject();
-		VAO->Attach(VERTEX, new VertexBufferObject<Vec4>(&Vertices[0], 6));
+		VAO->Attach(VERTEX, new VertexBufferObject<Vec4>(_vertices, 6));
 		Program = new Shader("Resources\\Shaders\\DebugQuad.sfx");
 	}
-
 	void Render(GPUptr tex)
 	{
 		Program->Enable();

@@ -38,8 +38,8 @@ public:
 	Mesh();
 	Mesh(std::string file);
 
-	void Bind();
-	void Render(Shader& _shader) override;
+	void Bind() override;
+	void Render() override;
 
 	void Unbind() override;
 	void Update() override;

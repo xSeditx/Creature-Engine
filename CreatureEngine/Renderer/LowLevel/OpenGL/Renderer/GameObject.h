@@ -37,8 +37,10 @@ public:
 	virtual void Update() = pure_virtual;
 	virtual void Unbind() = pure_virtual;
 
-	virtual void Bind(Shader& _shader) = pure_virtual;
-	virtual void Render(Shader& _shader) = pure_virtual;
+	//virtual void Bind(Shader& _shader) = pure_virtual;
+	//virtual void Render(Shader& _shader) = pure_virtual;
+	virtual void Bind() = pure_virtual;
+	virtual void Render() = pure_virtual;
 
 	//TagID GetID() { return Object_ID; }
 

@@ -174,9 +174,10 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GameObject.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h" />
-    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primatives.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primitives.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h" />

@@ -190,10 +190,13 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h">
       <Filter>Source Files\Graphics\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primatives.h">
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h">
       <Filter>Source Files\Graphics\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h">
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GameObject.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primitives.h">
       <Filter>Source Files\Graphics\Renderer</Filter>
     </ClInclude>
   </ItemGroup>

@@ -261,42 +261,42 @@ public:
 
 		case BufferTypes::VERTEX:
 		{
-			buffer->Location = Shader::GetActiveShader()->AttributeLocation("VertexPosition");
+			buffer->Location = Shader::get().AttributeLocation("VertexPosition");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = VERTEX;
 			break;
 		}
 		case BufferTypes::COLOR:
 		{
-			buffer->Location = Shader::GetActiveShader()->AttributeLocation("VertexColor");
+			buffer->Location = Shader::get().AttributeLocation("VertexColor");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = COLOR;
 			break;
 		}
 		case BufferTypes::NORMAL:
 		{
-			buffer->Location = Shader::GetActiveShader()->AttributeLocation("VertexNormal");
+			buffer->Location = Shader::get().AttributeLocation("VertexNormal");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = NORMAL;
 			break;
 		}
 		case BufferTypes::UVCOORD:
 		{
-			buffer->Location = Shader::GetActiveShader()->AttributeLocation("TextureCoord");
+			buffer->Location = Shader::get().AttributeLocation("TextureCoord");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = UVCOORD;
 			break;
 		}
 		case BufferTypes::TANGENT:
 		{
-			buffer->Location = Shader::GetActiveShader()->AttributeLocation("VertexTangent");
+			buffer->Location = Shader::get().AttributeLocation("VertexTangent");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = TANGENT;
 			break;
 		}
 		case BufferTypes::BITANGENT:
 		{
-			buffer->Location = Shader::GetActiveShader()->AttributeLocation("VertexBitangent");
+			buffer->Location = Shader::get().AttributeLocation("VertexBitangent");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = BITANGENT;
 			break;

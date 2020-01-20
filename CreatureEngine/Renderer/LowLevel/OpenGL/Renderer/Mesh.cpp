@@ -46,7 +46,7 @@ void Mesh::Unbind()
 	//	VAO->Unbind();
 }
 
-void Mesh::Render(Shader& _shader)
+void Mesh::Render()
 {
 	//if (needsUpdated == true)
 	//{
@@ -55,13 +55,13 @@ void Mesh::Render(Shader& _shader)
 	//Bind(_shader);
 	TODO("Minor Optimizations to remove calling functions and to turn Mesh Render into just OpenGL calls");
 	VAO->Bind();
-	_shader.SetUniform("ModelMatrix", Transform);
+	Shader::get().SetUniform("ModelMatrix", Transform);
 
 	glDrawElements(PrimativeType, VAO->ElementCount, GL_UNSIGNED_INT, nullptr);
 	//Unbind();
 	for (auto& C : Children)
 	{
-		C.Render(_shader);
+		C.Render();
 	}
 }
 

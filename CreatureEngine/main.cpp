@@ -79,11 +79,12 @@ bool TEST_PROFILE_WINDOW();
 #include"FrontEnd/Window.h"
 #include"Core/Application.h"
 
+#include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
 
 class App
 	: public Application
 {
-
+	DebugQuad OBJECT;
 	Vec2 Vertices[3] =
 	{
 		{-1.0,-1.0 },
