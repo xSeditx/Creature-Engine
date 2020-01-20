@@ -83,11 +83,81 @@ bool TEST_PROFILE_WINDOW();
 class App
 	: public Application
 {
+
+	Vec2 Vertices[3] =
+	{
+		{-1.0,-1.0 },
+		{ 1.0,-1.0 },
+		{ 0.0, 1.0 }
+	};
+
+	Vec2 UVcoords[3] =
+	{
+		{ 0.0, 0.0 },
+		{ 1.0, 0.0 },
+		{ 1.0, 1.0 }
+	};
+
+	GLuint Indices[3] =
+	{
+		0,1,2
+	};
+	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
+
 	virtual void OnCreate()
 	{
+
+
+		glUseProgram(getWindow().defaultShader());
+		glGenVertexArrays(1, &VAO);
+		glBindVertexArray(VAO);
+
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		GLuint Location = 4;
+
+		Location = glGetAttribLocation(getWindow().defaultShader(), "aPos");
+		glEnableVertexAttribArray(Location);
+		glVertexAttribPointer(Location, 3, GL_FLOAT, GL_FALSE, 0, (char *)NULL);
+
+		uint32_t ERR = 0;
+		if ((ERR = glGetError()))
+		{
+			Print("Error" << ERR);
+			__debugbreak();
+		}
+
+		ERR = 0;
+		if ((ERR = glGetError()))
+		{
+			Print("Error" << ERR);
+			__debugbreak();
+		}
  	}
-	virtual void OnStart()
+	virtual void OnRender()
 	{
+		glUseProgram(getWindow().defaultShader());
+		{
+			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			{
+				//glVertexAttribPointer(
+				//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				//	3,                  // size
+				//	GL_FLOAT,           // type
+				//	GL_FALSE,           // normalized?
+				//	0,                  // stride
+				//	(void*)0            // array buffer offset
+				//);
+
+				glDrawArrays(GL_TRIANGLES, 0, 3);
+			}
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+		glUseProgram(0);
 	}
 
 };
@@ -107,22 +177,14 @@ int main()
 	MyApp.Run();
 	MyApp.End();
 
-//  OpenGL::InitOpenGL();
-//  GLuint GL_Handle{ 0 };
-//  glGenTextures(1, &GL_Handle);
-//  Print("Passed");
-//	TEST_UNIT(TEST_PROFILE_WINDOW());
-
+  	TEST_UNIT(TEST_PROFILE_WINDOW());
 	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
 	DEBUGPrint(CON_Red, "Testing Print");
-	//auto E = ThreadPool::get().Async(TestRecursion, 15);
-	//auto R = ThreadPool::get().Async(TestRecursion, 15);
-	//E.get();
-	//R.get();
+ 
 
 	while (true)
 	{
-TestAsyncSort SortTest( 1024);// 4096); //262144);//
+        TestAsyncSort SortTest( 1024 ); // 4096); // 262144); //
 
 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
@@ -229,7 +291,7 @@ TestAsyncSort SortTest( 1024);// 4096); //262144);//
 			Print("Async :" << result);
 			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
 	
-			std::vector<std::vector<uint32_t>> Test;
+			std::vector<std::vector<uint64_t>> Test;
 
 			Test.push_back(TPTest5T.get());
 			Test.push_back(TPTest6T.get());
@@ -266,7 +328,7 @@ TestAsyncSort SortTest( 1024);// 4096); //262144);//
 			}
 			Print("Linear :" << result);
 
-			std::vector<std::vector<uint32_t>> Test;
+			std::vector<std::vector<uint64_t>> Test;
 			Test.push_back(Test5);
 			Test.push_back(Test6);
 			Test.push_back(Test7);
@@ -285,70 +347,7 @@ TestAsyncSort SortTest( 1024);// 4096); //262144);//
 	//	Profiling::Memory::TrackListMemoryUsage();
 	return 0;
 }
- 
-			//SortTest.AsyncMergeSort();
-
-
-/*
-Great List of Compiler Directives.
-Likely can eliminate verything else in this Comment because of this
-https://assets.ctfassets.net/9pcn2syx7zns/61QggiXm0CGYmsJEUfwjld/682ad1c09e795402d3c5f10c009985ad/preprocessor.pdf
-
-
-int _inp(ushort _port);                          Reads a Port
-int _outp(unsigned short port, int databyte)    Writes to a Port
-
-#pragma auto_inline( [ { on | off } ] )
-
-#pragma loop( hint_parallel( n ) )
-#pragma loop( no_vector )
-#pragma loop( ivdep )
-
-#pragma omp [directive]
-             parallel      Defines a parallel region, which is code that will be executed by multiple threads in parallel.
-             for           Causes the work done in a for loop inside a parallel region to be divided among threads.
-             sections      Identifies code sections to be divided among all threads.
-             single        Lets you specify that a section of code should be executed on a single thread, not necessarily the master thread.
-             
-             For master and synchronization:
-             Directive     Description
-             
-             master        Specifies that only the master thread should execute a section of the program.
-             critical      Specifies that code is only executed on one thread at a time.
-             barrier       Synchronizes all threads in a team; all threads pause at the barrier, until all threads execute the barrier.
-             atomic        Specifies that a memory location that will be updated atomically.
-             flush         Specifies that all threads have the same view of memory for all shared objects.
-             ordered       Specifies that code under a parallelized for loop should be executed like a sequential loop.
-             
-             threadprivate Specifies that a variable is private to a thread.
-*/
-
-/*
-=====================================================================================================================
-									  NOTES:
-=====================================================================================================================
- Pragmas for C++ Compilers, Good resource
- https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
-
- Open STD:
- http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3857.pdf
-
- Actor based system
- http://www.actor-framework.org/pdf/manual.pdf
-
- Physics Solver:
- https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
-
-
-
- Advanced Programming with Microsoft Quick C
- https://books.google.com/books?id=IjCjBQAAQBAJ&pg=PA41&lpg=PA41&dq=%23pragma+check_stack(+%5B%7B+on+%7C+off+%7D%5D+)+what+does+it+do&source=bl&ots=44JLKNArHT&sig=ACfU3U3eSXG1JpiNDv9IgKbrUv3ByJrJqw&hl=en&sa=X&ved=2ahUKEwj3rrKygeTmAhVxkuAKHbx8C1YQ6AEwAXoECAkQAQ#v=onepage&q=%23pragma%20check_stack(%20%5B%7B%20on%20%7C%20off%20%7D%5D%20)%20what%20does%20it%20do&f=false
-=====================================================================================================================
-*/
-
-
-
-
+  
 
 
 bool TEST_PROFILE_WINDOW()
@@ -387,3 +386,63 @@ bool TEST_PROFILE_WINDOW()
 
 	return true;
 }
+
+
+
+
+/*
+=====================================================================================================================
+									  NOTES:
+=====================================================================================================================
+ Pragmas for C++ Compilers, Good resource
+ https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
+
+ Open STD:
+ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3857.pdf
+
+ Actor based system
+ http://www.actor-framework.org/pdf/manual.pdf
+
+ Physics Solver:
+ https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
+
+
+
+ Advanced Programming with Microsoft Quick C
+ https://books.google.com/books?id=IjCjBQAAQBAJ&pg=PA41&lpg=PA41&dq=%23pragma+check_stack(+%5B%7B+on+%7C+off+%7D%5D+)+what+does+it+do&source=bl&ots=44JLKNArHT&sig=ACfU3U3eSXG1JpiNDv9IgKbrUv3ByJrJqw&hl=en&sa=X&ved=2ahUKEwj3rrKygeTmAhVxkuAKHbx8C1YQ6AEwAXoECAkQAQ#v=onepage&q=%23pragma%20check_stack(%20%5B%7B%20on%20%7C%20off%20%7D%5D%20)%20what%20does%20it%20do&f=false
+=====================================================================================================================
+*/
+
+/*
+             Great List of Compiler Directives.
+    Likely can eliminate verything else in this Comment because of this
+    https://assets.ctfassets.net/9pcn2syx7zns/61QggiXm0CGYmsJEUfwjld/682ad1c09e795402d3c5f10c009985ad/preprocessor.pdf
+    
+    
+    int _inp(ushort _port);                          Reads a Port
+    int _outp(unsigned short port, int databyte)    Writes to a Port
+    
+    #pragma auto_inline( [ { on | off } ] )
+    
+    #pragma loop( hint_parallel( n ) )
+    #pragma loop( no_vector )
+    #pragma loop( ivdep )
+    
+    #pragma omp [directive]
+    			 parallel      Defines a parallel region, which is code that will be executed by multiple threads in parallel.
+    			 for           Causes the work done in a for loop inside a parallel region to be divided among threads.
+    			 sections      Identifies code sections to be divided among all threads.
+    			 single        Lets you specify that a section of code should be executed on a single thread, not necessarily the master thread.
+    
+    			 For master and synchronization:
+    			 Directive     Description
+    
+    			 master        Specifies that only the master thread should execute a section of the program.
+    			 critical      Specifies that code is only executed on one thread at a time.
+    			 barrier       Synchronizes all threads in a team; all threads pause at the barrier, until all threads execute the barrier.
+    			 atomic        Specifies that a memory location that will be updated atomically.
+    			 flush         Specifies that all threads have the same view of memory for all shared objects.
+    			 ordered       Specifies that code under a parallelized for loop should be executed like a sequential loop.
+    
+    			 threadprivate Specifies that a variable is private to a thread.
+*/

@@ -45,8 +45,9 @@ extern std::string FragmentShader;
 class Application
 {
 private:
-	bool Running{ true };
-	HINSTANCE Instance{ nullptr };
+	bool Running       { true };
+	HINSTANCE Instance { nullptr };
+
 	struct Window
 	{
 		struct InputDevices
@@ -158,6 +159,8 @@ private:
 
 		HDC g_DeviceContext() { return DeviceContext; }
 
+		/* Return the Most basic and default Shader */
+		uint32_t defaultShader() { return BasicShader; }
  	private:
 		uint32_t BasicShader;
 

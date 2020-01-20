@@ -70,15 +70,15 @@ std::string TestFunctionD(float _paramA, int _paramB)
 OPTIMIZATION_ON()
 
 OPTIMIZATION_OFF()
-std::vector<uint32_t> TestFunctionE(int _paramA)
+std::vector<uint64_t> TestFunctionE(int _paramA)
 {
-	std::vector<uint32_t> SomethingAllocated;
+	std::vector<uint64_t> SomethingAllocated;
 
 	uint64_t result{ 0 };
-	for (int i{ 0 }; i < _paramA; ++i)
+	for (uint64_t i{ 0 }; i < _paramA; ++i)
 	{
 		//	std::cout << "E: " << i*i ;
-		result += static_cast<int64_t>(i * i);
+		result += (i * i);
 		SomethingAllocated.push_back(result);
 	}
 	Sleep(SLEEP_TIME);
@@ -88,15 +88,15 @@ std::vector<uint32_t> TestFunctionE(int _paramA)
 OPTIMIZATION_ON()
 
 OPTIMIZATION_OFF()
-std::vector<uint32_t> TestFunctionF(int _paramA)
+std::vector<uint64_t> TestFunctionF(int _paramA)
 {
-	std::vector<uint32_t> SomethingAllocated;
+	std::vector<uint64_t> SomethingAllocated;
 	uint64_t result{ 0 };
 	for (int i{ 0 }; i < _paramA; ++i)
 	{
 		double A = sqrt(i*i);
 		//		std::cout << "F: " << A ;
-		result += static_cast<int64_t>(_paramA * i + A);
+		result += static_cast<uint64_t>(_paramA * i + A);
 		SomethingAllocated.push_back(result);
 	}
 	Sleep(SLEEP_TIME);
@@ -107,9 +107,9 @@ OPTIMIZATION_ON()
 
 
 OPTIMIZATION_OFF()
-std::vector<uint32_t> TestFunctionG(int _paramA)
+std::vector<uint64_t> TestFunctionG(int _paramA)
 {
-	std::vector<uint32_t> SomethingAllocated;
+	std::vector<uint64_t> SomethingAllocated;
 	uint64_t result{ 0 };
 	int B = rand() % _paramA;
 	int C{ 0 };
@@ -118,7 +118,7 @@ std::vector<uint32_t> TestFunctionG(int _paramA)
 	{
 		double A = sqrt(i*i);
 		//		std::cout << "G: " << A ;
-		result += static_cast<int64_t>((_paramA * i) / pow(A, i));
+		result += static_cast<uint64_t>((_paramA * i) / pow(A, i));
 		SomethingAllocated.push_back(result);
 	}
 	Sleep(SLEEP_TIME);
@@ -128,9 +128,9 @@ std::vector<uint32_t> TestFunctionG(int _paramA)
 OPTIMIZATION_ON()
 
 OPTIMIZATION_OFF()
-std::vector<uint32_t> TestFunctionH(int _paramA)
+std::vector<uint64_t> TestFunctionH(int _paramA)
 {
-	std::vector<uint32_t> SomethingAllocated;
+	std::vector<uint64_t> SomethingAllocated;
 	double A{ 0 };
 	uint64_t result{ 0 };
 	int B = rand() % _paramA;
@@ -150,9 +150,9 @@ std::vector<uint32_t> TestFunctionH(int _paramA)
 OPTIMIZATION_ON()
 
 OPTIMIZATION_OFF()
-std::vector<uint32_t> TestFunctionI(int _paramA)
+std::vector<uint64_t> TestFunctionI(int _paramA)
 {
-	std::vector<uint32_t> SomethingAllocated;
+	std::vector<uint64_t> SomethingAllocated;
 	uint64_t A{ 0 };
 
 	int B = rand() % _paramA;
@@ -173,9 +173,9 @@ std::vector<uint32_t> TestFunctionI(int _paramA)
 OPTIMIZATION_ON()
 
 OPTIMIZATION_OFF()
-std::vector<uint32_t> TestFunctionJ(int _paramA)
+std::vector<uint64_t> TestFunctionJ(int _paramA)
 {
-	std::vector<uint32_t> SomethingAllocated;
+	std::vector<uint64_t> SomethingAllocated;
 	float A = 0;
 	int B = rand() % _paramA;
 	int C{ 0 };
@@ -184,7 +184,7 @@ std::vector<uint32_t> TestFunctionJ(int _paramA)
 		A = pow(i, _paramA) / i;
 		if (A == B)C = i;
 		Worker_Print("J: " << A << ":");
-		uint32_t result = A * C;
+		uint64_t result = A * C;
 		SomethingAllocated.push_back(result);
 	}
 	Sleep(SLEEP_TIME);
@@ -198,7 +198,7 @@ uint64_t Worker_TestFunction(size_t _count)
 {
 	int B = rand() % _count;
 	int C{ 0 };
-	for (uint32_t i{ 0 }; i < _count; ++i)
+	for (int64_t i{ 0 }; i < _count; ++i)
 	{
 		std::cout << i << ":";
 		if (!((i + 1) % (B + 1)))C++;
@@ -208,7 +208,7 @@ uint64_t Worker_TestFunction(size_t _count)
 OPTIMIZATION_ON()
 
 OPTIMIZATION_OFF()
-uint64_t TestCompile(std::vector<std::vector<uint32_t>> _input)
+uint64_t TestCompile(std::vector<std::vector<uint64_t>> _input)
 {
 	uint64_t result{ 0 };
 	for (auto& Y : _input)
