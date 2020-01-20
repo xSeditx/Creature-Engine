@@ -65,17 +65,17 @@ ___
 <hr>
 
 
-====
+____
 ### API:
-====
+____
 
 ____
    Viewport(Vec3 positon, Vec3 Rotation);   Constructor
 ____
 
 
-    Method                   |  Description
------------------------------|---------------
+Methods                  |   Description
+-------------------------|-------------------------------------------------------------------
 void PushProjectionMatrix(); | Pushes the Current Camera Projection Matrix to the Stack
 void PushViewMatrix();       | Pushes the Current Camera View Matrix to the Stack
 void PopProjectionMatrix();  | Pop the Current Camera Projection Matrix to the Stack setting the previous Matrix as the current
