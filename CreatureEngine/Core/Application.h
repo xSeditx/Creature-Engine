@@ -10,6 +10,7 @@
 
 #include"../Core/Common.h"
 #include"../Renderer/LowLevel/OpenGL/OpenGL.h"
+#include"../Renderer/LowLevel/OpenGL/Shader/Shader.h"
 
 extern std::string BasicVertexShader;
 extern std::string BasicFragmentShader;
@@ -153,12 +154,14 @@ private:
 		/* Changes with Window size and OpenGL Viewport settings */
 		void ResizeWindow(uint32_t _x, uint32_t _y);
 
+		/* Returns the Windows Device Context */
 		HDC g_DeviceContext() { return DeviceContext; }
 
 		/* Return the Most basic and default Shader */
-		uint32_t defaultShader() { return BasicShader; }
- 	private:
-		uint32_t BasicShader;
+		uint32_t defaultShader() { return WindowShader.g_ID(); }
+ 	
+    private:
+		Shader WindowShader;
 
 		Window* Parent = nullptr;
 
@@ -171,15 +174,15 @@ private:
 		std::string Name;
 
 		/* NOTE: This and PFD both need to be sent to Application class */
-		WNDCLASS WindowProperties = { 0 };
+		WNDCLASS WindowProperties { 0 };
 		PIXELFORMATDESCRIPTOR PixelFormatDescriptor{ 0 }; // This is where our Hints are going to be coming from.
 
 		int PixelFormat{ 0 };
 		std::string Title{ "" };
 
-		bool Active  = true;
-		bool Alive   = true;
-		bool Visible = true;
+		bool Active{ true };
+		bool Alive{ true };
+		bool Visible{ true };
 
 
  	private:
@@ -215,7 +218,6 @@ private:
 		static EventHandler& Messenger() { return EventHandler::get(); }
 	}  mainWindow;// Window
 
-	std::string Name() { return mainWindow.g_Title(); }
 	//Timer ApplicationTimer;
 
 public:
@@ -238,6 +240,8 @@ public:
 	/* Kills our Application */
 	void Terminate() { Running = false; }
 
+	/* Returns the Title of the Applications Window */
+	std::string Name() { return mainWindow.g_Title(); }
 	/* Return the Width dimension of the Main Window */
 	int   Width() const noexcept { return (int)mainWindow.Width(); }
 	/* Return the Height Dimension of the Main Window */

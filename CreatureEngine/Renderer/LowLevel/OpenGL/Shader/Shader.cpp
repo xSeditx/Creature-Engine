@@ -29,8 +29,9 @@ Shader::~Shader()
 }
 void Shader::Delete()
 {
-	DEBUGPrint(CON_Red, "Called the Shader Destructor: " << Filepath);
-	glDeleteProgram(GL_Handle);
+	TODO("Error creatd here if Shader is made on the Stack and destroyed after strings are gone");
+	if(Filepath)DEBUGPrint(CON_Red, "Called the Shader Destructor: " << Filepath);
+	//glDeleteProgram(GL_Handle);
 }
 
 
@@ -71,7 +72,7 @@ GLuint Shader::Load()
 	{
 		Print("Shader File Not Found:" << Filepath);
 		__debugbreak();
-		//		EngineErrorResponse(ERROR_FILE_NOT_FOUND, 0, (char*)Filepath);
+		//    EngineErrorResponse(ERROR_FILE_NOT_FOUND, 0, (char*)Filepath);
 	}
 	std::string Line;
 	std::string VertexShader;
@@ -100,34 +101,9 @@ GLuint Shader::Load()
 	std::string vert = SS[VERTEX].str();
 	std::string frag = SS[FRAGMENT].str();
 
-	GL_Handle = glCreateProgram();
-	VertID = glCreateShader(GL_VERTEX_SHADER);
-	FragID = glCreateShader(GL_FRAGMENT_SHADER);
+	CompileStrings(vert, frag);
+	TODO("See TRASHED SHADER in Trash.txt");
 
-	std::string vertSourceString = vert;
-	std::string fragSourceString = frag;
-
-	const char* vertSource = vertSourceString.c_str();
-	const char* fragSource = fragSourceString.c_str();
-
-	_GL(glShaderSource(VertID, 1, &vertSource, NULL));
-	_GL(glCompileShader(VertID));
-	GetShaderError(Vert);
-
-	_GL(glShaderSource(FragID, 1, &fragSource, NULL));
-	_GL(glCompileShader(FragID));
-	GetShaderError(Frag);
-
-	_GL(glAttachShader(GL_Handle, VertID));
-	_GL(glAttachShader(GL_Handle, FragID));
-	_GL(glLinkProgram(GL_Handle));
-	GetShaderError(Program);
-
-	_GL(glValidateProgram(GL_Handle));
-	_GL(glDetachShader(GL_Handle, VertID));
-	_GL(glDetachShader(GL_Handle, FragID));
-	_GL(glDeleteShader(VertID));
-	_GL(glDeleteShader(FragID));
 	return GL_Handle;
 }
 
@@ -169,41 +145,10 @@ void Shader::Reload()
 	std::string vert = SS[VERTEX].str();
 	std::string frag = SS[FRAGMENT].str();
 
-	VertID = glCreateShader(GL_VERTEX_SHADER);
-	FragID = glCreateShader(GL_FRAGMENT_SHADER);
-
-	std::string vertSourceString = vert;
-	std::string fragSourceString = frag;
-
-	const char* vertSource = vertSourceString.c_str();
-	const char* fragSource = fragSourceString.c_str();
-
-	glShaderSource(VertID, 1, &vertSource, NULL);
-	glCompileShader(VertID);
-	GetShaderError(Vert);
-
-	glShaderSource(FragID, 1, &fragSource, NULL);
-	glCompileShader(FragID);
-	GetShaderError(Frag);
-
-	glAttachShader(GL_Handle, VertID);
-	glAttachShader(GL_Handle, FragID);
-	glLinkProgram(GL_Handle);
-	GetShaderError(Program);
-
-	glValidateProgram(GL_Handle);
-	glDetachShader(GL_Handle, VertID);
-	glDetachShader(GL_Handle, FragID);
-	glDeleteShader(VertID);
-	glDeleteShader(FragID);
-
-	glUseProgram(GL_Handle);
+	CompileStrings(vert, frag);
+	TODO("See TRASHED SHADER in Trash.txt");
 	return;
 }
-
-
-
-
 
 /*
 Static Gets and Shader information
@@ -227,9 +172,10 @@ std::string Shader::get_FunctionName(int _shadertype, int _index)
 }
 void Shader::GetShaderError(ErrorType T)
 {
-	GLint length = 0;
-	GLint result;
-	GLchar  error[1028];
+	GLint length{ 0 };
+	GLint result{ 0 };
+	GLchar error[1028];
+
 	switch (T)
 	{
 	case Vert:
@@ -279,7 +225,6 @@ void Shader::GetShaderError(ErrorType T)
 // Statics
 //--------
 
-// STATIC 
 std::stack<Shader *> Shader::ActiveShader;
 
 
@@ -360,10 +305,51 @@ int Shader::AttributeLocation(const char *_name)
 {
 	return glGetAttribLocation(GL_Handle, _name);
 }
+Shader::Shader(std::string _vertstring, std::string _fragstring)
+{
+	CompileStrings(_vertstring, _fragstring);
+}
+ 
+void Shader::CompileStrings(std::string _vertstring, std::string _fragstring)
+{
+	enum ShaderType { VERTEX, FRAGMENT, PROGRAM };
 
-#if GL_VERSION_4_6
-//void Shader::SetTextureUniform(const char *_name, Texture *_tex)
-//{
-//	_GL(glProgramUniformui64NV(GL_Handle, glGetUniformLocation(GL_Handle, _name), _tex->Handle));
-//} 
-#endif
+	VertID = glCreateShader(GL_VERTEX_SHADER);
+	FragID = glCreateShader(GL_FRAGMENT_SHADER);
+
+	const char* vertSource = _vertstring.c_str();
+	const char* fragSource = _fragstring.c_str();
+
+	glShaderSource(VertID, 1, &vertSource, NULL);
+	glCompileShader(VertID);
+	GetShaderError(Vert);
+
+	CheckGLERROR();
+
+	glShaderSource(FragID, 1, &fragSource, NULL);
+	glCompileShader(FragID);
+	GetShaderError(Frag);
+	uint32_t ERR = 0;
+
+	CheckGLERROR();
+	GL_Handle = glCreateProgram();
+	glAttachShader(GL_Handle, VertID);
+	glAttachShader(GL_Handle, FragID);
+	glLinkProgram(GL_Handle);
+	GetShaderError(Program);
+
+	CheckGLERROR();
+
+	glValidateProgram(GL_Handle);
+	glDetachShader(GL_Handle, VertID);
+	glDetachShader(GL_Handle, FragID);
+	glDeleteShader(VertID);
+	glDeleteShader(FragID);
+
+	glUseProgram(GL_Handle);
+
+	CheckGLERROR();
+
+	return;
+}
+

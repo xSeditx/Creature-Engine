@@ -104,6 +104,33 @@ class App
 	};
 	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
+
+
+
+	Vec2 ProfilerVerts[4] =
+	{
+		{-1.0,-1.0 },
+		{ 1.0,-1.0 },
+		{ 0.0, 1.0 },
+		{ 1.0, 1.0 }
+	};
+
+	Vec2 ProfilerUV[4] =
+	{
+		{ 0.0, 0.0 },
+		{ 1.0, 0.0 },
+		{ 1.0, 1.0 },
+		{ 0.0, 1.0 }
+	};
+
+	GLuint ProfilerIndices[3] =
+	{
+		0,1,2,
+	};
+
+
+
+
 	virtual void OnCreate()
 	{
 
@@ -144,15 +171,6 @@ class App
 			glBindVertexArray(VAO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			{
-				//glVertexAttribPointer(
-				//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-				//	3,                  // size
-				//	GL_FLOAT,           // type
-				//	GL_FALSE,           // normalized?
-				//	0,                  // stride
-				//	(void*)0            // array buffer offset
-				//);
-
 				glDrawArrays(GL_TRIANGLES, 0, 3);
 			}
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -166,7 +184,7 @@ class App
 //https://en.cppreference.com/w/cpp/compiler_support
 int main()
 {
-
+	TODO("Setup the Bitmap object for the Profiler so that I can dynamically update it and get the HUD for the profiler Operation. Do NOTHING else first!");
 	App MyApp;
 	MyApp.Init();
 	iVec2 r = OpenGL::get_MaximumViewportDimensions();
@@ -353,7 +371,7 @@ int main()
 bool TEST_PROFILE_WINDOW()
 {
 	{
-		Profiling::DisplayWindow Test({ 0,0 }, { 2,150 });
+		Profiling::DisplayWindow Test({ 0,0 }, { 10, 150 });
 		{	// TEST SET PIXEL
 
 			Test.setPixel(1, 1, 0xffffffff);
@@ -446,3 +464,24 @@ bool TEST_PROFILE_WINDOW()
     
     			 threadprivate Specifies that a variable is private to a thread.
 */
+
+
+
+
+
+
+
+
+
+
+
+
+//glVertexAttribPointer(
+//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+//	3,                  // size
+//	GL_FLOAT,           // type
+//	GL_FALSE,           // normalized?
+//	0,                  // stride
+//	(void*)0            // array buffer offset
+//);
+

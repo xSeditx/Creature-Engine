@@ -61,6 +61,7 @@ namespace Profiling
 			Ycoeff = Size.y / TimeLength;
 			
 			TODO("Probably not... Test this with a Special Test");// Wish to construct than Immediately move into place
+			 
 			DisplayTexture = Graphics::Texture(*(new Graphics::Bitmap(ReadBuffer, _size)));// We dereference the Memory Address where the object was constructed than we pass that into Texture for construction and this should give us in place construction of the returned texture???
 		}
 		~DisplayWindow()
@@ -155,6 +156,53 @@ namespace Profiling
 			bool Record{ false };
 		}Properties;
 	};
+
+
+	
+
+
+	Vec2 Vertices[4] =
+	{
+		{-1.0,-1.0 },
+		{ 1.0,-1.0 },
+		{ 0.0, 1.0 },
+	    { 1.0, 1.0 }
+	};
+
+	Vec2 UVcoords[4] =
+	{
+		{ 0.0, 0.0 },
+		{ 1.0, 0.0 },
+		{ 1.0, 1.0 },
+	    { 0.0, 1.0 }
+	};
+
+	GLuint Indices[3] =
+	{
+		0,1,2, 
+	};
+	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
+
+	std::string QuadRenderer = " #version 330 core \n\
+layout(location = 0) in vec3 aPos;          \n\
+layout(location = 1) in vec3 textCoords;    \n\
+out vec4 vertexColor;                       \n\
+out vec2 TexCoords;                         \n\
+void main()                                 \n\
+{                                           \n\
+	gl_Position = vec4(aPos, 1.0);          \n\
+	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
+}";
+
+	std::string TextureRenderer = "#version 330 core \n\
+out vec4 FragColor;                             \n\
+in vec4 vertexColor;                            \n\
+in vec2 TexCoords                               \n\
+uniform sampler2D texture1;                     \n\
+void main()                                     \n\
+{                                               \n\
+	FragColor = texture2D(texture1, TexCoords); \n\
+}";
 
 }
 

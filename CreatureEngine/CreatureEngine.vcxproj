@@ -147,6 +147,8 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
@@ -172,10 +174,16 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primatives.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Trash.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

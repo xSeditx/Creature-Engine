@@ -19,7 +19,9 @@ class Shader
 	};
 
 public:
+	Shader() = default;
 	Shader(const char* filepath);
+	Shader(std::string _vertstring, std::string _fragstring);
 	~Shader();
 
 
@@ -29,6 +31,8 @@ public:
 	void Disable();
 	void Reload();
 	virtual void Bind() {}
+
+	void CompileStrings(std::string _vertstring, std::string _fragstring);
 
 	std::unordered_map<std::string, GLuint> ShaderAttribute;
 
@@ -74,12 +78,12 @@ public:
 
 
 protected:
-	GLuint GL_Handle;//8
-	unsigned int RecursionCount = 0;//8
+	GLuint GL_Handle{ 0 };//8
+	unsigned int RecursionCount{ 0 };//8
 	GLuint VertID, FragID; // Now these are destroyed at the end.. Find a better solution to handling the Shader errors as Currently I need to store this in order to pass to the Error response
 
-	const char* Filepath;//8
-	bool Active = false;//1
+	const char* Filepath{nullptr};
+	bool Active{ false };
 
 	static std::stack<Shader *> ActiveShader;
 

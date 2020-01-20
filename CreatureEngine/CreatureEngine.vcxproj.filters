@@ -107,6 +107,12 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp">
       <Filter>Source Files\Graphics\Renderer\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">
@@ -181,5 +187,19 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h">
       <Filter>Source Files\Graphics\Renderer\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primatives.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Trash.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

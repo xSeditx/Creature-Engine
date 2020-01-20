@@ -50,8 +50,17 @@ namespace Graphics
 		/* Assign this Texture from other*/
 		Texture& operator =(Texture&& _other) noexcept
 		{
+			Picture = std::move(_other.Picture);
+			GL_Handle = std::move(_other.GL_Handle);
+			Target = std::move(_other.Target);
+			Type = std::move(_other.Type);
+			Format = std::move(_other.Format);
+			WrapMode = std::move(_other.WrapMode);
+			Filtering = std::move(_other.Filtering);
+			InternalFormat = std::move(_other.InternalFormat);
+			Handle = std::move(_other.Handle);
 			DEBUGPrint(CON_Red, " I believe I messed this up but do not really have time to think about this right now");
-			return _other;
+			return *this;
 		}
 
 		void Update(uint8_t *_memory)
@@ -62,6 +71,7 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
  need to load up the texture functions as pointers so their functionality can be assigned inside of an Init function somewhere,\
  ALSO: Likely should make it update Bitmap then Texture but currently Bitmap contains original");
 
+DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 			Bind();
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Picture->Width(), Picture->Height(), GL_RGBA, GL_UNSIGNED_BYTE, _memory);
 			Unbind();
@@ -81,6 +91,10 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
 		inline void Bind()
 		{
+			////UniformLocation = glGetUniformLocation(Shader::getHandle(), "Texture1");
+			//glUniform1i(UniformLocation, 0);
+			//glActiveTexture(GL_TEXTURE0 + 0);
+
 			glBindTexture(Target, GL_Handle);
 		}
 		inline void Unbind()

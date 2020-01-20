@@ -46,7 +46,7 @@
 #define NO_WARNINGS             TRUE
 
 /* Defines the level of Messages the user wishes to see */
-#define MESSAGE_LEVEL           USER_WARNING_MESSAGES//TODO_MESSAGES//FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE
+#define MESSAGE_LEVEL           TODO_MESSAGES//FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE//USER_WARNING_MESSAGES//
 
 /* Test block of code for testing Threadspools Speeds */
 ///#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
@@ -451,6 +451,13 @@ https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf
 
 */
 
+#define CheckGLERROR() {uint32_t ERR = 0;\
+if((ERR = glGetError()))\
+{\
+	Print("Error" << ERR);\
+	__debugbreak();\
+}\
+}
 
 
 

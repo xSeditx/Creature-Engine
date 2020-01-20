@@ -302,11 +302,11 @@ Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, 
 void Application::Window::Sync()
 {//Display the contents of the back buffer to the Screen (*note:future at VSync if Specified) 
 	SwapBuffers(DeviceContext);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	CLS();
 }
 void Application::Window::CLS()
 {// Clear the Contents of the BackBuffer 
-	 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }        
 void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)             // Resize And Initialize The GL Window
 {/// NOTE :https://stackoverflow.com/questions/692742/how-do-you-programmatically-resize-and-move-windows-with-the-windows-api
@@ -350,88 +350,10 @@ void Application::Window::s_Title(std::string _name)
 		Title.c_str()
 	);
 }
+
 void Application::Window::create_DefaultShader()
 {
-	// Create the shaders
-	uint32_t ERR = 0;
-	if ((ERR = glGetError()))
-	{
-		Print("Error" << ERR);
-		__debugbreak();
-	}
-
-	uint32_t VertexShaderID   = glCreateShader(GL_VERTEX_SHADER);
-	uint32_t FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// Read the Vertex Shader code from the file
-	std::string VertexShaderCode = VertexShader;
-	std::string FragmentShaderCode = FragmentShader;
-
-
-	GLint Result = false;
-	int InfoLogLength{ 0 };
-
-	// Compile Vertex Shader
-	//printf("Compiling shader : %s\n", vertex_file_path);
-	char const* VertexSourcePointer = VertexShaderCode.c_str();
-	glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
-	glCompileShader(VertexShaderID);
-
-	// Check Vertex Shader
-	glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0) {
-		std::vector<char> VertexShaderErrorMessage;
-		VertexShaderErrorMessage.resize(InfoLogLength + 1);
-
-		glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		printf("%s\n", &VertexShaderErrorMessage[0]);
-	}
-
-	// Compile Fragment Shader
-	char const* FragmentSourcePointer = FragmentShaderCode.c_str();
-	glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
-	glCompileShader(FragmentShaderID);
-
-	// Check Fragment Shader
-	glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0) {
-		std::vector<char> FragmentShaderErrorMessage;
-		FragmentShaderErrorMessage.resize(InfoLogLength + 1);
-		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-		printf("%s\n", &FragmentShaderErrorMessage[0]);
-	}
-
-	// Link the program
-	printf("Linking program\n");
-	 BasicShader = glCreateProgram();
-	 glAttachShader(BasicShader, VertexShaderID);
-	 glAttachShader(BasicShader, FragmentShaderID);
-	 glLinkProgram(BasicShader);
-	 
-	// Check the program
-	 glGetProgramiv(BasicShader, GL_LINK_STATUS, &Result);
-	 glGetProgramiv(BasicShader, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0) {
-		std::vector<char> ProgramErrorMessage;
-		ProgramErrorMessage.resize(InfoLogLength + 1);
-	 	glGetProgramInfoLog(BasicShader, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		printf("%s\n", &ProgramErrorMessage[0]);
-	}
-
-	 glDetachShader(BasicShader, VertexShaderID);
-	 glDetachShader(BasicShader, FragmentShaderID);
-	 
-	 glDeleteShader(VertexShaderID);
-	 glDeleteShader(FragmentShaderID);
-
-	ERR = 0;
-	 if ((ERR = glGetError()))
-	 {
-	 	Print("Error" << ERR);
-	 	__debugbreak();
-	 }
+	WindowShader = Shader(VertexShader, FragmentShader);
 }
 
 ///==================================================================================================================
@@ -582,11 +504,11 @@ VertexColor = vec3(1.0,1.0,1.0);\n\
 }";
 
 std::string BasicFragmentShader = "#version 330 \n\
-out vec3 color;         \n\
+out vec4 color;         \n\
 in vec3 VertexColor;    \n\
 in vec4 FragPosition;   \n\
 void main(){            \n\
-color = vec3(1, 0, 0);  \n\
+color = vec3(1, 1, 0, 1);  \n\
 }";
 
 std::string VertexShader = " #version 330 core \n\
@@ -595,13 +517,13 @@ out vec4 vertexColor; 						\n\
 void main()									\n\
 {											\n\
 	gl_Position = vec4(aPos, 1.0);			\n\
-	vertexColor = vec4(0.5, 0.0, 0.0, 1.0); \n\
+	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
 }";
 
 std::string FragmentShader = "#version 330 core \n\
-out vec4 FragColor;									 \n\
-in vec4 vertexColor;  								 \n\
-void main()											 \n\
-{													 \n\
-	FragColor = vertexColor;						 \n\
+out vec4 FragColor;                             \n\
+in vec4 vertexColor;                            \n\
+void main()                                     \n\
+{                                               \n\
+	FragColor = vertexColor;                    \n\
 }";
