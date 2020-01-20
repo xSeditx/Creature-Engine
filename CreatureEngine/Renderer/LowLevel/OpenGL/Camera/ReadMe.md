@@ -10,23 +10,33 @@ ___
   PUBLIC:
 ___
 
+#### Floating points
 
-    Data Members                            |    Description and Type
---------------------------------------------|----------------------------------------
-	 TYPE                                   |  Floating points
-  FOV                                       |  - Field of view in Degrees
-  AspectRatio                               |  - Aspect Ratio of the Screen
-  Near,                                     |  - Near clipping range
-  Far;                                      |  - Far clipping range
-											|
-											|  Mat4 Matrix
-											|  ---------------
-  Matrix   ProjectionMatrix; 				|  - Current Projection Matrix
-  Matrix   ViewMatrix;						|  - Current ViewMatrix
-											|  - std::stack<Matrix>
-											|  ----------------------
+   Data Members   |  Description
+------------------|----------------------------------------
+  FOV             |   Field of view in Degrees
+  AspectRatio     |   Aspect Ratio of the Screen
+  Near            |   Near clipping range
+  Far;            |   Far clipping range
+
+
+
+
+  #### Matrix
+
+  Data Members |  Mat4 Matrix
+---------------|---------------
+ProjectionMatrix;   |Current Projection Matrix
+ViewMatrix;    | Current ViewMatrix
+
+#### std::stack<Matrix>
+
+  Data Member |  Description
+--------------|----------------------
   std::stack<Matrix> ViewMatrixStack;       |  - Current View Matrix Stack.
   std::stack<Matrix> ProjectionMatrixStack; |  - Current Projection Matrix Stack.
+
+
 											|  - Viewport
 											|  ------------------
   static Viewport *Camera;                  |  - Static Currently Active Camera
