@@ -172,15 +172,12 @@ namespace Core
                     Arguments(std::forward<ARGS>(_args)...)
                 {// Signals to user the object is now completed and valid
                     Status = Valid;
-					//Print(*typeid(this).name());
-					//PRINT_Thread("Creating Async from thread ");
                 }
  
 				/*     Calls the Objects Stored function along with its parameters using std::apply
 					Sets the value of the Promise and signals to the User that the value is waiting */
 				virtual void Invoke() noexcept override
 				{
-					//PRINT_Thread("Invoking Async that was launched From: ");
 					Status = Busy;
 					auto result = std::apply(Function, Arguments);
 					set_return(result);
@@ -190,7 +187,6 @@ namespace Core
 				void set_return(type& _value)
 				{
 					ReturnValue.set_value(_value);
-					//PRINT_Thread("Can Execute Paused Function here: " );
 				}
 
 				/*      To ensure familiarity and usability get_future works to retrieve the
@@ -207,7 +203,7 @@ namespace Core
 				const Fptr Function;                                       // Pointer to our Function
 				const std::tuple<ARGS...> Arguments;                       // Tuple which Binds the Parameters to the Function call				
 				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
-				//Promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
+				//Promise<type> ReturnValue;                               // Return Value of our function stored as a Promise
 			};// End asyncTask Class
 			
 			/*     SUSPEND: Attempt at making a Fork point so the current location of the program is pushed to the 

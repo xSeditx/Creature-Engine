@@ -11,9 +11,14 @@
 #include"../Core/Common.h"
 #include"../Renderer/LowLevel/OpenGL/OpenGL.h"
 
-using MsgType = uint32_t;
+extern std::string BasicVertexShader;
+extern std::string BasicFragmentShader;
+extern std::string VertexShader;
+extern std::string FragmentShader;
 
+using MsgType = uint32_t;
 using Event = MSG;
+
 
 struct Listener
 {
@@ -33,15 +38,6 @@ public:
 private:
 	void(*_handler)(Event msg);
 };
-
-
-
-extern std::string BasicVertexShader;
-extern std::string BasicFragmentShader;
-extern std::string VertexShader;
-extern std::string FragmentShader;
-
-
 class Application
 {
 private:
@@ -129,20 +125,20 @@ private:
 
 
 		/* Return the Width dimension of a Window */
-		int    Width() const noexcept { return (int)Size.x; }
+		int  Width()     const noexcept  { return (int)Size.x; }
 		/* Return the Height Dimension of a Window */
-		int    Height() const noexcept { return (int)Size.y; }
+		int  Height()    const noexcept  { return (int)Size.y; }
 
 		/* Return if the Window is Alive
 		Note: A Window can be invisible and still be Alive. When the final Window is no longer Alive our Application will terminate*/
-		bool   isAlive() const noexcept { return Alive; }
+		bool isAlive()   const noexcept  { return Alive; }
 
 		/* Let us know if the Window is currently Visible on Screen
 		Note: Intentions are to hide all child Windows if Parent becomes invisible*/
-		bool isVisible() const { return Visible; }
+		bool isVisible() const           { return Visible; }
 
 		/* Allow us to see if the Window in Question is the Currently Active window on the screen */
-		bool isActive() const { return Active; }
+		bool isActive()  const           { return Active; }
 
 		/* Display the contents of the back buffer to the Screen (*note:future at VSync if Specified) */
 		void Sync();
