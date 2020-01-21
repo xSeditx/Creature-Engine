@@ -29,13 +29,13 @@ namespace Graphics
 		GL_Handle(0),
 		MipmapComplete(0)
 	{
+
 		glGenTextures(1, &GL_Handle);
+		Bind();
 		SetFiltering(GL_LINEAR);
 		SetWrap(GL_CLAMP_TO_EDGE);
-
+		//GL_RGB
 		glTexImage2D(Target, 0, InternalFormat, (Picture->Width()), Picture->Height(), 0, Format, GL_UNSIGNED_BYTE, Picture->Data()); // 	_GL(glTexImage2D(Target, 0, GL_RGB, Picture.Size.x, Picture.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, Picture.Data));
-
-		///Load();
 	}
 ///     Texture::Texture(Bitmap& image, int _x, int _y, int _width, int _height)
 ///     {// Generate a Texture from a Sub image 

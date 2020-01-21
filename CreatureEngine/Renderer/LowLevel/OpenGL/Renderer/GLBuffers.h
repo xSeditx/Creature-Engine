@@ -8,7 +8,7 @@
 
 #define BUFFER_OFFSET(i)   ((char *)NULL + (i))
 
-#define MYSTIC_DEFAULT_BUFFER_ACCESS   GL_DYNAMIC_DRAW // For later implementation
+#define DEFAULT_BUFFER_ACCESS   GL_DYNAMIC_DRAW // For later implementation
 
 
 enum BufferTypes
@@ -33,6 +33,8 @@ enum ShaderType
 class Attribute
 {
 public:
+	NO_COPY_OR_ASSIGNMENT(Attribute);
+
 	Attribute();
 	Attribute(BufferTypes t);
 
@@ -79,7 +81,7 @@ public:
 
 		glGenBuffers(1, &GL_Handle);
 		glBindBuffer(GL_ARRAY_BUFFER, GL_Handle);
-		glBufferData(GL_ARRAY_BUFFER, (ElementCount)*Stride, data, MYSTIC_DEFAULT_BUFFER_ACCESS);
+		glBufferData(GL_ARRAY_BUFFER, (ElementCount)*Stride, data, DEFAULT_BUFFER_ACCESS);
 
 
 		/// ------------------------Bindless Address stuff---------------------------------
@@ -117,7 +119,7 @@ public:
 		glBufferSubData(GL_ARRAY_BUFFER, 0, _sz * sizeof(T), _data);
 	}
 
-	GLuint GetBufferSize()
+	GLuint get_BufferSize()
 	{
 		GLint results;
 		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &results);
@@ -126,21 +128,21 @@ public:
 	size_t size() const { return Data.size(); }
 
 
-	VertexBufferObject operator = (std::vector<T> data)
-	{// Map the whole buffer, resize if needed and make the data of the buffer equal to that of the Rvalue
-		Update(data);
-	}
-	VertexBufferObject operator = (VertexBufferObject& other)
-	{// Same but perform a shallow copy of the buffer
-		return *other;
-	}
+	/// VertexBufferObject operator = (std::vector<T> data)
+	/// {// Map the whole buffer, resize if needed and make the data of the buffer equal to that of the Rvalue
+	/// 	Update(data);
+	/// }
+	/// VertexBufferObject operator = (VertexBufferObject& other)
+	/// {// Same but perform a shallow copy of the buffer
+	/// 	return *other;
+	/// }
 	VertexBufferObject operator += (VertexBufferObject& other)
 	{ // Map the buffer and add to the end of it, updating the data, and size while retaining access type and GL_Handle
 		Bind();
 		glBufferData(GL_ARRAY_BUFFER,
 			(size() * sizeof(value_type)) + (other.size() * sizeof(other.value_type)),
 			0,
-			MYSTIC_DEFAULT_BUFFER_ACCESS);
+			DEFAULT_BUFFER_ACCESS);
 
 		std::move(other.Data.begin(), other.Data.end(), std::back_inserter(Data));
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size() * sizeof(value_type), Data);
@@ -174,7 +176,6 @@ class VertexArrayObject
 { // OpenGL VAO container which holds the state information for the Object contained on the GPU
 
 public:
-
 	NO_COPY_OR_ASSIGNMENT(VertexArrayObject);
 
 	VertexArrayObject();

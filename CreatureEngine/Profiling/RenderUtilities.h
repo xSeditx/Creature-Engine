@@ -7,7 +7,7 @@
 
 #include<atomic>
 
-
+#define _RGB(r,g,b) (((b << 16)| (g << 8)) | (r))
 namespace Profiling
 {
 	template<typename _Ty>
@@ -30,9 +30,6 @@ namespace Profiling
 		_Ty Value{ 0 };
 	};
 
-
-
-
 	struct CREATURE_API DisplayWindow
 	{
 		using Data_t = uint32_t;
@@ -48,11 +45,34 @@ namespace Profiling
 		{
 			 QuadRenderer = Shader(vRenderer, fRenderer);
 
-			memset(ReadBuffer, 0, size());
-			memset(WriteBuffer, 0, size());
+
+			 memset(ReadBuffer, 0, size());
+			 memset(WriteBuffer, 0, size());
+
+
+			//memset( ReadBuffer, 255, size());
+			//memset(WriteBuffer, 255, size());
+
+		    uint8_t R{ 100 }, G{ 0 }, B{ 0 };
+		    for_loop(y, Size.y)
+		    {
+		    	for_loop(x, Size.x)
+		    	{
+					//ReadBuffer[x + (int)Size.x * y].r = R;
+					//ReadBuffer[x + (int)Size.x * y].g = G;
+					//ReadBuffer[x + (int)Size.x * y].b = B;
+					ReadBuffer[x + (int)Size.x * y] = Pixel(R, G, B);;
+
+		    		R+=5;
+		    		if (R >= 255) { G+= 5; R = 0; }
+		    		if (G >= 255) { B+= 5; G = 0; }
+		    
+		    	}
+		    }
+
+
 			float xDiff{ 0 }, yDiff{ 0 };
 
-			// If
 			Low > 0 ?
 				xDiff = High + std::abs(Low) :
 				xDiff = High - Low;
@@ -65,9 +85,29 @@ namespace Profiling
 			Ycoeff = Size.y / TimeLength;
 			
 			TODO("Probably not... Test this with a Special Test");// Wish to construct than Immediately move into place
-			 
+			glActiveTexture(GL_TEXTURE0);
 			DisplayTexture = Graphics::Texture(*(new Graphics::Bitmap(ReadBuffer, _size)));// We dereference the Memory Address where the object was constructed than we pass that into Texture for construction and this should give us in place construction of the returned texture???
+
+			glUseProgram(QuadRenderer.g_ID());
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
+
+			glGenBuffers(1, &VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
+
+			GLuint Location{ 0 };
+
+			Location = glGetAttribLocation(QuadRenderer.g_ID(), "aPos");
+			glEnableVertexAttribArray(Location);
+			glVertexAttribPointer(Location, 4, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+
+ 
+
+			CheckGLERROR();
 		}
+
+
 		~DisplayWindow()
 		{
 			delete(ReadBuffer);
@@ -86,8 +126,7 @@ namespace Profiling
 				memcpy((char*)ReadBuffer + LineSize, (char*)WriteBuffer, size() - LineSize);
 				//ReadBuffer[DataPoint] = DefaultColor;
 				memcpy((char*)WriteBuffer, (char*)ReadBuffer, size());
-
-				DisplayTexture.Update((uint8_t*)ReadBuffer);
+			 	DisplayTexture.Update((uint8_t*)ReadBuffer);
 			}
 		}
 		Data_t getPixel(uint32_t _x, uint32_t _y)
@@ -99,7 +138,28 @@ namespace Profiling
 			WriteBuffer[_x + (size_t)Size.x * _y].Color = _color;
 		}
 		void Render()
-		{}
+		{
+			QuadRenderer.Enable();
+			{
+				glBindVertexArray(VAO);
+				{
+					glActiveTexture(GL_TEXTURE0 );
+					DisplayTexture.Bind();
+				//glBindTexture(GL_TEXTURE_2D,0);
+					glUniform1i(glGetUniformLocation(QuadRenderer.g_ID(), "texture1"), 0);
+
+					glBindBuffer(GL_ARRAY_BUFFER, VBO);
+					{
+						glDrawArrays(GL_TRIANGLES, 0, 6);
+					}
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+				}
+				glBindVertexArray(0);
+			}
+			QuadRenderer.Disable();
+			//setPixel(1, 1, 0xffffffff);
+
+		}
 
 		size_t size()
 		{
@@ -125,23 +185,25 @@ namespace Profiling
 	    union Pixel
 		{// We want to access color of pixel either as RGBA values or 32 bit Color
 			Pixel() = default;
-			Pixel(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a)
+			Pixel(uint8_t _r, uint8_t _g, uint8_t _b)//, uint8_t _a)
 				:
-				r(_r), g(_g), b(_b), a(_a)
+				r(_r), g(_g), b(_b)//, a(_a)
 			{ }
 
 			struct
 			{
-				uint8_t r, g, b, a;
+				uint8_t r, g, b;// , a;
 			};	
 			uint32_t Color;
 			operator Data_t() { return Color; }
 
 		};
-	    Pixel DefaultColor{ 255,255,255,255 };
-		Pixel 
-			*WriteBuffer, 
-			*ReadBuffer;
+
+		Pixel
+			DefaultColor{ 255,255,255}, //, 255
+	
+			 *WriteBuffer{ nullptr },
+			 *ReadBuffer{ nullptr };
 
 		Vec2 Size{ 0,0 };
 		Vec2 Position{ 0,0 };
@@ -159,54 +221,63 @@ namespace Profiling
 			bool Border{ false };
 			bool Record{ false };
 		}Properties;
-	};
 
+		Shader QuadRenderer;
 
-	
-	Shader QuadRenderer;
+//Vec4 Vertices[4] =
+//{
+//	{ -1.0, -1.0,             0.0, 0.0 },
+//	{  0.0, -1.0,             1.0, 0.0 },
+//	{  0.0,  0.0,             1.0, 1.0 },
+//	{ -1.0,  0.0,             0.0, 1.0 }
+//};
+		Vec4 Vertices[6] =
+		{ // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+			// positions   // texCoords
+			Vec4(-1.0f,  1.0f,  0.0f, 1.0f),
+			Vec4(-1.0f, -1.0f,  0.0f, 0.0f),
+			Vec4(1.0f, -1.0f,  1.0f, 0.0f),
 
-	Vec2 Vertices[4] =
-	{
-		{-1.0,-1.0 },
-		{ 1.0,-1.0 },
-		{ 0.0, 1.0 },
-	    { 1.0, 1.0 }
-	};
+			Vec4(-1.0f,  1.0f,  0.0f, 1.0f),
+			Vec4(1.0f, -1.0f,  1.0f, 0.0f),
+			Vec4(1.0f,  1.0f,  1.0f, 1.0f)
+		};
+		Vec2 UVcoords[4] =
+		{
+			{  },
+			{  },
+			{  },
+			{  }
+		};
 
-	Vec2 UVcoords[4] =
-	{
-		{ 0.0, 0.0 },
-		{ 1.0, 0.0 },
-		{ 1.0, 1.0 },
-	    { 0.0, 1.0 }
-	};
+ 
+		GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
-	GLuint Indices[3] =
-	{
-		0,1,2, 
-	};
-	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
-
-	std::string vRenderer = " #version 330 core \n\
-layout(location = 0) in vec3 aPos;          \n\
-layout(location = 1) in vec3 textCoords;    \n\
-out vec4 vertexColor;                       \n\
+		std::string vRenderer = 
+"#version 330 core \n\
+layout(location = 0) in vec4 aPos;          \n\
+uniform sampler2D texture1;                 \n\
+out vec3 vertexColor;                       \n\
 out vec2 TexCoords;                         \n\
 void main()                                 \n\
 {                                           \n\
-	gl_Position = vec4(aPos, 1.0);          \n\
-	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
+	gl_Position = vec4(aPos.x, aPos.y, 1.0, 1.0);          \n\
+	vertexColor = texture(texture1, aPos.zw).xyz; \n\
 }";
 
-	std::string fRenderer = "#version 330 core \n\
+		std::string fRenderer = 
+"#version 330 core \n\
+in vec3 vertexColor;                            \n\
 out vec4 FragColor;                             \n\
-in vec4 vertexColor;                            \n\
-in vec2 TexCoords                               \n\
-uniform sampler2D texture1;                     \n\
 void main()                                     \n\
 {                                               \n\
-	FragColor = texture2D(texture1, TexCoords); \n\
+	FragColor = vec4(vertexColor.xyz, 1.0);     \n\
 }";
+
+
+	};
+
+
 
 }
 

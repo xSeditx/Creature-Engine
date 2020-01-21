@@ -84,7 +84,7 @@ bool TEST_PROFILE_WINDOW();
 class App
 	: public Application
 {
-	DebugQuad OBJECT;
+
 	Vec2 Vertices[3] =
 	{
 		{-1.0,-1.0 },
@@ -103,39 +103,15 @@ class App
 	{
 		0,1,2
 	};
+
 	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
-
-
-
-	Vec2 ProfilerVerts[4] =
-	{
-		{-1.0,-1.0 },
-		{ 1.0,-1.0 },
-		{ 0.0, 1.0 },
-		{ 1.0, 1.0 }
-	};
-
-	Vec2 ProfilerUV[4] =
-	{
-		{ 0.0, 0.0 },
-		{ 1.0, 0.0 },
-		{ 1.0, 1.0 },
-		{ 0.0, 1.0 }
-	};
-
-	GLuint ProfilerIndices[3] =
-	{
-		0,1,2,
-	};
-
-
+	Profiling::DisplayWindow * ProfilerTest;
 
 
 	virtual void OnCreate()
 	{
-
-
+		
 		glUseProgram(getWindow().defaultShader());
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
@@ -158,12 +134,8 @@ class App
 			__debugbreak();
 		}
 
-		ERR = 0;
-		if ((ERR = glGetError()))
-		{
-			Print("Error" << ERR);
-			__debugbreak();
-		}
+		ProfilerTest = new Profiling::DisplayWindow ({ 0,0 }, { 10, 150 });
+		ProfilerTest->Update(1);
  	}
 	virtual void OnRender()
 	{
@@ -177,6 +149,9 @@ class App
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		glUseProgram(0);
+	
+	 	ProfilerTest->Update(1);
+		ProfilerTest->Render();
 	}
 
 };
@@ -196,7 +171,7 @@ int main()
 	MyApp.Run();
 	MyApp.End();
 
-  	TEST_UNIT(TEST_PROFILE_WINDOW());
+///  	TEST_UNIT(TEST_PROFILE_WINDOW());
 	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
 	DEBUGPrint(CON_Red, "Testing Print");
  
@@ -486,3 +461,34 @@ bool TEST_PROFILE_WINDOW()
 //	(void*)0            // array buffer offset
 //);
 
+
+
+
+
+
+
+
+
+
+/*
+	Vec2 ProfilerVerts[4] =
+	{
+		{-1.0,-1.0 },
+		{ 1.0,-1.0 },
+		{ 0.0, 1.0 },
+		{ 1.0, 1.0 }
+	};
+
+	Vec2 ProfilerUV[4] =
+	{
+		{ 0.0, 0.0 },
+		{ 1.0, 0.0 },
+		{ 1.0, 1.0 },
+		{ 0.0, 1.0 }
+	};
+
+	GLuint ProfilerIndices[3] =
+	{
+		0,1,2,
+	};
+*/

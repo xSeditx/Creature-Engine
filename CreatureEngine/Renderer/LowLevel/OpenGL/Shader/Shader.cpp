@@ -38,12 +38,11 @@ void Shader::Delete()
 
 void Shader::Enable()
 {
-	glUseProgram(GL_Handle);
-	Push(this);
+	glUseProgram(GL_Handle);//	Push(this);
 }
 void Shader::Disable()
 {
-	glUseProgram(Pop()->GL_Handle);
+	glUseProgram(0);// Pop()->GL_Handle);
 }
 
 void Shader::Push(Shader *shad)

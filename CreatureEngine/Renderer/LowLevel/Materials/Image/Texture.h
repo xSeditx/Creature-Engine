@@ -73,7 +73,7 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
 DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 			Bind();
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Picture->Width(), Picture->Height(), GL_RGBA, GL_UNSIGNED_BYTE, _memory);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Picture->Width(), Picture->Height(), GL_RGB, GL_UNSIGNED_BYTE, _memory);
 			Unbind();
   		}
 

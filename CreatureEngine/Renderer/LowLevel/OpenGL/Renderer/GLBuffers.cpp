@@ -89,7 +89,7 @@ ElementArrayBuffer::ElementArrayBuffer(GLuint* _data, size_t _count)
 
 	glGenBuffers(1, &GL_Handle);
 	Bind();
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(GLuint), _data, MYSTIC_DEFAULT_BUFFER_ACCESS);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(GLuint), _data, DEFAULT_BUFFER_ACCESS);
 }
 ElementArrayBuffer::ElementArrayBuffer(GLenum _access, GLuint* _data, size_t _count)
 	:
