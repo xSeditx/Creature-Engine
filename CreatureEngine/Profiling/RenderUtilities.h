@@ -3,6 +3,8 @@
 
 #include"../Core/Common.h"
 #include"../Renderer/LowLevel/Materials/Image/Texture.h"
+#include"../Renderer/LowLevel/OpenGL/Shader/Shader.h"
+
 #include<atomic>
 
 
@@ -44,6 +46,8 @@ namespace Profiling
 			ReadBuffer (new Pixel[static_cast<size_t>(_size.x) * static_cast<size_t>(_size.y)]),
 			WriteBuffer(new Pixel[static_cast<size_t>(_size.x) * static_cast<size_t>(_size.y)])
 		{
+			 QuadRenderer = Shader(vRenderer, fRenderer);
+
 			memset(ReadBuffer, 0, size());
 			memset(WriteBuffer, 0, size());
 			float xDiff{ 0 }, yDiff{ 0 };
@@ -159,7 +163,7 @@ namespace Profiling
 
 
 	
-
+	Shader QuadRenderer;
 
 	Vec2 Vertices[4] =
 	{
@@ -183,7 +187,7 @@ namespace Profiling
 	};
 	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
-	std::string QuadRenderer = " #version 330 core \n\
+	std::string vRenderer = " #version 330 core \n\
 layout(location = 0) in vec3 aPos;          \n\
 layout(location = 1) in vec3 textCoords;    \n\
 out vec4 vertexColor;                       \n\
@@ -194,7 +198,7 @@ void main()                                 \n\
 	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
 }";
 
-	std::string TextureRenderer = "#version 330 core \n\
+	std::string fRenderer = "#version 330 core \n\
 out vec4 FragColor;                             \n\
 in vec4 vertexColor;                            \n\
 in vec2 TexCoords                               \n\

@@ -274,7 +274,8 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		glEnable(GL_DEPTH_TEST);                               // Enables Depth Testing
 		glDepthFunc(GL_LEQUAL);                                // The Type Of Depth Test To Do
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);     // Really Nice Perspective Calculations
-		glViewport(0, 0, _width, _height);
+    	glViewport(0, 0, _width, _height);
+
 	}
 
 	/// Set FullScreen Mode : Define _FULL_SCREEN_MODE to activate
