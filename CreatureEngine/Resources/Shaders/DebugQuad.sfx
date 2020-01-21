@@ -1,0 +1,34 @@
+//==============================================================================================================================================================
+[#SHADER: VERTEX]
+//==============================================================================================================================================================
+#version 420
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+layout (location = 0) in vec4 VertexPosition; // <vec2 position, vec2 texCoords>
+
+out vec2 TexCoords;
+
+void main()
+{
+    gl_Position = vec4(VertexPosition.xy, 0.0f, 1.0f); 
+    TexCoords = VertexPosition.zw;
+} 
+
+
+//==============================================================================================================================================================
+[#SHADER: FRAGMENT]
+//==============================================================================================================================================================
+#version 420
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+uniform uint64_t DiffuseTexture;
+in vec2 TexCoords;
+
+void main()
+{
+    vec4 color = texture2D(sampler2D(DiffuseTexture), TexCoords.xy);
+	float val = color.r + color.g + color.b;
+    gl_FragColor = color;//vec4(val,val,val, 1.0);// vec4(1,0,0,1);// 
+}

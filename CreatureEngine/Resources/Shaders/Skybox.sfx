@@ -1,0 +1,30 @@
+[#SHADER: VERTEX]
+#version 330 core
+layout (location = 0) in vec3 VertexPosition;
+
+out vec3 TexCoords;
+
+uniform mat4 PV;
+
+void main()
+{
+    TexCoords = VertexPosition;
+    gl_Position = PV * vec4(VertexPosition, 1.0);
+} 
+
+
+
+
+
+[#SHADER: FRAGMENT]
+#version 330 core
+out vec4 FragColor;
+
+in vec3 TexCoords;
+
+uniform samplerCube Skybox;
+
+void main()
+{    
+    FragColor = texture(Skybox, TexCoords);
+}

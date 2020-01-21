@@ -34,7 +34,7 @@ namespace Profiling
 	{
 		using Data_t = uint32_t;
 		/* X Axis represents Value
-		   Y Axis represents Time 
+		   Y Axis represents Time  
 		   Optional RGB values for additional dimensions */
 		DisplayWindow(Vec2 _position, Vec2 _size)
 			:

@@ -1,0 +1,35 @@
+[#SHADER: VERTEX]
+#version 430
+ 
+layout(location = 0) in vec2 VertexPosition;// <vec2 position, vec2 texCoords>
+layout(location = 1) in vec2 TextureCoord;
+
+uniform mat4 ProjectionMatrix;
+uniform mat4 ViewMatrix;
+uniform mat4 ModelMatrix;
+
+out vec2 TCoords;
+
+void main()
+{
+    TCoords = TextureCoord;
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition.xy, 0.0, 1.0);
+}
+
+//===========================================================================
+[#SHADER: FRAGMENT]
+//===========================================================================
+#version 430
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+in vec2 TCoords;
+
+uniform uint64_t DiffuseTexture;
+//uniform sampler2D DiffuseTexture;
+
+out vec4 color;
+void main()
+{    
+    color =  texture(sampler2D(DiffuseTexture), TCoords);
+}  

@@ -1,0 +1,205 @@
+[#SHADER: VERTEX]
+#version 430
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+layout (std140) uniform Matrices
+{
+    mat4 projection;
+    mat4 view;
+	vec4 eyePosition;
+}Matrix;
+
+uniform mat4 DepthMatrix;
+uniform mat4 ModelMatrix;
+
+layout(location = 0) in vec3 VertexPosition;
+layout(location = 1) in vec3 VertexColor;
+layout(location = 2) in vec3 VertexNormal;
+layout(location = 3) in vec2 TextureCoord;
+layout(location = 4) in vec3 VertexTangent;
+
+uniform vec3 LightPosition;
+uniform vec3 LightColor;
+
+//=========================================
+// OUTPUT TO THE FRAGMENT SHADER
+
+out VS_OUT
+{
+    vec4 FColor;
+    vec3 FPosition;
+    vec3 FNormal;
+    vec2 TCoord;
+     //=========================================
+    mat3 tbnMatrix;
+    vec3 WorldPosition;
+ 	vec4 ShadowCoord;
+	vec3 EyePosition;
+	vec3 LightDirection;
+	vec3 LightColor;
+	vec3 ViewDirection;
+}OUT;
+
+//
+//layout (std140) uniform Lights
+//{
+//  vec4 Position;
+//  vec4 Color;
+//}Light;
+//
+//
+
+void main()
+{
+    mat4 ModelViewMatrix = (Matrix.view * ModelMatrix); 
+    mat4 ModelViewProjectionMatrix = (Matrix.projection * ModelViewMatrix);
+	vec4 WorldPosition = vec4(VertexPosition, 1.0f);
+
+
+	OUT.FColor = vec4(VertexColor, 1.0f);
+    OUT.FPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+    OUT.FNormal = normalize((ModelMatrix * vec4(VertexNormal, 0.0f)).xyz);
+	OUT.TCoord = TextureCoord;
+	OUT.LightDirection = normalize(LightPosition - OUT.FPosition);
+	OUT.LightColor = LightColor;
+
+	//----------------For the Bumpmap------------------------------------
+    vec3 T = normalize((ModelMatrix * vec4(VertexTangent, 0.0f)).xyz);
+    	 T = normalize(T - dot(T, OUT.FNormal) * OUT.FNormal);
+    //-------------------------------------------------------------------
+
+	OUT.tbnMatrix = mat3(T,  cross(T, OUT.FNormal), OUT.FNormal);
+	OUT.WorldPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+    OUT.ShadowCoord = DepthMatrix * vec4(VertexPosition, 1.0f);
+	OUT.EyePosition = Matrix.eyePosition.xyz;
+	OUT.ViewDirection = OUT.EyePosition - OUT.FPosition; 
+
+    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+}
+//http://hacksoflife.blogspot.com/2015/06/glmapbuffer-no-longer-cool.html
+
+
+
+
+
+
+
+
+
+//==============================================================================================================================================================
+[#SHADER: FRAGMENT]
+//==============================================================================================================================================================
+#version 430
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+uniform uint64_t DiffuseTexture;
+uniform uint64_t NormalTexture;
+uniform uint64_t ShadowMap;
+
+in VS_OUT
+{
+    vec4 FColor;
+    vec3 FPosition;
+    vec3 FNormal;
+    vec2 TCoord;
+     //=========================================
+    mat3 tbnMatrix;
+    vec3 WorldPosition;
+ 	vec4 ShadowCoord;
+	vec3 EyePosition;
+	vec3 LightDirection;
+	vec3 LightColor;
+	vec3 ViewDirection;
+}IN;
+
+
+out vec4 FragColor;
+void main()
+{
+	vec4 color = texture(sampler2D(DiffuseTexture), IN.TCoord.xy);
+    if(color.a < 0.5)
+	{
+	    discard;
+	}
+    vec3 Normal = normalize(IN.tbnMatrix * (2 * texture2D(sampler2D(NormalTexture), IN.TCoord.xy).xyz - 1));	// Factor in the Bumpmap
+
+//========================================================
+// Calculate the Shadowing
+//========================================================
+  
+   vec2  poisDisk[4] = 
+   vec2[]
+   (
+       vec2(-.94201624, -.39906216),
+       vec2(0.94558609, -.76890725),
+       vec2(-.094184101, -.92938870),
+       vec2( .34495938, .29387760)
+   );
+   
+   float visibility = 1.0;
+   for(int i = 0; i < 4; i++)
+   {
+       if (texture(sampler2D(ShadowMap), IN.ShadowCoord.xy +  poisDisk[i] / 700.0f).r  <  IN.ShadowCoord.z - .005)
+       {
+           visibility -= 0.2;
+       }
+   }
+
+//========================================================
+// Calculate the Ambient Lighting
+//========================================================
+
+	float ambientStrength = .05;
+    vec3 Ambient = ambientStrength * IN.LightColor.rgb;
+
+
+//========================================================
+// Calculate the Diffuse Lighting
+//========================================================
+
+	
+	float Diff = max(dot(Normal, IN.LightDirection), 0.0);
+	vec3 Diffuse =  Diff * IN.LightColor.rgb ;
+
+//========================================================
+// Calculate the Specular Lighting
+//========================================================
+    float SpecularStrength = 1.0f;
+    float SpecularPower = 32;
+	//reflect(IN.LightDirection, Normal);   
+   	vec3 ReflectionDirection = normalize(2.0f * Normal * dot(Normal, IN.LightDirection) - IN.LightDirection);// R = 2 * (N · L) * N ­ L 
+
+	float Spec = pow(max(dot(ReflectionDirection, normalize(IN.ViewDirection)), 0.0f), SpecularPower);
+	vec3 SpecularColor = SpecularStrength * Spec * IN.LightColor.rgb;
+
+//========================================================
+// FINAL OUT
+//========================================================
+// vec4(1.0,1.0,1.0, 1.0); //color;// vec4(1.0, 1.0, 1.0, 1.0);//vec4(Normal.xyz, 1.0f);//vec4(Normal.xyz, 1.0f);//
+    FragColor = vec4( Ambient + (visibility * ( Diffuse + SpecularColor )) *  vec3(1.0,1.0,1.0), color.a);//vec4( Ambient + (visibility * ( Diffuse + SpecularColor )) *  color.rgb, color.a); //vec4(Ambient * Diffuse * SpecularColor * LightColor * color.rgb, color.a); // FColor //   vec4(Z,Z,Z,color.a);  ////
+}
+
+
+
+
+
+// Diffuse = Normal ' Light * Cd * Ld
+// Half = view + light
+// Spec = pow((Normal ' Half) , shine)
+// color = Diffuse + specular + ambient + emit 
+// http://learnwebgl.brown37.net/09_lights/lights_combined.html
+// vec4(brightness * LightIntensity*  color.rgb, color.a); //  vec4(FNormal.xyz, color.a);//
+// vec3 Bitangent = cross(T, FNormal);
+
+// L = LightPosition;
+// N = Normals;
+// D = dot(N, L) 
+
+
+//vec4 Result = (Ambient * Diffuse * Specular).xyz;
+  //  float Z =  texture(ShadowMap,  gl_FragCoord.xy ).z; // 
+
+
+

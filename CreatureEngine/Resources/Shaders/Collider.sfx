@@ -1,0 +1,32 @@
+[#SHADER: VERTEX]
+#version 400
+uniform mat4 ProjectionMatrix;
+uniform mat4 ViewMatrix;
+uniform mat4 ModelMatrix;
+
+layout(location = 0) in vec3 VertexPosition;
+layout(location = 1) in vec3 VertexColor;
+layout(location = 2) in vec3 VertexNormal;
+layout(location = 3) in vec2 TextureCoord;
+layout(location = 4) in vec3 VertexTangent;
+
+out vec3 Normals;
+void main()
+{
+Normals = VertexNormal;
+
+    mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix); 
+    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);
+    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+}
+
+
+[#SHADER: FRAGMENT]
+#version 400
+
+out vec4 FragColor;
+in vec3 Normals;
+void main()
+{
+    FragColor = vec4( 2.0 * Normals - 1.0, 1.0);
+}

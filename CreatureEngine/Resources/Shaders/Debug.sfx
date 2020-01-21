@@ -1,0 +1,76 @@
+[#SHADER: VERTEX]
+#version 430
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+layout (std140) uniform Matrices
+{
+    mat4 projection;
+    mat4 view;
+}Matrix;
+
+uniform mat4 ModelMatrix;
+
+layout(location = 0) in vec3 VertexPosition;
+layout(location = 3) in vec2 TextureCoord;
+
+
+//=========================================
+// OUTPUT TO THE FRAGMENT SHADER
+
+out VS_OUT
+{
+    vec3 FPosition;
+    vec2 TCoord;
+    vec3 WorldPosition;
+}OUT;
+
+
+
+void main()
+{
+    mat4 ModelViewMatrix = (Matrix.view * ModelMatrix); 
+    mat4 ModelViewProjectionMatrix = (Matrix.projection * ModelViewMatrix);
+	vec4 WorldPosition = vec4(VertexPosition, 1.0f);
+
+    OUT.FPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+	OUT.TCoord = TextureCoord;
+
+    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+}
+//http://hacksoflife.blogspot.com/2015/06/glmapbuffer-no-longer-cool.html
+
+
+
+
+
+
+
+
+
+//==============================================================================================================================================================
+[#SHADER: FRAGMENT]
+//==============================================================================================================================================================
+#version 430
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+uniform uint64_t DiffuseTexture;
+
+in VS_OUT
+{
+    vec3 FPosition;
+    vec2 TCoord;
+    vec3 WorldPosition;
+}IN;
+
+out vec4 FragColor;
+
+void main()
+{
+	vec4 color = texture(sampler2D(DiffuseTexture), IN.TCoord.xy);
+    FragColor = color;
+}
+
+
+

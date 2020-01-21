@@ -1,0 +1,127 @@
+//==============================================================================================================================================================
+[#SHADER: VERTEX]
+//==============================================================================================================================================================
+#version 420
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+
+uniform mat4 ProjectionMatrix;
+uniform mat4 ViewMatrix;
+uniform mat4 ModelMatrix;
+uniform mat4 DepthMatrix;
+
+layout(location = 0) in vec3 VertexPosition;
+layout(location = 1) in vec3 VertexColor;
+layout(location = 2) in vec3 VertexNormal;
+layout(location = 3) in vec2 TextureCoord;
+layout(location = 4) in vec3 VertexTangent;
+
+out vec3 vColor;
+out vec3 vPosition;
+out vec2 texCoords;
+out mat3 tbnMatrix;
+out vec2 vShadowCoord;
+
+void main()
+{
+	texCoords = TextureCoord;
+
+    vPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+	vNormal = normalize((ModelMatrix * vec4(VertexNormal, 0.0f)).xyz);
+
+    vec3 T = normalize((ModelMatrix * vec4(VertexTangent, 0.0f)).xyz);
+    	 T = normalize(T - dot(T, vNormal) * vNormal);
+	tbnMatrix = mat3(T,  cross(T, vNormal), vNormal);
+
+    mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix); 
+    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);
+	vec4 WorldPosition = ModelMatrix * vec4(VertexPosition, 1.0f);
+
+    vColor = vec4(VertexColor, 1.0f);
+    vShadowCoord = DepthMatrix * vec4(VertexPosition, 1.0f);
+
+    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+}
+
+
+//==============================================================================================================================================================
+[#SHADER: FRAGMENT]
+//==============================================================================================================================================================
+#version 420
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+uniform uint64_t DiffuseTexture;
+uniform uint64_t NormalTexture;
+uniform uint64_t ShadowMap;
+
+
+uniform vec3 LightPosition;
+uniform vec3 LightColor
+
+in vec3 vColor;
+in vec3 vPosition;
+in vec2 texCoords;
+in mat3 tbnMatrix;
+
+
+void main()
+{
+
+
+
+//============================================================================================================================================
+// Calculate the Shadowing
+//============================================================================================================================================
+  
+vec2  poisDisk[4] = vec2[]
+    (
+        vec2(-.94201624, -.39906216),
+        vec2(0.94558609, -.76890725),
+        vec2(-.094184101, -.92938870),
+        vec2( .34495938, .29387760)
+    );
+    
+    float visibility = 1.0;
+    for(int i = 0; i < 4; i++)
+    {
+        if (texture(sampler2D(ShadowMap), IN.ShadowCoord.xy +  poisDisk[i] / 700.0f).r  <  IN.ShadowCoord.z - .005)
+        {
+            visibility -= 0.2;
+        }
+    }
+//============================================================================================================================================
+
+
+    float Shine = 100;
+	float SpecularStrength = .5f;
+
+
+
+
+    vec4 outColor = texture2D(DiffuseTexture, texCoords); // *vColor <- if Vertex Color is being used
+	if(outColor.a < .5) discard;
+
+    vec3 Normal = normalize(tbnMatrix * (2 * texture2D(NormalTexture, texCoords.xy).xyz - 1));
+
+	float d = distance(vPosition, LightPosition);
+	float att = 1.0f / (1.0f * d _ .1 * (d * d));
+
+	vec3 N = normalize(Normal);
+	vec3 V = normalize(-vPosition);
+	vec3 L = normalize(LightPosition - vPosition);
+	vec3 R = normalize(reflect(L, N));
+	float NdotL = max(dot(N,L), 0.0f);
+
+	if(NdotL > 0)
+	{
+	    vec4 Ambient = att * LightColor * outColor;
+		vec4 Diffuse = att * LightColor * NdotL * outColor;
+		float RdotL = max(dot(R,V), 0.0f);
+		vec4 Specular = LightColor * pow(RdotV, Shine);
+		outColor = vec3(Ambient * Diffuse * Specular)
+	}
+
+	gl_FragColor = outColor;
+}

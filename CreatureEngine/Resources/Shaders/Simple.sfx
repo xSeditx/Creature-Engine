@@ -1,0 +1,51 @@
+[#SHADER: VERTEX]
+#version 430
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+layout (std140) uniform Matrices
+{
+    mat4 projection;
+    mat4 view;
+	vec4 eyePosition;
+}Matrix;
+
+uniform mat4 DepthMatrix;
+uniform mat4 ModelMatrix;
+
+layout(location = 0) in vec3 VertexPosition;
+layout(location = 1) in vec3 VertexColor;
+
+out VS_OUT
+{
+    vec4 FColor;
+    vec3 FNormal;
+}OUT;
+
+void main()
+{
+    mat4 ModelViewMatrix = (Matrix.view * ModelMatrix); 
+    mat4 ModelViewProjectionMatrix = (Matrix.projection * ModelViewMatrix);
+    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+
+	OUT.FColor = vec4(VertexColor, 1.0f);
+}
+
+//==============================================================================================================================================================
+[#SHADER: FRAGMENT]
+//==============================================================================================================================================================
+#version 430
+#extension GL_NV_bindless_texture : enable
+#extension GL_NV_gpu_shader5 : enable
+
+in VS_OUT
+{
+    vec4 FColor;
+    vec3 FNormal;
+}IN;
+
+out vec4 FragColor;
+void main()
+{
+    FragColor = IN.FColor;
+}
