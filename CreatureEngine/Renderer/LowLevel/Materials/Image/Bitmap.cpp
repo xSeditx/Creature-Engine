@@ -9,7 +9,8 @@ namespace Graphics
 	{
 		if (size() % 3 == 0)
 		{
-			BytesPerPixel = 3;
+		//	BytesPerPixel = 4;
 		}
+		BytesPerPixel = 4;
 	}
 }

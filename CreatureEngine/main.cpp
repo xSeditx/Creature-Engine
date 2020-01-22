@@ -85,24 +85,10 @@ class App
 	: public Application
 {
 
-	Vec2 Vertices[3] =
-	{
-		{-1.0,-1.0 },
-		{ 1.0,-1.0 },
-		{ 0.0, 1.0 }
-	};
+	Vec2 Vertices[3] =	{		{-1.0,-1.0 },		{ 1.0,-1.0 },		{ 0.0, 1.0 }	};
+	Vec2 UVcoords[3] =	{		{ 0.0, 0.0 },		{ 1.0, 0.0 },		{ 1.0, 1.0 }	};
 
-	Vec2 UVcoords[3] =
-	{
-		{ 0.0, 0.0 },
-		{ 1.0, 0.0 },
-		{ 1.0, 1.0 }
-	};
-
-	GLuint Indices[3] =
-	{
-		0,1,2
-	};
+	GLuint Indices[3] =	{	0,1,2	};
 
 	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
@@ -127,14 +113,9 @@ class App
 		glEnableVertexAttribArray(Location);
 		glVertexAttribPointer(Location, 3, GL_FLOAT, GL_FALSE, 0, (char *)NULL);
 
-		uint32_t ERR = 0;
-		if ((ERR = glGetError()))
-		{
-			Print("Error" << ERR);
-			__debugbreak();
-		}
+		CheckGLERROR();
 
-		ProfilerTest = new Profiling::DisplayWindow ({ 0,0 }, { 10, 150 });
+		ProfilerTest = new Profiling::DisplayWindow({ 30,0 }, { 40, 200 });/// { 640, 480 });
 		ProfilerTest->Update(1);
  	}
 	virtual void OnRender()
@@ -144,16 +125,15 @@ class App
 			glBindVertexArray(VAO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			{
-				glDrawArrays(GL_TRIANGLES, 0, 3);
+		//		glDrawArrays(GL_TRIANGLES, 0, 3);
 			}
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		glUseProgram(0);
 	
-	 	ProfilerTest->Update(1);
+	 	ProfilerTest->Update(rand() % 3255);
 		ProfilerTest->Render();
 	}
-
 };
 
 
@@ -350,7 +330,7 @@ bool TEST_PROFILE_WINDOW()
 		Profiling::DisplayWindow Test({ 0,0 }, { 10, 150 });
 		{	// TEST SET PIXEL
 
-			Test.setPixel(1, 1, 0xffffffff);
+			Test.setPixel(1, 1, Pixel(255,255,255,255));
 		}
 		{	// TEST UPDATE
 

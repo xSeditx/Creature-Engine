@@ -190,6 +190,22 @@
   <ItemGroup>
     <Text Include="Trash.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\BasicShader.sfx" />
+    <None Include="Resources\Shaders\Blur.sfx" />
+    <None Include="Resources\Shaders\Collider.sfx" />
+    <None Include="Resources\Shaders\ColorShader.sfx" />
+    <None Include="Resources\Shaders\Debug.sfx" />
+    <None Include="Resources\Shaders\DebugQuad.sfx" />
+    <None Include="Resources\Shaders\Example.sfx" />
+    <None Include="Resources\Shaders\GodRays.sfx" />
+    <None Include="Resources\Shaders\LightShader.sfx" />
+    <None Include="Resources\Shaders\Preblur.sfx" />
+    <None Include="Resources\Shaders\Shadow.sfx" />
+    <None Include="Resources\Shaders\Simple.sfx" />
+    <None Include="Resources\Shaders\Skybox.sfx" />
+    <None Include="Resources\Shaders\Sprite.sfx" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

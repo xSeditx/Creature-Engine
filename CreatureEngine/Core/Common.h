@@ -461,4 +461,29 @@ if((ERR = glGetError()))\
 
 
 
+
+
+
+#include<atomic>
+template<typename _Ty>
+struct CREATURE_API Protected_Value
+{
+	void Store(_Ty _value)
+	{
+		while (Flag.test_and_set(std::memory_order_acquire))
+		{}// maybe an atomic test wait?
+		
+		Value = _value;
+		Flag.clear(std::memory_order_release);
+	}
+	_Ty Load()
+	{
+		return Value;
+	}
+private:
+	std::atomic_flag Flag{ ATOMIC_FLAG_INIT };
+	_Ty Value{ 0 };
+};
+
+
 #endif// COMMON_H

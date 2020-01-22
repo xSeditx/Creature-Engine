@@ -269,12 +269,15 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	/// Set OpenGL State
 	{
 		glShadeModel(GL_SMOOTH);
-		glClearColor(0.0f, 0.0f, 1.0f, 0.0f);                  // Black Background
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);                  // Black Background
 		glClearDepth(1.0f);                                    // Depth Buffer Setup
 		glEnable(GL_DEPTH_TEST);                               // Enables Depth Testing
 		glDepthFunc(GL_LEQUAL);                                // The Type Of Depth Test To Do
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);     // Really Nice Perspective Calculations
     	glViewport(0, 0, _width, _height);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	}
 

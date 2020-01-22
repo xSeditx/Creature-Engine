@@ -217,4 +217,48 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\BasicShader.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Blur.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Collider.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\ColorShader.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Debug.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\DebugQuad.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Example.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\GodRays.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\LightShader.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Preblur.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Shadow.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Simple.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Skybox.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\Sprite.sfx">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -32,9 +32,11 @@ namespace Graphics
 
 		glGenTextures(1, &GL_Handle);
 		Bind();
-		SetFiltering(GL_LINEAR);
-		SetWrap(GL_CLAMP_TO_EDGE);
-		//GL_RGB
+		SetFiltering(GL_NEAREST);// GL_LINEAR);
+		SetWrap( GL_CLAMP_TO_EDGE);
+		//GL_RGBGL_REPEAT);//
+		InternalFormat = GL_RGBA;// GL_RGBA;GL_RED;// 
+		Format = GL_RGBA;// _INTEGER;// GL_RGBA_INTEGER; GL_RED;//
 		glTexImage2D(Target, 0, InternalFormat, (Picture->Width()), Picture->Height(), 0, Format, GL_UNSIGNED_BYTE, Picture->Data()); // 	_GL(glTexImage2D(Target, 0, GL_RGB, Picture.Size.x, Picture.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, Picture.Data));
 	}
 ///     Texture::Texture(Bitmap& image, int _x, int _y, int _width, int _height)
