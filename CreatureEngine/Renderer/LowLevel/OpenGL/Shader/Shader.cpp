@@ -38,11 +38,12 @@ void Shader::Delete()
 
 void Shader::Enable()
 {
-	glUseProgram(GL_Handle);//	Push(this);
+	glUseProgram(GL_Handle);
+	Push(this);
 }
 void Shader::Disable()
 {
-	glUseProgram(0);// Pop()->GL_Handle);
+	glUseProgram(Pop()->GL_Handle);
 }
 
 void Shader::Push(Shader *shad)
@@ -52,8 +53,7 @@ void Shader::Push(Shader *shad)
 Shader* Shader::Pop()
 {
 	ActiveShader.pop();
-	Shader *ret = ActiveShader.top();
-	return ret;
+	return ActiveShader.top();
 }
 
 GLint Shader::GetUniformLocation(const char  *name)

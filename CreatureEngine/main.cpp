@@ -115,7 +115,7 @@ class App
 
 		CheckGLERROR();
 
-		ProfilerTest = new Profiling::DisplayWindow({ 30,0 }, { 40, 200 });/// { 640, 480 });
+		ProfilerTest = new Profiling::DisplayWindow({ 20,0 }, { 40, 200 }, {40,500});/// { 640, 480 });
 		ProfilerTest->Update(1);
  	}
 	virtual void OnRender()
@@ -327,7 +327,7 @@ int main()
 bool TEST_PROFILE_WINDOW()
 {
 	{
-		Profiling::DisplayWindow Test({ 0,0 }, { 10, 150 });
+		Profiling::DisplayWindow Test({ 0,0 }, { 10, 150 }, { 30, 450 });
 		{	// TEST SET PIXEL
 
 			Test.setPixel(1, 1, Pixel(255,255,255,255));

@@ -358,6 +358,7 @@ void Application::Window::s_Title(std::string _name)
 void Application::Window::create_DefaultShader()
 {
 	WindowShader = Shader(VertexShader, FragmentShader);
+	WindowShader.Enable();
 }
 
 ///==================================================================================================================
