@@ -19,6 +19,10 @@ public:
 		Right,
 		Left;
 
+	void Move(Vec2 _pos);
+	void MoveX(float _amount);
+	void MoveY(float _amount);
+
 	void Translate(Vec2 pos);
 	void Rotate(float _angle);
 

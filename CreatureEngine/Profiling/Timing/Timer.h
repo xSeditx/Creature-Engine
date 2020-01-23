@@ -10,17 +10,17 @@ typedef std::chrono::time_point<std::chrono::system_clock> SystemClock;
 typedef std::chrono::time_point<std::chrono::steady_clock> SteadyClock;
 typedef std::chrono::duration<float> fDuration;
 
+using Seconds = std::chrono::seconds;
 using Milliseconds = std::chrono::milliseconds;
 using Microseconds = std::chrono::microseconds;
 using Nanoseconds = std::chrono::nanoseconds;
 
 namespace Timing
 {
-
 	template<typename _Res = std::chrono::microseconds>
 	struct CREATURE_API Timer
 	{
-		using Resolution = std::chrono::microseconds;
+		using Resolution = _Res;// std::chrono::microseconds;
 
 		SteadyClock Start_Time;
 		SteadyClock Duration;
@@ -45,12 +45,23 @@ namespace Timing
 			Start_Time = Clock::now();
 			Duration = Clock::now();
 		}
+
+		static size_t GetTime()
+		{
+			static Timer<_Res> GlobalStartTimer;
+			static bool _init{ false };
+			if (_init == false)
+			{
+				_init = true;    GlobalStartTimer.Start();
+			}
+			return GlobalStartTimer.Sample();
+		}
 	};
 
-	template < typename _Res  >
+	template < typename _Res  = Microseconds>
 	struct CREATURE_API scoped_Timer
 		:
-		Timer<>
+		Timer<_Res>
 	{
 		using Resolution = _Res;
 		scoped_Timer(uint64_t* _storage)
@@ -65,6 +76,7 @@ namespace Timing
 		{
 			*Storage = (std::chrono::duration_cast <Resolution> (Clock::now() - Start_Time).count());
 		}
+		SteadyClock Start_Time;
 
 		uint64_t* Storage;
 	};
@@ -94,4 +106,5 @@ namespace Timing
 
 		uint64_t Trigger;
 	};
+
 }

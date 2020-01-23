@@ -122,15 +122,14 @@ Mat4 Camera3D::LookAt(Vec3 eye, Vec3 target, Vec3 up)
 {
 	Vec3 vz = glm::normalize(eye - target);
 	Vec3 vx = glm::normalize(glm::cross(up, vz));
-	// vy doesn't need to be normalized because it's a cross
-	// product of 2 normalized vectors
 	Vec3 vy = glm::cross(vz, vx);
-	Mat4 RETURN = // Inverse Matrix
-		Mat4(
+	Mat4 results =  
+		Mat4
+		(
 			Vec4(vx, 0),
 			Vec4(vy, 0),
 			Vec4(vz, 0),
 			Vec4(eye, 1)
 		);
-	return RETURN; //inverseViewMatrix.inverse();
+	return results; 
 }// MATRIX STATE HANDLING

@@ -79,14 +79,17 @@
 			Matrix = glm::rotate(Matrix, glm::radians(_rot.z), Vec3(0.0f, 0.0f, 1.0f));
 		}
 
-
-		Mat4 Translate(Vec3 _pos)
+		void Identity()
 		{
-			return 	glm::translate(	glm::mat4(1.0f), _pos);
+			Matrix = Mat4(1);
 		}
-		Mat4 Rotate_Translate(Vec3 _pos, Vec3 _rot)
+		void Translate(Vec3 _pos)
 		{
-			return glm::rotate
+			Matrix = glm::translate(	glm::mat4(1.0f), _pos);
+		}
+		void Rotate_Translate(Vec3 _pos, Vec3 _rot)
+		{
+			Matrix = glm::rotate
 			( // ensure unneeded copying as the results from the last transform are immediately used in the next step
 				glm::rotate
 				(
@@ -105,9 +108,9 @@
 				Vec3(0.0f, 0.0f, 1.0f)
 			);
 		}
-		Mat4 Rotate(Vec3 _rot)
+		void Rotate(Vec3 _rot)
 		{
-			return glm::rotate
+			Matrix = glm::rotate
 			( // ensure unneeded copying as the results from the last transform are immediately used in the next step
 				glm::rotate
 				(
@@ -122,17 +125,17 @@
 				Vec3(0.0f, 0.0f, 1.0f)
 			);
 		}
-		Mat4 RotateX(float _rot)
+		void RotateX(float _rot)
 		{
-			return glm::rotate(Matrix, glm::radians(_rot), Vec3(1.0f, 0.0f, 0.0f));
+		    Matrix = glm::rotate(Matrix, glm::radians(_rot), Vec3(1.0f, 0.0f, 0.0f));
 		}
-		Mat4 RotateY(float _rot)
+		void RotateY(float _rot)
 		{
-			return glm::rotate(Matrix, glm::radians(_rot), Vec3(0.0f, 1.0f, 0.0f));
+			Matrix = glm::rotate(Matrix, glm::radians(_rot), Vec3(0.0f, 1.0f, 0.0f));
 		}
-		Mat4 RotateZ(float _rot)
+		void RotateZ(float _rot)
 		{
-			return glm::rotate(Matrix, glm::radians(_rot), Vec3(0.0f, 0.0f, 1.0f));
+			Matrix = glm::rotate(Matrix, glm::radians(_rot), Vec3(0.0f, 0.0f, 1.0f));
 		}
 
 

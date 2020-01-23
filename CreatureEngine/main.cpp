@@ -115,9 +115,12 @@ class App
 
 		CheckGLERROR();
 
-		ProfilerTest = new Profiling::DisplayWindow({ 20,0 }, { 40, 200 }, {40,500});/// { 640, 480 });
+		ProfilerTest = new Profiling::DisplayWindow({ 640/2, 480/2 }, { 100, 200 }, {20,500});/// { 640, 480 });
 		ProfilerTest->Update(1);
  	}
+	
+
+	size_t PreviousTime;
 	virtual void OnRender()
 	{
 		glUseProgram(getWindow().defaultShader());
@@ -130,16 +133,28 @@ class App
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		glUseProgram(0);
-	
-	 	ProfilerTest->Update(rand() % 3255);
+
+		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
+    	size_t Time = NewTime - PreviousTime;
+		PreviousTime = NewTime;
+	 	ProfilerTest->Update(Time);
 		ProfilerTest->Render();
+		Print("Time since State = " << Time);
 	}
 };
 
-
+//  void test(int ar[])
+//  {
+//  	std::cout << "Array Size Test =  " << (sizeof(ar) / sizeof(int)) << "\n";
+//  	int ar[] = { 1,2,3,4,5,6 };
+//  	std::cout << "Array Size = " << (sizeof(ar) / sizeof(int)) << "\n";
+//  	test(ar);}
+ 
 //https://en.cppreference.com/w/cpp/compiler_support
+
 int main()
 {
+
 	TODO("Setup the Bitmap object for the Profiler so that I can dynamically update it and get the HUD for the profiler Operation. Do NOTHING else first!");
 	App MyApp;
 	MyApp.Init();

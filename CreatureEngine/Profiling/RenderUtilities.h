@@ -32,10 +32,9 @@ namespace Profiling
 {
     struct CREATURE_API DisplayWindow
     {
-
+		Camera2D Camera;
         Mat4 ProjectionMatrix;
         Mat4 ViewMatrix;
-        Mat4 ModelMatrix;
 		Transform Model;
 
 
@@ -74,10 +73,13 @@ namespace Profiling
             Position(_position),
 			DataRange(_dataRange),
             ReadBuffer ( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
-            WriteBuffer( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)])
+            WriteBuffer( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
+			Model({ Vec3(0.0f),Vec3(0.0f), "Model" })
         {
-			High = DataRange.x;
+			Camera = Camera2D(Vec2(640, 480 ));
 
+			High = Size.x;
+			Xcoeff = 1.0 / _dataRange.x;
             QuadRenderer = Shader(vRenderer, fRenderer);
 
             Print("Pixel Size: " << sizeof(Pixel) << " bytes");
@@ -99,25 +101,16 @@ namespace Profiling
 
             // Setup the Matrics for our Quad. 
             {// Possibly rid ourselves of these later
-                ProjectionMatrix = glm::ortho(0.0f, 640.0f, 480.0f, 0.0f, -1.0f, 1.0f);  //OrthographicMatrix(_size.x, _size.y);
-                ViewMatrix = glm::translate(Mat4(1.0f), Vec3(200, 200, 0));//200, 200, 0))
-                ModelMatrix = Mat4(1.0);
-                ModelMatrix = Rotate_Translate(Vec3(_position.x, _position.y, 0), Vec3(0, 0, 45));
+            //    ProjectionMatrix = glm::ortho(0.0f, 640.0f, 480.0f, 0.0f, -1.0f, 1.0f);  //OrthographicMatrix(_size.x, _size.y);
+            //    ViewMatrix = glm::translate(Mat4(1.0f), Vec3(200, 200, 0));//200, 200, 0))
             }
 
-            // Figure out the Coefficients for the values displayed to the screen
+			//Model.Rotate_Translate(Vec3(_position.x, _position.y, 0), Vec3(0, 0, 45));
+			Model.Translate({ _position.x,_position.y, 0.0f });
+			Model.RotateZ(-90.0f);
+			// Figure out the Coefficients for the values displayed to the screen
             {
-                float xDiff{ 0 }, yDiff{ 0 };
-
-                Low > 0 ?
-                    xDiff = High + std::abs(Low) :
-                    xDiff = High - Low;
-
-                Low > 0 ?
-                    xDiff = High + std::abs(Low) :
-                    xDiff = High - Low;
-
-                Xcoeff = DataRange.x / (High + Low);
+				Xcoeff = DataRange.x / High;//Fix this later to allow Negative Values + Low);
                 Ycoeff = DataRange.y / TimeLength;
             }
 
@@ -132,12 +125,12 @@ namespace Profiling
             {
                 Vec4 Vertices[6] =
                 {   // positions   // texCoords
-                    Vec4(-Size.x  * 0.5f,   Size.y  * 0.5f,    0.0f,  1.0f),
-                    Vec4(-Size.x  * 0.5f,  -Size.y  * 0.5f,    0.0f,  0.0f),
-                    Vec4( Size.x  * 0.5f,  -Size.y  * 0.5f,    1.0f,  0.0f),
-                    Vec4(-Size.x  * 0.5f,   Size.y  * 0.5f,    0.0f,  1.0f),
-                    Vec4( Size.x  * 0.5f , -Size.y  * 0.5f,    1.0f,  0.0f),
-                    Vec4( Size.x  * 0.5f ,  Size.y  * 0.5f,    1.0f,  1.0f)
+                    Vec4(0 ,         Size.y   ,    0.0f,  1.0f),
+                    Vec4(0 ,        -Size.y   ,    0.0f,  0.0f),
+                    Vec4( Size.x ,  -Size.y   ,    1.0f,  0.0f),
+                    Vec4(0 ,         Size.y   ,    0.0f,  1.0f),
+                    Vec4( Size.x ,  -Size.y   ,    1.0f,  0.0f),
+                    Vec4( Size.x ,   Size.y   ,    1.0f,  1.0f)
                 };
 
                 glGenBuffers(1, &VBO);
@@ -154,7 +147,13 @@ namespace Profiling
                 CheckGLERROR();
             }
         }
-
+		void generateXCoeff()
+		{
+		    //    float xDiff{ 0 }, yDiff{ 0 };
+		    //    Low > 0 ?
+		    //    xDiff = High + std::abs(Low) :
+		    //    xDiff = High - Low;
+		}
 
         ~DisplayWindow()
         {
@@ -166,19 +165,33 @@ namespace Profiling
             Counter{ 0 },
             val = 0,
             rad = 0;
+		size_t PreviousTime{ 0 };
+		uint32_t PreviousX{ 0 };
         void Update(uint32_t _value)
         {
-			TODO("Fix the Y Axis so that the Timer only goes off when it is in the proper range so Y Accurately represents Time ");
-            if (Counter++ % 10 == 0)
-            {// TODO("This needs to be set after a Timer is added so that if the Sample Limit is passed test the value and display it");
+			size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
+			size_t Time = NewTime - PreviousTime;
+			if (Time > 100)
+			{
+				PreviousTime = NewTime;
+				Print("PreviousTime: " << Time);
                 int DataPoint = static_cast<int>(Xcoeff * _value);
 
                 ClearLine();// Clear the new Line.
-                setPixel(val, 0, Pixel(255,0,255,255));   // Sets its value
 
+
+                setPixel(val, 0, Pixel(255,0,255,255));   // Sets its value
+				
+				int start = val < PreviousX ? val : PreviousX;
+				int end = val > PreviousX ? val : PreviousX;
+				for (int i{ start };i < end; ++i)
+				{ 
+					setPixel(i, 0, Pixel(255, 0, 0, 155));
+				}
+			    PreviousX = val;
                 rad+=5;// Just temp shit for testing to make a sin wave
-                if (rad > 180)rad = 0;
-                val = DataRange.x* sin(rad * 3.14159 / 180.0f)  ;
+                if (rad > 180) rad = 0;
+				val = (int)DataPoint;//(DataRange.x * sin(rad * 3.14159 / 180.0f))  ;
 				swapBuffer();
                 DisplayTexture.Update((uint8_t*)ReadBuffer);
             }
@@ -191,10 +204,14 @@ namespace Profiling
                 {
                     glActiveTexture( GL_TEXTURE0 );
                     DisplayTexture.Bind();
-                    QuadRenderer.SetUniform("texture1"  ,                0);
-                    QuadRenderer.SetUniform("View"      ,       ViewMatrix);
-                    QuadRenderer.SetUniform("Model"     ,      ModelMatrix);
-                    QuadRenderer.SetUniform("Projection", ProjectionMatrix);
+                    QuadRenderer.SetUniform("texture1" , 0);
+					Model.Bind();
+					//Camera.ProjectionMatrix = ProjectionMatrix;
+					//Camera.ViewMatrix = ViewMatrix;
+					Camera.Bind();
+					// A Camera is just a projection and View Matrix. Make it so...
+					 //Shader::get().SetUniform("ViewMatrix", ViewMatrix);
+                     //Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
 
 					OpenGL::Renderer::drawArray(VBO, 6);
                 }
@@ -204,13 +221,17 @@ namespace Profiling
         }
 
         size_t   size()                                            {    return (size_t)(DataRange.x * DataRange.y) * sizeof(Pixel);    }
-        void     setPixel(uint32_t _x, uint32_t _y, Pixel _color)  {           ReadBuffer[_x + (size_t)DataRange.x * _y] = _color;        }
+		__forceinline void     setPixel(uint32_t _x, uint32_t _y, Pixel _color) 
+		{ 
+			if (_x > DataRange.x) return;   
+			ReadBuffer[_x + (size_t)DataRange.x * _y] = _color;
+		}
         uint32_t getPixel(uint32_t _x, uint32_t _y)                {    return ReadBuffer[_x + (size_t)DataRange.x * _y];                 }
 
     private:
 		void ClearLine()
 		{
-			memset(ReadBuffer, Pixel(100, 100, 100, 100).Color, DataRange.x * sizeof(Pixel));          // Clear the new Line.
+			memset(ReadBuffer, Pixel(100, 100, 100, 100).Color, (size_t)(DataRange.x * sizeof(Pixel)));          // Clear the new Line.
 		}
 		void swapBuffer()
 		{
@@ -279,15 +300,15 @@ namespace Profiling
         std::string vRenderer =
             "#version 330 core \n\
 layout(location = 0) in vec4 aPos;          \n\
-uniform mat4 Projection;                    \n\
-uniform mat4 View ;                         \n\
+uniform mat4 ProjectionMatrix;                    \n\
+uniform mat4 ViewMatrix;                         \n\
 uniform mat4 Model;                         \n\
 out vec3 vertexColor;                       \n\
 out vec2 TexCoords;                         \n\
 void main()                                 \n\
 {                                           \n\
-    mat4 ModelViewMatrix = (View * Model);  \n\
-    mat4 ModelViewProjectionMatrix = (Projection * ModelViewMatrix);\n\
+    mat4 ModelViewMatrix = (ViewMatrix * Model);  \n\
+    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
     TexCoords = aPos.zw;                          \n\
     gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
 }";
