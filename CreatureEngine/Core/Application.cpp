@@ -55,7 +55,7 @@ USAGE:
 	 //-------------------------------------------------------------------------------------------------------------
 	 OnCreate();
  }
-
+#include"../Profiling/Timing/Timer.h"
  void Application::Pause() {}
  void Application::End()
  {
@@ -64,9 +64,20 @@ USAGE:
  void Application::Run()
  {
 	 MSG msg;
+	 size_t PreviousTime{ 0 };
 
 	while (isRunning())
 	{
+		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
+		size_t Time = NewTime - PreviousTime;
+		++FPS;
+		if (Time > 1000)
+		{
+			Print("FPS: " << FPS);
+			FPS = 0;
+			PreviousTime = NewTime;
+		}
+		
 	 Application::PollEvents();
 	 while(Application::PeekMSG(msg))
 	 {
@@ -125,7 +136,7 @@ USAGE:
  void Application::OnUpdate() {  }
  void Application::OnRender() {  }
 
-
+ // WGL_EXT_swap_control
 
  //=================================================================================================
  //________________________________ WINDOW CREATION PROPERTIES _____________________________________
@@ -134,10 +145,12 @@ USAGE:
  {
 	 s_Position ({ 0,0 });// iVec2(0);
 	 s_Size ( { 640, 480 });//iVec2(640, 480);
-	 mainWindow.s_Title("Default Mystic Application Window");
+	 mainWindow.s_Title("Default Application Window");
  }
  void Application::CreateApplicationWindow()
  {
+	// wglSwapIntervalEXT
+	// wg
 	 SetWindowProperties();
 	 if (Width() == 0 || Height() == 0)
 	 {

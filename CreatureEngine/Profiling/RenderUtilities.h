@@ -33,33 +33,10 @@ namespace Profiling
     struct CREATURE_API DisplayWindow
     {
 		Camera2D Camera;
-        Mat4 ProjectionMatrix;
-        Mat4 ViewMatrix;
+
 		Transform Model;
 
 
-        Mat4 Rotate_Translate(Vec3 _pos, Vec3 _rot)
-        {
-            return glm::rotate
-            ( // ensure unneeded copying as the results from the last transform are immediately used in the next step
-                glm::rotate
-                (
-                    glm::rotate
-                    (
-                        glm::translate
-                        ( // Starts with the Translation here
-                            glm::mat4(1.0f),
-                            _pos
-                        ),
-                        glm::radians(_rot.x),
-                        Vec3(1.0f, 0.0f, 0.0f)),
-                    glm::radians(_rot.y),
-                    Vec3(0.0f, 1.0f, 0.0f)),
-                glm::radians(_rot.z),
-                Vec3(0.0f, 0.0f, 1.0f)
-            );
-        }
-		
 
         /* X Axis represents Value
            Y Axis represents Time  
@@ -174,8 +151,8 @@ namespace Profiling
 			if (Time > 100)
 			{
 				PreviousTime = NewTime;
-				Print("PreviousTime: " << Time);
-                int DataPoint = static_cast<int>(Xcoeff * _value);
+				//Print("PreviousTime: " << Time);
+                int DataPoint = static_cast<int>(_value);//Xcoeff * 
 
                 ClearLine();// Clear the new Line.
 

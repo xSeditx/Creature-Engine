@@ -115,7 +115,7 @@ class App
 
 		CheckGLERROR();
 
-		ProfilerTest = new Profiling::DisplayWindow({ 640/2, 480/2 }, { 100, 200 }, {20,500});/// { 640, 480 });
+		ProfilerTest = new Profiling::DisplayWindow({ 640/2, 480/2 }, { 50, 50 }, {2000,100});/// { 640, 480 });
 		ProfilerTest->Update(1);
  	}
 	
@@ -137,9 +137,9 @@ class App
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
-	 	ProfilerTest->Update(Time);
+	 	ProfilerTest->Update(2000-Time);
 		ProfilerTest->Render();
-		Print("Time since State = " << Time);
+	//	Print("Time since State = " << Time);
 	}
 };
 
