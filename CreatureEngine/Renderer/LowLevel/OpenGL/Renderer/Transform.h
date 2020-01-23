@@ -45,6 +45,21 @@
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
+			Matrix = glm::scale(Matrix, Scale);
+		}
+		Transform(Vec3 _pos, Vec3 _rot, Vec3 _scale, std::string _name)
+			:
+			Position(_pos),
+			Rotation(_rot),
+			Scale(_scale),
+			Name(_name)
+		{
+			Matrix = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
+			Matrix = glm::translate(Matrix, _pos);
+			Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
+			Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
+			Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
+			Matrix = glm::scale(Matrix, Scale);
 		}
 
 
@@ -65,11 +80,13 @@
 		}
 		void Update()
 		{
+			
 			Matrix = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
 			Matrix = glm::translate(Matrix, Position);
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
+			Matrix = glm::scale(Matrix, Scale);
 		}
 		void UpdateBy(Vec3 _pos, Vec3 _rot)
 		{
@@ -77,6 +94,7 @@
 			Matrix = glm::rotate(Matrix, glm::radians(_rot.x), Vec3(1.0f, 0.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(_rot.y), Vec3(0.0f, 1.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(_rot.z), Vec3(0.0f, 0.0f, 1.0f));
+			Matrix = glm::scale(Matrix, Scale);
 		}
 
 		void Identity()
@@ -86,6 +104,8 @@
 		void Translate(Vec3 _pos)
 		{
 			Matrix = glm::translate(	glm::mat4(1.0f), _pos);
+			Matrix = glm::scale(Matrix, Scale);
+
 		}
 		void Rotate_Translate(Vec3 _pos, Vec3 _rot)
 		{

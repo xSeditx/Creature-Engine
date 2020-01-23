@@ -74,7 +74,15 @@ namespace Profiling
 			DataRange(_dataRange),
             ReadBuffer ( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
             WriteBuffer( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
-			Model({ Vec3(0.0f),Vec3(0.0f), "Model" })
+			Model
+			(
+				{
+					Vec3(0.0f),
+					Vec3(0.0f),
+					Vec3(1),
+					"Model"
+				}
+			)
         {
 			Camera = Camera2D(Vec2(640, 480 ));
 
@@ -147,14 +155,6 @@ namespace Profiling
                 CheckGLERROR();
             }
         }
-		void generateXCoeff()
-		{
-		    //    float xDiff{ 0 }, yDiff{ 0 };
-		    //    Low > 0 ?
-		    //    xDiff = High + std::abs(Low) :
-		    //    xDiff = High - Low;
-		}
-
         ~DisplayWindow()
         {
             delete(ReadBuffer);
@@ -175,11 +175,9 @@ namespace Profiling
 			{
 				PreviousTime = NewTime;
 				Print("PreviousTime: " << Time);
-                int DataPoint = static_cast<int>(Xcoeff * _value);
+                int DataPoint = static_cast<int>(_value);
 
                 ClearLine();// Clear the new Line.
-
-
                 setPixel(val, 0, Pixel(255,0,255,255));   // Sets its value
 				
 				int start = val < PreviousX ? val : PreviousX;
@@ -191,7 +189,7 @@ namespace Profiling
 			    PreviousX = val;
                 rad+=5;// Just temp shit for testing to make a sin wave
                 if (rad > 180) rad = 0;
-				val = (int)DataPoint;//(DataRange.x * sin(rad * 3.14159 / 180.0f))  ;
+				val =(DataRange.x * sin(rad * 3.14159 / 180.0f))  ; //(int)DataPoint;//
 				swapBuffer();
                 DisplayTexture.Update((uint8_t*)ReadBuffer);
             }
@@ -205,14 +203,9 @@ namespace Profiling
                     glActiveTexture( GL_TEXTURE0 );
                     DisplayTexture.Bind();
                     QuadRenderer.SetUniform("texture1" , 0);
-					Model.Bind();
-					//Camera.ProjectionMatrix = ProjectionMatrix;
-					//Camera.ViewMatrix = ViewMatrix;
-					Camera.Bind();
-					// A Camera is just a projection and View Matrix. Make it so...
-					 //Shader::get().SetUniform("ViewMatrix", ViewMatrix);
-                     //Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
 
+					Model.Bind();
+					Camera.Bind();
 					OpenGL::Renderer::drawArray(VBO, 6);
                 }
                 glBindVertexArray(0);
@@ -242,6 +235,14 @@ namespace Profiling
 
 		void clearRead() { memset(ReadBuffer, 0, size()); }
 		void clearWrite() { memset(WriteBuffer, 0, size()); }
+		void generateXCoeff()
+		{
+			//    float xDiff{ 0 }, yDiff{ 0 };
+			//    Low > 0 ?
+			//    xDiff = High + std::abs(Low) :
+			//    xDiff = High - Low;
+		}
+
 
 
 
