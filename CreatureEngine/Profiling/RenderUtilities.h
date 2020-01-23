@@ -33,33 +33,10 @@ namespace Profiling
     struct CREATURE_API DisplayWindow
     {
 		Camera2D Camera;
-        Mat4 ProjectionMatrix;
-        Mat4 ViewMatrix;
+
 		Transform Model;
 
 
-        Mat4 Rotate_Translate(Vec3 _pos, Vec3 _rot)
-        {
-            return glm::rotate
-            ( // ensure unneeded copying as the results from the last transform are immediately used in the next step
-                glm::rotate
-                (
-                    glm::rotate
-                    (
-                        glm::translate
-                        ( // Starts with the Translation here
-                            glm::mat4(1.0f),
-                            _pos
-                        ),
-                        glm::radians(_rot.x),
-                        Vec3(1.0f, 0.0f, 0.0f)),
-                    glm::radians(_rot.y),
-                    Vec3(0.0f, 1.0f, 0.0f)),
-                glm::radians(_rot.z),
-                Vec3(0.0f, 0.0f, 1.0f)
-            );
-        }
-		
 
         /* X Axis represents Value
            Y Axis represents Time  
@@ -74,15 +51,7 @@ namespace Profiling
 			DataRange(_dataRange),
             ReadBuffer ( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
             WriteBuffer( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
-			Model
-			(
-				{
-					Vec3(0.0f),
-					Vec3(0.0f),
-					Vec3(1),
-					"Model"
-				}
-			)
+			Model({ Vec3(0.0f),Vec3(0.0f), "Model" })
         {
 			Camera = Camera2D(Vec2(640, 480 ));
 
@@ -155,6 +124,14 @@ namespace Profiling
                 CheckGLERROR();
             }
         }
+		void generateXCoeff()
+		{
+		    //    float xDiff{ 0 }, yDiff{ 0 };
+		    //    Low > 0 ?
+		    //    xDiff = High + std::abs(Low) :
+		    //    xDiff = High - Low;
+		}
+
         ~DisplayWindow()
         {
             delete(ReadBuffer);
@@ -174,10 +151,12 @@ namespace Profiling
 			if (Time > 100)
 			{
 				PreviousTime = NewTime;
-				Print("PreviousTime: " << Time);
-                int DataPoint = static_cast<int>(_value);
+				//Print("PreviousTime: " << Time);
+                int DataPoint = static_cast<int>(_value);//Xcoeff * 
 
                 ClearLine();// Clear the new Line.
+
+
                 setPixel(val, 0, Pixel(255,0,255,255));   // Sets its value
 				
 				int start = val < PreviousX ? val : PreviousX;
@@ -189,7 +168,7 @@ namespace Profiling
 			    PreviousX = val;
                 rad+=5;// Just temp shit for testing to make a sin wave
                 if (rad > 180) rad = 0;
-				val =(DataRange.x * sin(rad * 3.14159 / 180.0f))  ; //(int)DataPoint;//
+				val = (int)DataPoint;//(DataRange.x * sin(rad * 3.14159 / 180.0f))  ;
 				swapBuffer();
                 DisplayTexture.Update((uint8_t*)ReadBuffer);
             }
@@ -203,9 +182,14 @@ namespace Profiling
                     glActiveTexture( GL_TEXTURE0 );
                     DisplayTexture.Bind();
                     QuadRenderer.SetUniform("texture1" , 0);
-
 					Model.Bind();
+					//Camera.ProjectionMatrix = ProjectionMatrix;
+					//Camera.ViewMatrix = ViewMatrix;
 					Camera.Bind();
+					// A Camera is just a projection and View Matrix. Make it so...
+					 //Shader::get().SetUniform("ViewMatrix", ViewMatrix);
+                     //Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
+
 					OpenGL::Renderer::drawArray(VBO, 6);
                 }
                 glBindVertexArray(0);
@@ -235,14 +219,6 @@ namespace Profiling
 
 		void clearRead() { memset(ReadBuffer, 0, size()); }
 		void clearWrite() { memset(WriteBuffer, 0, size()); }
-		void generateXCoeff()
-		{
-			//    float xDiff{ 0 }, yDiff{ 0 };
-			//    Low > 0 ?
-			//    xDiff = High + std::abs(Low) :
-			//    xDiff = High - Low;
-		}
-
 
 
 

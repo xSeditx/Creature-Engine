@@ -184,7 +184,6 @@ private:
 		bool Alive{ true };
 		bool Visible{ true };
 
-
  	private:
 
 		void create_DefaultShader();
@@ -220,7 +219,9 @@ private:
 
 	//Timer ApplicationTimer;
 
+
 public:
+	size_t FPS;
 	Application();
 	Application(int _width, int _height, std::string _name);
 	~Application();
