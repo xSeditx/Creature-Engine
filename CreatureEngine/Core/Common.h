@@ -485,5 +485,7 @@ private:
 	_Ty Value{ 0 };
 };
 
+#define Property (_getter, _setter) __declspec(property(get = _getter, put = _setter))
+
 
 #endif// COMMON_H

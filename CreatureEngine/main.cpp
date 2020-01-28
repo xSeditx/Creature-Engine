@@ -1,6 +1,8 @@
 #include<iostream>
 #include<Windows.h>
 #include<array>
+
+//#define CacheLineFlush(Address) _mm_clflush(Address)
 #pragma optimize( "", off )
 
 #define MY_WRAPPER
