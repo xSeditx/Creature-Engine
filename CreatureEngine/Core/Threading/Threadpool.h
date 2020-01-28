@@ -108,9 +108,9 @@ bool is_ready(std::future<_R> const& _fut)
 
 
  /* Will be used later so Threadpool can accept functions that return void
-	template<typename _Ty> struct FixReturn       { using type = _Ty ;}
-	template<typename _Ty> struct FixReturn<_Ty&> { using type = _Ty*;}
-	template<>             struct FixReturn<>     { using type = int ;}
+    template<typename _Ty> struct FixReturn       { using type = _Ty ;}
+    template<typename _Ty> struct FixReturn<_Ty&> { using type = _Ty*;}
+    template<>             struct FixReturn<>     { using type = int ;}
  */
 
 namespace Core
@@ -119,27 +119,27 @@ namespace Core
     {
         class CREATURE_API ThreadPool
         {  
-			NO_COPY_OR_ASSIGNMENT(ThreadPool);
+            NO_COPY_OR_ASSIGNMENT(ThreadPool);
 
-			std::thread::id Main_ThreadID{ std::this_thread::get_id() }; // Thread ID of the Main Thread
-			static std::atomic<int> RunningThreads;
-			/*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various
+            std::thread::id Main_ThreadID{ std::this_thread::get_id() }; // Thread ID of the Main Thread
+            static std::atomic<int> RunningThreads;
+            /*      WRAPPER_BASE: Allows us to make a polymorphic object and derive from it with the various
                 Function types the user may invoke. We store the Base class pointer in Queues to Erase the type 
                 While Polymorphically calling each Functions specific invoke method */
             struct NO_VTABLE Executor
             {
-				virtual ~Executor() noexcept = default;
+                virtual ~Executor() noexcept = default;
 
-				/* Function responsible to properly invoking our derived class */
-				virtual void Invoke() noexcept = 0;
+                /* Function responsible to properly invoking our derived class */
+                virtual void Invoke() noexcept = 0;
 
-				/* Mainly for Debug information Gives the Current status of a Function passed into our Queue */
-				enum asyncStatus
-				{
-					Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
-				} Status{ Empty };
+                /* Mainly for Debug information Gives the Current status of a Function passed into our Queue */
+                enum asyncStatus
+                {
+                    Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
+                } Status{ Empty };
 
-				std::thread::id LaunchThread{ std::this_thread::get_id() };
+                std::thread::id LaunchThread{ std::this_thread::get_id() };
             }; // End Wrapper_Base Class
             
             /*      ASYNC TASK: Object Binds Function Pointers as well as Arguments into a single unit 
@@ -148,14 +148,14 @@ namespace Core
             struct asyncTask final
                 : public Executor
             {	
-				NO_COPY_OR_ASSIGNMENT(asyncTask);
+                NO_COPY_OR_ASSIGNMENT(asyncTask);
 
-			public:													   
-				using type = std::invoke_result_t<_Func, ARGS...>; // Return type of our function
+            public:													   
+                using type = std::invoke_result_t<_Func, ARGS...>; // Return type of our function
 
                 virtual ~asyncTask() noexcept = default; // Virtual destructor to ensure proper Deallocation of object
-															   
-				/* Accepts Functions and their arguments */
+                                                               
+                /* Accepts Functions and their arguments */
                 asyncTask(_Func&& _function, ARGS&&... _args) noexcept
                     :
                     Function(std::forward<_Func>(_function)),
@@ -164,38 +164,38 @@ namespace Core
                     Status = Valid;
                 }
  
-				/*     Calls the Objects Stored function along with its parameters using std::apply
-					Sets the value of the Promise and signals to the User that the value is waiting */
-				virtual void Invoke() noexcept override
-				{
-					Status = Busy;
-					auto result = std::apply(Function, Arguments);
-					set_return(result);
-					Status = Waiting;
-				}
+                /*     Calls the Objects Stored function along with its parameters using std::apply
+                    Sets the value of the Promise and signals to the User that the value is waiting */
+                virtual void Invoke() noexcept override
+                {
+                    Status = Busy;
+                    auto result = std::apply(Function, Arguments);
+                    set_return(result);
+                    Status = Waiting;
+                }
 
-				void set_return(type& _value)
-				{
-					ReturnValue.set_value(_value);
-				}
+                void set_return(type& _value)
+                {
+                    ReturnValue.set_value(_value);
+                }
 
-				/*      To ensure familiarity and usability get_future works to retrieve the
-					std::future object associated with the return values std::promise */
-				auto get_future() noexcept
-				{
-					Status = Submitted;
-					return ReturnValue.get_future();
-				}
+                /*      To ensure familiarity and usability get_future works to retrieve the
+                    std::future object associated with the return values std::promise */
+                auto get_future() noexcept
+                {
+                    Status = Submitted;
+                    return ReturnValue.get_future();
+                }
 
-			private:
-				using Fptr = type(*)(ARGS...);                             // Function pointer type for our function
-				const Fptr Function;                                       // Pointer to our Function
-				const std::tuple<ARGS...> Arguments;                       // Tuple which Binds the Parameters to the Function call				
-				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
-			};// End asyncTask Class
+            private:
+                using Fptr = type(*)(ARGS...);                             // Function pointer type for our function
+                const Fptr Function;                                       // Pointer to our Function
+                const std::tuple<ARGS...> Arguments;                       // Tuple which Binds the Parameters to the Function call				
+                std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
+            };// End asyncTask Class
 
-		
-		public:
+        
+        public:
 
             /*
              JOB QUEUE: Stores a Deque of Base Pointers to asyncTask Objects. 
@@ -203,9 +203,9 @@ namespace Core
             struct JobQueue
             {
             public:
- 				std::thread::id QueueID{ std::this_thread::get_id() };
+                std::thread::id QueueID{ std::this_thread::get_id() };
 
-				JobQueue() = default;
+                JobQueue() = default;
 
                 std::mutex QueueMutex;
                 std::deque<Executor*> TaskQueue;
@@ -229,21 +229,21 @@ namespace Core
 
 
 
-				/* Try to Pop a function off the BACK OF the Queue if it fails return false */
-				bool try_Pop_back(Executor*& _func);            // Lower Priority Function
+                /* Try to Pop a function off the BACK OF the Queue if it fails return false */
+                bool try_Pop_back(Executor*& _func);            // Lower Priority Function
 
-				/* Pop function from Queue if fails wait for it */
-				bool pop_back(Executor*& _func);                // Lower Priority Function
+                /* Pop function from Queue if fails wait for it */
+                bool pop_back(Executor*& _func);                // Lower Priority Function
 
-				/* Attempts to add a function to the FRONT OF the Queue if unable to lock return false */
-				bool try_push_front(Executor* _func);           // Higher Priority Function
+                /* Attempts to add a function to the FRONT OF the Queue if unable to lock return false */
+                bool try_push_front(Executor* _func);           // Higher Priority Function
 
-				/* Adds a Function to the FRONT OF our Queue */
-				void push_front(Executor* _func);               // Higher Priority Function
+                /* Adds a Function to the FRONT OF our Queue */
+                void push_front(Executor* _func);               // Higher Priority Function
             };
             
             
-			const uint32_t           ThreadCount{ std::thread::hardware_concurrency() }; 
+            const uint32_t           ThreadCount{ std::thread::hardware_concurrency() }; 
             std::vector<JobQueue>    ThreadQueue    { ThreadCount };
             std::vector<std::thread> Worker_Threads; // Each Thread is responsible for an instance of Run which owns a specific Queue
             std::atomic<uint32_t>    Index          { 0 };
@@ -264,39 +264,39 @@ namespace Core
             blocking other threads until the initialization is completed. All subsequent calls will use the initialized value.
             Source: https://stackoverflow.com/questions/27181645/is-publishing-of-magic-statics-thread-safe 				*/
 
-			/* Returns a singleton instance of our Threadpool */
-			static ThreadPool& get()
-			{
-				static ThreadPool __instance;
-				return __instance;
-			}
+            /* Returns a singleton instance of our Threadpool */
+            static ThreadPool& get()
+            {
+                static ThreadPool __instance;
+                return __instance;
+            }
 
 
-			/* Executor for our Threadpool Allocating our Asyncronous objects, 
-			   returning their Futures an handles work sharing throughout all the available Queues */
-			template<typename _FUNC, typename...ARGS >
-			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
-			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
+            /* Executor for our Threadpool Allocating our Asyncronous objects, 
+               returning their Futures an handles work sharing throughout all the available Queues */
+            template<typename _FUNC, typename...ARGS >
+            auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+            {// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
 
-				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
-				auto result = _function->get_future(); // Get the future of our async task for later use
-				auto i = Index++;
+                auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
+                auto result = _function->get_future(); // Get the future of our async task for later use
+                auto i = Index++;
                
-				int Attempts = 5;// Ensure fair work distribution
-				for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n) // Attempts is Tunable for better work distribution
-				{// Cycle over all Queues K times and attempt to push our function to one of them
+                int Attempts = 5;// Ensure fair work distribution
+                for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n) // Attempts is Tunable for better work distribution
+                {// Cycle over all Queues K times and attempt to push our function to one of them
 
-					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Executor*>(_function)))
-					{// If succeeded return our functions Future
-						return result;
-					}
-				}
+                    if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(static_cast<Executor*>(_function)))
+                    {// If succeeded return our functions Future
+                        return result;
+                    }
+                }
 
-				// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
-				ThreadQueue[i % ThreadCount].push(static_cast<Executor*>(_function));
-				return result;
-			}
+                // In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
+                ThreadQueue[i % ThreadCount].push(static_cast<Executor*>(_function));
+                return result;
+            }
         }; // End ThreadPool Class
     }// End NS Threading
 }// End NS Core 
