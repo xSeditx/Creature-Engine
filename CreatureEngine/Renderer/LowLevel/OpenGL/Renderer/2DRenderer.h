@@ -47,7 +47,10 @@ namespace OpenGL
         {
             return mainCamera;
         }
-	private:
+
+
+        void Resize(Vec2 _size);
+    private:
 
 
 		std::string vRenderer =

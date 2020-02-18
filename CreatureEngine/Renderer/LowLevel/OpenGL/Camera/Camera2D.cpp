@@ -76,12 +76,37 @@ void Camera2D::Update()
 
 
 
+void Camera2D::Resize(Vec2 _size)
+{
+    Right = _size.x;
+    Bottom = _size.y;
+    ProjectionMatrix = glm::ortho(0.0f, Right, Bottom, 0.0f, Near, Far);  //OrthographicMatrix(_size.x, _size.y);
+}
 
 
 /*=======================================================================================================================================================
 /*                                               NOTES
 /*=======================================================================================================================================================
 
-
+template <typename valType>
+GLM_FUNC_QUALIFIER detail::tmat4x4<valType> ortho
+(
+    valType const & left,
+    valType const & right,
+    valType const & bottom,
+    valType const & top,
+    valType const & zNear,
+    valType const & zFar
+)
+{
+    detail::tmat4x4<valType> Result(1);
+    Result[0][0] = valType(2) / (right - left);
+    Result[1][1] = valType(2) / (top - bottom);
+    Result[2][2] = - valType(2) / (zFar - zNear);
+    Result[3][0] = - (right + left) / (right - left);
+    Result[3][1] = - (top + bottom) / (top - bottom);
+    Result[3][2] = - (zFar + zNear) / (zFar - zNear);
+    return Result;
+}
 
 /*=======================================================================================================================================================*/

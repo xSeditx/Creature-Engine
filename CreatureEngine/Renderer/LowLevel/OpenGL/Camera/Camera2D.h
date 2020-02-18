@@ -32,6 +32,8 @@ public:
 	const int Width() { return  static_cast<int>(Size.x); }
 	/* Gets the Height of the Cameras Dimensions*/
 	const int Height() { return static_cast<int>(Size.y); }
+
+    void Resize(Vec2 _size);
 private:
 
 
