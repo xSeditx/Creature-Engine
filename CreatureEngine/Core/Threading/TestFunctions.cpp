@@ -838,3 +838,71 @@ std::vector<int> Merge_Sort(int *_input, int _start, int _size)
 }
 
 */
+
+
+
+
+
+/*
+
+
+//     SUSPEND: Attempt at making a Fork point so the current location of the program is pushed to the
+//     Threadpool to allow the child function to return first
+//
+// *********INCOMPLETE********
+template<typename _Func, typename ...ARGS>
+struct Suspend final
+    : public Executor
+{
+    NO_COPY_OR_ASSIGNMENT(Suspend);
+
+    using child_type = std::invoke_result_t<_Func, ARGS...>;
+    virtual ~Suspend() noexcept = default;                   // Virtual destructor to ensure proper Deallocation of object
+    std::jmp_buf* Context{}; // This thing gets in the way with Cryptic Error message if not properly initialize so I am using pointer
+    int Return{ -1 };
+
+    //Pushes current Threads execution to our Queue 
+    Suspend(std::jmp_buf* _context, _Func&& _function, ARGS&&... _args) noexcept
+        :
+        Context(_context),
+        Function(std::forward<_Func>(_function)),
+        Arguments(std::forward<ARGS>(_args)...)
+
+    {
+        Status = Valid;
+        PRINT_Thread("Suspend Thread: ");
+    }
+
+    // Returns Execution to where previously suspend 
+    virtual void Invoke() noexcept override
+    {
+        PRINT_Thread("Suspend Thread Invoke: ");
+        Status = Waiting;
+        auto result = std::apply(Function, Arguments); // Can not continue on until function returns which goes into result
+        ReturnValue.set_value(result);// Result sets the return value of the future. Our main thread is allowed to Run now...
+
+    }
+
+    auto get_future() noexcept
+    {
+        PRINT_Thread("Getting the Future of the Suspended Task ");
+        Status = Submitted;
+
+        return ReturnValue.get_future();
+    }
+
+    void set_return(child_type& _value)
+    {
+        PRINT_Thread("Setting Value of the Suspended Task. ");
+        ReturnValue.set_value(_value);
+    }
+
+private:
+    using Fptr = child_type(*)(ARGS...);                    // Function pointer type for our function
+    const Fptr Function;                                    // Pointer to our Child Function
+    const std::tuple<ARGS...> Arguments;                    // Tuple which Binds the Parameters to the Child Function call				
+    std::promise<child_type> ReturnValue;                   // Return Value of our function stored as a Promise
+};
+
+
+*/

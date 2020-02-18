@@ -78,13 +78,13 @@ public:
 	using pointer_type = T*;
 
 	VertexBufferObject() = default;
-	VertexBufferObject(T* data, GLsizei count)
+	VertexBufferObject(pointer_type data, GLsizei count)
 	{
 		ElementCount = count;
 		Data.resize(count);
 		Data.insert(Data.begin(), count, *data);
 
-		Stride = sizeof(T);
+		Stride = sizeof(value_type);
 
 		glGenBuffers(1, &GL_Handle);
 		glBindBuffer(GL_ARRAY_BUFFER, GL_Handle);
@@ -98,7 +98,7 @@ public:
 		///--------------------------------------------------------------------------------
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-	VertexBufferObject(GLenum access, T* data, GLsizei count)
+	VertexBufferObject(GLenum access, pointer_type data, GLsizei count)
 		: /// Specify default access
 		ElementCount(count),
 		GL_Handle(0)
@@ -108,22 +108,22 @@ public:
 		Stride = sizeof(T);
 		glGenBuffers(1, &GL_Handle);
 		glBindBuffer(GL_ARRAY_BUFFER, GL_Handle);
-		glBufferData(GL_ARRAY_BUFFER, ElementCount * sizeof(T), data, access);
+		glBufferData(GL_ARRAY_BUFFER, ElementCount * sizeof(value_type), data, access);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-	VertexBufferObject(std::vector<T> _vec)
+	VertexBufferObject(std::vector<value_type> _vec)
 	{// Create from a Vector
-		*this = &VertexBufferObject<T>(&_vec[0], _vec.size());
+		*this = &VertexBufferObject<value_type>(&_vec[0], _vec.size());
 	}
-	void Update(std::vector<T>* _data)
+	void Update(std::vector<value_type>* _data)
 	{
 		Bind();
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _data.size() * sizeof(T), _data);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, _data.size() * sizeof(value_type), _data);
 	}
 	void Update(void* _data, size_t _sz)
 	{
 		Bind();
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _sz * sizeof(T), _data);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, _sz * sizeof(value_type), _data);
 	}
 
 	GLuint get_BufferSize()
@@ -134,7 +134,10 @@ public:
 	}
 	size_t size() const { return Data.size(); }
 
-
+    pointer_type data_ptr()
+    {
+        return Data.data();
+    }
 	/// VertexBufferObject operator = (std::vector<T> data)
 	/// {// Map the whole buffer, resize if needed and make the data of the buffer equal to that of the Rvalue
 	/// 	Update(data);
@@ -157,7 +160,7 @@ public:
 
 protected:
 	GLuint Stride;
-	std::vector<T> Data;
+	std::vector<value_type> Data;
 };
 
 

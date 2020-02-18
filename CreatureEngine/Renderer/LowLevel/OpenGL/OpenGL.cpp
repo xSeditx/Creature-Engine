@@ -1,19 +1,21 @@
 #include"OpenGL.h"
 
-
+#include"../Materials/Image/Texture.h"
+#include"Shader/Shader.h"
+//../Image/Texture.h"
 
 #include<utility>//std::pair
 #include<vector>//std::vector
-/*
-*/
+
+using namespace Graphics;
+
 namespace OpenGL
 {
 	/*
 	Experimental nonsense more than likely
 	========================================================*/
 	struct Mesh {};
-	struct Shader {};
-	struct Texture {};
+ 	//struct Texture {};
 
 
 	enum  Surface_t { Normals, Albedo, Metallic };

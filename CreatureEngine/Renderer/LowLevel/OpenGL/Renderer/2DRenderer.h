@@ -30,6 +30,10 @@ namespace OpenGL
 		void Render();
 		void Update();
 
+        Camera2D& getCamera()
+        {
+            return mainCamera;
+        }
 	private:
 
 

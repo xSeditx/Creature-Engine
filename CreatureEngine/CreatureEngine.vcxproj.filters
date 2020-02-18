@@ -39,9 +39,6 @@
     <Filter Include="Source Files\Graphics\Renderer">
       <UniqueIdentifier>{4b0d588c-cf0d-4d66-877d-2b1c5ef98f3c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Graphics\Image">
-      <UniqueIdentifier>{ed460fd1-21ca-4e4f-a46b-282e171cba42}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Graphics\Buffers">
       <UniqueIdentifier>{e9431067-58e1-498e-83e9-11c87b682d47}</UniqueIdentifier>
     </Filter>
@@ -50,6 +47,12 @@
     </Filter>
     <Filter Include="Source Files\Graphics\Renderer\Shader">
       <UniqueIdentifier>{33765486-aa39-4767-b84f-ba7aab571e21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Renderer\LowLevel">
+      <UniqueIdentifier>{a85e03dd-a64c-4c42-8306-8a3fef293968}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Renderer\LowLevel\Image">
+      <UniqueIdentifier>{ed460fd1-21ca-4e4f-a46b-282e171cba42}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -87,10 +90,10 @@
       <Filter>Source Files\System</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp">
-      <Filter>Source Files\Graphics\Image</Filter>
+      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp">
-      <Filter>Source Files\Graphics\Image</Filter>
+      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp">
       <Filter>Source Files\Graphics\Buffers</Filter>
@@ -167,10 +170,10 @@
       <Filter>Source Files\System</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h">
-      <Filter>Source Files\Graphics\Image</Filter>
+      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h">
-      <Filter>Source Files\Graphics\Image</Filter>
+      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
       <Filter>Source Files\Graphics\Buffers</Filter>

@@ -224,7 +224,7 @@ namespace OpenGL
  	template<typename _Ty> 
 	CREATURE_API void set_BufferData( std::vector<_Ty>& _data)
 	{ // Sets the Data in the currently bound Vertex Buffer sizeof(_data)
-		glBufferData(GL_ARRAY_BUFFER, _data.size() , &_data[0], DEFAULT_BUFFER_ACCESS);
+		glBufferData(GL_ARRAY_BUFFER, _data.size() * sizeof(_Ty) , &_data[0], DEFAULT_BUFFER_ACCESS);
 		DEBUG_CODE(CheckGLERROR());
 	}
 
