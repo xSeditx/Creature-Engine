@@ -17,20 +17,41 @@ class Shader
 		Frag,
 		Program
 	};
-
 public:
 	Shader() = default;
 	Shader(const char* filepath);
 	Shader(std::string _vertstring, std::string _fragstring);
 	~Shader();
 
+	/*
+	NO_COPY_OR_ASSIGNMENT(Shader);
+	Shader(Shader&& _other)
+	{
+		GL_Handle = _other.GL_Handle;
+		RecursionCount = _other.RecursionCount;
+		VertID = _other.VertID;
+		FragID = _other.FragID;
+		Filepath = _other.Filepath;
+		Active = _other.Active;
+		_other.GL_Handle = 0;
+		_other.RecursionCount = 0;
+		_other.VertID = 0;
+		_other.FragID = 0;
+		_other.Filepath = "";
+		_other.Active = false;
+	}
+	const Shader& operator =(Shader&& _other)
+	{
+		return std::move(_other);
+	} */
 
 	void Delete();
 
-	void Enable();
-	void Disable();
+	//void Enable();
+	//void Disable();
 	void Reload();
-	virtual void Bind() {}
+	void Bind();
+	void Unbind();
 
 	void CompileStrings(std::string _vertstring, std::string _fragstring);
 
@@ -42,8 +63,8 @@ public:
 	/* returns the OpenGL ID name */
 	GLuint g_ID() { return GL_Handle; }
 
-	void Push(Shader *shad);
-	Shader *Pop();
+	static void Push(Shader& shad);
+	static Shader& Pop();
 
 	GLuint GetResourceLocation();
 

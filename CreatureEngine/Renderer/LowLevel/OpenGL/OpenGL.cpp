@@ -247,32 +247,90 @@ namespace OpenGL
 	{	// Returns the Viewport of the OpenGL context 
 		iVec4 result;
 		glGetIntegerv(GL_VIEWPORT, (int*)&result);
+		DEBUG_CODE(CheckGLERROR());
 		return result;
 	}
 	int get_MaxAttributes()
 	{	// Returns the maximum number of Vertex buffers that can be bound as attributes 
 		int result;
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &result);
+		DEBUG_CODE(CheckGLERROR());
 		return result;
 	}
 
 
-
-
+	void set_Hint(Hint_t _hint, Mode_t _mode)
+	{
+		glHint(_hint, _mode);
+		DEBUG_CODE(CheckGLERROR());
+	}
+	/* ==========================================================
+					 Vertex Array Object Management
+	/* ==========================================================*/
+	uint32_t create_VAO()
+	{ // Creates a Unique ID for a Vertex Array Object
+		uint32_t result;
+		glGenVertexArrays(1, &result);
+		DEBUG_CODE(CheckGLERROR());
+		return result;
+	}
+	void bind_VAO(int32_t _vaoID)
+	{
+		glBindVertexArray(_vaoID);
+		DEBUG_CODE(CheckGLERROR());
+	}
+	void unbind_VAO()
+	{
+		glBindVertexArray(0);
+		DEBUG_CODE(CheckGLERROR());
+	}
 	bool isVAO(int _array)
 	{// Is an ID a Vertex Array Object 
 		return (bool)(glIsVertexArray(_array));
 	}
 
-
- 
-	void set_Hint(Hint_t _hint, Mode_t _mode)
-	{
-		glHint( _hint, _mode);
+	/* ==========================================================
+					 Vertex Buffer Object Management
+	/* ==========================================================*/
+	
+	uint32_t create_VBO()
+	{// Creates a Unique ID for a Vertex Array Object
+		uint32_t result;
+		glGenBuffers(1, &result);
+		DEBUG_CODE(CheckGLERROR());
+		return result;
+	}
+	void bind_VBO(int32_t _vboID)
+	{ // Sets Vertex Buffer Object as Current 
+		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+		DEBUG_CODE(CheckGLERROR());
+	}
+	void unbind_VBO()
+	{ // Unbinds all Vertex Buffer Objects from OpenGL
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		DEBUG_CODE(CheckGLERROR());
+	}
+	bool isVBO(int _array)
+	{// Is an ID a Vertex Buffer Object 
+		return (bool)(glIsBuffer(_array));
 	}
 
 
 
+	void set_BufferData(uint32_t _size, const void* _data)
+	{ // Sets the Data in the currently bound Vertex Buffer 
+		glBufferData(GL_ARRAY_BUFFER, _size, _data, DEFAULT_BUFFER_ACCESS);
+		DEBUG_CODE(CheckGLERROR());
+	}
+
+	/* ==========================================================
+				Texture Management
+	/* ==========================================================*/
+	CREATURE_API void ActivateTexture(uint32_t _slot)
+	{// Sets _slot as the Currently Active Texture 
+		glActiveTexture(GL_TEXTURE0 + _slot);
+		DEBUG_CODE(CheckGLERROR());
+	}
 
 
 
@@ -403,10 +461,13 @@ namespace OpenGL
 
 
 
-
-
-
-
+	void  set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
+	{
+		uint32_t Location = glGetAttribLocation(_shaderID, _name);
+		glEnableVertexAttribArray(Location);
+		glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+		CheckGLERROR();
+	}
 
 
 
@@ -428,5 +489,3 @@ https://github.com/vertexbanana/Basic-OpenGL-Tutorials/blob/master/BasicTutorial
 */
 
 
- 
- 

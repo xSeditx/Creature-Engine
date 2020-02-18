@@ -1,6 +1,17 @@
 #pragma once
 #include<vector>
-
+/*
+RenderTargets<FrameBuffers>
+Pass<Depth Blending etc.>
+Material<Shaders>
+MaterialInstance<Textures>
+Vertex Format<VAO/VBO>
+Object<>
+{
+Uniforms
+glDrawElementsBaseVertex()
+}
+*/
 
 #include"../OpenGL.h"
 #include"Core/Common.h"
@@ -26,10 +37,7 @@ enum ShaderType
 	VERTEX_SHADER = GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER
 };
 
-
-
-//#define BINDLESS_ATTRIBUTES
-
+ 
 class Attribute
 {
 public:
@@ -65,7 +73,6 @@ class  VertexBufferObject
 public:
 
 	NO_COPY_OR_ASSIGNMENT(VertexBufferObject);
-
 
 	using value_type = T;
 	using pointer_type = T*;
@@ -189,52 +196,6 @@ public:
 
 	std::vector<Attribute*> Buffers;
 
-	// Simple move assignment operator
- //VertexArrayObject& operator=(VertexArrayObject&& other)
- //{
- //   // *this = 
- //    return *std::move(other);//
- //}
-#ifdef BINDLESS_ATTRIBUTES
-	void Bind() {}
-	void Unbind() {}
-
-	template<typename T>
-	void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
-	{
-		if (GL_Handle == NULL)
-		{
-			glGenVertexArrays(1, &GL_Handle);
-		}
-		Bind();
-		GLint Amount = sizeof(T) / sizeof(float);
-		Buffers.push_back(buffer);
-
-		switch (bufferT)
-		{
-		case INDICE:
-			buffer->AttributeType = INDICE;
-			return;
-			break;
-		case VERTEX:
-			buffer->AttributeType = VERTEX;
-			break;
-		case COLOR:
-			buffer->AttributeType = COLOR;
-			break;
-		case NORMAL:
-			buffer->AttributeType = NORMAL;
-			break;
-		case UVCOORD:
-			buffer->AttributeType = UVCOORD;
-			break;
-		case TANGENT:
-			buffer->AttributeType = TANGENT;
-			break;
-		}
-	}
-#else
-
 	void Bind();
 	void Unbind();
 
@@ -310,12 +271,13 @@ public:
 		_GL(glEnableVertexAttribArray(buffer->Location));
 		_GL(glVertexAttribPointer(buffer->Location, Amount, GL_FLOAT, GL_FALSE, 0, (char*)NULL));
 	}
-#endif
 
 	void Render();
 };
 
-
+/*
+    Determines if something is Color, Depth Buffer etc
+*/
 class FrameBufferObject
 {
 public:

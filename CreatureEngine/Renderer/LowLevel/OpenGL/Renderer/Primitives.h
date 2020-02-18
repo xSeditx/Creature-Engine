@@ -206,7 +206,7 @@ public:
 	void Render(uint64_t tex)
 	{
 		__debugbreak();// because idk about texture handles yet
-		Program->Enable();
+		Program->Bind();
 		{
 			VAO->Bind();
 			{
@@ -215,7 +215,7 @@ public:
 			}
 			VAO->Unbind();
 		}
-		Program->Disable();
+		Program->Unbind();
 	}
     Graphics::Texture* Picture;
 	Shader* Program;
@@ -261,12 +261,12 @@ public:
 	}
 	void Render(GPUptr tex)
 	{
-		Program->Enable();
+		Program->Bind();
 		VAO->Bind();
 		Program->SetTextureUniform("DiffuseTexture", tex);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		VAO->Unbind();
-		Program->Disable();
+		Program->Unbind();
 	}
     Graphics::Texture* Picture;
 	Shader* Program;

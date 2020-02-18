@@ -157,9 +157,6 @@
     <ClInclude Include="Core\Threading\TestFunctions.h">
       <Filter>Source Files\System\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Defines.h">
-      <Filter>Source Files\System</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Threading\Future.h">
       <Filter>Source Files\System\Threading</Filter>
     </ClInclude>
@@ -213,6 +210,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera3D.h">
       <Filter>Source Files\Graphics\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Defines.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

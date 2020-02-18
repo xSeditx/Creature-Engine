@@ -163,8 +163,7 @@
 		Vec3 scale() { return Scale; }
 		Vec3 position() { return Position; }
 		Vec2 rotation() { return Rotation; }
-
-
+	
 		Mat4 Matrix;
 		Vec3 Position, Rotation, Scale;
 		std::string Name;

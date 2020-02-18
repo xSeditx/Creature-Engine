@@ -9,8 +9,28 @@
 #pragma comment(lib, "OpenGL32.lib") 
 #pragma comment(lib, "glu32.lib")
 
+/* Subject to change default buffer access hint */
+#define DEFAULT_BUFFER_ACCESS  GL_STATIC_DRAW
+
+
+
+
+
+
 namespace OpenGL
 {
+	CREATURE_API enum Buffer_Access
+	{/* Why are we missing E3-E7-EB? Is there Undocumented modes?*/
+		StreamDraw = GL_STREAM_DRAW,   // 0
+		StreamRead = GL_STREAM_READ,   // 1
+		StreamCopy = GL_STREAM_COPY,   // 2	
+		StaticDraw = GL_STATIC_DRAW,   // 4
+		StaticRead = GL_STATIC_READ,   // 5
+		StaticCopy = GL_STATIC_COPY,   // 6
+		DynamicDraw = GL_DYNAMIC_DRAW, // 8
+		DynamicRead = GL_DYNAMIC_READ, // 9
+		DynamicCopy = GL_DYNAMIC_COPY  // A
+	};
 
 	CREATURE_API enum Pixel_flags
 	{
@@ -126,9 +146,6 @@ namespace OpenGL
 	/*Returns a version or release number for the shading language.*/
 	CREATURE_API std::string get_GLSL_version();
 
-	/* Is an ID a Vertex Array Object */
-	CREATURE_API bool isVAO(int _array);
-
 	/* Sets a specific Hint for OpenGL */
 	CREATURE_API void set_Hint(Hint_t _hint, Mode_t _mode);
 
@@ -172,6 +189,57 @@ namespace OpenGL
 	CREATURE_API void  EnableSeemlessTextureCubemap();
 	CREATURE_API void  EnableProgramPointSize();
 
+
+	CREATURE_API void  set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name);
+
+
+
+	//============================================================================================
+	// VERTEX ARRAY OBJECT 
+	//============================================================================================
+	/* Creates a Unique ID for a Vertex Array Object*/
+	CREATURE_API uint32_t create_VAO();
+	/* Is an ID a Vertex Array Object */
+	CREATURE_API bool isVAO(int _array);
+	/* Sets Vertex Array Object as Current */
+	CREATURE_API void bind_VAO(int32_t _vaoID);
+	/* Clears any VAO Binding */
+	CREATURE_API void unbind_VAO();
+	//============================================================================================
+
+
+
+	//============================================================================================
+	// VERTEX BUFFER OBJECT 
+	//============================================================================================
+	/* Creates a Unique ID for a Vertex Array Object*/
+	CREATURE_API uint32_t create_VBO();
+	/* Sets Vertex Buffer Object as Current */
+	CREATURE_API void bind_VBO(int32_t _vboID);
+	/*  Unbinds all Vertex Buffer Objects from OpenGL */
+	CREATURE_API void unbind_VBO();
+	/* Is an ID a Vertex Buffer Object */
+	CREATURE_API bool isVBO(int _array);
+	/* Sets the Data in the currently bound Vertex Buffer */
+ 	template<typename _Ty> 
+	CREATURE_API void set_BufferData( std::vector<_Ty>& _data)
+	{ // Sets the Data in the currently bound Vertex Buffer sizeof(_data)
+		glBufferData(GL_ARRAY_BUFFER, _data.size() , &_data[0], DEFAULT_BUFFER_ACCESS);
+		DEBUG_CODE(CheckGLERROR());
+	}
+
+
+	/* Sets the Data in the currently bound Vertex Buffer */
+	CREATURE_API void set_BufferData(uint32_t _size, const void* _data);
+	//============================================================================================
+
+
+	//============================================================================================
+	// TEXTURE MANAGEMENT 
+	//============================================================================================
+	/* Sets _slot as the Currently Active Texture */
+	CREATURE_API void ActivateTexture(uint32_t _slot);
+	//============================================================================================
 
 
 }

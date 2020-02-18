@@ -66,34 +66,33 @@ USAGE:
 	 MSG msg;
 	 size_t PreviousTime{ 0 };
 
-	while (isRunning())
-	{
-		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
-		size_t Time = NewTime - PreviousTime;
-		++FPS;
-		if (Time > 1000)
-		{
-			Print("FPS: " << FPS);
-			FPS = 0;
-			PreviousTime = NewTime;
-		}
-		
-	 Application::PollEvents();
-	 while(Application::PeekMSG(msg))
+	 while (isRunning())
 	 {
-		 TranslateMessage(&msg);
-		 Application::Dispatch(msg);
-		 Print(msg.message);
-		 if (msg.message == WM_DESTROY)
+		 size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
+		 size_t Time = NewTime - PreviousTime;
+		 ++FPS;
+		 if (Time > 1000)
 		 {
-			 Print("Exit");
-			 
+			 Print("FPS: " << FPS);
+			 FPS = 0;
+			 PreviousTime = NewTime;
 		 }
+
+		 Application::PollEvents();
+		 while (Application::PeekMSG(msg))
+		 {
+			 TranslateMessage(&msg);
+			 Application::Dispatch(msg);
+			 /// Print(msg.message);
+			 if (msg.message == WM_DESTROY)
+			 {
+				 Print("Exit");
+			 }
+		 }
+		 Update();
+		 Render();
 	 }
-	 Update();
-	 Render();
-	}
-    End();
+	 End();
  }
 
  void Application::Window::EventHandler::PollEvents()
@@ -282,7 +281,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	/// Set OpenGL State
 	{
 		glShadeModel(GL_SMOOTH);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);                  // Black Background
+		glClearColor(0.0f, 0.0f, 0.25f, 1.0f);                  // Black Background
 		glClearDepth(1.0f);                                    // Depth Buffer Setup
 		glEnable(GL_DEPTH_TEST);                               // Enables Depth Testing
 		glDepthFunc(GL_LEQUAL);                                // The Type Of Depth Test To Do
@@ -370,8 +369,8 @@ void Application::Window::s_Title(std::string _name)
 
 void Application::Window::create_DefaultShader()
 {
-	WindowShader = Shader(VertexShader, FragmentShader);
-	WindowShader.Enable();
+	WindowShader = new Shader(VertexShader, FragmentShader);
+	WindowShader->Bind();
 }
 
 ///==================================================================================================================
@@ -511,37 +510,92 @@ _static Application::Window::EventHandler& Application::Window::EventHandler::ge
 
 
 
-std::string BasicVertexShader = "#version 330 \n\
-layout(location = 0) in vec3 VertexPosition;\n\
-out vec3 VertexColor;\n\
-out vec4 FragPosition;\n\
-void main()\n\
-{\n\
-FragPosition = vec4(VertexPosition.xyz, 1.0f);\n\
-VertexColor = vec3(1.0,1.0,1.0);\n\
+///std::string BasicVertexShader = "#version 330 \n\
+///layout(location = 0) in vec3 VertexPosition;\n\
+///out vec3 VertexColor;\n\
+///out vec4 FragPosition;\n\
+///void main()\n\
+///{\n\
+///FragPosition = vec4(VertexPosition.xyz, 1.0f);\n\
+///VertexColor = vec3(1.0,1.0,1.0);\n\
+///}";
+///
+///std::string BasicFragmentShader = "#version 330 \n\
+///out vec4 color;         \n\
+///in vec3 VertexColor;    \n\
+///in vec4 FragPosition;   \n\
+///void main(){            \n\
+///color = vec3(1, 1, 0, 1);  \n\
+///}";
+
+///std::string VertexShader = " #version 330 core \n\
+///layout(location = 0) in vec3 aPos; 			\n\
+///uniform mat4 ProjectionMatrix;              \n\
+///uniform mat4 ViewMatrix;                    \n\
+///uniform mat4 ModelMatrix;                   \n\
+///out vec4 vertexColor; 						\n\
+///void main()									\n\
+///{											\n\
+///	gl_Position = vec4(aPos, 1.0);			\n\
+///	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
+///}";
+std::string VertexShader =
+"#version 330 core \n\
+layout(location = 0) in vec2 aPos;          \n\
+uniform mat4 ProjectionMatrix;              \n\
+uniform mat4 ViewMatrix;                    \n\
+uniform mat4 ModelMatrix;                   \n\
+void main()                                 \n\
+{                                           \n\
+    mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix);  \n\
+    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+    gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
 }";
 
-std::string BasicFragmentShader = "#version 330 \n\
-out vec4 color;         \n\
-in vec3 VertexColor;    \n\
-in vec4 FragPosition;   \n\
-void main(){            \n\
-color = vec3(1, 1, 0, 1);  \n\
+
+std::string FragmentShader =
+"#version 330 core  \n\
+out vec4 FragColor; \n\
+void main()         \n\
+{                   \n\
+    FragColor = vec4(0.5, 1.0, 0.0, 1.0);  \n\
 }";
 
-std::string VertexShader = " #version 330 core \n\
-layout(location = 0) in vec3 aPos; 			\n\
-out vec4 vertexColor; 						\n\
-void main()									\n\
-{											\n\
-	gl_Position = vec4(aPos, 1.0);			\n\
-	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
-}";
+//vec4(texture(texture1,TexCoords.xy).xyzw); 
+///std::string FragmentShader = "#version 330 core \n\
+///out vec4 FragColor;                             \n\
+///in vec4 vertexColor;                            \n\
+///void main()                                     \n\
+///{                                               \n\
+///	FragColor = vertexColor;                    \n\
+///}";
+///
 
-std::string FragmentShader = "#version 330 core \n\
-out vec4 FragColor;                             \n\
-in vec4 vertexColor;                            \n\
-void main()                                     \n\
-{                                               \n\
-	FragColor = vertexColor;                    \n\
-}";
+
+///    std::string vRenderer =
+///    "#version 330 core \n\
+///    layout(location = 0) in vec4 aPos;          \n\
+///    uniform mat4 ProjectionMatrix;                    \n\
+///    uniform mat4 ViewMatrix;                         \n\
+///    uniform mat4 Model;                         \n\
+///    out vec3 vertexColor;                       \n\
+///    out vec2 TexCoords;                         \n\
+///    void main()                                 \n\
+///    {                                           \n\
+///        mat4 ModelViewMatrix = (ViewMatrix * Model);  \n\
+///        mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+///        TexCoords = aPos.zw;                          \n\
+///        gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+///    }";
+
+///    std::string fRenderer =
+///    "#version 330 core \n\
+///    in vec3 vertexColor;                              \n\
+///    uniform sampler2D texture1;                       \n\
+///    out vec4 FragColor;                               \n\
+///    in  vec2 TexCoords;                               \n\
+///    void main()                                       \n\
+///    {                                                 \n\
+///        FragColor = vec4(texture(texture1,TexCoords.xy).xyzw);  \n\
+///    }";
+///    
