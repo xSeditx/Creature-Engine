@@ -179,9 +179,7 @@ class App
 	}
 	virtual void OnUpdate() override
 	{
-		//MainRenderer->renderQuad(Vec2(0.f, 0.f), Vec2(3, 3));
-		//MainRenderer->renderQuad(Vec2(10.f, 10.f), Vec2(300, 300));
-		MainRenderer->Update();
+ 		MainRenderer->Update();
 
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;

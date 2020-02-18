@@ -165,12 +165,9 @@ namespace Profiling
 				
 				int start = val < (int)PreviousX ? val : (int)PreviousX;
 				int end = val > (int)PreviousX ? val : (int)PreviousX;
-				for (int i{ start };i < end; ++i)
-				{ 
-					setPixel((Size.x+1) - i, 0 , Pixel(255, 0, 0, 155));
-				}
+
                 uint32_t _color = Pixel(255, 255, 255, 155);
-                //ReadBuffer[_x + (size_t)DataRange.x * _y] = _color;
+
                 if (val < (size_t)DataRange.x && val >= 0)
                 {
                     memset(&ReadBuffer[(int)(Size.x/4)], _color, val+1);
