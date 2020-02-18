@@ -121,35 +121,35 @@ class App
 	: public Application
 {
 
-	//Vec2 Vertices[3] = { {-200.0,-200.0 },		{ 200.0,-200.0 },		{ 0.0, 200.0 } };
-	Vec2 Vertices[3] = { {200.0, 200.0 },		{ 400.0,200.0 },		{ 0.0, 400.0 } };
-	Vec2 UVcoords[3] =	{		{ 0.0, 0.0 },		{ 1.0, 0.0 },		{ 1.0, 1.0 }	};
+	Vec2 Vertices[3] = { {200.0, 200.0 },  { 400.0, 200.0 },  { 0.0, 400.0 } };
+	Vec2 UVcoords[3] = { {  0.0,   0.0 },  {   1.0,   0.0 },  { 1.0,   1.0 } };
 
-	GLuint Indices[3] =	{	0,1,2	};
-
+	GLuint Indices[3] = { 0, 1, 2 };
 	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
+	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
+
 	Profiling::DisplayWindow *ProfilerTest;
-	OpenGL::Renderer2D *MainRenderer;
-	Camera2D *Camera;
+	OpenGL::Renderer2D MainRenderer;
+	Camera2D Camera;
+
 	virtual void OnCreate()
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
-		Camera = new Camera2D({ 640.0f, 480.0f });
-		WorldCamera = Camera;
-		MainRenderer = new OpenGL::Renderer2D({ 640.0f,480.0f });
-
+		Camera =  Camera2D({ 640.0f, 480.0f });
+		WorldCamera = &Camera;
+		MainRenderer = OpenGL::Renderer2D({ 640.0f,480.0f });
 
 		getWindow().defaultShader().Bind();
 
 		VAO = OpenGL::create_VAO();
 		OpenGL::bind_VAO(VAO);
-		int S = sizeof(Vertices);
+
 		VBO = OpenGL::create_VBO();
 		OpenGL::bind_VBO(VBO);
 		OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
 		OpenGL::set_Attribute(getWindow().defaultShader().g_ID(), 2, "aPos");
-		float Aspect = 640.0f / 480.0f;
+		float Aspect = Camera.AspectRatio;
 		float Size = 100;
 		ProfilerTest = new Profiling::DisplayWindow
 		(
@@ -162,25 +162,26 @@ class App
 	}
 
 
-	size_t PreviousTime;
 	virtual void OnRender() override
 	{
 		OpenGL::bind_VAO(VAO);
 		getWindow().defaultShader().Bind();
 		{
-			Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
-			Camera->Bind();
+			ModelMatrix.Bind();
+			Camera.Bind();
 			OpenGL::Renderer::drawArray(VBO, 3);
 		}
 		getWindow().defaultShader().Unbind();
-		
-	  	MainRenderer->Render();
+		MainRenderer.renderQuad(Vec2(100, 100), Vec2(200, 200));
+		MainRenderer.renderQuad(Vec2(400, 400), Vec2(10, 200));
+	  	MainRenderer.Render();
+
 		ProfilerTest->Render();
 	}
+
+	size_t PreviousTime;
 	virtual void OnUpdate() override
 	{
- 		MainRenderer->Update();
-
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;

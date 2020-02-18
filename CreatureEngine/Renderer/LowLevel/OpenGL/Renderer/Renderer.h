@@ -15,9 +15,10 @@ namespace OpenGL
 	class Renderer
 	{
 	protected:
-		
+		 
 		///Shader* mainProgram; Comment to avoid Minor confusion until its working
 	public:
+		Renderer() = default;
 		static void drawArray(uint32_t _vbo, uint32_t _elementCount)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
