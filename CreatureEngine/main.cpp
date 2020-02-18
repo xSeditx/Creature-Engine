@@ -80,11 +80,15 @@ bool TEST_PROFILE_WINDOW();
 #include"Core/Application.h"
 
 #include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
-
+int Tester(int i)
+{
+    Print("Hello:" << i);
+    return i;
+}
+//[&](int i) { Print("LAMBDA: " << i); return Vec[i]; })
 class App
 	: public Application
 {
-
 	Vec2 Vertices[3] =	{		{-1.0,-1.0 },		{ 1.0,-1.0 },		{ 0.0, 1.0 }	};
 	Vec2 UVcoords[3] =	{		{ 0.0, 0.0 },		{ 1.0, 0.0 },		{ 1.0, 1.0 }	};
 
@@ -97,7 +101,8 @@ class App
 
 	virtual void OnCreate()
 	{
-		
+
+
 		glUseProgram(getWindow().defaultShader());
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
@@ -123,37 +128,65 @@ class App
 	size_t PreviousTime;
 	virtual void OnRender()
 	{
-		glUseProgram(getWindow().defaultShader());
-		{
-			glBindVertexArray(VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			{
-		//		glDrawArrays(GL_TRIANGLES, 0, 3);
-			}
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		}
-		glUseProgram(0);
+      //  std::vector<int> Vec;
+      // for_loop(i, 2000)
+      // {
+      //     Vec.emplace_back(i);
+      // }
+        //= { 1,2,3,4,5,6,7,8,9 };
+        //Print("WHAT = " <<  ThreadPool::get().For_each(Vec.begin(), Vec.end(), Tester));// [&](int x) {});
+      //for_loop(i, 2000)
+      //{
+      //    ThreadPool::get().Async(Tester,i);
+      //}
+     //   Print("Finished````````````````````````````````");
+	    glUseProgram(getWindow().defaultShader());
+	    {
+	    	glBindVertexArray(VAO);
+	    	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	    	{
+	     		glDrawArrays(GL_TRIANGLES, 0, 3);
+	    	}
+	    	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	    }
+	    glUseProgram(0);
+        
+	    size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
+        size_t Time = NewTime - PreviousTime;
+	    PreviousTime = NewTime;
 
-		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
-    	size_t Time = NewTime - PreviousTime;
-		PreviousTime = NewTime;
-	 	ProfilerTest->Update(2000-Time);
-		ProfilerTest->Render();
-	//	Print("Time since State = " << Time);
+         ProfilerTest->Update(2000-Time);
+         ProfilerTest->Render();
 	}
 };
-
-//  void test(int ar[])
-//  {
-//  	std::cout << "Array Size Test =  " << (sizeof(ar) / sizeof(int)) << "\n";
-//  	int ar[] = { 1,2,3,4,5,6 };
-//  	std::cout << "Array Size = " << (sizeof(ar) / sizeof(int)) << "\n";
-//  	test(ar);}
- 
+//template<class _Rx, class _Ty>
+//_NODISCARD inline _Mem_fn<_Rx _Ty::*> mem_fn(_Rx _Ty::* _Pm) noexcept
+//{	// wrap a pointer to member function/data
+//    return (_Mem_fn<_Rx _Ty::*>(_Pm));
+//}
+//
+          //auto Fnc = std::mem_fn(&Profiling::DisplayWindow::Update);
+//        ThreadPool::get().Async(  &ProfilerTest->Update, 2000 - Time);
+//        ThreadPool::get().Flush();
+      //	Print("Time since State = " << Time);
+        /// //
 //https://en.cppreference.com/w/cpp/compiler_support
+
+
+int StaticCounter{ 0 };
+int TestRecursion2(int _counter)
+{
+	Print("TestRecursion iteration :" << _counter);
+	if (--_counter > 0)
+	{
+		//ThreadPool::get().Async(TestRecursion2, _counter);
+	}
+	return StaticCounter++;
+}
 
 int main()
 {
+	//ThreadPool::get().Async(TestRecursion, 20);
 
 	TODO("Setup the Bitmap object for the Profiler so that I can dynamically update it and get the HUD for the profiler Operation. Do NOTHING else first!");
 	App MyApp;
@@ -166,7 +199,7 @@ int main()
 	MyApp.Run();
 	MyApp.End();
 
-///  	TEST_UNIT(TEST_PROFILE_WINDOW());
+/// TEST_UNIT(TEST_PROFILE_WINDOW());
 	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
 	DEBUGPrint(CON_Red, "Testing Print");
  

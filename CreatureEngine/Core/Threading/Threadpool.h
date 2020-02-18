@@ -168,11 +168,12 @@ namespace Core
 				/* Accepts Functions and their arguments */
                 asyncTask(_Func&& _function, ARGS&&... _args) noexcept
                     :
-                    Function(std::forward<_Func>(_function)),
+                    Function( std::forward<_Func>(_function)),
                     Arguments(std::forward<ARGS>(_args)...)
                 {// Signals to user the object is now completed and valid
                     Status = Valid;
                 }
+ 
  
 				/*     Calls the Objects Stored function along with its parameters using std::apply
 					Sets the value of the Promise and signals to the User that the value is waiting */
@@ -205,63 +206,6 @@ namespace Core
 				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
 				//Promise<type> ReturnValue;                               // Return Value of our function stored as a Promise
 			};// End asyncTask Class
-			
-			/*     SUSPEND: Attempt at making a Fork point so the current location of the program is pushed to the 
-			    Threadpool to allow the child function to return first
-
-			*********INCOMPLETE*********/
-			template<typename _Func, typename ...ARGS>
-            struct Suspend final
-				: public Executor
-            {	
-				NO_COPY_OR_ASSIGNMENT(Suspend);
-
-				using child_type = std::invoke_result_t<_Func, ARGS...>;
-            	virtual ~Suspend() noexcept = default;                   // Virtual destructor to ensure proper Deallocation of object
-				std::jmp_buf* Context{}; // This thing gets in the way with Cryptic Error message if not properly initialize so I am using pointer
-				int Return{ -1 };
-            	/* Pushes current Threads execution to our Queue */
-				Suspend(std::jmp_buf* _context, _Func&& _function, ARGS&&... _args) noexcept
-					:
-					Context( _context ),
-					Function(std::forward<_Func>(_function)),
-					Arguments(std::forward<ARGS>(_args)...)
-
-            	{ 
-					Status = Valid;
-					PRINT_Thread("Suspend Thread: ");
-				}
-
-            	/* Returns Execution to where previously suspend */
-            	virtual void Invoke() noexcept override
-            	{
-					PRINT_Thread("Suspend Thread Invoke: ");
- 				    Status = Waiting;
-				    auto result = std::apply(Function, Arguments); // Can not continue on until function returns which goes into result
-					ReturnValue.set_value(result);// Result sets the return value of the future. Our main thread is allowed to Run now...
-
-            	}
-            
-				auto get_future() noexcept
-				{ 
-					PRINT_Thread("Getting the Future of the Suspended Task ");
-					Status = Submitted;
-
-					return ReturnValue.get_future();
-				}
-
-				void set_return(child_type& _value)
-				{
-					PRINT_Thread("Setting Value of the Suspended Task. ");
-					ReturnValue.set_value(_value);
-				}
-
-            private:
-				using Fptr = child_type(*)(ARGS...);                    // Function pointer type for our function
-				const Fptr Function;                                    // Pointer to our Child Function
-				const std::tuple<ARGS...> Arguments;                    // Tuple which Binds the Parameters to the Child Function call				
-				std::promise<child_type> ReturnValue;                   // Return Value of our function stored as a Promise
-            };
 
         public:
 
@@ -308,6 +252,12 @@ namespace Core
 
 				/* Adds a Function to the FRONT OF our Queue */
 				void push_front(Executor* _func);               // Higher Priority Function
+
+                /* Test if the Queue is empty */
+                bool is_empty();
+
+                /* Returns the amount of Elements still waiting in the Queue*/
+                size_t size();
             };
             
             
@@ -340,50 +290,6 @@ namespace Core
 			}
 
 
-#if 1
-			/* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
-			///<Possibly to avoid Code bloat Make Async create the asynTask and Future and cast the task to Executionwer before sending it to the rest of the function to process>
-			///<This way it will only duplicate the Async code and not the rest when not needed>
-			template<typename _FUNC, typename...ARGS >
-			auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
-			{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
-
-
-				auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
-				auto result = _function->get_future();                                                           // Get the future of our async task for later use
-				Submit(static_cast<Executor*>(_function));
-                return result;
-            }
-
-			void Submit(Executor *_task)
-			{
-				auto i = Index++;  
-				auto ThreadID = std::this_thread::get_id();
-
-				//===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
-				//if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
-				//{// If not our main thread run now
-				//	_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
-				//	delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
-				//	return result;
-				//}
-				//======================================================================================================================================
-																												 // Ensure fair work distribution
-				int Attempts = 5;
-				for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // Attempts is Tunable for better work distribution
-				{// Cycle over all Queues K times and attempt to push our function to one of them
-
-					if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(_task))
-					{// If succeeded return our functions Future
-						return;
-					}
-				}
-
-				// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
-				ThreadQueue[i % ThreadCount].push(_task);
-				return;
-			}
-#else
 			/* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
 ///<Possibly to avoid Code bloat Make Async create the asynTask and Future and cast the task to Executionwer before sending it to the rest of the function to process>
 ///<This way it will only duplicate the Async code and not the rest when not needed>
@@ -396,16 +302,6 @@ namespace Core
 				auto result = _function->get_future();                                                           // Get the future of our async task for later use
 				auto i = Index++;
 				auto ThreadID = std::this_thread::get_id();
-
-				//===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
-				//if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
-				//{// If not our main thread run now
-				//	_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
-				//	delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
-				//	return result;
-				//}
-				//======================================================================================================================================
-																												 // Ensure fair work distribution
 				int Attempts = 5;
 				for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // Attempts is Tunable for better work distribution
 				{// Cycle over all Queues K times and attempt to push our function to one of them
@@ -421,9 +317,11 @@ namespace Core
 				return result;
 			}
 
-#endif
-        }; // End ThreadPool Class
+            /* Wait until all Queues are empty */
+            void Flush();
 
+
+        }; // End ThreadPool Class
     }// End NS Threading
 }// End NS Core 
 

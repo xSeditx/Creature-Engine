@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include"Bitmap.h"
-#include"Core\Common.h"
 
+#include"Core\Common.h"
+#include"Bitmap.h"
 #include<vector>
 
 /*

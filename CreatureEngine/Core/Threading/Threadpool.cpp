@@ -165,7 +165,13 @@ namespace Core
 			{/* ~   CRITICAL SECTION   ~ */
 				std::unique_lock<std::mutex> Lock{ QueueMutex };
 
-				if (_func->LaunchThread == QueueID) Print("Job Pushed to Thread it was Launched from. Possible Error if Recursive Call made ");
+                DEBUG_CODE
+                (
+                    if (_func->LaunchThread == QueueID)
+                    {
+                        Print("Job Pushed to Thread it was Launched from. Possible Error if Recursive Call made ");
+                    }
+                );
 
 				TaskQueue.emplace_back(std::move(_func));
 
@@ -206,6 +212,8 @@ namespace Core
 
 			is_Ready.notify_one();                       // Why did I not have this before?
 		}
+
+
 		/* ============================================================ */
 		
 
@@ -238,19 +246,172 @@ namespace Core
 		}
 		/* ============================================================ */
 
+        /* ============================================================
+         *                State and Utility
+         * ============================================================ */
+
+        bool   ThreadPool::JobQueue::is_empty()
+        {// Test if the Queue is empty 
+            {/* ~   CRITICAL SECTION   ~ */
+               // std::unique_lock<std::mutex> Lock{ QueueMutex };
+                return TaskQueue.empty();
+            }
+        }
+        size_t ThreadPool::JobQueue::size()
+        {  // Returns the amount of Elements still waiting in the Queue
+            {/* ~   CRITICAL SECTION   ~ */
+                std::unique_lock<std::mutex> Lock{ QueueMutex };
+                return TaskQueue.size();
+            }
+        }
+     
+        void ThreadPool::Flush()
+        {  // Wait until all Queues are empty 
+            while (std::any_of(ThreadQueue.begin(), ThreadQueue.end(), [](auto &x) {return !x.is_empty(); }))
+            {  // While any queue is not empty
+            }
+        }
+
+        
 	}// End NS Threading
 }// End NS Core
-
+                          
 #pragma warning( pop )
 
 
-#include<intrin.h>
+
+
+
+
+
+
+
+
+
+
+
+//#include<intrin.h>
+
+            //template<typename _FUNC, typename...ARGS >
 
 /*
 ==========================================================================================================================================================================
                                                            Trash:
 ==========================================================================================================================================================================
 */
+ ////* Executor for our Threadpool Allocating our Asyncronous objects, returning their Futures an handles work sharing throughout all the available Queues*/
+//////<Possibly to avoid Code bloat Make Async create the asynTask and Future and cast the task to Executionwer before sending it to the rest of the function to process>
+//////<This way it will only duplicate the Async code and not the rest when not needed>
+///template<typename _FUNC, typename...ARGS >
+///auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+///{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
+///
+///
+///    auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
+///    auto result = _function->get_future();                                                           // Get the future of our async task for later use
+///    Submit(static_cast<Executor*>(_function));
+///    return result;
+///}
+///
+///void Submit(Executor *_task)
+///{
+///    auto i = Index++;
+///    auto ThreadID = std::this_thread::get_id();
+///
+///    //===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
+///    //if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
+///    //{// If not our main thread run now
+///    //	_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
+///    //	delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
+///    //	return result;
+///    //}
+///    //======================================================================================================================================
+///                                                                                                     // Ensure fair work distribution
+///    int Attempts = 5;
+///    for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n)                                      // Attempts is Tunable for better work distribution
+///    {// Cycle over all Queues K times and attempt to push our function to one of them
+///
+///        if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push(_task))
+///        {// If succeeded return our functions Future
+///            return;
+///        }
+///    }
+///
+///    // In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
+///    ThreadQueue[i % ThreadCount].push(_task);
+///    return;
+///}
+///#else
+//auto Async(_FUNC&& _func, const ARGS&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
+//{// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
+//    return Async(_func, std::move(args...));
+//}
+            //template<typename _CON, typename _FUNC, typename...ARGS >
+            //void For_Each(_CON _container, _FUNC&& _func, ARGS&&... arg)
+            //{
+            //    for (auto& C : _container)
+            //    {
+            //
+            //    }
+            //
+            //}
+          //
+          // template<class _InIt,
+          //     class _Fn> inline
+          //     _Fn For_each(_InIt _First, _InIt _Last, _Fn  _Func)
+          // {	// perform function for each element [_First, _Last)
+          //    // _Adl_verify_range(_First, _Last);
+          //     auto _UFirst =  _First;// _Get_unwrapped(_First);
+          //     const auto _ULast = _Last;// _Get_unwrapped(_Last);
+          //     for (; _UFirst != _ULast; ++_UFirst)
+          //     {
+          //         Async(_Func, (_UFirst));
+          //     }
+          //
+          //     return (_Func);
+          // }
+                    //PoolWaiting |= ThreadQueue[i].is_empty();
+                 //for (uint32_t i{ 0 }; i < ThreadCount; ++i)
+                //{
+                //    ThreadQueue[i].is_Ready.notify_all();
+                //}
+          //  } //                  // std::unique_lock<std::mutex> Lock(ThreadQueue[i].QueueMutex);
+   
+
+//std::condition_variable CV;
+//for (uint32_t i{ 0 }; i < ThreadCount; ++i)
+//{
+//
+//    ThreadQueue[i].QueueMutex.try_lock();
+//}
+
+//while (!PoolWaiting)
+//{
+//    for (uint32_t i{ 0 }; i < ThreadCount; ++i)
+//    {
+//        ThreadQueue[i].is_Ready;
+//    }
+//// }
+ //
+ //for (uint32_t i{ 0 }; i < ThreadCount; ++i)
+ //{
+ //    ThreadQueue[i].QueueMutex.unlock();
+ //}
+//// CV.notify_all();
+
+
+
+
+
+//===================================== IF TASK WAS LANCHED FROM ANOTHER RUNNING TASK ==================================================
+//if (Main_ThreadID != ThreadID)                // If this is being call from one of the Threadpool Threads.
+//{// If not our main thread run now
+//	_function->Invoke();                                                                         // Invoke Immediately as our Thread is alreadylocked up
+//	delete& (*_function);                                                                       // Destroy the Object which our Async Class Allocated
+//	return result;
+//}
+//======================================================================================================================================
+                                                                                                 // Ensure fair work distribution
 
 
 //DEBUGPrint(CON_DarkRed, "Created Queue: ");

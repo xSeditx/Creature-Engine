@@ -1,6 +1,7 @@
 #pragma once
 #include<map>
 #include"../OpenGL.h"
+#include"../../Materials/Image/Texture.h"
 
 #include"Core/Common.h"
 #include"Mesh.h"
@@ -175,6 +176,10 @@ class Diamond
 };
 
 
+
+
+
+
 class Rectangle2D 
 	: public Mesh
 {
@@ -212,7 +217,7 @@ public:
 		}
 		Program->Disable();
 	}
-	Texture* Picture;
+    Graphics::Texture* Picture;
 	Shader* Program;
 
 	Vec2 Vertices[6];
@@ -263,7 +268,7 @@ public:
 		VAO->Unbind();
 		Program->Disable();
 	}
-	Texture* Picture;
+    Graphics::Texture* Picture;
 	Shader* Program;
 	Vec4 Vertices[6] =
 	{ // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -296,7 +301,7 @@ public:
 		VAO->Unbind();
 	}
 
-	Texture* Picture;
+    Graphics::Texture* Picture;
 
 	Vec4 Vertices[6] =
 	{ // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.

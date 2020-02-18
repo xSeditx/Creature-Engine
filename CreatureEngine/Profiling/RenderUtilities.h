@@ -159,8 +159,8 @@ namespace Profiling
 
                 setPixel(val, 0, Pixel(255,0,255,255));   // Sets its value
 				
-				int start = val < PreviousX ? val : PreviousX;
-				int end = val > PreviousX ? val : PreviousX;
+				int start = val < (int)PreviousX ? val : (int)PreviousX;
+				int end = val > (int)PreviousX ? val : (int)PreviousX;
 				for (int i{ start };i < end; ++i)
 				{ 
 					setPixel(i, 0, Pixel(255, 0, 0, 155));
