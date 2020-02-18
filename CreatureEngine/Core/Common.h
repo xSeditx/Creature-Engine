@@ -51,10 +51,13 @@
 /* Test block of code for testing Threadspools Speeds */
 ///#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
 
+/* List all the warnings we wish to disable or enable */
+#define DISABLED_WARNINGS 4018
 
 //  Arithmetic overflow: Using operator Just pain in the ass warning about using Integer inside of [] brackets and mostly shit like that.
 //  Check it every now and then but mostly keep this off
 #pragma warning( disable : 26451 ) 
+#pragma warning( disable : DISABLED_WARNINGS ) 
 
 // ===================================================================================================================================================
 //  Declarations for Library Import and Exportation: [incomplete]
@@ -333,7 +336,7 @@ DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 #    define DEBUG_CODE(_code)   _code
 #else
 /* Code Currently turned off */
-#    define DEBUG_CODE(_code)   
+#    define DEBUG_CODE(_code)   _code
 #endif
 
 
@@ -362,11 +365,14 @@ we will have more functionality for tracking the stack and functions while easil
 #endif
 
 
+
+/* For new versions of C++ that allows Attributes */
 #define   UNLIKELY   //[[unlikely]]
 
 
 
- 
+/* May used this for code that is only present in specific versions
+/* of OpenGL */
 #define  _GL(_code)    _code
 #define _GL3(_code)    _code
 #define _GL4(_code)    _code
@@ -374,6 +380,9 @@ we will have more functionality for tracking the stack and functions while easil
 
 #define RADIANS(x)            ((x) * 0.01745329251)
 #define DEGREES(x)            ((x) * 57.2957795131)
+
+/* Creates a 32bit word from RGB Values */
+#define _RGB(r,g,b) (((b << 16)| (g << 8)) | (r))
 
  /*
 Idk how to handle this yet in a platform independent way so we will cast a void * to the Native Application Instance for now, 

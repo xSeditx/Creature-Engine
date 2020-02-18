@@ -50,9 +50,13 @@
 #include <tuple>
 #include <iostream>
 #include <type_traits> 
-//#include "Future.h"
+
+#include <setjmp.h>
+#include <csetjmp>
+#include <intrin.h>
 #include"../Common.h" // Comment out this header to stand alone
 
+//#include "Future.h"
 
 /*
 THREADING PATTERNS:
@@ -133,7 +137,7 @@ namespace Core
                 /* Function responsible to properly invoking our derived class */
                 virtual void Invoke() noexcept = 0;
 
-                /* Mainly for Debug information Gives the Current status of a Function passed into our Queue */
+				/* Mainly for Debug information Gives the Current status of a Function passed into our Queue */
                 enum asyncStatus
                 {
                     Empty, Valid, Waiting, Busy, Submitted, Ready, Aquired
@@ -194,7 +198,60 @@ namespace Core
                 std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
             };// End asyncTask Class
 
-        
+			template<typename _Func, typename ...ARGS>
+			class Suspend
+				: public Executor
+			{
+
+			public:
+				using type = std::invoke_result_t<_Func, ARGS...>; // Return type of our function
+
+				Suspend(std::thread::native_handle_type _thread, _Func _function, ARGS...args)
+					:
+					ThreadID(_thread)
+				{
+					Context.ContextFlags = CONTEXT_ALL;
+					if (setjmp(JumpBuffer) != 1)
+					{
+					    GetThreadContext(ThreadID, &Context);
+						Print("Storing Jump Context");
+					}
+					else
+					{
+						Print("Running Child Function");
+						type Result = _function(args...);
+						set_return(Result);
+					}
+				}
+				virtual void Invoke() noexcept override
+				{
+					Print("Restoring Jump Context");
+					SetThreadContext(ThreadID, &Context);
+					longjmp(JumpBuffer, 1);
+				}
+				void set_return(type& _value)
+				{
+					Print("Setting Return Value");
+					ReturnValue.set_value(_value);
+				}
+
+				/*      To ensure familiarity and usability get_future works to retrieve the
+					std::future object associated with the return values std::promise */
+				auto get_future() noexcept
+				{
+					Print("Getting the Future");
+					Status = Submitted;
+					return ReturnValue.get_future();
+				}
+
+				std::jmp_buf JumpBuffer;
+				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
+				
+
+				std::thread::native_handle_type ThreadID;
+				CONTEXT Context;
+			};
+
         public:
 
             /*
@@ -278,11 +335,35 @@ namespace Core
             auto Async(_FUNC&& _func, ARGS&&... args)->std::future<typename asyncTask<_FUNC, ARGS... >::type>
             {// Accept arbitrary Function signature, Bind its arguments and add to a Work pool for Asynchronous execution
 
+				auto ThreadID = std::this_thread::get_id();
+				//Executor* _function;
+				auto i = Index++;
 
-                auto _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
-                auto result = _function->get_future(); // Get the future of our async task for later use
-                auto i = Index++;
-               
+				if (ThreadID != Main_ThreadID)
+				{
+
+					auto _function = new Suspend<_FUNC, ARGS... >(GetCurrentThread(), std::move(_func), std::forward<ARGS>(args)...); //Suspend(GetCurrentThread());  // Create our task which binds the functions parameters
+					auto result = _function->get_future(); // Get the future of our async task for later use
+				
+					int Attempts = 5;// Ensure fair work distribution
+					for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n) // Attempts is Tunable for better work distribution
+					{// Cycle over all Queues K times and attempt to push our function to one of them
+
+						if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push_front(static_cast<Executor*>(_function)))
+						{// If succeeded return our functions Future
+							return result;
+						}
+					}
+					// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
+					ThreadQueue[i % ThreadCount].push_front(static_cast<Executor*>(_function));
+					return result;
+
+					return result;
+				}
+				
+                auto  _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
+			    auto result = _function->get_future(); // Get the future of our async task for later use
+				
                 int Attempts = 5;// Ensure fair work distribution
                 for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n) // Attempts is Tunable for better work distribution
                 {// Cycle over all Queues K times and attempt to push our function to one of them

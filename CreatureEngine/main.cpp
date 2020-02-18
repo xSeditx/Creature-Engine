@@ -82,75 +82,114 @@ bool TEST_PROFILE_WINDOW();
 #include"Core/Application.h"
 
 #include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
+#include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
 
+#define CAMERA_SPEED 4.0f
+Camera2D* WorldCamera{ nullptr };
+Listener KeyListener(
+	[](Event _msg)
+{
+	switch (_msg.wParam)
+	{
+		{
+	case 37://
+	{//Print("Left");
+		WorldCamera->MoveX(-CAMERA_SPEED);
+	}
+	break;
+	case 38:
+	{//Print("Up");
+		WorldCamera->MoveY(-CAMERA_SPEED);
+	}
+	break;
+	case 39:
+	{//Print("Right");
+		WorldCamera->MoveX(CAMERA_SPEED);
+	}
+	break;
+	case 40:
+	{//Print("Down");
+		WorldCamera->MoveY(CAMERA_SPEED);
+	}
+    break;
+		}
+	}
+});
+
+#include<cmath>
 class App
 	: public Application
 {
 
-	Vec2 Vertices[3] =	{		{-1.0,-1.0 },		{ 1.0,-1.0 },		{ 0.0, 1.0 }	};
+	//Vec2 Vertices[3] = { {-200.0,-200.0 },		{ 200.0,-200.0 },		{ 0.0, 200.0 } };
+	Vec2 Vertices[3] = { {200.0, 200.0 },		{ 400.0,200.0 },		{ 0.0, 400.0 } };
 	Vec2 UVcoords[3] =	{		{ 0.0, 0.0 },		{ 1.0, 0.0 },		{ 1.0, 1.0 }	};
 
 	GLuint Indices[3] =	{	0,1,2	};
 
 	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
-	Profiling::DisplayWindow * ProfilerTest;
-
-
+	Profiling::DisplayWindow *ProfilerTest;
+	OpenGL::Renderer2D *MainRenderer;
+	Camera2D *Camera;
 	virtual void OnCreate()
 	{
-		
-		glUseProgram(getWindow().defaultShader());
-		glGenVertexArrays(1, &VAO);
-		glBindVertexArray(VAO);
+		RegisterListener(WM_KEYDOWN, KeyListener);
+		Camera = new Camera2D({ 640.0f, 480.0f });
+		WorldCamera = Camera;
+		MainRenderer = new OpenGL::Renderer2D({ 640.0f,480.0f });
 
-		glGenBuffers(1, &VBO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		GLuint Location = 4;
+		getWindow().defaultShader().Bind();
 
-		Location = glGetAttribLocation(getWindow().defaultShader(), "aPos");
-		glEnableVertexAttribArray(Location);
-		glVertexAttribPointer(Location, 3, GL_FLOAT, GL_FALSE, 0, (char *)NULL);
+		VAO = OpenGL::create_VAO();
+		OpenGL::bind_VAO(VAO);
+		int S = sizeof(Vertices);
+		VBO = OpenGL::create_VBO();
+		OpenGL::bind_VBO(VBO);
+		OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
+		OpenGL::set_Attribute(getWindow().defaultShader().g_ID(), 2, "aPos");
+		float Aspect = 640.0f / 480.0f;
+		float Size = 100;
+		ProfilerTest = new Profiling::DisplayWindow
+		(
+			{(640 / 2) , 480 / 2 },
+			{ std::floor(Size * Aspect), std::floor((Size)) },
+			{ std::floor(Size * Aspect), std::floor((Size) )}
+		); 	  
 
-		CheckGLERROR();
-
-		ProfilerTest = new Profiling::DisplayWindow({ 640/2, 480/2 }, { 50, 50 }, {2000,100});/// { 640, 480 });
 		ProfilerTest->Update(1);
- 	}
-	
+	}
+
 
 	size_t PreviousTime;
-	virtual void OnRender()
+	virtual void OnRender() override
 	{
-		glUseProgram(getWindow().defaultShader());
+		OpenGL::bind_VAO(VAO);
+		getWindow().defaultShader().Bind();
 		{
-			glBindVertexArray(VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			{
-		//		glDrawArrays(GL_TRIANGLES, 0, 3);
-			}
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
+			Camera->Bind();
+			OpenGL::Renderer::drawArray(VBO, 3);
 		}
-		glUseProgram(0);
+		getWindow().defaultShader().Unbind();
+		
+	  	MainRenderer->Render();
+		ProfilerTest->Render();
+	}
+	virtual void OnUpdate() override
+	{
+		//MainRenderer->renderQuad(Vec2(0.f, 0.f), Vec2(3, 3));
+		//MainRenderer->renderQuad(Vec2(10.f, 10.f), Vec2(300, 300));
+		MainRenderer->Update();
 
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
-	 	ProfilerTest->Update(2000-Time);
-		ProfilerTest->Render();
-	//	Print("Time since State = " << Time);
+	 	ProfilerTest->Update((uint32_t)(Time));
 	}
-};
 
-//  void test(int ar[])
-//  {
-//  	std::cout << "Array Size Test =  " << (sizeof(ar) / sizeof(int)) << "\n";
-//  	int ar[] = { 1,2,3,4,5,6 };
-//  	std::cout << "Array Size = " << (sizeof(ar) / sizeof(int)) << "\n";
-//  	test(ar);}
+};
  
 //https://en.cppreference.com/w/cpp/compiler_support
 
@@ -160,6 +199,7 @@ int main()
 	TODO("Setup the Bitmap object for the Profiler so that I can dynamically update it and get the HUD for the profiler Operation. Do NOTHING else first!");
 	App MyApp;
 	MyApp.Init();
+
 	iVec2 r = OpenGL::get_MaximumViewportDimensions();
 	Print("Max Viewport Dimensions: " << r.x << " : " << r.y);
 	iVec4 vp = OpenGL::get_Viewport();
@@ -168,16 +208,24 @@ int main()
 	MyApp.Run();
 	MyApp.End();
 
-///  	TEST_UNIT(TEST_PROFILE_WINDOW());
+#if 0
+/// TEST_UNIT(TEST_PROFILE_WINDOW());
 	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
 	DEBUGPrint(CON_Red, "Testing Print");
- 
+/* */
 
 	while (true)
 	{
         TestAsyncSort SortTest( 1024 ); // 4096); // 262144); //
-
-		{
+		Print("Running 40");
+		ThreadPool::get().Async(TestRecursion, 40);
+		Print("Running 30");
+		ThreadPool::get().Async(TestRecursion, 30);
+		Print("Running 20");
+		ThreadPool::get().Async(TestRecursion, 20);
+		Print("Running 10");
+		ThreadPool::get().Async(TestRecursion, 10);
+ 		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
 		// 	SortTest.LinearMergeSort();
 		}
@@ -236,7 +284,7 @@ int main()
 			}
 			Print("End Thread Pool Cluster: " << result);
 
-			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter.
+			//while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter.
 
 			Print("Threadpool: " << result);
 		}
@@ -330,9 +378,8 @@ int main()
 		}
 		Sleep(1500);
 #endif //_TEST_THREADPOOL_SPEED
-
 	}
-
+#endif // IF 0 to turn all this off for now.
 
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();
@@ -459,6 +506,16 @@ bool TEST_PROFILE_WINDOW()
 //);
 
 
+		 //glGenVertexArrays(1, &VAO);
+		// glBindVertexArray(VAO);
+	   //  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	   //  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
+		 //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		// GLuint Location = 4;
+		  //Location = glGetAttribLocation(getWindow().defaultShader().g_ID(), "aPos");
+		 //glEnableVertexAttribArray(Location);
+		 //glVertexAttribPointer(Location, 2, GL_FLOAT, GL_FALSE, 0, (char *)NULL);
+
 
 
 
@@ -489,3 +546,10 @@ bool TEST_PROFILE_WINDOW()
 		0,1,2,
 	};
 */
+
+
+//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//	{
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+//	}
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -173,7 +173,60 @@ DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 		glActiveTexture(GL_TEXTURE0 + _slot);
 		glBindTexture(GL_TEXTURE_BUFFER, TextureID);
 	}
-}
+
+
+
+}// NS Graphics
 
 
 //http://ogldev.atspace.co.uk/www/tutorial25/tutorial25.html
+
+	// Simple move assignment operator
+ //VertexArrayObject& operator=(VertexArrayObject&& other)
+ //{
+ //   // *this = 
+ //    return *std::move(other);//
+ //}
+/*
+#ifdef BINDLESS_ATTRIBUTES
+void Bind() {}
+void Unbind() {}
+
+template<typename T>
+void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
+{
+	if (GL_Handle == NULL)
+	{
+		glGenVertexArrays(1, &GL_Handle);
+	}
+	Bind();
+	GLint Amount = sizeof(T) / sizeof(float);
+	Buffers.push_back(buffer);
+
+	switch (bufferT)
+	{
+	case INDICE:
+		buffer->AttributeType = INDICE;
+		return;
+		break;
+	case VERTEX:
+		buffer->AttributeType = VERTEX;
+		break;
+	case COLOR:
+		buffer->AttributeType = COLOR;
+		break;
+	case NORMAL:
+		buffer->AttributeType = NORMAL;
+		break;
+	case UVCOORD:
+		buffer->AttributeType = UVCOORD;
+		break;
+	case TANGENT:
+		buffer->AttributeType = TANGENT;
+		break;
+	}
+}
+#else
+//#endif
+
+ */

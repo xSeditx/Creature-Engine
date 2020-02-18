@@ -25,7 +25,7 @@ Shader::Shader(const char* filepath)
 }
 Shader::~Shader()
 {
-	Delete();
+	//Delete();
 }
 void Shader::Delete()
 {
@@ -35,25 +35,50 @@ void Shader::Delete()
 }
 
 
-
-void Shader::Enable()
+void Shader::Bind()
 {
 	glUseProgram(GL_Handle);
-	Push(this);
+	//Print("Enabling Shader: " << GL_Handle);
+	Push(*this);
+	DEBUG_CODE(CheckGLERROR(););
 }
-void Shader::Disable()
+void Shader::Unbind()
 {
-	glUseProgram(Pop()->GL_Handle);
+	REFACTOR("Perhaps return just the Shader ID instead of dereferencing a pointer here.");
+	//DEBUG_CODE(Print("Disabling Shader:" << Shader::get_CurrentShader()));
+	int Prog = Pop().GL_Handle;
+	glUseProgram(Prog);
+	//DEBUG_CODE(Print("Reenabling Shader:" << Shader::get_CurrentShader()));
+	//DEBUG_CODE(CheckGLERROR(););
 }
+//
+//void Shader::Enable()
+//{
+//	glUseProgram(GL_Handle);
+//	//Print("Enabling Shader: " << GL_Handle);
+//	Push(*this);
+//	DEBUG_CODE(CheckGLERROR(););
+//}
+//void Shader::Disable()
+//{
+//	REFACTOR("Perhaps return just the Shader ID instead of dereferencing a pointer here.");
+//	//DEBUG_CODE(Print("Disabling Shader:" << Shader::get_CurrentShader()));
+//	int Prog = Pop().GL_Handle;
+//	glUseProgram(Prog);
+//	//DEBUG_CODE(Print("Reenabling Shader:" << Shader::get_CurrentShader()));
+//	//DEBUG_CODE(CheckGLERROR(););
+//}
 
-void Shader::Push(Shader *shad)
+void Shader::Push(Shader& shad)
 {
-	ActiveShader.push(shad);
+	ActiveShader.push(&shad);
 }
-Shader* Shader::Pop()
+Shader& Shader::Pop()
 {
 	ActiveShader.pop();
-	return ActiveShader.top();
+	//DEBUG_CODE(if (ActiveShader.empty()) __debugbreak(););
+	//DEBUG_CODE(Print("Popping Shader: " << ActiveShader.top()->GL_Handle));
+	return *ActiveShader.top();
 }
 
 GLint Shader::GetUniformLocation(const char  *name)
