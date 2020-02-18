@@ -99,6 +99,12 @@ namespace OpenGL
 
     }
 
+
+    void Renderer2D::Resize(Vec2 _size)
+    {
+        mainCamera.Resize(_size);
+    }
+
 }//NS OpenGL
 
 

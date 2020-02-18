@@ -110,6 +110,7 @@ Listener KeyListener(
 	case 40:
 	{//Print("Down");
 		WorldCamera->MoveY(CAMERA_SPEED);
+        WorldCamera->Resize({ 200.0f,200.f });
 	}
     break;
 		}

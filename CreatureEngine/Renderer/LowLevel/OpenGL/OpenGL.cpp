@@ -317,11 +317,6 @@ namespace OpenGL
 
 
 
-	void set_BufferData(uint32_t _size, const void* _data)
-	{ // Sets the Data in the currently bound Vertex Buffer 
-		glBufferData(GL_ARRAY_BUFFER, _size, _data, DEFAULT_BUFFER_ACCESS);
-		DEBUG_CODE(CheckGLERROR());
-	}
 
 	/* ==========================================================
 				Texture Management
