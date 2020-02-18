@@ -14,7 +14,7 @@ namespace OpenGL
 
 
 		enum  Surface_t { Normals, Albedo, Metallic };
-		using SurfaceFragment = std::pair<Surface_t, Texture>;
+		using SurfaceFragment = std::pair<Surface_t, Graphics::Texture>;
 		using Surface = std::vector<SurfaceFragment>;
 		using Material = std::pair<Surface, Shader>;
 		using RenderPair = std::pair<Material, Mesh>;

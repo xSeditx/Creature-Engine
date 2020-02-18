@@ -7,7 +7,7 @@
 #include"Core/Common.h"
 
 class uniform_t;
-class Texture;
+//class Texture;
 
 class Shader
 {

@@ -4,6 +4,7 @@
 
 #include"Core/Common.h"
 #include"Mesh.h"
+
 /// Make a Submit for a full renderer that mimics what Batch Currently does, the Renderable will have an ID that marks its start offset and Size in each Attribute, possible interlace 
 /// the data as it can be simpler to just place a stride into the Mesh object telling other objects to skip that many bytes
 struct Batch
@@ -212,7 +213,7 @@ public:
 		}
 		Program->Unbind();
 	}
-	Texture* Picture;
+	Graphics::Texture* Picture;
 	Shader* Program;
 
 	Vec2 Vertices[6];
@@ -263,7 +264,7 @@ public:
 		VAO->Unbind();
 		Program->Unbind();
 	}
-	Texture* Picture;
+	Graphics::Texture* Picture;
 	Shader* Program;
 	Vec4 Vertices[6] =
 	{ // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -296,7 +297,7 @@ public:
 		VAO->Unbind();
 	}
 
-	Texture* Picture;
+	Graphics::Texture* Picture;
 
 	Vec4 Vertices[6] =
 	{ // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
