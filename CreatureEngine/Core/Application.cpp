@@ -336,7 +336,7 @@ void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)       
 	}
 
 	Size = { (float)_width,(float)_height };
-
+	
 	glViewport(0, 0, _width, _height);               // Reset The Current Viewport
 	glMatrixMode(GL_PROJECTION);                     // Select The Projection Matrix
 	glLoadIdentity();                                // Reset The Projection Matrix

@@ -320,6 +320,32 @@ void Shader::SetUniform(const char* _name, Mat4 _val)
 	_GL(glUniformMatrix4fv(glGetUniformLocation(GL_Handle, _name), 1, GL_FALSE, glm::value_ptr(_val)));
 }
 
+
+
+
+void Shader::SetUniform(const char* _name, std::vector < Vec2>& _array)
+{
+	_GL(glUniform2fv(glGetUniformLocation(GL_Handle, _name), _array.size(), glm::value_ptr(_array[0])));
+}
+void Shader::SetUniform(const char* _name, std::vector < Vec3>& _array)
+{
+	_GL(glUniform3fv(glGetUniformLocation(GL_Handle, _name), _array.size(), glm::value_ptr(_array[0])));
+}
+void Shader::SetUniform(const char* _name, std::vector < Vec4>& _array)
+{
+	_GL(glUniform4fv(glGetUniformLocation(GL_Handle, _name), _array.size(), glm::value_ptr(_array[0])));
+}
+void Shader::SetUniform(const char* _name, std::vector < Mat3>& _array)
+{
+	_GL(glUniformMatrix3fv(glGetUniformLocation(GL_Handle, _name), _array.size(), GL_FALSE, glm::value_ptr(_array[0])));
+}
+void Shader::SetUniform(const char* _name, std::vector<Mat4>& _array)
+{
+	_GL(glUniformMatrix4fv(glGetUniformLocation(GL_Handle, _name),2, GL_FALSE, reinterpret_cast<GLfloat*>(&_array[0]))); // Passing 20 matrices
+}
+
+
+
 void Shader::SetTextureUniform(const char *_name, uint64_t _tex)
 {
 	_GL(glProgramUniformui64NV(GL_Handle, glGetUniformLocation(GL_Handle, _name), _tex));

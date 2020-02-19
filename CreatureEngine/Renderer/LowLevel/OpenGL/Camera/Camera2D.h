@@ -33,10 +33,14 @@ public:
 	/* Gets the Height of the Cameras Dimensions*/
 	const int Height() { return static_cast<int>(Size.y); }
 
-    void Resize(Vec2 _size);
+	void ZoomIn (float _amount);
+	void ZoomOut(float _amount);
+	void Zoom(float _amount);
+
+	void Resize(Vec2 _size);
 private:
 
-
+	float ZoomLevel{ 0.0f };
 	Vec2  Size{ 0,0 };
 	Vec2  Position{ 0,0 };
 

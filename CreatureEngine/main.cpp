@@ -89,34 +89,57 @@ Camera2D* WorldCamera{ nullptr };
 Listener KeyListener(
 	[](Event _msg)
 {
+
+	DEBUG_CODE(Print("Key Entered: " << _msg.wParam));
 	switch (_msg.wParam)
 	{
-		{
-	case 37://
-	{//Print("Left");
+	case 37:
+	{// Left Key
 		WorldCamera->MoveX(-CAMERA_SPEED);
 	}
 	break;
+
 	case 38:
-	{//Print("Up");
+	{// Up  Key
 		WorldCamera->MoveY(-CAMERA_SPEED);
 	}
 	break;
+
 	case 39:
-	{//Print("Right");
+	{// Right  Key
 		WorldCamera->MoveX(CAMERA_SPEED);
 	}
 	break;
+
 	case 40:
-	{//Print("Down");
+	{// Down  Key
 		WorldCamera->MoveY(CAMERA_SPEED);
-        WorldCamera->Resize({ 200.0f,200.f });
 	}
     break;
-		}
-	}
+
+	case 107: 
+	{//- Key
+		WorldCamera->Zoom(.10f);
+	}break;
+
+	case 109:
+	{//+ Key
+		WorldCamera->Zoom(-.10f);
+	}break;
+
+	}// End of Switch
 });
 
+Listener ResizeListener(
+	[](Event _msg)
+{
+	float W = GET_X_LPARAM(_msg.lParam);
+	float H = GET_Y_LPARAM(_msg.lParam);
+	WorldCamera->Resize({ W,H });
+});
+/// #define GET_X_LPARAM(lp)    ((int)(short)LOWORD(lp))
+//#define GET_Y_LPARAM(lp)    ((int)(short)HIWORD(lp))
+//WM_SIZE
 #include<cmath>
 class App
 	: public Application
@@ -131,15 +154,15 @@ class App
 	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
 
 	Profiling::DisplayWindow *ProfilerTest;
-	OpenGL::Renderer2D MainRenderer;
-	Camera2D Camera;
+	OpenGL::Renderer2D *MainRenderer;
 
 	virtual void OnCreate()
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
-		Camera =  Camera2D({ 640.0f, 480.0f });
-		WorldCamera = &Camera;
-		MainRenderer = OpenGL::Renderer2D({ 640.0f,480.0f });
+		RegisterListener(WM_SIZING, ResizeListener);
+		MainRenderer = new OpenGL::Renderer2D({ 640.0f,480.0f });
+		getWindow().s_Camera(&MainRenderer->g_Camera());
+		WorldCamera = &getCamera();
 
 		getWindow().defaultShader().Bind();
 
@@ -150,18 +173,64 @@ class App
 		OpenGL::bind_VBO(VBO);
 		OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
 		OpenGL::set_Attribute(getWindow().defaultShader().g_ID(), 2, "aPos");
-		float Aspect = Camera.AspectRatio;
+
+
+		Vec2 _size = Vec2(2, 2);
+		Vec2 Space = Vec2(1, 1);
+		Vec2 Count = Vec2(20, 10);
+		for_loop(y, Count.y)
+		{
+			for_loop(x, Count.x)
+			{
+				Vec2 _topleft
+				(
+					x * (_size.x + Space.x),
+					y * (_size.y + Space.y)
+				);
+
+				TestBatch.push_back(Vec2(_topleft.x, _topleft.y));
+				TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+				TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+				TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+				TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+				TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+			}
+		}
+		for_loop(y, Count.y)
+		{
+			for_loop(x, Count.x)
+			{
+				Vec2 _topleft
+				(
+					x * (_size.x + Space.x), 
+					(y + Count.y) * (_size.y + Space.y)
+				);
+
+				TestBatch2.push_back(Vec2(_topleft.x, _topleft.y));
+				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+				TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+				TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+			}
+		}
+
+		/* 
+		/*   Make a Profiler Window which Displays the FPS as a graph
+		/*/
+		float Aspect = getCamera().AspectRatio;
 		float Size = 100;
 		ProfilerTest = new Profiling::DisplayWindow
 		(
-			{(640 / 2) , 480 / 2 },
+			{ (640 / 2) , 480 / 2 },
 			{ std::floor(Size * Aspect), std::floor((Size)) },
-			{ std::floor(Size * Aspect), std::floor((Size) )}
-		); 	  
-
+			{ std::floor(Size * Aspect), std::floor((Size)) }
+		);
 		ProfilerTest->Update(1);
 	}
 
+	std::vector<Vec2> TestBatch;
+	std::vector<Vec2> TestBatch2;
 
 	virtual void OnRender() override
 	{
@@ -169,17 +238,33 @@ class App
 		getWindow().defaultShader().Bind();
 		{
 			ModelMatrix.Bind();
-			Camera.Bind();
+			getCamera().Bind();
 			OpenGL::Renderer::drawArray(VBO, 3);
 		}
 		getWindow().defaultShader().Unbind();
-		MainRenderer.renderQuad(Vec2(100, 100), Vec2(200, 200));
-		MainRenderer.renderQuad(Vec2(400, 400), Vec2(10, 200));
-	  	MainRenderer.Render();
+		//MainRenderer->renderQuad(Vec2(100, 100), Vec2(200, 200));
+		//MainRenderer->renderQuad(Vec2(400, 400), Vec2(10, 200));
+		MainRenderer->renderQuadBatch(TestBatch);
+		MainRenderer->renderQuadBatch(TestBatch2);
+		//for_loop(y, 100)
+		//{
+		//	for_loop(x, 100)
+		//	{
+		//		float
+		//			Px = x * 21,
+		//			Py = y * 21;
+		//		MainRenderer->renderQuad(Vec2(Px, Py), Vec2(20, 20));
+		//	}
+		//}
+		CheckGLERROR();
+		MainRenderer->Render();
+		CheckGLERROR();
 
-		ProfilerTest->Render();
+	//	ProfilerTest->Render();
+
 	}
 
+	
 	size_t PreviousTime;
 	virtual void OnUpdate() override
 	{
@@ -190,13 +275,12 @@ class App
 	}
 
 };
- 
-//https://en.cppreference.com/w/cpp/compiler_support
+
 
 int main()
 {
 
-	TODO("Setup the Bitmap object for the Profiler so that I can dynamically update it and get the HUD for the profiler Operation. Do NOTHING else first!");
+	TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
 	App MyApp;
 	MyApp.Init();
 
@@ -208,15 +292,23 @@ int main()
 	MyApp.Run();
 	MyApp.End();
 
+
+	//	Profiling::Memory::TrackDumpBlocks();
+	//	Profiling::Memory::TrackListMemoryUsage();
+	return 0;
+}
+  
+bool THREAD_POOL_TEST()
+{
 #if 0
-/// TEST_UNIT(TEST_PROFILE_WINDOW());
+	/// TEST_UNIT(TEST_PROFILE_WINDOW());
 	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
 	DEBUGPrint(CON_Red, "Testing Print");
-/* */
+	/* */
 
 	while (true)
 	{
-        TestAsyncSort SortTest( 1024 ); // 4096); // 262144); //
+		TestAsyncSort SortTest(1024); // 4096); // 262144); //
 		Print("Running 40");
 		ThreadPool::get().Async(TestRecursion, 40);
 		Print("Running 30");
@@ -225,23 +317,23 @@ int main()
 		ThreadPool::get().Async(TestRecursion, 20);
 		Print("Running 10");
 		ThreadPool::get().Async(TestRecursion, 10);
- 		{
+		{
 			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
-		// 	SortTest.LinearMergeSort();
+			// 	SortTest.LinearMergeSort();
 		}
 		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
 			Timing::Profiling::Profile_Timer Bench("My MT Merge Sort");// Dont use the current Threaded Version its broke.
 		//	SortTest.AsyncMergeSort();
 		}
-        {
-        	Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
-        	//SortTest.StdMergeSort();
-        }
+		{
+			Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
+			//SortTest.StdMergeSort();
+		}
 
 
 #if _TEST_THREADPOOL_SPEED
 		Function_Counter = 0;
-	//	LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
+		//	LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
 		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
 		{
 			Timing::Profiling::Profile_Timer Bench("My Threadpool");
@@ -329,7 +421,7 @@ int main()
 			Print("End Async Cluster");
 			Print("Async :" << result);
 			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
-	
+
 			std::vector<std::vector<uint64_t>> Test;
 
 			Test.push_back(TPTest5T.get());
@@ -358,7 +450,7 @@ int main()
 
 
 			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
-			
+
 
 			uint64_t result{ 0 };
 			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
@@ -380,13 +472,8 @@ int main()
 #endif //_TEST_THREADPOOL_SPEED
 	}
 #endif // IF 0 to turn all this off for now.
-
-	//	Profiling::Memory::TrackDumpBlocks();
-	//	Profiling::Memory::TrackListMemoryUsage();
-	return 0;
+	return true;
 }
-  
-
 
 bool TEST_PROFILE_WINDOW()
 {
@@ -432,6 +519,7 @@ bool TEST_PROFILE_WINDOW()
 =====================================================================================================================
 									  NOTES:
 =====================================================================================================================
+
  Pragmas for C++ Compilers, Good resource
  https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
 
@@ -452,6 +540,11 @@ bool TEST_PROFILE_WINDOW()
 */
 
 /*
+
+    https://en.cppreference.com/w/cpp/compiler_support
+
+
+
              Great List of Compiler Directives.
     Likely can eliminate verything else in this Comment because of this
     https://assets.ctfassets.net/9pcn2syx7zns/61QggiXm0CGYmsJEUfwjld/682ad1c09e795402d3c5f10c009985ad/preprocessor.pdf

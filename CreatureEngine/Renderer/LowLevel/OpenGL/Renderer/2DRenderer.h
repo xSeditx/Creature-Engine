@@ -15,13 +15,15 @@ namespace OpenGL
 		Renderer2D() = default;
 		Renderer2D(Vec2 _size);
 
-		Renderer2D(Renderer2D&& _other)
-		{}
-		Renderer2D& operator=(Renderer2D&& _other)
-		{
-			return _other;
-		}
-		 
+		//Renderer2D(Renderer2D&& _other) = default;
+	//	Renderer2D& operator=(Renderer2D&& _other) = default;
+
+		//{}
+		//{
+		//	return _other;
+		//}
+		// 
+		std::vector<Mat4> Transforms;
 
 		enum  Surface_t { Normals, Albedo, Metallic };
 		using SurfaceFragment = std::pair<Surface_t, Graphics::Texture>;
@@ -37,13 +39,20 @@ namespace OpenGL
 		uint32_t QuadVAO{ 0 };
 
 		void renderQuad(Vec2 _topleft, Vec2 _bottomright);
+		void renderLine(Vec2 _start, Vec2 _end);
 
-		Shader *QuadRenderer;
+		void renderQuadBatch(const std::vector<Vec2> _batch);
+		void renderLineBatch(const std::vector<Vec2> _batch);
+
+
+		Shader* QuadRenderer;
+		Shader* LineRenderer;
 		Transform ModelMatrix;
+
 		void Render();
 		void Update();
 
-        Camera2D& getCamera()
+		Camera2D& g_Camera()
         {
             return mainCamera;
         }
@@ -53,7 +62,7 @@ namespace OpenGL
     private:
 
 
-		std::string vRenderer =
+		std::string VquadRenderer =
 			"#version 330 core     \n\
 layout(location = 0) in vec2 aPos; \n\
 uniform mat4 ProjectionMatrix;     \n\
@@ -66,7 +75,30 @@ void main()                        \n\
     gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
 }";
 
-		std::string fRenderer =
+		std::string FquadRenderer =
+			"#version 330 core \n\
+out vec4 FragColor;            \n\
+void main()                    \n\
+{                              \n\
+    FragColor = vec4(1.0, 1.0, 1.0, 1.0);  \n\
+}";
+
+
+
+		std::string VlineRenderer =
+			"#version 330 core     \n\
+layout(location = 0) in vec2 aPos; \n\
+uniform mat4 ProjectionMatrix;     \n\
+uniform mat4 ViewMatrix;           \n\
+uniform mat4 ModelMatrix[100];          \n\
+void main()                        \n\
+{                                  \n\
+    mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix[gl_InstanceID]);  \n\
+    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+    gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+}";
+
+		std::string FlineRenderer =
 			"#version 330 core \n\
 out vec4 FragColor;            \n\
 void main()                    \n\

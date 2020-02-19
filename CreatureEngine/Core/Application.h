@@ -11,6 +11,7 @@
 #include"../Core/Common.h"
 #include"../Renderer/LowLevel/OpenGL/OpenGL.h"
 #include"../Renderer/LowLevel/OpenGL/Shader/Shader.h"
+#include"../Renderer/LowLevel/OpenGL/Camera/Camera2D.h"
 
 extern std::string BasicVertexShader;
 extern std::string BasicFragmentShader;
@@ -165,12 +166,24 @@ private:
         /* Gets the default Shader Object */
         Shader& defaultShader() { return *WindowShader; }
  
+        /* returns the default Camera for our Window */
+        Camera2D& g_Camera()
+        {
+            return *defaultCamera;
+        }
+        /* Sets the Default Camera for our Window */
+        void s_Camera(Camera2D* _camera)
+        {
+            defaultCamera = _camera;
+        }
     protected:
         Shader* WindowShader{ nullptr };
+        Camera2D* defaultCamera{ nullptr };
 
     private:
 
         Window* Parent = nullptr;
+
 
         HGLRC GL_Context{ 0 };
 
@@ -325,7 +338,10 @@ public:
     static Application::Window::InputDevices& getDevice() { return AppInstance->mainWindow.Input; }
     static Window::InputDevices::_mouse& getMouse() { return AppInstance->getDevice().Mouse; }
     static Window::InputDevices::_keyboard& getKeyboard() { return AppInstance->getDevice().Keyboard; }
-
+    static Camera2D& getCamera() 
+    {
+        return AppInstance->mainWindow.g_Camera();
+    }
 };// Application
 
 

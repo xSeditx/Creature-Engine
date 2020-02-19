@@ -84,6 +84,69 @@ void Camera2D::Resize(Vec2 _size)
 }
 
 
+
+void Camera2D::ZoomIn(float _amount)
+{
+	ZoomLevel -= ( _amount);
+
+	float
+		Sx = Right * ZoomLevel * 0.5f,
+		Sy = Bottom * ZoomLevel * 0.5f;
+
+
+	ProjectionMatrix = 
+		glm::ortho
+		(
+			0.0f - Sx, 
+			Right * ZoomLevel,
+			Bottom * ZoomLevel,
+			0.0f - Sy,
+			Near,
+			Far);  //OrthographicMatrix(_size.x, _size.y);
+}
+void Camera2D::ZoomOut(float _amount)
+{
+	ZoomLevel += _amount;
+
+	float
+		Sx = Right  * ZoomLevel * 0.5f,
+		Sy = Bottom * ZoomLevel * 0.5f;
+	
+	 
+
+	ProjectionMatrix = 
+		glm::ortho
+		(
+			0.0f - Sx,
+			Right *  ZoomLevel, 
+			Bottom *  ZoomLevel,
+			0.0f - Sy, 
+			Near, 
+			Far
+		);  //OrthographicMatrix(_size.x, _size.y);
+}
+
+void Camera2D::Zoom(float _amount)
+{
+	TODO("This is not currently setup correctly 2/18/2020: The Left and Right should zoom in on that current location of the Camera");
+
+	ZoomLevel += _amount;
+
+	float
+		Sx = Right * ZoomLevel * 0.5f,
+		Sy = Bottom * ZoomLevel * 0.5f;
+
+	ProjectionMatrix =
+		glm::ortho
+		(
+			0.0f - Sx,
+			Right * ZoomLevel,
+			Bottom * ZoomLevel,
+			0.0f - Sy,
+			Near,
+			Far
+		);  //OrthographicMatrix(_size.x, _size.y);
+}
 /*=======================================================================================================================================================
 /*                                               NOTES
 /*=======================================================================================================================================================

@@ -44,6 +44,7 @@ namespace Profiling
     {
 		Camera2D Camera;
 		Transform Model;
+        Pixel* ColorTemplate{ nullptr };
 
         /* X Axis represents Value
            Y Axis represents Time  
@@ -89,6 +90,11 @@ namespace Profiling
                 }
             }
 
+            ColorTemplate = new Pixel[Size.x];
+            for_loop(x, Size.x)
+            {
+                ColorTemplate[x] = Pixel(255, 0, 0, 150);
+            }
 
 			// Figure out the Coefficients for the values displayed to the screen
             {
@@ -166,13 +172,14 @@ namespace Profiling
 				int start = val < (int)PreviousX ? val : (int)PreviousX;
 				int end = val > (int)PreviousX ? val : (int)PreviousX;
 
-                uint32_t _color = Pixel(255, 255, 255, 155);
-
+                uint32_t _color = Pixel(255, 0, 200, 155);
+                 
                 if (val < (size_t)DataRange.x && val >= 0)
-                {
-                    memset(&ReadBuffer[(int)(Size.x/4)], _color, val+1);
+                {// Look for some XMM memmove perhaps which can memcpy Integer values
+                    memmove(&ReadBuffer[(int)(Size.x / 4)], &ColorTemplate[0], val + sizeof(Pixel));
                 }
-                setPixel(start , 0 , Pixel(255, 0, 255, 155));
+               //  ReadBuffer[val + (size_t)DataRange.x * 0] = _color;
+             //  setPixel(start , 0 , Pixel(255, 0, 255, 155));
 			    PreviousX = val;
 
                 float Y = (_value * (_value / DataRange.x)) * (1.0 / Size.x);
@@ -183,6 +190,7 @@ namespace Profiling
         }
         void Render()
         {
+            CheckGLERROR();
             QuadRenderer.Bind();
             {
                 OpenGL::bind_VAO(VAO);

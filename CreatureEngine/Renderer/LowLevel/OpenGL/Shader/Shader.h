@@ -85,6 +85,22 @@ public:
 	void SetUniform(const char* _name, Mat3 _val);
 	void SetUniform(const char* _name, Mat4 _val);
 
+
+	/* Sets Arrays of Values as the Uniform */
+	void SetUniform(const char* _name, std::vector < Vec2 >& _array);
+	void SetUniform(const char* _name, std::vector < Vec3 >& _array);
+	void SetUniform(const char* _name, std::vector < Vec4 >& _array);
+	void SetUniform(const char* _name, std::vector < Mat3 >& _array);
+	void SetUniform(const char* _name, std::vector < Mat4 >& _array);
+
+
+
+
+
+
+
+	void SetArrayUniform(const char* _name, std::vector<Mat4>& _array);
+
 	void SetTextureUniform(const char *_name, uint64_t _tex);
 	//void SetTextureUniform(const char *_name, Texture *_tex);
 

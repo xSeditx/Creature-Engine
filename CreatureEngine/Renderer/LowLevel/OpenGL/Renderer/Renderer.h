@@ -23,7 +23,15 @@ namespace OpenGL
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 			glDrawArrays(GL_TRIANGLES, 0, _elementCount);
- 			DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+		}	
+		static void drawArrayInstanced(uint32_t _vbo, uint32_t _elementCount)
+		{
+			DEBUG_CODE(CheckGLERROR());
+			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, (int)(10));//mode/first/count/instancecount
+			DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			DEBUG_CODE(CheckGLERROR());
 		}
 		static void drawIndices(uint32_t _ibo, uint32_t _elementCount)
 		{
@@ -33,3 +41,7 @@ namespace OpenGL
 		}
 	};
 }
+//static Vec2 SplitLParam(int lParam)
+//{
+//	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
+//}
