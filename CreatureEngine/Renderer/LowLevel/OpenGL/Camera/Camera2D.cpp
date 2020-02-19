@@ -84,20 +84,21 @@ void Camera2D::Resize(Vec2 _size)
 
 void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
+    REFACTOR("Zoom is slightly broken leading to elongation on the Y Axis. Not important ATM but something that should be fixed");
+    
     ZoomLevel += _amount;
-
     Vec2 Sz
     {
-        Right * ZoomLevel,
+        Right * (ZoomLevel * AspectRatio),
         Bottom  * ZoomLevel,
     };
     ProjectionMatrix =
         glm::ortho
         (
-            0.0f   - ZoomLevel,
+            Position.x   - ZoomLevel,
             Right  + ZoomLevel,
             Bottom + ZoomLevel,
-            0.0f   - ZoomLevel,
+            Position.y   - ZoomLevel,
             Near,
             Far
         );

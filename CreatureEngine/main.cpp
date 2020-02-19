@@ -73,7 +73,7 @@ bool TEST_PROFILE_WINDOW();
 #include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
 #include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
 
-#define CAMERA_SPEED 40.0f
+#define CAMERA_SPEED 4.0f
 Vec2 SplitLParam(int lParam)
 {
 	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
@@ -171,7 +171,7 @@ class App
 
 		Vec2 _size = Vec2(2, 2);
 		Vec2 Space = Vec2(1, 1);
-		Vec2 Count = Vec2(20, 10);
+		Vec2 Count = Vec2(200, 100);
 		for_loop(y, Count.y)
 		{
 			for_loop(x, Count.x)
