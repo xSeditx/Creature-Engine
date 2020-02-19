@@ -1,48 +1,37 @@
 #include<iostream>
 #include<Windows.h>
 #include<array>
+#include<cmath>
+#include<string>
 
 //#define CacheLineFlush(Address) _mm_clflush(Address)
-#pragma optimize( "", off )
+//#pragma optimize( "", off )
 
 #define MY_WRAPPER
 #define _PROFILE_MEMORY
+#define NUMBER_OF_THREADS 20000
+#define _TEST_THREADPOOL_SPEED    1
 
-#include"Profiling\SystemInfo.h"
-#include"Profiling\MemoryPerf\MemTracker.h"
-#include"Core\Threading\Threadpool.h"
-#include"Profiling\Timing\Benchmark.h"
 
-#include"Core\Common.h"
+#include"Profiling/SystemInfo.h"
+#include"Profiling/MemoryPerf/MemTracker.h"
+#include"Core/Threading/Threadpool.h"
+#include"Profiling/Timing/Benchmark.h"
+
+#include"Core/Common.h"
 #include"../CreatureEngine/Renderer/LowLevel/OpenGL/OpenGL.h"
 using namespace Core;
 using namespace Threading;
 
 int LOOP_COUNT{ 1000000 };
-#include<string>
-
-#define NUMBER_OF_THREADS 20000
 
 #include"Core/Threading/TestFunctions.h"
 
 //Nice
 ///http://eel.is/c++draft/meta.trans.other
-auto func(char a, char b) {
-	return a + b;
-}
 
 
-std::array<float,10> TestVec(std::vector<uint32_t>& _input)
-{
-	return std::array<float, 10>();
-}
-int TestNot(int _input)
-{
-	Print("Called Test Not with a " << _input);
-	return 42;
-}
 
-#define _TEST_THREADPOOL_SPEED    1
 //
 //#include <intrin.h>
 
@@ -84,7 +73,12 @@ bool TEST_PROFILE_WINDOW();
 #include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
 #include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
 
-#define CAMERA_SPEED 4.0f
+#define CAMERA_SPEED 40.0f
+Vec2 SplitLParam(int lParam)
+{
+	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
+}
+
 Camera2D* WorldCamera{ nullptr };
 Listener KeyListener(
 	[](Event _msg)
@@ -119,12 +113,12 @@ Listener KeyListener(
 
 	case 107: 
 	{//- Key
-		WorldCamera->Zoom(.10f);
+        WorldCamera->Zoom(-1.0);// .10f);
 	}break;
 
 	case 109:
 	{//+ Key
-		WorldCamera->Zoom(-.10f);
+        WorldCamera->Zoom(1.0);// -.10f);
 	}break;
 
 	}// End of Switch
@@ -137,10 +131,7 @@ Listener ResizeListener(
 	float H = GET_Y_LPARAM(_msg.lParam);
 	WorldCamera->Resize({ W,H });
 });
-/// #define GET_X_LPARAM(lp)    ((int)(short)LOWORD(lp))
-//#define GET_Y_LPARAM(lp)    ((int)(short)HIWORD(lp))
-//WM_SIZE
-#include<cmath>
+
 class App
 	: public Application
 {
@@ -151,16 +142,19 @@ class App
 	GLuint Indices[3] = { 0, 1, 2 };
 	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
 
+	OpenGL::Renderer2D *MainRenderer;
+	Profiling::DisplayWindow *ProfilerTest;
 	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
 
-	Profiling::DisplayWindow *ProfilerTest;
-	OpenGL::Renderer2D *MainRenderer;
+    std::vector<Vec2> TestBatch;
+    std::vector<Vec2> TestBatch2;
 
 	virtual void OnCreate()
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
 		RegisterListener(WM_SIZING, ResizeListener);
-		MainRenderer = new OpenGL::Renderer2D({ 640.0f,480.0f });
+
+		MainRenderer = new OpenGL::Renderer2D({ 640.0f, 480.0f });
 		getWindow().s_Camera(&MainRenderer->g_Camera());
 		WorldCamera = &getCamera();
 
@@ -229,9 +223,6 @@ class App
 		ProfilerTest->Update(1);
 	}
 
-	std::vector<Vec2> TestBatch;
-	std::vector<Vec2> TestBatch2;
-
 	virtual void OnRender() override
 	{
 		OpenGL::bind_VAO(VAO);
@@ -242,26 +233,14 @@ class App
 			OpenGL::Renderer::drawArray(VBO, 3);
 		}
 		getWindow().defaultShader().Unbind();
-		//MainRenderer->renderQuad(Vec2(100, 100), Vec2(200, 200));
-		//MainRenderer->renderQuad(Vec2(400, 400), Vec2(10, 200));
+		MainRenderer->renderQuad(Vec2(400, 400), Vec2(10, 200));
 		MainRenderer->renderQuadBatch(TestBatch);
 		MainRenderer->renderQuadBatch(TestBatch2);
-		//for_loop(y, 100)
-		//{
-		//	for_loop(x, 100)
-		//	{
-		//		float
-		//			Px = x * 21,
-		//			Py = y * 21;
-		//		MainRenderer->renderQuad(Vec2(Px, Py), Vec2(20, 20));
-		//	}
-		//}
-		CheckGLERROR();
-		MainRenderer->Render();
+
+ 		MainRenderer->Render();
 		CheckGLERROR();
 
 	//	ProfilerTest->Render();
-
 	}
 
 	
@@ -646,3 +625,13 @@ bool TEST_PROFILE_WINDOW()
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 //	}
 //	glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //for_loop(y, 100)
+        //{
+        //	for_loop(x, 100)
+        //	{
+        //		float
+        //			Px = x * 21,
+        //			Py = y * 21;
+        //		MainRenderer->renderQuad(Vec2(Px, Py), Vec2(20, 20));
+        //	}
+        //}

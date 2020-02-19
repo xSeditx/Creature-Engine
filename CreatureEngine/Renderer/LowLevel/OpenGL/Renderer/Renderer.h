@@ -41,7 +41,3 @@ namespace OpenGL
 		}
 	};
 }
-//static Vec2 SplitLParam(int lParam)
-//{
-//	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
-//}

@@ -13,24 +13,29 @@ namespace OpenGL
         QuadRenderer = new Shader(VquadRenderer, FquadRenderer);
         LineRenderer = new Shader(VlineRenderer, FlineRenderer);
 
-        QuadRenderer->Bind();
-        {
-            QuadVAO = OpenGL::create_VAO();
-            OpenGL::bind_VAO(QuadVAO);
+        LineVAO = OpenGL::create_VAO();
+        LineVBO = OpenGL::create_VBO();
+        QuadVAO = OpenGL::create_VAO();
+        QuadVBO = OpenGL::create_VBO();
 
-            QuadVBO = OpenGL::create_VBO();
+        QuadRenderer->Bind();
+        {// Sets up the VAO for the Quads
+            OpenGL::bind_VAO(QuadVAO);
             OpenGL::bind_VBO(QuadVBO);
-            OpenGL::set_Attribute(QuadRenderer->g_ID(), 2, "aPos");
+            OpenGL::set_Attribute( 2, "aPos");
         }
         QuadRenderer->Unbind();
-        for_loop (y, 10)
-        {
-            for_loop (x, 10)
-            {
-                Transform Tr = Transform({ x,y,0 }, { 0,0,0 }, "Tr");
-                Transforms.push_back(Tr.get());
-            }
+
+
+        LineRenderer->Bind();
+        {// Sets up the VAO for the Lines
+            OpenGL::bind_VAO(LineVAO);
+            OpenGL::bind_VBO(LineVBO);
+            OpenGL::set_Attribute(LineRenderer->g_ID(), 2, "aPos");
         }
+        LineRenderer->Unbind();
+
+
     }
 
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size)
@@ -70,8 +75,18 @@ namespace OpenGL
             DEBUG_CODE(CheckGLERROR());
         }
         QuadRenderer->Unbind();
-
         QuadData.clear();
+
+        LineRenderer->Bind();
+        {
+            Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
+            mainCamera.Bind();
+            Renderer::drawArray(LineVBO, QuadData.size());
+            DEBUG_CODE(CheckGLERROR());
+        }
+        LineRenderer->Unbind();
+        LineData.clear();
+
     }
 
     void Renderer2D::Update()
@@ -140,3 +155,11 @@ namespace OpenGL
        /// size_t Start = QuadData.size();
        /// QuadData.reserve(Sz);
        /// memcpy(&QuadData[Start ], &_batch[0], _batch.size() * sizeof(Vec2));
+//  for_loop(y, 10)
+//  {
+//      for_loop(x, 10)
+//      {
+//          Transform Tr = Transform({ x,y,0 }, { 0,0,0 }, "Tr");
+//          Transforms.push_back(Tr.get());
+//      }
+//  }

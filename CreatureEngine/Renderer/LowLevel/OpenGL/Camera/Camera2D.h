@@ -40,7 +40,7 @@ public:
 	void Resize(Vec2 _size);
 private:
 
-	float ZoomLevel{ 0.0f };
+	float ZoomLevel{ 1.0f };
 	Vec2  Size{ 0,0 };
 	Vec2  Position{ 0,0 };
 

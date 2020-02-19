@@ -35,8 +35,11 @@ namespace OpenGL
 		std::vector<Vec2> QuadData;
 		std::vector<Vec2> LineData;
 
-		uint32_t QuadVBO{ 0 };
-		uint32_t QuadVAO{ 0 };
+        uint32_t QuadVBO{ 0 };
+        uint32_t QuadVAO{ 0 };
+
+        uint32_t LineVBO{ 0 };
+        uint32_t LineVAO{ 0 };
 
 		void renderQuad(Vec2 _topleft, Vec2 _bottomright);
 		void renderLine(Vec2 _start, Vec2 _end);
