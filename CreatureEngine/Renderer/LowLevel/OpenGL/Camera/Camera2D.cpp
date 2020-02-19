@@ -13,7 +13,6 @@ Camera2D::Camera2D(float _left, float _right, float _top, float _bottom, float _
 			_bottom - _top
 		})
 {
-	TODO("Implement a 2D Camera Abstraction");
 	//FOV = 60.0;
 	Near = _near;
 	Far = _far;
@@ -24,7 +23,7 @@ Camera2D::Camera2D(float _left, float _right, float _top, float _bottom, float _
 	Rotation = 0;
 
 	ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top, Near, Far);  //OrthographicMatrix(_size.x, _size.y);
-	ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0));
+	ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0.0f));
 
 	set(this);
 }
@@ -42,25 +41,24 @@ Camera2D::Camera2D(Vec2 _size)
 
 void Camera2D::Move(Vec2 _amount)
 {// Move Camera by _amount
-	ViewMatrix = glm::translate(ViewMatrix, Vec3(-_amount.x, -_amount.y, 0));
+	Position += _amount;
 }
 void Camera2D::MoveX(float _amount)
 {// Move Camera on X axis by _amount
-	ViewMatrix = glm::translate(ViewMatrix, Vec3(-_amount, 0, 0));
+	Position.x += _amount;
 }
 void Camera2D::MoveY(float _amount)
 {// Move Camera on Y axis by _amount
-	ViewMatrix = glm::translate(ViewMatrix, Vec3(0, -_amount, 0));
+	Position.y += _amount;
 }
 void Camera2D::Rotate(float _angle)
 {// Rotate the Camera by _angle
-	ViewMatrix = glm::rotate(ViewMatrix, glm::radians(-_angle), Vec3(0, 0, 1));
+	Rotation += _angle;
 }
 void Camera2D::Translate(Vec2 _pos)
 {// Move Camera to Position _pos
 	ViewMatrix = (glm::translate(glm::mat4(1.0f), Vec3(-_pos.x, -_pos.y, 1.0f)));
 }
-
 
 
 void Camera2D::Bind()
@@ -70,66 +68,22 @@ void Camera2D::Bind()
 }
 void Camera2D::Update()
 {// Updates the interpolation of the Camera
-	ViewMatrix = Mat4(1.0);
+	ViewMatrix = Mat4(1.0f);
 	Translate(Position);
+	ViewMatrix = glm::rotate(ViewMatrix, glm::radians(Rotation), Vec3(0, 0, 1.0f));
 }
-
 
 
 void Camera2D::Resize(Vec2 _size)
 {
     Right = _size.x;
     Bottom = _size.y;
-    ProjectionMatrix = glm::ortho(0.0f, Right, Bottom, 0.0f, Near, Far);  //OrthographicMatrix(_size.x, _size.y);
+    ProjectionMatrix = glm::ortho(0.0f, Right, Bottom, 0.0f, Near, Far); 
 }
 
-
-
-void Camera2D::ZoomIn(float _amount)
-{
-	ZoomLevel -= ( _amount);
-
-	float
-		Sx = Right * ZoomLevel * 0.5f,
-		Sy = Bottom * ZoomLevel * 0.5f;
-
-
-	ProjectionMatrix = 
-		glm::ortho
-		(
-			0.0f - Sx, 
-			Right * ZoomLevel,
-			Bottom * ZoomLevel,
-			0.0f - Sy,
-			Near,
-			Far);  //OrthographicMatrix(_size.x, _size.y);
-}
-void Camera2D::ZoomOut(float _amount)
-{
-	ZoomLevel += _amount;
-
-	float
-		Sx = Right  * ZoomLevel * 0.5f,
-		Sy = Bottom * ZoomLevel * 0.5f;
-	
-	 
-
-	ProjectionMatrix = 
-		glm::ortho
-		(
-			0.0f - Sx,
-			Right *  ZoomLevel, 
-			Bottom *  ZoomLevel,
-			0.0f - Sy, 
-			Near, 
-			Far
-		);  //OrthographicMatrix(_size.x, _size.y);
-}
 
 void Camera2D::Zoom(float _amount)
-{
-    TODO("This is not currently setup correctly 2/18/2020: The Left and Right should zoom in on that current location of the Camera");
-
+{//  Zooms in or out of a scene by manipulating the Projection Matrix
     ZoomLevel += _amount;
 
     Vec2 Sz
@@ -148,7 +102,8 @@ void Camera2D::Zoom(float _amount)
             Far
         );
 }
-
+void Camera2D::ZoomIn(float _amount) {  Zoom(_amount);  }
+void Camera2D::ZoomOut(float _amount){  Zoom(-_amount); }
 
 
 //  Sz.x,
@@ -170,6 +125,8 @@ void Camera2D::Zoom(float _amount)
 ///		Far
 ///	);  //OrthographicMatrix(_size.x, _size.y);
 ///}
+   // TODO("This is not currently setup correctly 2/18/2020: The Left and Right should zoom in on that current location of the Camera");
+
 /*=======================================================================================================================================================
 /*                                               NOTES
 /*=======================================================================================================================================================
@@ -196,3 +153,24 @@ GLM_FUNC_QUALIFIER detail::tmat4x4<valType> ortho
 }
 
 /*=======================================================================================================================================================*/
+//ViewMatrix = glm::translate(ViewMatrix, Vec3(-_amount.x, -_amount.y, 0));
+//ViewMatrix = glm::translate(ViewMatrix, Vec3(-_amount, 0, 0));
+//ViewMatrix = glm::translate(ViewMatrix, Vec3(0, -_amount, 0));
+//  ZoomLevel += _amount;
+//  
+//  float
+//  Sx = Right * ZoomLevel * 0.5f,
+//  Sy = Bottom * ZoomLevel * 0.5f;
+//  
+//  
+//  
+//  ProjectionMatrix =
+//  glm::ortho
+//  (
+//  	0.0f - Sx,
+//  	Right * ZoomLevel,
+//  	Bottom * ZoomLevel,
+//  	0.0f - Sy,
+//  	Near,
+//  	Far
+//  );  //OrthographicMatrix(_size.x, _size.y);

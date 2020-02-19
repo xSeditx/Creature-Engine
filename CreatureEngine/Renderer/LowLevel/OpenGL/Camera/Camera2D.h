@@ -33,10 +33,14 @@ public:
 	/* Gets the Height of the Cameras Dimensions*/
 	const int Height() { return static_cast<int>(Size.y); }
 
-	void ZoomIn (float _amount);
-	void ZoomOut(float _amount);
+	/*  Zooms in or out of a scene by manipulating the Projection Matrix */
 	void Zoom(float _amount);
+	/*  Zooms in on a scene by manipulating the Projection Matrix */
+	void ZoomIn (float _amount);
+	/*  Zooms out on a scene by manipulating the Projection Matrix */
+	void ZoomOut(float _amount);
 
+	/* Resizes the Projection Matrix to the given _size */
 	void Resize(Vec2 _size);
 private:
 

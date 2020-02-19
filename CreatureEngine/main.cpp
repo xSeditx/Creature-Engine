@@ -113,12 +113,12 @@ Listener KeyListener(
 
 	case 107: 
 	{//- Key
-        WorldCamera->Zoom(-1.0);// .10f);
+        WorldCamera->ZoomOut(1.0); 
 	}break;
 
 	case 109:
 	{//+ Key
-        WorldCamera->Zoom(1.0);// -.10f);
+        WorldCamera->ZoomIn(1.0);
 	}break;
 
 	}// End of Switch
