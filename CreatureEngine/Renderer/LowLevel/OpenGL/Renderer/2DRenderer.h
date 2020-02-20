@@ -83,13 +83,13 @@ out vec4 FragColor;            \n\
 in vec4  Col;            \n\
 void main()                    \n\
 {                              \n\
-    FragColor = Col; \n\
+    FragColor = Col;\n\
 }";
 
 //vec4(1.0, 1.0, 1.0, 1.0); vec4(1.0, 1.0, 1.0, 1.0) + Col; 
 	};// Class Renderer2D
 
-}// NS OpenGL
+}// NS OpenGLvec4(Col.rgb,1.0f); 
 
 
 

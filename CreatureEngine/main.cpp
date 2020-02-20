@@ -153,9 +153,9 @@ class App
 		OpenGL::set_Attribute(getWindow().defaultShader().g_ID(), 2, "aPos");
 
 
-		Vec2 _size = Vec2(2, 2);
+		Vec2 _size = Vec2(8, 8);
 		Vec2 Space = Vec2(1, 1);
-		Vec2 Count = Vec2(200, 100);
+		Vec2 Count = Vec2(80, 60);
 		for_loop(y, Count.y)
 		{
 			for_loop(x, Count.x)

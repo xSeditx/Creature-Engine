@@ -79,7 +79,7 @@ void Camera2D::Resize(Vec2 _size)
     Right = _size.x;
     Bottom = _size.y;
     AspectRatio = Right / Bottom;
-    glViewport(0, 0, _size.x, _size.y);
+     glViewport(0, 0, _size.x, _size.y);
     //ProjectionMatrix = glm::ortho(0.0f, Right,  Bottom,0.0f, Near, Far); 
     Zoom(1.0f);
 }
@@ -88,27 +88,46 @@ void Camera2D::Resize(Vec2 _size)
 void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
     REFACTOR("Zoom is slightly broken leading to elongation on the Y Axis. Not important ATM but something that should be fixed");
-   // 
+
     ZoomLevel += _amount;
-    Vec2 Sz
+    Print("Zoom Level: " << (1.0f / ZoomLevel));
+
+    if (ZoomLevel > 0)
     {
-       ( Right * ZoomLevel)* AspectRatio ,
-        Bottom  * ZoomLevel,
-    };
-    ProjectionMatrix =
-        glm::ortho
-        (
-            Position.x   - ZoomLevel,
-            Right  + ZoomLevel,
-            Bottom + ZoomLevel,
-            Position.y   - ZoomLevel,
-            Near,
-            Far
-        );
+        ProjectionMatrix =
+            glm::ortho
+            (
+                Position.x   * (1.0f / ZoomLevel),
+                Right  *  (1.0f / ZoomLevel),
+                Bottom *  (1.0f / ZoomLevel),
+                Position.y   *  (1.0f / ZoomLevel),
+                Near,
+                Far
+            );
+    }
+    else
+    {
+        ProjectionMatrix =
+            glm::ortho
+            (
+                Position.x   * -(1.0f / ZoomLevel),
+                Right  *  -(1.0f / ZoomLevel),
+                Bottom *  -(1.0f / ZoomLevel),
+                Position.y   *  -(1.0f / ZoomLevel),
+                Near,
+                Far
+            );
+
+    }
 }
 void Camera2D::ZoomIn(float _amount) {  Zoom(_amount);  }
 void Camera2D::ZoomOut(float _amount){  Zoom(-_amount); }
 
+// Vec2 Sz
+// {
+//    ( Right * ZoomLevel)* AspectRatio ,
+//     Bottom  * ZoomLevel,
+// };
 
 //  Sz.x,
 //Sz.y,

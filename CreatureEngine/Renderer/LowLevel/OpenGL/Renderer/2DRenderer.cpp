@@ -6,7 +6,7 @@ namespace OpenGL
 
     Renderer2D::Renderer2D(Vec2 _size)
     {
-        CurrentRenderColor = Vec4(1, 0, 0, 0);
+        CurrentRenderColor = Vec4(1, 0, 0, 1);
         mainCamera = Camera2D(_size);
         ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
 
@@ -20,7 +20,7 @@ namespace OpenGL
         {// Sets up the VAO for the Quads
             OpenGL::bind_VAO(QuadVAO);
             OpenGL::bind_VBO(ColorVBO);
-            OpenGL::set_Attribute(3, "Color");
+            OpenGL::set_Attribute(4, "Color");
             OpenGL::bind_VBO(QuadVBO);
             OpenGL::set_Attribute(2, "aPos");
         }
@@ -69,8 +69,6 @@ namespace OpenGL
         Update();
         QuadRenderer->Bind();
         {   
-           // glEnableVertexAttribArray(0); 
-          //  glEnableVertexAttribArray(1);
             Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
             mainCamera.Bind();
             Renderer::drawArray(QuadVBO, QuadData.size());

@@ -545,12 +545,6 @@ _static Application::Window::EventHandler& Application::Window::EventHandler::ge
 //{
 //	stream << "X:[" << vector.x << "] - Y:[" << vector.y << "]";
 //	return stream;
-
-
-
-
-
-
 ///std::string BasicVertexShader = "#version 330 \n\
 ///layout(location = 0) in vec3 VertexPosition;\n\
 ///out vec3 VertexColor;\n\
