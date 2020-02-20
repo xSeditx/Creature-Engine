@@ -25,7 +25,11 @@ namespace Timing
 		SteadyClock Start_Time;
 		SteadyClock Duration;
 
-		Timer() = default;	~Timer() = default;
+		Timer()
+		{
+			Start();
+		}
+		~Timer() = default;
 
 		void Start()
 		{

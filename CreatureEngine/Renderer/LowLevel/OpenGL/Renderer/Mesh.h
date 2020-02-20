@@ -33,6 +33,7 @@ public:
 	VertexArrayObject* VAO; /// Figure something out here
 
 	std::vector<Mesh> Children;
+
 ///	std::vector<Material> Surfaces;
 
 	Mesh();
@@ -64,10 +65,7 @@ public:
 ///	break;
 ///}
 	}
-	//inline void AddVertexArray( VertexArrayObject &&_vao)
-	//{
-	//	//*VAO = &_vao;
-	//}
+
 
 
 	std::string VertexShader = " #version 330 core \n\

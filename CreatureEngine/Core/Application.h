@@ -12,6 +12,7 @@
 #include"../Renderer/LowLevel/OpenGL/OpenGL.h"
 #include"../Renderer/LowLevel/OpenGL/Shader/Shader.h"
 #include"../Renderer/LowLevel/OpenGL/Camera/Camera2D.h"
+#include"../Profiling/Timing/Timer.h"
 
 extern std::string BasicVertexShader;
 extern std::string BasicFragmentShader;
@@ -237,8 +238,7 @@ private:
         static EventHandler& Messenger() { return EventHandler::get(); }
     }  mainWindow;// Window
 
-    //Timer ApplicationTimer;
-
+    Timing::Timer<> ApplicationTimer;
 
 public:
     size_t FPS;

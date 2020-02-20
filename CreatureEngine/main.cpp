@@ -635,3 +635,37 @@ bool TEST_PROFILE_WINDOW()
         //		MainRenderer->renderQuad(Vec2(Px, Py), Vec2(20, 20));
         //	}
         //}
+
+
+
+
+
+
+
+
+
+
+/*
+FASTEST RELEASE SETTINGS IN MSVC
+Disable Vtable Init         	__declspec (novtable)	Stops compiler from generating code to initialize the vfptr in the constructor. Apply to pure interface classes.
+No Throw	                    __declspec (nothrow)	Stops compiler from tracking unwindable objects. Apply to functions that don’t throw exceptions. Recommend using the Std C exception specification throw() instead.
+Pentium Pro	                    /G6	Optimize for PentiumPro and above (program might not run on Pentium)
+Windows	                        /GA	Optimize for Windows
+Fastcall	                    /Gr	Fastest calling convention
+String pooling RO	            /GF	Merge duplicate strings into one read-only memory location
+Disable RTTI	                /GR-	Turn off run time type information.
+Stack probes off	            /Gs	Turn off stack checking
+Exception handling	            /GX-	Turns off exception handling (assumes program isn’t using excptn handling)
+Func-level linking	            /Gy	Only include functions that are referenced
+Assume no aliasing	            /Oa	Assume no aliasing occurs within functions
+Inline any or inline expansion	/Ob2 or /Ob1	Inline any function deemed appropriate by compiler or turn inlining on. Alternates: inline, __forceinline
+Global opts	                    /Og	Full loop, common subexpression and register optimizations
+Intrinsic functions	            /Oi	Replaces specific functions with inline versions (memcpy, strcpy, etc.)
+Fast code	                    /Ot	Favor code speed over size
+Omit frame pointer	            /Oy	Omit frame pointer
+Ctor displacement	            /vd0	Disable constructor displacement.
+Best case ptrs	                /vmb	Use best case “pointer to class member” representation
+
+
+
+*/

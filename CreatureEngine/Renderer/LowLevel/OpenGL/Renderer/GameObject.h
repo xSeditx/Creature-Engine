@@ -78,9 +78,16 @@ public:
 	Mat4 Transform;
 	Vec3 Position, Rotation, Scale;
 	static int ObjectCount;
-private:
 
-	uint32_t Handle;
+	/* Gets the OpenGL VAO handle of the Mesh */
+	const uint32_t g_Handle() const
+	{
+		return GL_Handle;
+	}
+
+private:
+	uint32_t GL_Handle{ 0 };
+	uint32_t Handle{ 0 };
 };
 
 

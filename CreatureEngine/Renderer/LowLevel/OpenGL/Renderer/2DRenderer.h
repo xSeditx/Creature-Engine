@@ -15,14 +15,10 @@ namespace OpenGL
 		Renderer2D() = default;
 		Renderer2D(Vec2 _size);
 
-		//Renderer2D(Renderer2D&& _other) = default;
-	//	Renderer2D& operator=(Renderer2D&& _other) = default;
+//  Renderer2D(Renderer2D&& _other) = default;
+//	Renderer2D& operator=(Renderer2D&& _other) = default;
 
-		//{}
-		//{
-		//	return _other;
-		//}
-		// 
+
 		std::vector<Mat4> Transforms;
 
 		enum  Surface_t { Normals, Albedo, Metallic };
@@ -30,7 +26,49 @@ namespace OpenGL
 		using Surface = std::vector<SurfaceFragment>;
 		using Material = std::pair<Surface, Shader>;
 		using RenderPair = std::pair<Material, Mesh>;
+		struct RenderPass
+		{
+			void Submit(Mesh& _mesh, Graphics::Texture& _tex)
+			{
+				SurfaceMap.insert(_tex.g_Handle(), _mesh.g_Handle());
+			}
+			void Render()
+			{
+				for (auto& Te : SurfaceMap)
+				{
+				    int Slot{ 0 };
+					for (auto& S : Te.first)
+					{// Cycle over and fill all the Slots for the Surface,  Diffuse, the Bump map, Shine, Displacement etc..
+						glActiveTexture(GL_TEXTURE0 + (Slot++));
+						glBindTexture(GL_TEXTURE_2D, S);
+					}
 
+					for(auto& M : Te.second)
+					{ 
+						M.
+					}
+				}
+			}
+			std::unordered_map<std::vector<uint32_t>, std::vector<Mesh>> SurfaceMap;
+			std::vector<std::vector<int>> Pairs;
+			std::vector<Graphics::Texture*> Texts;
+			std::vector<Mesh*> Meshes;
+			Shader* GPUrenderer;
+			FrameBufferObject FBO;
+			DEBUG_CODE(const char* Name{""};)
+		};
+		struct Surface_s
+		{
+			struct Material {
+				Graphics::Texture Tex;
+			};
+			Shader* MaterialShader;
+		};
+		void Submit(RenderPair _matMesh)
+		{
+
+		}
+		std::unordered_map<Material, uint32_t> Pairs;
 
 		std::vector<Vec2> QuadData;
 		std::vector<Vec2> LineData;

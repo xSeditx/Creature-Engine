@@ -57,13 +57,15 @@ public:
 	void Release();
 	void Destroy();
 
-	GLuint GL_Handle = 0;
-	BufferTypes AttributeType;
-	GLint Location = 0;
-	GLuint ElementCount = 0;
+	GLuint GL_Handle{ 0 };
+	BufferTypes AttributeType{NONE};
+	GLint Location{ 0 };
+	GLuint ElementCount{ 0 };
 
-	GLuint64EXT Address;
-	GLuint      Size;
+	GLuint64EXT Address{ 0 };
+	GLuint      Size{ 0 };
+	GLuint      Stride{ 0 };
+	void* BufferPtr{ nullptr };
 };
 
 template<class T = Vec3>
@@ -97,6 +99,7 @@ public:
 		Size = ElementCount * Stride;
 		///--------------------------------------------------------------------------------
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		BufferPtr = &Data[0];
 	}
 	VertexBufferObject(GLenum access, pointer_type data, GLsizei count)
 		: /// Specify default access
@@ -159,7 +162,6 @@ public:
 	}
 
 protected:
-	GLuint Stride;
 	std::vector<value_type> Data;
 };
 

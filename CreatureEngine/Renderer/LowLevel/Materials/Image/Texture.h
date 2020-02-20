@@ -107,6 +107,13 @@ DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 		inline void MipmapOff();
 
 		void Render(int _x, int _y, int _w, int _h);
+
+		/* Gets the OpenGL Handle of the Texture*/
+		const uint32_t g_Handle() const
+		{
+			return GL_Handle;
+		}
+
 	private:
 
 		Bitmap *Picture{ nullptr };
