@@ -462,6 +462,7 @@ bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _r
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    Print(uMsg << " : " << WM_SIZE);
 	if (uMsg == WM_DESTROY) UNLIKELY
 	{
 		Application::get().Terminate();

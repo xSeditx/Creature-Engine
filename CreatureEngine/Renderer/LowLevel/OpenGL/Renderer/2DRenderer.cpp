@@ -6,36 +6,25 @@ namespace OpenGL
 
     Renderer2D::Renderer2D(Vec2 _size)
     {
-
+        CurrentRenderColor = Vec3(1, 0, 0);// , 1);
         mainCamera = Camera2D(_size);
         ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
 
         QuadRenderer = new Shader(VquadRenderer, FquadRenderer);
-        LineRenderer = new Shader(VlineRenderer, FlineRenderer);
 
-        LineVAO = OpenGL::create_VAO();
-        LineVBO = OpenGL::create_VBO();
         QuadVAO = OpenGL::create_VAO();
         QuadVBO = OpenGL::create_VBO();
+        ColorVBO = OpenGL::create_VBO();
 
         QuadRenderer->Bind();
         {// Sets up the VAO for the Quads
             OpenGL::bind_VAO(QuadVAO);
+            OpenGL::bind_VBO(ColorVBO);
+            OpenGL::set_Attribute(3, "Color");
             OpenGL::bind_VBO(QuadVBO);
-            OpenGL::set_Attribute( 2, "aPos");
+            OpenGL::set_Attribute(2, "aPos");
         }
         QuadRenderer->Unbind();
-
-
-        LineRenderer->Bind();
-        {// Sets up the VAO for the Lines
-            OpenGL::bind_VAO(LineVAO);
-            OpenGL::bind_VBO(LineVBO);
-            OpenGL::set_Attribute(LineRenderer->g_ID(), 2, "aPos");
-        }
-        LineRenderer->Unbind();
-
-
     }
 
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size)
@@ -47,6 +36,12 @@ namespace OpenGL
         QuadData.push_back(Vec2(_topleft.x          , _topleft.y + _size.y));
         QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y          ));
 
+        ColorData.push_back(CurrentRenderColor);
+        ColorData.push_back(CurrentRenderColor);
+        ColorData.push_back(CurrentRenderColor);
+        ColorData.push_back(CurrentRenderColor);
+        ColorData.push_back(CurrentRenderColor);
+        ColorData.push_back(CurrentRenderColor);
     }
 
     void Renderer2D::renderLine(Vec2 _start, Vec2 _end)
@@ -62,6 +57,10 @@ namespace OpenGL
     void Renderer2D::renderQuadBatch(const std::vector<Vec2> _batch)
     {
         QuadData.insert(QuadData.end(), _batch.begin(), _batch.end());
+        for_loop(i, _batch.size())
+        {
+            ColorData.emplace_back(CurrentRenderColor);
+        }
     }
     void Renderer2D::Render()
     {
@@ -69,6 +68,8 @@ namespace OpenGL
         Update();
         QuadRenderer->Bind();
         {   
+            glEnableVertexAttribArray(0); 
+            glEnableVertexAttribArray(1);
             Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
             mainCamera.Bind();
             Renderer::drawArray(QuadVBO, QuadData.size());
@@ -76,17 +77,6 @@ namespace OpenGL
         }
         QuadRenderer->Unbind();
         QuadData.clear();
-
-        LineRenderer->Bind();
-        {
-            Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
-            mainCamera.Bind();
-            Renderer::drawArray(LineVBO, QuadData.size());
-            DEBUG_CODE(CheckGLERROR());
-        }
-        LineRenderer->Unbind();
-        LineData.clear();
-
     }
 
     void Renderer2D::Update()
@@ -100,6 +90,14 @@ namespace OpenGL
     void Renderer2D::Resize(Vec2 _size)
     {
         mainCamera.Resize(_size);
+    }
+    void Renderer2D::SetRenderColor(int _r, int _g, int _b, int _a)
+    {
+        float coef = 1.0f / 255.0f;
+        CurrentRenderColor.r = _r * coef;
+        CurrentRenderColor.g = _g * coef;
+        CurrentRenderColor.b = _b * coef;
+//        CurrentRenderColor.a = _a * coef;
     }
 
 }//NS OpenGL
