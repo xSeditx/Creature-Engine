@@ -53,10 +53,9 @@ namespace OpenGL
 
 	void InitOpenGL()
 	{
-		// Init GLFW
+	/*	// Init GLFW
 		//glfwInit();
 		// ... <snip> ... setup a window and a context
-
 		// Load all OpenGL functions using the glfw loader function
 		// If you use SDL you can use: https://wiki.libsdl.org/SDL_GL_GetProcAddress
 	//	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -64,25 +63,22 @@ namespace OpenGL
 	//		return -1;
 	//	}
 		// Alternative use the builtin loader, e.g. if no other loader function is available
-		/*
+		
 		if (!gladLoadGL()) {
 			std::cout << "Failed to initialize OpenGL context" << std::endl;
 			return -1;
 		}
-		*/
-
+		
 		// glad populates global constants after loading to indicate,
 		// if a certain extension/version is available.
 	//	printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
-
 	//	if (GLAD_GL_EXT_framebuffer_multisample) {
-			/* GL_EXT_framebuffer_multisample is supported */
+			/* GL_EXT_framebuffer_multisample is supported 
 	//	}
 	//	if (GLAD_GL_VERSION_3_0) {
-			/* We support at least OpenGL version 3 */
+			/* We support at least OpenGL version 3 
 	//	}
-
-		// ... <snip> ... more code
+		// ... <snip> ... more code*/
 	}
 
 	HGLRC create_OpenGLContext(HDC _dc)
@@ -465,7 +461,8 @@ namespace OpenGL
 	}
     void  set_Attribute(uint8_t _elements, const char* _name)
     {
-        uint32_t Location = glGetAttribLocation(Shader::getHandle(), _name);
+		int H = Shader::getHandle();
+        uint32_t Location = glGetAttribLocation(H, _name);
         glEnableVertexAttribArray(Location);
         glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
         CheckGLERROR();

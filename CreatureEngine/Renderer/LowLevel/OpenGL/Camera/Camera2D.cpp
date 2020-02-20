@@ -78,18 +78,21 @@ void Camera2D::Resize(Vec2 _size)
 {
     Right = _size.x;
     Bottom = _size.y;
-    ProjectionMatrix = glm::ortho(0.0f, Right, Bottom, 0.0f, Near, Far); 
+    AspectRatio = Right / Bottom;
+    glViewport(0, 0, _size.x, _size.y);
+    //ProjectionMatrix = glm::ortho(0.0f, Right,  Bottom,0.0f, Near, Far); 
+    Zoom(1.0f);
 }
 
 
 void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
     REFACTOR("Zoom is slightly broken leading to elongation on the Y Axis. Not important ATM but something that should be fixed");
-    
+   // 
     ZoomLevel += _amount;
     Vec2 Sz
     {
-        Right * (ZoomLevel * AspectRatio),
+       ( Right * ZoomLevel)* AspectRatio ,
         Bottom  * ZoomLevel,
     };
     ProjectionMatrix =

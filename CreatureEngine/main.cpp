@@ -7,11 +7,7 @@
 //#define CacheLineFlush(Address) _mm_clflush(Address)
 //#pragma optimize( "", off )
 
-#define MY_WRAPPER
 #define _PROFILE_MEMORY
-#define NUMBER_OF_THREADS 20000
-#define _TEST_THREADPOOL_SPEED    1
-
 
 #include"Profiling/SystemInfo.h"
 #include"Profiling/MemoryPerf/MemTracker.h"
@@ -57,6 +53,8 @@ int TestRecursion(int _param)
 }
 
 #include<stack>
+#include<utility>
+
 std::stack<std::string> CS;
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -65,19 +63,13 @@ std::mutex DEBUGMutex;
 
 bool TEST_PROFILE_WINDOW();
 
-#include<utility>
 #include"Profiling/RenderUtilities.h"
 #include"FrontEnd/Window.h"
 #include"Core/Application.h"
-
 #include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
 #include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
 
 #define CAMERA_SPEED 4.0f
-Vec2 SplitLParam(int lParam)
-{
-	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
-}
 
 Camera2D* WorldCamera{ nullptr };
 Listener KeyListener(
@@ -124,18 +116,11 @@ Listener KeyListener(
 	}// End of Switch
 });
 
-Listener ResizeListener(
-	[](Event _msg)
-{
-	float W = GET_X_LPARAM(_msg.lParam);
-	float H = GET_Y_LPARAM(_msg.lParam);
-	WorldCamera->Resize({ W,H });
-});
+
 
 class App
 	: public Application
 {
-
 	Vec2 Vertices[3] = { {200.0, 200.0 },  { 400.0, 200.0 },  { 0.0, 400.0 } };
 	Vec2 UVcoords[3] = { {  0.0,   0.0 },  {   1.0,   0.0 },  { 1.0,   1.0 } };
 
@@ -152,7 +137,6 @@ class App
 	virtual void OnCreate()
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
-		RegisterListener(WM_SIZING, ResizeListener);
 
 		MainRenderer = new OpenGL::Renderer2D({ 640.0f, 480.0f });
 		getWindow().s_Camera(&MainRenderer->g_Camera());
@@ -271,12 +255,21 @@ int main()
 	MyApp.Run();
 	MyApp.End();
 
-
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();
 	return 0;
 }
   
+
+
+
+
+
+
+#define MY_WRAPPER
+#define NUMBER_OF_THREADS 200
+#define _TEST_THREADPOOL_SPEED    1
+
 bool THREAD_POOL_TEST()
 {
 #if 0

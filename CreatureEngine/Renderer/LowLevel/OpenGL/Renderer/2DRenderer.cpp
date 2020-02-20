@@ -6,7 +6,7 @@ namespace OpenGL
 
     Renderer2D::Renderer2D(Vec2 _size)
     {
-        CurrentRenderColor = Vec3(1, 0, 0);// , 1);
+        CurrentRenderColor = Vec4(1, 0, 0, 0);
         mainCamera = Camera2D(_size);
         ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
 
@@ -57,10 +57,11 @@ namespace OpenGL
     void Renderer2D::renderQuadBatch(const std::vector<Vec2> _batch)
     {
         QuadData.insert(QuadData.end(), _batch.begin(), _batch.end());
-        for_loop(i, _batch.size())
-        {
-            ColorData.emplace_back(CurrentRenderColor);
-        }
+        ColorData.insert(ColorData.end(), _batch.size(), CurrentRenderColor);
+       //for_loop(i, _batch.size())
+       //{
+       //    ColorData.emplace_back(CurrentRenderColor);
+       //}
     }
     void Renderer2D::Render()
     {
@@ -68,8 +69,8 @@ namespace OpenGL
         Update();
         QuadRenderer->Bind();
         {   
-            glEnableVertexAttribArray(0); 
-            glEnableVertexAttribArray(1);
+           // glEnableVertexAttribArray(0); 
+          //  glEnableVertexAttribArray(1);
             Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
             mainCamera.Bind();
             Renderer::drawArray(QuadVBO, QuadData.size());
@@ -77,6 +78,7 @@ namespace OpenGL
         }
         QuadRenderer->Unbind();
         QuadData.clear();
+        ColorData.clear();
     }
 
     void Renderer2D::Update()
@@ -84,6 +86,9 @@ namespace OpenGL
         mainCamera.Update();
         OpenGL::bind_VBO(QuadVBO); 
         OpenGL::set_BufferData(QuadData);
+
+        OpenGL::bind_VBO(ColorVBO);
+        OpenGL::set_BufferData(ColorData);
     }
 
 
@@ -97,7 +102,7 @@ namespace OpenGL
         CurrentRenderColor.r = _r * coef;
         CurrentRenderColor.g = _g * coef;
         CurrentRenderColor.b = _b * coef;
-//        CurrentRenderColor.a = _a * coef;
+        CurrentRenderColor.a = _a * coef;
     }
 
 }//NS OpenGL
@@ -110,7 +115,7 @@ namespace OpenGL
 
         
 
-
+//		Shader* LineRenderer;
 //       Vec2
 //           _topleft = Vec2(30, 30),
 //           _bottomright = Vec2(200.f, 200.f);

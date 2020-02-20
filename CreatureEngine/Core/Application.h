@@ -22,6 +22,7 @@ extern std::string FragmentShader;
 using MsgType = uint32_t;
 using Event = MSG;
 
+Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 /* Creates a Listener Object to Handle whatever message is assigned to it
 Syntax:   Listener(void(*func)(Event))   */
@@ -238,9 +239,7 @@ private:
         static EventHandler& Messenger() { return EventHandler::get(); }
     }  mainWindow;// Window
 
-    Timing::Timer<> ApplicationTimer;
-
-public:
+ public:
     size_t FPS;
     Application();
     Application(int _width, int _height, std::string _name);
@@ -307,6 +306,9 @@ public:
     /* Basic Nonblocing check of our Message Queue */
     bool PeekMSG(Event& msg);
 
+
+    /* Resize the Application */
+    void Resize(Vec2 _size);
 protected:
 
     /* Executed when Application is Initialized */
@@ -335,12 +337,18 @@ public:
 
     static Application& get() { return *AppInstance; }
     static Application::Window& getWindow() { return AppInstance->mainWindow; }
+    static void setWindow(Application::Window& _window) { AppInstance->mainWindow = _window; }
+
     static Application::Window::InputDevices& getDevice() { return AppInstance->mainWindow.Input; }
     static Window::InputDevices::_mouse& getMouse() { return AppInstance->getDevice().Mouse; }
     static Window::InputDevices::_keyboard& getKeyboard() { return AppInstance->getDevice().Keyboard; }
     static Camera2D& getCamera() 
     {
         return AppInstance->mainWindow.g_Camera();
+    }
+    static void setCamera(Camera2D& _camera)
+    {
+        AppInstance->mainWindow.s_Camera(&_camera);
     }
 };// Application
 

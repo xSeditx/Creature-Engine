@@ -33,6 +33,8 @@ namespace OpenGL
         uint32_t LineVAO{ 0 }; uint32_t LineVBO{ 0 };
        
 		void renderQuad(Vec2 _topleft, Vec2 _bottomright);
+		void renderQuad(Vec2 _topleft, Vec2 _bottomright, Vec4 _color);
+
 		void renderLine(Vec2 _start, Vec2 _end);
 
 		void renderQuadBatch(const std::vector<Vec2> _batch);
@@ -40,7 +42,6 @@ namespace OpenGL
 
 
 		Shader* QuadRenderer;
-		Shader* LineRenderer;
 		Transform ModelMatrix;
 
 		void Render();
@@ -55,19 +56,19 @@ namespace OpenGL
         void Resize(Vec2 _size);
 
         void SetRenderColor(int _r, int _g, int _b, int _a);
-        Vec3 CurrentRenderColor;
-        std::vector<Vec3> ColorData;
+        Vec4 CurrentRenderColor;
+        std::vector<Vec4> ColorData;
 
     private:
  
 		std::string VquadRenderer =
 			"#version 330 core     \n\
 layout(location = 0) in vec2 aPos; \n\
-layout(location = 1) in vec3 Color;\n\
+layout(location = 1) in vec4 Color;\n\
 uniform mat4 ProjectionMatrix;     \n\
 uniform mat4 ViewMatrix;           \n\
 uniform mat4 ModelMatrix;          \n\
-out vec3 Col;                      \n\
+out vec4 Col;                      \n\
 void main()                        \n\
 {                                  \n\
     Col = Color;                   \n\
@@ -79,10 +80,10 @@ void main()                        \n\
 		std::string FquadRenderer =
 			"#version 330 core \n\
 out vec4 FragColor;            \n\
-in vec3  Col;            \n\
+in vec4  Col;            \n\
 void main()                    \n\
 {                              \n\
-    FragColor = vec4(Col, 1.0f); \n\
+    FragColor = Col; \n\
 }";
 
 //vec4(1.0, 1.0, 1.0, 1.0); vec4(1.0, 1.0, 1.0, 1.0) + Col; 

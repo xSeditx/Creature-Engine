@@ -31,6 +31,7 @@ USAGE:
 
  void Application::Init()
  {
+	 set(*this);
 	 CreateApplicationWindow();
  
 	 //--------Gathering information about OpenGL state and Display it -----------------------------------------------
@@ -82,6 +83,7 @@ USAGE:
 		 while (Application::PeekMSG(msg))
 		 {
 			 TranslateMessage(&msg);
+//			 Print(msg.message << " : " << WM_SIZE);
 			 Application::Dispatch(msg);
 			 /// Print(msg.message);
 			 if (msg.message == WM_DESTROY)
@@ -101,6 +103,7 @@ USAGE:
 	 while (PeekMessage(&msg, Application::getWindow().g_Handle(), 0, 0, PM_REMOVE))
 	 {
 		 Application::Window::EventHandler::get().PostMSG(msg);
+		 Print("Message" << msg.message);
 		 DispatchMessage(&msg);
 	 }
  }
@@ -120,7 +123,6 @@ USAGE:
  { // Calls User define Application Render function
 	 OnRender();
 	 mainWindow.Sync();
-	// mainWindow.CLS(); // 100, 150, 255); // Do not like the duel Dereference every single frame Feels unneeded at best
  }
  void Application::OnStart()
  {
@@ -269,7 +271,8 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	/// Create OpenGL Rendering Context
 	GL_Context = OpenGL::create_OpenGLContext(DeviceContext);
 	s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));
-
+	s_Camera(new Camera2D());
+	Application::setWindow(*this);
 	/// Set Window State
 	{
 		SetForegroundWindow(Handle);                           // Slightly Higher Priority
@@ -459,10 +462,47 @@ bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _r
 }
 
 
+Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	Event result;
+	result.hwnd = hwnd;
+	result.message = uMsg;
+	result.wParam = wParam;
+	result.lParam = lParam;
+	return result;
+}
+
+/* 
+Listener ResizeListener(
+	[](Event _msg)
+{
+	float W = GET_X_LPARAM(_msg.lParam);
+	float H = GET_Y_LPARAM(_msg.lParam);
+	WorldCamera->Resize({ W, H });
+});
+*/
+Vec2 SplitLParam(int lParam)
+{
+	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
+}
+void Application::Resize(Vec2 _size)
+{
+	
+	mainWindow.g_Camera().Resize(_size);
+}
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    Print(uMsg << " : " << WM_SIZE);
+	//Event msg = make_msg(hwnd, uMsg, wParam, lParam);
+	//Dispatch(msg);
+	if (uMsg == WM_SIZE)
+	{
+		if (&Application::get())
+		{
+			Vec2 sz = SplitLParam(lParam);
+			Application::get().Resize({ sz.x,sz.y });
+		}
+	}
 	if (uMsg == WM_DESTROY) UNLIKELY
 	{
 		Application::get().Terminate();
