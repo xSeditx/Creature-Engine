@@ -8,6 +8,7 @@ class Camera2D
 public:
 	Camera2D() = default;
 	Camera2D(Vec2 size);
+	Camera2D(float _left, float _right);
 	Camera2D(float _left, float _right, float _top, float _bottom);
 	Camera2D(float _left, float _right, float _top, float _bottom, float _near, float _far);
 
@@ -36,7 +37,7 @@ public:
 	/*  Zooms in or out of a scene by manipulating the Projection Matrix */
 	void Zoom(float _amount);
 	/*  Zooms in on a scene by manipulating the Projection Matrix */
-	void ZoomIn (float _amount);
+	void ZoomIn(float _amount);
 	/*  Zooms out on a scene by manipulating the Projection Matrix */
 	void ZoomOut(float _amount);
 
@@ -82,15 +83,6 @@ private:
 /*=======================================================================================================================================================
 /*                                               TRASH
 /*=======================================================================================================================================================
-	//	ProjectionMatrix = glm::ortho(0.0f, size.x, size.y, 0.0f, -1.0f, 1.0f);  //OrthographicMatrix(size.x, size.y);
-	//	ViewMatrix = glm::translate(Mat4(1.0f), Vec3(-100, 0, 0));
-//Top = _top;
-//Left = _left;
-//ProjectionMatrix = glm::ortho(0.0f, Right, Bottom, 0.0f, -1.0f, 100.0f);  //OrthographicMatrix(_size.x, _size.y);
-//ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0, 0, 0));//200, 200, 0))
-//Size(size)
-
-
 /*=======================================================================================================================================================*/
 
 

@@ -460,18 +460,6 @@ bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _r
 {
 	return getWindow().Messenger().PeekMSG(  _msg, _rangemin,  _rangemax,   _handlingflags);
 }
-
-
-Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	Event result;
-	result.hwnd = hwnd;
-	result.message = uMsg;
-	result.wParam = wParam;
-	result.lParam = lParam;
-	return result;
-}
-
 /* 
 Listener ResizeListener(
 	[](Event _msg)
@@ -485,95 +473,71 @@ Vec2 SplitLParam(int lParam)
 {
 	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
 }
+
+Vec2 getMouseCursor()
+{
+	POINT p;
+	GetCursorPos(&p);
+	return { p.x, p.y };
+}
+
 void Application::Resize(Vec2 _size)
 {
 	
 	mainWindow.g_Camera().Resize(_size);
 }
 
+
+Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	Event result;
+	result.hwnd = hwnd;
+	result.message = uMsg;
+	result.wParam = wParam;
+	result.lParam = lParam;
+
+	POINT p;
+	GetCursorPos(&p);
+	result.pt = p;
+
+	result.time = GetTickCount();
+	return result;
+}
+
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//Event msg = make_msg(hwnd, uMsg, wParam, lParam);
 	//Dispatch(msg);
-	if (uMsg == WM_SIZE)
+	switch (uMsg)
 	{
-		if (&Application::get())
-		{
-			Vec2 sz = SplitLParam(lParam);
-			Application::get().Resize({ sz.x,sz.y });
-		}
-	}
-	if (uMsg == WM_DESTROY) UNLIKELY
+
+	case WM_SIZE:
+	{
+		Vec2 sz = SplitLParam(lParam);
+		Application::get().Resize({ sz.x,sz.y });
+	}break;
+
+	case WM_DESTROY:
 	{
 		Application::get().Terminate();
-	}
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}break;
+
+	};
+
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
 
 _static Application::Window::InputDevices::_mouse    Application::Window::InputDevices::Mouse;
 _static Application::Window::InputDevices::_keyboard Application::Window::InputDevices::Keyboard;
+
 _static Application::Window::EventHandler& Application::Window::EventHandler::get()
 {
 	static Application::Window::EventHandler instance;
 	return instance;
 }
 
-
-
-
-/* =============================================================================================================================================
-/*                                          NOTES       
-/* ============================================================================================================================================= 
-
-
- Windows Messages:
- https://wiki.winehq.org/List_Of_Windows_Messages
-
- 
- https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee418748(v%3Dvs.85)
-
-*/
-
-
-//std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg)
-//{
-//	os << "Error: " << _msg.ErrorNumber << "\n At: " << _msg.Time << "\n ";
-//	return os;
-//}
-//std::ostream& operator<<(std::ostream& stream, const Vec2& vector)
-//{
-//	stream << "X:[" << vector.x << "] - Y:[" << vector.y << "]";
-//	return stream;
-///std::string BasicVertexShader = "#version 330 \n\
-///layout(location = 0) in vec3 VertexPosition;\n\
-///out vec3 VertexColor;\n\
-///out vec4 FragPosition;\n\
-///void main()\n\
-///{\n\
-///FragPosition = vec4(VertexPosition.xyz, 1.0f);\n\
-///VertexColor = vec3(1.0,1.0,1.0);\n\
-///}";
-///
-///std::string BasicFragmentShader = "#version 330 \n\
-///out vec4 color;         \n\
-///in vec3 VertexColor;    \n\
-///in vec4 FragPosition;   \n\
-///void main(){            \n\
-///color = vec3(1, 1, 0, 1);  \n\
-///}";
-
-///std::string VertexShader = " #version 330 core \n\
-///layout(location = 0) in vec3 aPos; 			\n\
-///uniform mat4 ProjectionMatrix;              \n\
-///uniform mat4 ViewMatrix;                    \n\
-///uniform mat4 ModelMatrix;                   \n\
-///out vec4 vertexColor; 						\n\
-///void main()									\n\
-///{											\n\
-///	gl_Position = vec4(aPos, 1.0);			\n\
-///	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
-///}";
 std::string VertexShader =
 "#version 330 core \n\
 layout(location = 0) in vec2 aPos;          \n\
@@ -596,41 +560,19 @@ void main()         \n\
     FragColor = vec4(0.5, 1.0, 0.0, 1.0);  \n\
 }";
 
-//vec4(texture(texture1,TexCoords.xy).xyzw); 
-///std::string FragmentShader = "#version 330 core \n\
-///out vec4 FragColor;                             \n\
-///in vec4 vertexColor;                            \n\
-///void main()                                     \n\
-///{                                               \n\
-///	FragColor = vertexColor;                    \n\
-///}";
-///
 
 
-///    std::string vRenderer =
-///    "#version 330 core \n\
-///    layout(location = 0) in vec4 aPos;          \n\
-///    uniform mat4 ProjectionMatrix;                    \n\
-///    uniform mat4 ViewMatrix;                         \n\
-///    uniform mat4 Model;                         \n\
-///    out vec3 vertexColor;                       \n\
-///    out vec2 TexCoords;                         \n\
-///    void main()                                 \n\
-///    {                                           \n\
-///        mat4 ModelViewMatrix = (ViewMatrix * Model);  \n\
-///        mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-///        TexCoords = aPos.zw;                          \n\
-///        gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
-///    }";
 
-///    std::string fRenderer =
-///    "#version 330 core \n\
-///    in vec3 vertexColor;                              \n\
-///    uniform sampler2D texture1;                       \n\
-///    out vec4 FragColor;                               \n\
-///    in  vec2 TexCoords;                               \n\
-///    void main()                                       \n\
-///    {                                                 \n\
-///        FragColor = vec4(texture(texture1,TexCoords.xy).xyzw);  \n\
-///    }";
-///    
+
+/* =============================================================================================================================================
+/*                                          NOTES       
+/* ============================================================================================================================================= 
+
+
+ Windows Messages:
+ https://wiki.winehq.org/List_Of_Windows_Messages
+
+ 
+ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee418748(v%3Dvs.85)
+
+*/

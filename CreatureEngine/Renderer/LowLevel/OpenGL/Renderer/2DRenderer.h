@@ -4,6 +4,24 @@
 
 namespace OpenGL
 {
+
+	struct QuadBatch
+	{
+		std::vector<Mat4> Transforms;
+		std::vector<Vec2> QuadData;
+		std::vector<Vec4> ColorData;
+
+		void renderQuad(Vec2 _topleft, Vec2 _bottomright, Vec4 _color);
+
+		void Render();
+		uint32_t QuadVAO{ 0 }; uint32_t QuadVBO{ 0 }; uint32_t ColorVBO{ 0 };
+
+		void* Color_ptr() { return &ColorData[0]; }
+		void* Vertices_ptr() { return &QuadData[0]; }
+		void* Transforms_ptr() { return &Transforms[0]; }
+	};
+
+
 	class Renderer2D
 		:
 		public Renderer
@@ -14,10 +32,6 @@ namespace OpenGL
 		NO_COPY_OR_ASSIGNMENT(Renderer2D);
 		Renderer2D() = default;
 		Renderer2D(Vec2 _size);
-
-//  Renderer2D(Renderer2D&& _other) = default;
-//	Renderer2D& operator=(Renderer2D&& _other) = default;
-
 
 		std::vector<Mat4> Transforms;
 

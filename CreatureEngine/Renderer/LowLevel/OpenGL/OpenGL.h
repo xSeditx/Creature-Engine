@@ -190,9 +190,9 @@ namespace OpenGL
 	CREATURE_API void  EnableProgramPointSize();
 
 
-	CREATURE_API void  set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name);
-    CREATURE_API void  set_Attribute(uint8_t _elements, const char* _name);
-
+	CREATURE_API uint32_t set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name);
+    CREATURE_API uint32_t set_Attribute(uint8_t _elements, const char* _name);
+	CREATURE_API void set_Divisor(uint8_t _location, uint32_t _divisor);
 
 	//============================================================================================
 	// VERTEX ARRAY OBJECT 

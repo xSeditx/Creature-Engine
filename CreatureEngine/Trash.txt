@@ -1,4 +1,538 @@
+// ============================================================================================================================================================================
+//                                 2/20/2020
+//          Clean up  
+// ============================================================================================================================================================================
+
+
+// Vec2 Sz
+// {
+//    ( Right * ZoomLevel)* AspectRatio ,
+//     Bottom  * ZoomLevel,
+// };
+
+//  Sz.x,
+//Sz.y,
+//    Sz *= _amount;
+//	float
+//		Sx = Right * ZoomLevel * 0.5f,
+//		Sy = Bottom * ZoomLevel * 0.5f;
+//
+
+///ProjectionMatrix =
+///	glm::ortho
+///	(
+///		0.0f - Sx,
+///		Right * ZoomLevel,
+///		Bottom * ZoomLevel,
+///		0.0f - Sy,
+///		Near,
+///		Far
+///	);  //OrthographicMatrix(_size.x, _size.y);
+///}
+   // TODO("This is not currently setup correctly 2/18/2020: The Left and Right should zoom in on that current location of the Camera");
+
+/*=======================================================================================================================================================
+/*                                               NOTES
+/*=======================================================================================================================================================
+
+template <typename valType>
+GLM_FUNC_QUALIFIER detail::tmat4x4<valType> ortho
+(
+    valType const & left,
+    valType const & right,
+    valType const & bottom,
+    valType const & top,
+    valType const & zNear,
+    valType const & zFar
+)
+{
+    detail::tmat4x4<valType> Result(1);
+    Result[0][0] = valType(2) / (right - left);
+    Result[1][1] = valType(2) / (top - bottom);
+    Result[2][2] = - valType(2) / (zFar - zNear);
+    Result[3][0] = - (right + left) / (right - left);
+    Result[3][1] = - (top + bottom) / (top - bottom);
+    Result[3][2] = - (zFar + zNear) / (zFar - zNear);
+    return Result;
+}
+ /*   Vec2 Diff = Size - Vec2
+    (
+        Right* (1.0f / ZoomLevel),
+        Bottom* (1.0f / ZoomLevel)
+    );
+    
+       
+    Print("Zoom Level: " << (1.0f / ZoomLevel));
+
+    if (ZoomLevel > 0)
+    {
+        ProjectionMatrix =
+            glm::ortho
+            (
+                Position.x   * (1.0f / ZoomLevel),
+                Right  *  (1.0f / ZoomLevel),
+                Bottom *  (1.0f / ZoomLevel),
+                Position.y   *  (1.0f / ZoomLevel),
+                Near,
+                Far
+            );
+    }
+    else
+    {
+        ProjectionMatrix =
+            glm::ortho
+            (
+                Position.x   * -(1.0f / ZoomLevel),
+                Right  *  -(1.0f / ZoomLevel),
+                Bottom *  -(1.0f / ZoomLevel),
+                Position.y   *  -(1.0f / ZoomLevel),
+                Near,
+                Far
+            );
+
+    }
+    */
+//    ZoomLevel += (1.0f /_amount);
+	//	ProjectionMatrix = glm::ortho(0.0f, size.x, size.y, 0.0f, -1.0f, 1.0f);  //OrthographicMatrix(size.x, size.y);
+	//	ViewMatrix = glm::translate(Mat4(1.0f), Vec3(-100, 0, 0));
+//Top = _top;
+//Left = _left;
+//ProjectionMatrix = glm::ortho(0.0f, Right, Bottom, 0.0f, -1.0f, 100.0f);  //OrthographicMatrix(_size.x, _size.y);
+//ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0, 0, 0));//200, 200, 0))
+//Size(size)
+
+
+
+/*=======================================================================================================================================================*/
+//ViewMatrix = glm::translate(ViewMatrix, Vec3(-_amount.x, -_amount.y, 0));
+//ViewMatrix = glm::translate(ViewMatrix, Vec3(-_amount, 0, 0));
+//ViewMatrix = glm::translate(ViewMatrix, Vec3(0, -_amount, 0));
+//  ZoomLevel += _amount;
+//  
+//  float
+//  Sx = Right * ZoomLevel * 0.5f,
+//  Sy = Bottom * ZoomLevel * 0.5f;
+//  
+//  
+//  
+//  ProjectionMatrix =
+//  glm::ortho
+//  (
+//  	0.0f - Sx,
+//  	Right * ZoomLevel,
+//  	Bottom * ZoomLevel,
+//  	0.0f - Sy,
+//  	Near,
+//  	Far
+//  );  //OrthographicMatrix(_size.x, _size.y);
+
+
+
+//================= #APPLICATION
+
+
+/*
+
+
+    //Print("Callback:" << uMsg);
+    ///switch (uMsg)
+    ///{
+    ///
+    ///case WM_ACTIVATE:                       // Watch For Window Activate Message
+    ///{
+    ///	if (!HIWORD(wParam))                    // Check Minimization State
+    ///	{
+    ///		Print("Active");                    // Program Is Active
+    ///	}
+    ///	else
+    ///	{
+    ///		Print("Inactive");              // Program Is No Longer Active
+    ///	}
+    ///
+    ///	break;                              // Return To The Message Loop
+    ///}
+    ///
+    ///case WM_SYSCOMMAND:                     // Intercept System Commands
+    ///{
+    ///	switch (wParam)                     // Check System Calls
+    ///	{
+    ///	case SC_SCREENSAVE:                 // Screensaver Trying To Start?
+    ///	case SC_MONITORPOWER:               // Monitor Trying To Enter Powersave?
+    ///		return 0;                       // Prevent From Happening
+    ///	}
+    ///	break;                              // Exit
+    ///}
+    ///
+    ///case WM_CLOSE:                          // Did We Receive A Close Message?
+    ///{
+    ///	Print("Close");
+    ///	PostQuitMessage(0);                 // Send A Quit Message
+    ///	break;    // Jump Back
+    ///}
+    ///
+    ///case WM_KEYDOWN:                        // Is A Key Being Held Down?
+    ///{
+    ///	Application::getDevice().Keyboard.Keys[wParam] = true;                    // If So, Mark It As TRUE
+    ///	break;                      // Jump Back
+    ///}
+    ///
+    ///case WM_KEYUP:                        // Is A Key Being Held Down?
+    ///{
+    ///	Application::getDevice().Keyboard.Keys[wParam] = false;                    // If So, Mark It As TRUE
+    ///	break;                      // Jump Back
+    ///}
+    ///
+    ///case WM_MOUSEMOVE:
+    ///{
+    ///	 Application::getDevice().Mouse.Relative = Application::getDevice().Mouse.Position;
+    ///	 Application::getDevice().Mouse.Position = { (float)GET_X_LPARAM(lParam),(float)GET_Y_LPARAM(lParam) };
+    ///
+    ///	 Application::getDevice().Mouse.Relative.x = Application::getDevice().Mouse.Position.x - Application::getDevice().Mouse.Relative.x;
+    ///	 Application::getDevice().Mouse.Relative.y = Application::getDevice().Mouse.Position.y - Application::getDevice().Mouse.Relative.y;
+    ///
+    ///	Print("MouseMove:" <<  Application::getDevice().Mouse.Relative.x << " : " <<  Application::getDevice().Mouse.Relative.y);
+    ///	Print("Position:" <<   Application::getDevice().Mouse.Position.x << " : " <<  Application::getDevice().Mouse.Position.y);
+    ///
+    ///}
+    ///
+    ///case WM_LBUTTONDOWN:
+    ///{
+    ///	Print("MouseDown");
+    ///	break;
+    ///}
+    ///
+    ///case WM_LBUTTONUP:
+    ///{
+    ///	Print("Left Button Up");
+    ///	break;
+    ///}
+    ///
+    ///case WM_LBUTTONDBLCLK:
+    ///{
+    ///	Print("L DClick ");
+    ///	break;
+    ///}
+    ///
+    ///case WM_RBUTTONDOWN:
+    ///{
+    ///	Print(" RButtonDown");
+    ///	break;
+    ///}
+    ///
+    ///case WM_RBUTTONUP:
+    ///{
+    ///	Print(" RButUP");
+    ///	break;
+    ///}
+    ///
+    ///case WM_RBUTTONDBLCLK:
+    ///{
+    ///	Print(" R Button DClick");
+    ///	break;
+    ///}
+    ///
+    ///case WM_MBUTTONDOWN:
+    ///{
+    ///	Print(" MButtonDown");
+    ///	break;
+    ///}
+    ///
+    ///case WM_MBUTTONUP:
+    ///{
+    ///	Print("M BUtton UP ");
+    ///	break;
+    ///}
+    ///
+    ///case WM_MBUTTONDBLCLK:
+    ///{
+    ///	Print(" MButton DClick");
+    ///	break;
+    ///}
+    ///
+    ///case WM_XBUTTONDOWN:
+    ///{
+    ///	Print(" XButtonDown");
+    ///	break;
+    ///}
+    ///case WM_XBUTTONUP:
+    ///{
+    ///	Print(" X Up");
+    ///	break;
+    ///}
+    ///
+    ///case WM_XBUTTONDBLCLK:
+    ///{
+    ///	Print(" X DClick");
+    ///	break;
+    ///}
+    ///
+    ///case WM_SIZE:
+    ///{
+    ///	Application::getWindow().ResizeWindow(HIWORD(wParam), LOWORD(wParam));
+    ///	break;
+    ///}
+    ///default:
+    ///	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    ///}
+
+
+
+#if 0
+while (true)
+{
+    MSG msg;
+    BOOL bRet;
+    while (PeekMessage(&msg, Application::getWindow().g_Handle(), 0, 0, PM_REMOVE))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    Update();
+    Render();
+}
+#else
+
+
+Application::Window::Event::Event()
+    :
+    ID(0),
+    ///WinID(0),
+    Time(0)
+{
+    memset(&data, 0, 16);
+}
+Application::Window::Event::Event(MsgType msg)
+    :
+    ID(msg),
+    ///WinID(0),
+    Time(0)
+{
+    memset(&data, 0, 16);
+}
+*/
+//struct Application
+//{
+//	struct Window
+//	{
+//		struct InputDevices
+//		{
+//			struct {}Mouse;
+//			struct {}Keyboard;
+//		}Input;
+//		struct EventHandler
+//		{}EventSystem;
+//	}mainWindow;
+//};
+        /*
+        struct Event
+        {// Event Union Defining an Event the Engine can produce
+            Event();
+            Event(MsgType msg);
+
+            MsgType ID;
+            ///	WindowID WinID;
+            unsigned long Time;
+            Vec2 Location{ 0, 0 };
+#pragma pack(push, 1)
+            union msgUnion
+            {// All messages are 128 bits
+                msgUnion() = default;
+
+                msgUnion& operator =(const msgUnion& other)
+                {
+                    memcpy(this, &other, sizeof(other)); // Should be 16 bytes, check this if any changes get made
+                    return *this;
+                }
+
+                struct msgstruct
+                {
+                    uint32_t wordParam;
+                    uint64_t longParam;
+                    uint32_t Padding;
+                }MSG; // 128 bits
+                struct kbstruct
+                {
+                    uint32_t KeyCode;
+                    uint32_t ScanCode;
+                    uint32_t Action;
+                    uint32_t Mods;
+                }Keyboard; // 128
+                struct mousestruct
+                {
+                    uint32_t Button;
+                    uint32_t x;
+                    uint32_t y;
+                    int16_t relX;
+                    int16_t relY;
+                }Mouse; // 128
+                struct buttonstruct
+                {
+                    struct buttons
+                    {
+                        uint8_t
+                            Left,
+                            Right,
+                            Middle,
+                            Wheel;
+                    }Buttons; // 32
+                    uint32_t Action;
+                    uint32_t Modification;
+                    uint32_t Padding;
+                }MouseButton; // 128
+                struct textstruct {}TextInput;
+            }data;
+#pragma pack(pop)
+            Event(MSG _msg)
+            {
+                Location.x = _msg.pt.x;
+                Location.y = _msg.pt.y;
+
+                ID = _msg.message;
+                this->data.MSG.longParam = _msg.lParam;
+                this->data.MSG.wordParam = _msg.wParam;
+                this->data.MSG.Padding = 0;
+                this->Time = _msg.time;
+            }
+            bool Handled() { return (ID == 0); }
+        };
+*/
+
+/*	{// OpenGL Rendering Context Scope
+        //  wglCreateContext	    Creates a new rendering context.
+        //  WglMakeCurrent	        Sets a thread's current rendering context.
+        //  WglGetCurrentContext	Obtains a handle to a thread's current rendering context.
+        //  WglGetCurrentDC      	Obtains a handle to the device context associated with a thread's current rendering context.
+        //  WglDeleteContext	    Deletes a rendering context.
+
+        GL_Context = wglCreateContext(DeviceContext);
+        if (!wglMakeCurrent(DeviceContext, GL_Context))
+        {
+            std::cout << "Making Current Rendering Context Failed" << "\n";
+        }
+        if (!GL_Context)
+        {
+            MessageBox
+            (/// Turn all this into a Macro for Clearity
+                NULL,
+                "GL Context Creation Failed  "
+                "Cannot Create Renderer",
+                "Error",
+                MB_OK
+            );
+        }
+
+        if (!gladLoadGL())
+        {// If the Loading of OpenGL functions fails report it and exit
+            int error_code = glad_glGetError();
+            std::cout << "Failed to initialize GLAD" << error_code << std::endl;
+            __debugbreak();
+        };
+
+        Title = std::string("OPENGL VERSION ") + std::string((char*) glGetString(GL_VERSION));
+        SetWindowTextA
+        (
+            Handle,
+            Title.c_str()
+        );
+
+        //  wglCreateContext	    Creates a new rendering context.
+        //  WglMakeCurrent	        Sets a thread's current rendering context.
+        //  WglGetCurrentContext	Obtains a handle to a thread's current rendering context.
+        //  WglGetCurrentDC      	Obtains a handle to the device context associated with a thread's current rendering context.
+        //  WglDeleteContext	    Deletes a rendering context.
+    }*/
+
+
+    ///std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg)
+///{
+///	os << "Error: " << _msg.ErrorNumber << "\n At: " << _msg.Time << "\n ";
+///	return os;
+///}
+///std::ostream& operator<<(std::ostream& stream, const Vec2& vector)
+///{
+///	stream << "X:[" << vector.x << "] - Y:[" << vector.y << "]";
+///	return stream;
+///std::string BasicVertexShader = "#version 330 \n\
+///layout(location = 0) in vec3 VertexPosition;\n\
+///out vec3 VertexColor;\n\
+///out vec4 FragPosition;\n\
+///void main()\n\
+///{\n\
+///FragPosition = vec4(VertexPosition.xyz, 1.0f);\n\
+///VertexColor = vec3(1.0,1.0,1.0);\n\
+///}";
+///
+///std::string BasicFragmentShader = "#version 330 \n\
+///out vec4 color;         \n\
+///in vec3 VertexColor;    \n\
+///in vec4 FragPosition;   \n\
+///void main(){            \n\
+///color = vec3(1, 1, 0, 1);  \n\
+///}";
+///std::string VertexShader = " #version 330 core \n\
+///layout(location = 0) in vec3 aPos; 			\n\
+///uniform mat4 ProjectionMatrix;              \n\
+///uniform mat4 ViewMatrix;                    \n\
+///uniform mat4 ModelMatrix;                   \n\
+///out vec4 vertexColor; 						\n\
+///void main()									\n\
+///{											\n\
+///	gl_Position = vec4(aPos, 1.0);			\n\
+///	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
+///}";
+///vec4(texture(texture1,TexCoords.xy).xyzw); 
+///std::string FragmentShader = "#version 330 core \n\
+///out vec4 FragColor;                             \n\
+///in vec4 vertexColor;                            \n\
+///void main()                                     \n\
+///{                                               \n\
+///	FragColor = vertexColor;                    \n\
+///}";
+///
+///    std::string vRenderer =
+///    "#version 330 core \n\
+///    layout(location = 0) in vec4 aPos;          \n\
+///    uniform mat4 ProjectionMatrix;                    \n\
+///    uniform mat4 ViewMatrix;                         \n\
+///    uniform mat4 Model;                         \n\
+///    out vec3 vertexColor;                       \n\
+///    out vec2 TexCoords;                         \n\
+///    void main()                                 \n\
+///    {                                           \n\
+///        mat4 ModelViewMatrix = (ViewMatrix * Model);  \n\
+///        mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+///        TexCoords = aPos.zw;                          \n\
+///        gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+///    }";
+///    std::string fRenderer =
+///    "#version 330 core \n\
+///    in vec3 vertexColor;                              \n\
+///    uniform sampler2D texture1;                       \n\
+///    out vec4 FragColor;                               \n\
+///    in  vec2 TexCoords;                               \n\
+///    void main()                                       \n\
+///    {                                                 \n\
+///        FragColor = vec4(texture(texture1,TexCoords.xy).xyzw);  \n\
+///    }";
+///    
+===================== #APPLICATION_END
+            
+            
+
+// ============================================================================================================================================================================
+// ============================================================================================================================================================================
    
+
+
+
+
+
+
+
+
+
+
+
    
 //DEBUGPrint(CON_DarkRed, "Created Queue: ");
 

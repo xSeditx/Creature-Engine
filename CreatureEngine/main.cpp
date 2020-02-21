@@ -70,7 +70,7 @@ bool TEST_PROFILE_WINDOW();
 #include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
 
 #define CAMERA_SPEED 4.0f
-
+#define ZOOM_SPEED 1.0
 Camera2D* WorldCamera{ nullptr };
 Listener KeyListener(
 	[](Event _msg)
@@ -105,12 +105,12 @@ Listener KeyListener(
 
 	case 107: 
 	{//- Key
-        WorldCamera->ZoomOut(1.0); 
+        WorldCamera->ZoomOut(ZOOM_SPEED);
 	}break;
 
 	case 109:
 	{//+ Key
-        WorldCamera->ZoomIn(1.0);
+        WorldCamera->ZoomIn(ZOOM_SPEED);
 	}break;
 
 	}// End of Switch
@@ -134,6 +134,7 @@ class App
     std::vector<Vec2> TestBatch;
     std::vector<Vec2> TestBatch2;
 
+	OpenGL::QuadBatch RealBatch;
 	virtual void OnCreate()
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
@@ -156,6 +157,7 @@ class App
 		Vec2 _size = Vec2(8, 8);
 		Vec2 Space = Vec2(1, 1);
 		Vec2 Count = Vec2(80, 60);
+		MainRenderer->SetRenderColor(255, 0, 0, 255);
 		for_loop(y, Count.y)
 		{
 			for_loop(x, Count.x)
@@ -174,6 +176,7 @@ class App
 				TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
 			}
 		}
+		MainRenderer->SetRenderColor(0, 255, 255, 255);
 		for_loop(y, Count.y)
 		{
 			for_loop(x, Count.x)
@@ -192,7 +195,22 @@ class App
 				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
 			}
 		}
-
+/// for_loop(y, Count.y)
+/// {
+/// 	for_loop(x, Count.x)
+/// 	{
+/// 		Vec2 _topleft
+/// 		(
+/// 			x * (_size.x + Space.x),
+/// 			(y + Count.y) * (_size.y + Space.y)
+/// 		);
+/// 		Vec4 Color{ 1,x, 1,1 };
+/// 		RealBatch.renderQuad(_topleft, _size, Color);
+/// 		//	void* Color_ptr() { return &ColorData[0]; }
+/// 		//void* Vertices_ptr() { return &QuadData[0]; }
+/// 		//void* Transforms_ptr() { return &Transforms[0]; }
+/// 	}
+/// }
 		/* 
 		/*   Make a Profiler Window which Displays the FPS as a graph
 		/*/
@@ -218,7 +236,9 @@ class App
 		}
 		getWindow().defaultShader().Unbind();
 		MainRenderer->renderQuad(Vec2(400, 400), Vec2(10, 200));
+		MainRenderer->SetRenderColor(255, 0, 0, 255);
 		MainRenderer->renderQuadBatch(TestBatch);
+		MainRenderer->SetRenderColor(0, 255, 255, 255);
 		MainRenderer->renderQuadBatch(TestBatch2);
 
  		MainRenderer->Render();
