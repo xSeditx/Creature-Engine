@@ -460,10 +460,21 @@ namespace OpenGL
 		CheckGLERROR();
 		return Location;
 	}
-	uint32_t  set_Attribute(uint8_t _elements, const char* _name)
+	uint32_t set_Attribute(uint8_t _elements, const char* _name)
     {
+		CheckGLERROR();
 		int H = Shader::getHandle();
-        uint32_t Location = glGetAttribLocation(H, _name);
+        int32_t Location = glGetAttribLocation(H, _name);
+
+		DEBUG_CODE
+		(
+			if (Location == -1)
+			{
+				Print("ERROR: Attribute does not exist");
+				__debugbreak();
+			}
+		);
+
         glEnableVertexAttribArray(Location);
         glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
         CheckGLERROR();
@@ -472,11 +483,9 @@ namespace OpenGL
 
 	void set_Divisor(uint8_t _location, uint32_t _divisor)
 	{
-		//glVertexAttribDivisor(_location, _divisor);
-		glVertexAttribDivisorARB(_location, _divisor);
+		OpenGL4_6(glVertexAttribDivisor(_location, _divisor));
+		OpenGL3_1(glVertexAttribDivisorARB(_location, _divisor));
 	}
-
-
 
 
 	void set_BufferData(uint32_t _size, const void* _data)
@@ -484,8 +493,6 @@ namespace OpenGL
 		glBufferData(GL_ARRAY_BUFFER, _size, _data, DEFAULT_BUFFER_ACCESS);
 		DEBUG_CODE(CheckGLERROR());
 	}
-
-
 }
 
 

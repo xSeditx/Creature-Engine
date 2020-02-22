@@ -374,8 +374,10 @@ we will have more functionality for tracking the stack and functions while easil
 /* May used this for code that is only present in specific versions
 /* of OpenGL */
 #define  _GL(_code)    _code
-#define _GL3(_code)    _code
-#define _GL4(_code)    _code
+
+#define OpenGL4_6(_code)
+#define OpenGL3_1(_code) _code
+
 
 
 #define RADIANS(x)            ((x) * 0.01745329251)
@@ -389,6 +391,9 @@ Idk how to handle this yet in a platform independent way so we will cast a void 
 In this case a Windows HINSTANCE
 */
 #define  GetInstance() (HINSTANCE)Application::get().OSInstance 
+
+
+
 
 ///================================================================================================================
 ///================= SIMPLE ERROR HANDLING ========================================================================

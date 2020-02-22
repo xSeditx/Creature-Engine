@@ -139,7 +139,7 @@ class App
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
 
-		MainRenderer = new OpenGL::Renderer2D({ 640.0f, 480.0f });
+		MainRenderer = new OpenGL::Renderer2D({1280.0f, 970.0});// { 640.0f, 480.0f });
 		getWindow().s_Camera(&MainRenderer->g_Camera());
 		WorldCamera = &getCamera();
 
@@ -195,22 +195,6 @@ class App
 				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
 			}
 		}
-/// for_loop(y, Count.y)
-/// {
-/// 	for_loop(x, Count.x)
-/// 	{
-/// 		Vec2 _topleft
-/// 		(
-/// 			x * (_size.x + Space.x),
-/// 			(y + Count.y) * (_size.y + Space.y)
-/// 		);
-/// 		Vec4 Color{ 1,x, 1,1 };
-/// 		RealBatch.renderQuad(_topleft, _size, Color);
-/// 		//	void* Color_ptr() { return &ColorData[0]; }
-/// 		//void* Vertices_ptr() { return &QuadData[0]; }
-/// 		//void* Transforms_ptr() { return &Transforms[0]; }
-/// 	}
-/// }
 		/* 
 		/*   Make a Profiler Window which Displays the FPS as a graph
 		/*/
@@ -223,10 +207,28 @@ class App
 			{ std::floor(Size * Aspect), std::floor((Size)) }
 		);
 		ProfilerTest->Update(1);
+
+
+		uint8_t R{ 100 }, G{ 0 }, B{ 0 };
+		Vec2 Sze{ 160,120 };
+		for_loop(y, Sze.y)
+		{
+			for_loop(x, Sze.x)
+			{
+				R += 5;
+				if (R >= 255) { G += 5; R = 0; }
+				if (G >= 255) { B += 5; G = 0; }
+
+				MainRenderer->renderQuad({ x * 8.0f,y * 8.0f }, { 7,7 }, MainRenderer->CreateColor(R, G, B, 255));
+			}
+		}
 	}
 
 	virtual void OnRender() override
 	{
+
+
+
 		OpenGL::bind_VAO(VAO);
 		getWindow().defaultShader().Bind();
 		{
@@ -235,22 +237,20 @@ class App
 			OpenGL::Renderer::drawArray(VBO, 3);
 		}
 		getWindow().defaultShader().Unbind();
-		MainRenderer->renderQuad(Vec2(400, 400), Vec2(10, 200));
-		MainRenderer->SetRenderColor(255, 0, 0, 255);
-		MainRenderer->renderQuadBatch(TestBatch);
-		MainRenderer->SetRenderColor(0, 255, 255, 255);
-		MainRenderer->renderQuadBatch(TestBatch2);
+
+
 
  		MainRenderer->Render();
 		CheckGLERROR();
 
-	//	ProfilerTest->Render();
+	 	ProfilerTest->Render();
 	}
 
 	
 	size_t PreviousTime;
 	virtual void OnUpdate() override
 	{
+		//MainRenderer->renderQuad({ 100,100 }, { 10,10 });
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;

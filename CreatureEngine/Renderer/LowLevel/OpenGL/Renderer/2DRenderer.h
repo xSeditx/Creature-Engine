@@ -4,24 +4,6 @@
 
 namespace OpenGL
 {
-
-	struct QuadBatch
-	{
-		std::vector<Mat4> Transforms;
-		std::vector<Vec2> QuadData;
-		std::vector<Vec4> ColorData;
-
-		void renderQuad(Vec2 _topleft, Vec2 _bottomright, Vec4 _color);
-
-		void Render();
-		uint32_t QuadVAO{ 0 }; uint32_t QuadVBO{ 0 }; uint32_t ColorVBO{ 0 };
-
-		void* Color_ptr() { return &ColorData[0]; }
-		void* Vertices_ptr() { return &QuadData[0]; }
-		void* Transforms_ptr() { return &Transforms[0]; }
-	};
-
-
 	class Renderer2D
 		:
 		public Renderer
@@ -30,79 +12,97 @@ namespace OpenGL
 
 	public:
 		NO_COPY_OR_ASSIGNMENT(Renderer2D);
-		Renderer2D() = default;
-		Renderer2D(Vec2 _size);
-
-		std::vector<Mat4> Transforms;
-
 		enum  Surface_t { Normals, Albedo, Metallic };
 		using SurfaceFragment = std::pair<Surface_t, Graphics::Texture>;
 		using Surface = std::vector<SurfaceFragment>;
 		using Material = std::pair<Surface, Shader>;
 		using RenderPair = std::pair<Material, Mesh>;
-		std::vector<Vec2> QuadData;
-		std::vector<Vec2> LineData;
-       
-        uint32_t QuadVAO{ 0 }; uint32_t QuadVBO{ 0 }; uint32_t ColorVBO{ 0 };
-        uint32_t LineVAO{ 0 }; uint32_t LineVBO{ 0 };
-       
+
+
+		Renderer2D() = default;
+		Renderer2D(Vec2 _size);
+
+		/* Submits a Quad using the Current Draw Color */
 		void renderQuad(Vec2 _topleft, Vec2 _bottomright);
+		/* Submits a Quad using the provided Draw Color */
 		void renderQuad(Vec2 _topleft, Vec2 _bottomright, Vec4 _color);
 
-		void renderLine(Vec2 _start, Vec2 _end);
-
+		/* Accepts a precreated Batch into the Renderer
+		 ~WARNING~ Possibly Deprecation soon */
 		void renderQuadBatch(const std::vector<Vec2> _batch);
-		void renderLineBatch(const std::vector<Vec2> _batch);
 
+       
 
-		Shader* QuadRenderer;
-		Transform ModelMatrix;
-
+		/* Renderers the Current batch */
 		void Render();
+		/* Updates the data in the Camera and the Batchs */
 		void Update();
 
-		Camera2D& g_Camera()
-        {
-            return mainCamera;
-        }
+		/* Returns a vec4 of Normalized Colors for OpenGL Accepts 0-255*/
+		Vec4 CreateColor(int _r, int _g, int _b, int _a);
+		/* Clears the Buffers */
+		void Flush();
 
+		/* Might eliminate these in near future idk yet*/
+        void SetRenderColor(int _r, int _g, int _b, int _a);
 
+		/* Changes the size of the Renderer */
         void Resize(Vec2 _size);
 
-        void SetRenderColor(int _r, int _g, int _b, int _a);
-        Vec4 CurrentRenderColor;
-        std::vector<Vec4> ColorData;
+		/* Gets the Camera the Renderer uses */
+		Camera2D& g_Camera() { return mainCamera; }
 
     private:
- 
-		std::string VquadRenderer =
+		uint32_t QuadVAO{ 0 };
+		size_t InstanceCount{ 0 };
+
+		Shader* InstanceRenderer;
+
+		uint32_t ColorVBO{ 0 };
+		std::vector<Vec4> ColorData;
+
+		uint32_t TransformVBO{ 0 };
+		std::vector<Vec4> Positions;
+
+
+		uint32_t QuadVBO{ 0 };
+		Vec2 QuadData[6] =
+		{
+			Vec2(0, 0),  Vec2(1, 0),  Vec2(0, 1),
+			Vec2(1, 1),  Vec2(0, 1),  Vec2(1, 0)
+		};
+
+
+		Vec4 CurrentRenderColor{ 1, 0, 0, 1 };
+
+//===============================================================================================================
+		std::string VinstanceRenderer =
 			"#version 330 core     \n\
 layout(location = 0) in vec2 aPos; \n\
-layout(location = 1) in vec4 Color;\n\
+layout(location = 1) in vec4 Position; \n\
+layout(location = 2) in vec4 Color; \n\
 uniform mat4 ProjectionMatrix;     \n\
 uniform mat4 ViewMatrix;           \n\
-uniform mat4 ModelMatrix;          \n\
 out vec4 Col;                      \n\
 void main()                        \n\
 {                                  \n\
-    Col = Color;                   \n\
-    mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix);  \n\
+    Col = Color; \n\
+    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-    gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
 }";
 
-		std::string FquadRenderer =
+		std::string FinstanceRenderer =
 			"#version 330 core \n\
+in vec4 Col;                   \n\
 out vec4 FragColor;            \n\
-in vec4  Col;            \n\
 void main()                    \n\
 {                              \n\
     FragColor = Col;\n\
 }";
 
-//vec4(1.0, 1.0, 1.0, 1.0); vec4(1.0, 1.0, 1.0, 1.0) + Col; 
-	};// Class Renderer2D
 
+	};// Class Renderer2D
 }// NS OpenGLvec4(Col.rgb,1.0f); 
 
 
@@ -110,178 +110,4 @@ void main()                    \n\
 
 /*=======================================================================================================================================================
 /*                                               TRASH
-/*=======================================================================================================================================================
-//gl_Position = (ProjectionMatrix * (ViewMatrix * ModelMatrix)) * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
-
-std::vector<FrameBufferObject> RenderTargets;
-std::vector<Shader> Programs;
-//std::vector<VertexArrayObject> VAOs;
-//std::vector<VertexBufferObject<Vec3>> VBOs;
-std::vector<Mesh> Meshes;
-
-VertexData.push_back(Vec2(Position.x - Offset.x, Position.y + Offset.y));
-VertexData.push_back(Vec2(Position.x - Offset.x, Position.y - Offset.y));
-VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
-VertexData.push_back(Vec2(Position.x - Offset.x, Position.y + Offset.y));
-VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
-VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
-
-Vec2 Position = Vec2(0);
-//Vec4 Vertices[6] =
-//{   // positions   // texCoords
-//	Vec4(0 ,         Size.y   ,    0.0f,  1.0f),
-//	Vec4(0 ,        -Size.y   ,    0.0f,  0.0f),
-//	Vec4(Size.x ,  -Size.y   ,    1.0f,  0.0f),
-//	Vec4(0 ,         Size.y   ,    0.0f,  1.0f),
-//	Vec4(Size.x ,  -Size.y   ,    1.0f,  0.0f),
-//	Vec4(Size.x ,   Size.y   ,    1.0f,  1.0f)
-//};
-
-//glGenBuffers(1, &VBO);
-//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
-//VAO->Attach(VERTEX, new VertexBufferObject<Vec2>(&newVertices[0], 6));
-//VAO->Attach(UVCOORD, new VertexBufferObject<Vec2>(&TexCoords[0], 6));
-//Program = new Shader("Resources\\DebugQuad.sfx");
-
-Vec2 Vertices[6];
-Vec2 TexCoords[6] =
-{
-	Vec2(0.0f, 1.0f),
-	Vec2(0.0f, 0.0f),
-	Vec2(1.0f, 0.0f),
-	Vec2(0.0f, 1.0f),
-	Vec2(1.0f, 0.0f),
-	Vec2(1.0f, 1.0f)
-};
-
-                   //VA.Bind();
-                   //for(auto& VB: VBOs)
-                   //{ }
-
-
-		//for (auto& FB : RenderTargets)
-		//{
-		//    FB.Bind();
-		//    for (auto& S: Programs)
-		//    {
-		//        S.Enable();
-		//        for (auto& VA : VAOs)
-		//        {
-		//            VA.Bind();
-		//            /*
-		//            for(auto& VB: VA.Buffers)
-		//            {
-		//                VB->Bind();
-		//            }
-		//            for(auto& M: Meshes)
-		//            {
-		//                M.Bind();
-		//            }*/
-		//            Renderer::drawArray(QuadVBO, VertexData.size() * 0.5f);
-		//        }
-		//    }
-		//}
-///     struct RenderPass
-///     {
-///     	void Submit(Mesh& _mesh, Graphics::Texture& _tex)
-///     	{
-///           //  SurfaceMap[_tex.g_Handle()].push_back( _mesh );
-///     	}
-///     	void Render()
-///     	{
-///             for (auto& Te : SurfaceMap)
-///             {
-///                 int Slot{ 0 };
-///             	for (auto& S : Te.first)
-///             	{// Cycle over and fill all the Slots for the Surface,  Diffuse, the Bump map, Shine, Displacement etc..
-///             		glActiveTexture(GL_TEXTURE0 + (Slot++));
-///             		glBindTexture(GL_TEXTURE_2D, S);
-///             	}
-///             
-///             	for(auto& M : Te.second)
-///             	{ 
-///             		//M.
-///             	}
-///             }
-///     	}
-///     	//std::unordered_map<std::vector<uint32_t>, std::vector<Mesh>> SurfaceMap;
-///     	std::vector<std::vector<int>> Pairs;
-///     	std::vector<Graphics::Texture*> Texts;
-///     	std::vector<Mesh*> Meshes;
-///     	Shader* GPUrenderer;
-///     	FrameBufferObject FBO;
-///     	DEBUG_CODE(const char* Name{""};)
-///     };
-/// 	struct Surface_s
-/// 	{
-/// 		struct Material {
-/// 			Graphics::Texture Tex;
-/// 		};
-/// 		Shader* MaterialShader;
-/// 	};
-/// 	void Submit(RenderPair _matMesh)
-/// 	{
-/// 
-/// 	}
-///		std::unordered_map<Material, uint32_t> Pairs;
-
-
-
-
-
-
 /*=======================================================================================================================================================*/
-
-
-
-
-
-
-
-
-//LineRenderer->Bind();
-//{
-//    Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
-//    mainCamera.Bind();
-//    Renderer::drawArray(LineVBO, QuadData.size());
-//    DEBUG_CODE(CheckGLERROR());
-//}
-//LineRenderer->Unbind();
-//LineData.clear();
-
-
-
-// LineRenderer = new Shader(VlineRenderer, FlineRenderer);
-// 
-// LineVAO = OpenGL::create_VAO();
-// LineVBO = OpenGL::create_VBO();
-// LineRenderer->Bind();
-// {// Sets up the VAO for the Lines
-//     OpenGL::bind_VAO(LineVAO);
-//     OpenGL::bind_VBO(LineVBO);
-//     OpenGL::set_Attribute(LineRenderer->g_ID(), 2, "aPos");  
-// }
-// LineRenderer->Unbind();
-
-
-//		std::string VlineRenderer =
-//			"#version 330 core     \n\
-//layout(location = 0) in vec2 aPos; \n\
-//uniform mat4 ProjectionMatrix;     \n\
-//uniform mat4 ViewMatrix;           \n\
-//uniform mat4 ModelMatrix[100];          \n\
-//void main()                        \n\
-//{                                  \n\
-//    mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix[gl_InstanceID]);  \n\
-//    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-//    gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
-//}";
-//
-//		std::string FlineRenderer =
-//			"#version 330 core \n\
-//out vec4 FragColor;            \n\
-//void main()                    \n\
-//{                              \n\
-//    FragColor = vec4(1.0, 1.0, 1.0, 1.0);  \n\
-//}";

@@ -33,13 +33,9 @@ namespace OpenGL
             DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
         }
 
-		static void drawArrayInstanced(uint32_t _vbo, uint32_t _elementCount)
+		static void drawArrayInstanced( uint32_t _indicesCount, uint32_t _instanceCount)
 		{
-			DEBUG_CODE(CheckGLERROR());
-			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, (int)(10));//mode/first/count/instancecount
-			DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
-			DEBUG_CODE(CheckGLERROR());
+			glDrawArraysInstanced(GL_TRIANGLES, 0, _indicesCount, _instanceCount);//mode/first/count/instancecount
 		}
 		static void drawIndices(uint32_t _ibo, uint32_t _elementCount)
 		{
