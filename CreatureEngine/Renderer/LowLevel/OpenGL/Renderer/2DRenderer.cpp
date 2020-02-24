@@ -20,11 +20,6 @@ namespace OpenGL
         QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
 
         ColorData.push_back(_color);
-        ColorData.push_back(_color);
-        ColorData.push_back(_color);
-        ColorData.push_back(_color);
-        ColorData.push_back(_color);
-        ColorData.push_back(_color);
         Transform trans = Transform(Vec3(0), Vec3(0), "ModelMatrix"); //_topleft + (_size * 0.5f);
         Transforms.push_back(trans.get());
     }
@@ -55,7 +50,8 @@ namespace OpenGL
         {// Sets up the VAO for the Quads
             OpenGL::bind_VAO(QuadVAO);
             OpenGL::bind_VBO(ColorVBO);
-            OpenGL::set_Divisor(OpenGL::set_Attribute(4, "Color"), 6);
+            uint32_t A = OpenGL::set_Attribute(4, "Color");
+            OpenGL::set_Divisor(A, 1);
 
             OpenGL::bind_VBO(QuadVBO);
             OpenGL::set_Attribute(2, "aPos");

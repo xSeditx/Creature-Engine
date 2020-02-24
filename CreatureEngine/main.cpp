@@ -195,23 +195,7 @@ class App
 				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
 			}
 		}
-/// for_loop(y, Count.y)
-/// {
-/// 	for_loop(x, Count.x)
-/// 	{
-/// 		Vec2 _topleft
-/// 		(
-/// 			x * (_size.x + Space.x),
-/// 			(y + Count.y) * (_size.y + Space.y)
-/// 		);
-/// 		Vec4 Color{ 1,x, 1,1 };
-/// 		RealBatch.renderQuad(_topleft, _size, Color);
-/// 		//	void* Color_ptr() { return &ColorData[0]; }
-/// 		//void* Vertices_ptr() { return &QuadData[0]; }
-/// 		//void* Transforms_ptr() { return &Transforms[0]; }
-/// 	}
-/// }
-		/* 
+ 		/* 
 		/*   Make a Profiler Window which Displays the FPS as a graph
 		/*/
 		float Aspect = getCamera().AspectRatio;
@@ -235,7 +219,7 @@ class App
 			OpenGL::Renderer::drawArray(VBO, 3);
 		}
 		getWindow().defaultShader().Unbind();
-		MainRenderer->renderQuad(Vec2(400, 400), Vec2(10, 200));
+		//MainRenderer->renderQuad(Vec2(400, 400), Vec2(10, 200));
 		MainRenderer->SetRenderColor(255, 0, 0, 255);
 		MainRenderer->renderQuadBatch(TestBatch);
 		MainRenderer->SetRenderColor(0, 255, 255, 255);

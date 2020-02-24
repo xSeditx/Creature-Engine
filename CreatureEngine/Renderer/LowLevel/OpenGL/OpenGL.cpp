@@ -472,8 +472,8 @@ namespace OpenGL
 
 	void set_Divisor(uint8_t _location, uint32_t _divisor)
 	{
-		//glVertexAttribDivisor(_location, _divisor);
-		glVertexAttribDivisorARB(_location, _divisor);
+		glVertexAttribDivisor(_location, _divisor);
+		//glVertexAttribDivisorARB(_location, _divisor);
 	}
 
 
