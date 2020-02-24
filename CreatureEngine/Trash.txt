@@ -1,10 +1,309 @@
+
+
 // ============================================================================================================================================================================
 //                                 2/20/2020
 //          Clean up  
 // ============================================================================================================================================================================
 
 
-// Vec2 Sz
+
+
+        /* QuadRenderer->Bind();
+        {
+            Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
+            mainCamera.Bind();
+           // Renderer::drawArray(QuadVBO, QuadData.size());
+            Renderer::drawArrayInstanced(QuadVBO, 6, 1000);
+
+            DEBUG_CODE(CheckGLERROR());
+        }
+        QuadRenderer->Unbind();*/
+//	void renderLine(Vec2 _start, Vec2 _end);
+//void renderLineBatch(const std::vector<Vec2> _batch);
+//vec4(1.0, 1.0, 1.0, 1.0); vec4(1.0, 1.0, 1.0, 1.0) + Col; 
+// 		std::string VquadRenderer =
+// 			"#version 330 core     \n\
+// layout(location = 0) in vec2 aPos; \n\
+// layout(location = 1) in vec4 Color;\n\
+// uniform mat4 ProjectionMatrix;     \n\
+// uniform mat4 ViewMatrix;           \n\
+// uniform mat4 ModelMatrix;          \n\
+// out vec4 Col;                      \n\
+// void main()                        \n\
+// {                                  \n\
+//     Col = Color;                   \n\
+//     mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix);  \n\
+//     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+//     gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+// }";
+//
+// 		std::string FquadRenderer =
+// 			"#version 330 core \n\
+// out vec4 FragColor;            \n\
+// in vec4  Col;            \n\
+// void main()                    \n\
+// {                              \n\
+//     FragColor = Col;\n\
+// }";
+//
+////gl_Position = (ProjectionMatrix * (ViewMatrix * ModelMatrix)) * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+//
+//        // QuadRenderer = new Shader(VquadRenderer, FquadRenderer);
+//        // Shader* QuadRenderer;
+//
+//std::vector<FrameBufferObject> RenderTargets;
+//std::vector<Shader> Programs;
+////std::vector<VertexArrayObject> VAOs;
+////std::vector<VertexBufferObject<Vec3>> VBOs;
+//std::vector<Mesh> Meshes;
+//
+//VertexData.push_back(Vec2(Position.x - Offset.x, Position.y + Offset.y));
+//VertexData.push_back(Vec2(Position.x - Offset.x, Position.y - Offset.y));
+//VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
+//VertexData.push_back(Vec2(Position.x - Offset.x, Position.y + Offset.y));
+//VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
+//VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
+//
+//Vec2 Position = Vec2(0);
+//Vec4 Vertices[6] =
+//{   // positions   // texCoords
+//	Vec4(0 ,         Size.y   ,    0.0f,  1.0f),
+//	Vec4(0 ,        -Size.y   ,    0.0f,  0.0f),
+//	Vec4(Size.x ,  -Size.y   ,    1.0f,  0.0f),
+//	Vec4(0 ,         Size.y   ,    0.0f,  1.0f),
+//	Vec4(Size.x ,  -Size.y   ,    1.0f,  0.0f),
+//	Vec4(Size.x ,   Size.y   ,    1.0f,  1.0f)
+//};
+//glGenBuffers(1, &VBO);
+//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
+//VAO->Attach(VERTEX, new VertexBufferObject<Vec2>(&newVertices[0], 6));
+//VAO->Attach(UVCOORD, new VertexBufferObject<Vec2>(&TexCoords[0], 6));
+////Program = new Shader("Resources\\DebugQuad.sfx");
+//
+//Vec2 Vertices[6];
+//Vec2 TexCoords[6] =
+//{
+//    Vec2(0.0f, 1.0f),
+//    Vec2(0.0f, 0.0f),
+//    Vec2(1.0f, 0.0f),
+//    Vec2(0.0f, 1.0f),
+//    Vec2(1.0f, 0.0f),
+//    Vec2(1.0f, 1.0f)
+//};
+//VA.Bind();
+//for(auto& VB: VBOs)
+//{ }
+//for (auto& FB : RenderTargets)
+//{
+//    FB.Bind();
+//    for (auto& S: Programs)
+//    {
+//        S.Enable();
+//        for (auto& VA : VAOs)
+//        {
+//            VA.Bind();
+//            /*
+//            for(auto& VB: VA.Buffers)
+//            {
+//                VB->Bind();
+//            }
+//            for(auto& M: Meshes)
+//            {
+//                M.Bind();
+//            }*/
+//            Renderer::drawArray(QuadVBO, VertexData.size() * 0.5f);
+//        }
+//    }
+//}
+///     struct RenderPass
+///     {
+///     	void Submit(Mesh& _mesh, Graphics::Texture& _tex)
+///     	{
+///           //  SurfaceMap[_tex.g_Handle()].push_back( _mesh );
+///     	}
+///     	void Render()
+///     	{
+///             for (auto& Te : SurfaceMap)
+///             {
+///                 int Slot{ 0 };
+///             	for (auto& S : Te.first)
+///             	{// Cycle over and fill all the Slots for the Surface,  Diffuse, the Bump map, Shine, Displacement etc..
+///             		glActiveTexture(GL_TEXTURE0 + (Slot++));
+///             		glBindTexture(GL_TEXTURE_2D, S);
+///             	}
+///             
+///             	for(auto& M : Te.second)
+///             	{ 
+///             		//M.
+///             	}
+///             }
+///     	}
+///     	//std::unordered_map<std::vector<uint32_t>, std::vector<Mesh>> SurfaceMap;
+///     	std::vector<std::vector<int>> Pairs;
+///     	std::vector<Graphics::Texture*> Texts;
+///     	std::vector<Mesh*> Meshes;
+///     	Shader* GPUrenderer;
+///     	FrameBufferObject FBO;
+///     	DEBUG_CODE(const char* Name{""};)
+///     };
+/// 	struct Surface_s
+/// 	{
+/// 		struct Material {
+/// 			Graphics::Texture Tex;
+/// 		};
+/// 		Shader* MaterialShader;
+/// 	};
+/// 	void Submit(RenderPair _matMesh)
+/// 	{
+/// 
+/// 	}
+///		std::unordered_map<Material, uint32_t> Pairs;
+/*=======================================================================================================================================================*/
+//
+//
+//
+//
+//void QuadBatch::Render()
+//{
+//}
+//
+//void QuadBatch::renderQuad(Vec2 _topleft, Vec2 _size, Vec4 _color)
+//{
+//
+//	QuadData.push_back(Vec2(_topleft.x, _topleft.y));
+//	QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+//	QuadData.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+//	QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+//	QuadData.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+//	QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+//
+//	ColorData.push_back(_color);
+//	ColorData.push_back(_color);
+//	ColorData.push_back(_color);
+//	ColorData.push_back(_color);
+//	ColorData.push_back(_color);
+//	ColorData.push_back(_color);
+//}
+//
+//
+//
+//LineRenderer->Bind();
+//{
+//    Shader::get().SetUniform("ModelMatrix", Mat4(1.0f));
+//    mainCamera.Bind();
+//    Renderer::drawArray(LineVBO, QuadData.size());
+//    DEBUG_CODE(CheckGLERROR());
+//}
+//LineRenderer->Unbind();
+//LineData.clear();
+// LineRenderer = new Shader(VlineRenderer, FlineRenderer);
+// 
+// LineVAO = OpenGL::create_VAO();
+// LineVBO = OpenGL::create_VBO();
+// LineRenderer->Bind();
+// {// Sets up the VAO for the Lines
+//     OpenGL::bind_VAO(LineVAO);
+//     OpenGL::bind_VBO(LineVBO);
+//     OpenGL::set_Attribute(LineRenderer->g_ID(), 2, "aPos");  
+// }
+// LineRenderer->Unbind();
+//		std::string VlineRenderer =
+//			"#version 330 core     \n\
+//layout(location = 0) in vec2 aPos; \n\
+//uniform mat4 ProjectionMatrix;     \n\
+//uniform mat4 ViewMatrix;           \n\
+//uniform mat4 ModelMatrix[100];          \n\
+//void main()                        \n\
+//{                                  \n\
+//    mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix[gl_InstanceID]);  \n\
+//    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+//    gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+//}";
+//
+//		std::string FlineRenderer =
+//			"#version 330 core \n\
+//out vec4 FragColor;            \n\
+//void main()                    \n\
+//{                              \n\
+//    FragColor = vec4(1.0, 1.0, 1.0, 1.0);  \n\
+//}";
+//void Renderer2D::renderLineBatch(const std::vector<Vec2> _batch)
+//{
+//    LineData.insert(LineData.end(), _batch.begin(), _batch.end());
+//}
+//
+//
+//ColorData.push_back(CurrentRenderColor);
+//ColorData.push_back(CurrentRenderColor);
+//ColorData.push_back(CurrentRenderColor);
+//ColorData.push_back(CurrentRenderColor);
+//ColorData.push_back(CurrentRenderColor);
+//
+// void Renderer2D::renderLine(Vec2 _start, Vec2 _end)
+// {
+//     LineData.push_back(_start);
+//     LineData.push_back(_end);
+// }
+//		Shader* LineRenderer;
+//       Vec2
+//           _topleft = Vec2(30, 30),
+//           _bottomright = Vec2(200.f, 200.f);
+//
+//       Vec2 Offset = Vec2
+//       (// Later we may perform a check to ensure values are properly ordered
+//           (_bottomright.x - _topleft.x) * 0.5f,
+//           (_bottomright.y - _topleft.y) * 0.5f
+//       );
+//       Vec2 Position = { 100, 100 };
+//
+// VertexData.push_back({ 200.0, 200.0 });
+// VertexData.push_back({ 400.0, 200.0 });
+// VertexData.push_back({ 0.0, 400.0 });
+// VertexData.push_back(Vec2(Position.x - Offset.x, Position.y + Offset.y));
+// VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
+// VertexData.push_back(Vec2(Position.x + Offset.x, Position.y - Offset.y));
+ //       renderQuad(Vec2(100,100), Vec2(200,200));
+        //==============================================================================
+        //Vec2 Offset = Vec2
+       //(// Later we may perform a check to ensure values are properly ordered
+       //    (_size.x - _topleft.x) * 0.5f,
+       //    (_size.y - _topleft.y) * 0.5f
+       //);
+       //
+       //VertexData.push_back(Vec2(-Offset.x, +Offset.y));
+       //VertexData.push_back(Vec2(-Offset.x, -Offset.y));
+       //VertexData.push_back(Vec2(+Offset.x, -Offset.y));
+       //VertexData.push_back(Vec2(-Offset.x, +Offset.y));
+       //VertexData.push_back(Vec2(+Offset.x, -Offset.y));
+       //VertexData.push_back(Vec2(+Offset.x, -Offset.y));
+       //VertexData.push_back(Vec2(-Offset.x, +Offset.y));
+       //VertexData.push_back(Vec2(-Offset.x, -Offset.y));
+       //VertexData.push_back(Vec2(+Offset.x, -Offset.y));
+// Currently Memcpy is far slower than Insert. Like 1/2 the speed
+/// size_t Sz = QuadData.size() + _batch.size();
+       /// size_t Start = QuadData.size();
+       /// QuadData.reserve(Sz);
+       /// memcpy(&QuadData[Start ], &_batch[0], _batch.size() * sizeof(Vec2));
+//  for_loop(y, 10)
+//  {
+//      for_loop(x, 10)
+//      {
+//          Transform Tr = Transform({ x,y,0 }, { 0,0,0 }, "Tr");
+//          Transforms.push_back(Tr.get());
+//      }
+//  }
+/*
+        Vec2 _topleft = { 0 ,0 };    _size = {1, 1};
+        QuadData.push_back(Vec2(_topleft.x, _topleft.y));
+        QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+        QuadData.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+        QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+        QuadData.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+        QuadData.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+
+
+*/// Vec2 Sz
 // {
 //    ( Right * ZoomLevel)* AspectRatio ,
 //     Bottom  * ZoomLevel,

@@ -182,7 +182,7 @@ namespace Profiling
              //  setPixel(start , 0 , Pixel(255, 0, 255, 155));
 			    PreviousX = val;
 
-                float Y = (_value * (_value / DataRange.x)) * (1.0 / Size.x);
+                float Y = (_value * (_value / DataRange.x)) * (1.0f / Size.x);
                 val = std::log(_value) * Size.x / std::log(DataRange.x);
 				swapBuffer();
                 DisplayTexture.Update((uint8_t*)ReadBuffer);

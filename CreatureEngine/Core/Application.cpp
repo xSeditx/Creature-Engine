@@ -43,8 +43,8 @@ USAGE:
 	 //  	Print(ccc);
 	 //  }
 
-	 //const GLubyte *extensions = glGetString(GL_EXTENSIONS);
-	 //Print(extensions);
+	 const GLubyte *extensions = glGetString(GL_EXTENSIONS);
+	 Print(extensions);
 	 Print("");
 	 Print("Vendor: " << OpenGL::get_Vendor());
 	 Print("Renderer: " << OpenGL::get_Renderer());
