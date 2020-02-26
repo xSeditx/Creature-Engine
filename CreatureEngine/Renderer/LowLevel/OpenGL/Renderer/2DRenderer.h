@@ -12,12 +12,30 @@ namespace OpenGL
 
 	public:
 		NO_COPY_OR_ASSIGNMENT(Renderer2D);
-		enum  Surface_t { Normals, Albedo, Metallic };
-		using SurfaceFragment = std::pair<Surface_t, Graphics::Texture>;
-		using Surface = std::vector<SurfaceFragment>;
-		using Material = std::pair<Surface, Shader>;
-		using RenderPair = std::pair<Material, Mesh>;
 
+
+        using Texture_ID_t = uint32_t;
+        using Mesh_ID_t = uint32_t;
+        using Shader_ID_t = uint32_t;
+        using Texture_ID_t = uint32_t;
+        using Texture_ID_t = uint32_t;
+
+		enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
+        using SurfaceFragment = std::pair<Surface_t, Texture_ID_t>;
+        using Surface = std::vector<SurfaceFragment>;
+        using Material = std::pair<Surface, Shader_ID_t>;
+        using RenderPair = std::pair<Material, Mesh_ID_t>;
+
+		//using SurfaceFragment = std::pair<Surface_t, Graphics::Texture>;
+		//using Surface = std::vector<SurfaceFragment>;
+		//using Material = std::pair<Surface, Shader>;
+		//using RenderPair = std::pair<Material, Mesh>;
+
+
+        std::vector<Shader*> Shaders;
+        std::vector<Graphics::Texture*> Textures;
+        std::vector<Mesh*> Meshes;
+        void Submit(Shader& _shader, Graphics::Texture& _texture, Mesh& _mesh);
 
 		Renderer2D() = default;
 		Renderer2D(Vec2 _size);
@@ -32,6 +50,7 @@ namespace OpenGL
 		void renderQuadBatch(const std::vector<Vec2> _batch);
 
        
+        void Render_Buckets();
 
 		/* Renderers the Current batch */
 		void Render();
@@ -40,6 +59,7 @@ namespace OpenGL
 
 		/* Returns a vec4 of Normalized Colors for OpenGL Accepts 0-255*/
 		Vec4 CreateColor(int _r, int _g, int _b, int _a);
+
 		/* Clears the Buffers */
 		void Flush();
 
@@ -54,7 +74,7 @@ namespace OpenGL
 
     private:
 		uint32_t QuadVAO{ 0 };
-		size_t InstanceCount{ 0 };
+		uint32_t InstanceCount{ 0 };
 
 		Shader* InstanceRenderer;
 

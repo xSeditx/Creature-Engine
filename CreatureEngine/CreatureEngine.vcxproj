@@ -71,15 +71,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(ProjectDir);$(Solution)..\Bin\glm;$(Solution)..\Bin\glad\include;$(Solution)..\Bin\glfw-3.2.1\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir);$(Solution)..\Bin\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(Solution)/Bin/SOIL/lib;C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -125,6 +129,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

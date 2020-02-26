@@ -145,7 +145,7 @@ USAGE:
  void Application::SetWindowProperties()
  {
 	 s_Position ({ 0,0 });// iVec2(0);
-	 s_Size ({ 1280.0f, 970.0 });//iVec2(640, 480);
+	 s_Size ( { 640, 480 });//iVec2(640, 480);
 	 mainWindow.s_Title("Default Application Window");
  }
  void Application::CreateApplicationWindow()
@@ -159,7 +159,7 @@ USAGE:
 		 Print(" Define the virtual function with the specifications for your applications Window before calling CreateWindow() ");
 		 __debugbreak();
 	 }
-	 mainWindow = Window( SCREEN_X, SCREEN_Y, "TestWIndow",0);
+	 mainWindow = Window( 640,480, "TestWIndow",0);
  }
 
 ///==================================================================================================================
@@ -469,7 +469,7 @@ Listener ResizeListener(
 	WorldCamera->Resize({ W, H });
 });
 */
-Vec2 SplitLParam(long long lParam)
+Vec2 SplitLParam(int lParam)
 {
 	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
 }
@@ -500,7 +500,7 @@ Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	GetCursorPos(&p);
 	result.pt = p;
 
-	result.time = (DWORD)GetTickCount64();
+	result.time = GetTickCount();
 	return result;
 }
 
@@ -514,7 +514,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_SIZE:
 	{
-		Vec2 sz = SplitLParam((long long)lParam);
+		Vec2 sz = SplitLParam((int)lParam);
 		Application::get().Resize({ sz.x,sz.y });
 	}break;
 

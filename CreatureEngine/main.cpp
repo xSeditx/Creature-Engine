@@ -134,14 +134,14 @@ class App
     std::vector<Vec2> TestBatch;
     std::vector<Vec2> TestBatch2;
 
-	virtual void OnCreate()
+    FrameBufferObject *FBO;
+    virtual void OnCreate()
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
-
-		MainRenderer = new OpenGL::Renderer2D({ SCREEN_X,SCREEN_Y });// { 640.0f, 480.0f });
+         
+		MainRenderer = new OpenGL::Renderer2D({1280.0f, 970.0});// { 640.0f, 480.0f });
 		getWindow().s_Camera(&MainRenderer->g_Camera());
 		WorldCamera = &getCamera();
-
 		getWindow().defaultShader().Bind();
 
 		VAO = OpenGL::create_VAO();
@@ -221,28 +221,43 @@ class App
 				MainRenderer->renderQuad({ x * 8.0f,y * 8.0f }, { 7,7 }, MainRenderer->CreateColor(R, G, B, 255));
 			}
 		}
+
+
+        FBO = new FrameBufferObject(1280.0f, 970.0);
+        FBO->Bind();
+        glViewport(0, 0, 1280, 970);
+
+      //  Graphics::Texture::InitDebug();
+
+        //(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format)
 	}
 
 	virtual void OnRender() override
 	{
 
+        FBO->Bind();
+        {
+            FBO->Clear();
+
+            OpenGL::bind_VAO(VAO);
+            getWindow().defaultShader().Bind();
+            {
+                ModelMatrix.Bind();
+                getCamera().Bind();
+                OpenGL::Renderer::drawArray(VBO, 3);
+            }
+            getWindow().defaultShader().Unbind();
 
 
-		OpenGL::bind_VAO(VAO);
-		getWindow().defaultShader().Bind();
-		{
-			ModelMatrix.Bind();
-			getCamera().Bind();
-			OpenGL::Renderer::drawArray(VBO, 3);
-		}
-		getWindow().defaultShader().Unbind();
 
+            MainRenderer->Render();
+            OpenGL::glCheckError_(__FILE__, __LINE__);
+            CheckGLERROR();
 
-
- 		MainRenderer->Render();
-		CheckGLERROR();
-
-	 	ProfilerTest->Render();
+            ProfilerTest->Render();
+        }
+        FBO->Unbind();
+      //  FBO->RenderTarget->Render(0,0, 640,480);
 	}
 
 	
@@ -255,13 +270,15 @@ class App
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
 	}
+
 };
+
 
 
 int main()
 {
 
-	TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
+    TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
 	App MyApp;
 	MyApp.Init();
 
@@ -278,9 +295,6 @@ int main()
 	return 0;
 }
   
-
-
-
 
 
 

@@ -277,66 +277,64 @@ public:
 	void Render();
 };
 
-/*
-    Determines if something is Color, Depth Buffer etc
-*/
+
+
+
+
+
+
+#include"../../Materials/Image/Texture.h"
+
+/* Sort or Bucket Visible Objects
+foreach( render target )    // framebuffer
+foreach( pass )             // depth, blending, etc... states
+foreach( material )         // shaders
+foreach( material instance) // textures, normals, diffuse,
+foreach( vertex format )    // vertex buffers
+foreach( object )           //
+{
+ WriteUniformData( object );
+ glDrawElementBaseVertex(
+     GL_TRIANGLES,
+     object->indexCount,
+     GL_UNSIGNED_SHORT,
+     object->indexDataOffset,
+     object->baseVertex );
+}*/
 class FrameBufferObject
 {
 public:
 	FrameBufferObject() = default;
+
+
+    /* Creates a Frame Buffer Object for the user to Render to */
 	FrameBufferObject(int _width, int _height, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
 
+	GLuint GL_Handle;
+
+    Graphics::Texture *RenderTarget;
+    Graphics::Texture *DepthTarget;
+
 	Vec2 Size;
-	int Width;
-	int Height;
-	GLuint FrameBufferID;
-	GLuint TextureID;
-	GLuint DepthTexture;
-	GLenum InternalFormat;
-	GLenum PixelFormat;
-	GLenum DataType;
 
-	void Bind();
-	void Unbind();
-	void ValidateFrameBuffer();
 
-	enum AttachmentPoint_t
-	{
-		COLOR = GL_COLOR_ATTACHMENT0, // These are an implementation - dependent number of attachment points.You can query GL_MAX_COLOR_ATTACHMENTS to determine the number of color attachments that an implementation will allow.The minimum value for this is 8, so you are guaranteed to be able to have at least color attachments 0 - 7. These attachment points can only have Images bound to them with color - renderable formats.All compressed Image formats are not color - renderable, and thus cannot be attached to an FBO.
-		COLOR1 = GL_COLOR_ATTACHMENT1,
-		COLOR2 = GL_COLOR_ATTACHMENT2,
-		COLOR3 = GL_COLOR_ATTACHMENT3,
-		COLOR4 = GL_COLOR_ATTACHMENT4,
-		COLOR5 = GL_COLOR_ATTACHMENT5,
-		COLOR6 = GL_COLOR_ATTACHMENT6,
-		COLOR7 = GL_COLOR_ATTACHMENT7,
-		COLOR10 = GL_COLOR_ATTACHMENT10,
-		COLOR11 = GL_COLOR_ATTACHMENT11,
-		COLOR12 = GL_COLOR_ATTACHMENT12,
-		COLOR13 = GL_COLOR_ATTACHMENT13,
-		COLOR14 = GL_COLOR_ATTACHMENT14,
-		COLOR15 = GL_COLOR_ATTACHMENT15,
-		COLOR16 = GL_COLOR_ATTACHMENT16,
-		COLOR17 = GL_COLOR_ATTACHMENT17,
-		COLOR18 = GL_COLOR_ATTACHMENT18,
-		COLOR19 = GL_COLOR_ATTACHMENT19,
-		COLOR20 = GL_COLOR_ATTACHMENT20,
-		COLOR21 = GL_COLOR_ATTACHMENT21,
-		COLOR22 = GL_COLOR_ATTACHMENT22,
-		COLOR23 = GL_COLOR_ATTACHMENT23,
-		COLOR24 = GL_COLOR_ATTACHMENT24,
-		COLOR25 = GL_COLOR_ATTACHMENT25,
-		COLOR26 = GL_COLOR_ATTACHMENT26,
-		COLOR27 = GL_COLOR_ATTACHMENT27,
-		COLOR28 = GL_COLOR_ATTACHMENT28,
-		COLOR29 = GL_COLOR_ATTACHMENT29,
-		COLOR30 = GL_COLOR_ATTACHMENT30,
-		COLOR31 = GL_COLOR_ATTACHMENT31,
-		DEPTH = GL_DEPTH_ATTACHMENT,//GL_DEPTH_ATTACHMENT : This attachment point can only have Images with depth formats bound to it.The Image attached becomes the Depth Buffer for the FBO. **NOTE** Even if you don't plan on reading from this depth_attachment, an off screen buffer that will be rendered to should have a depth attachment.
-		STENCIL = GL_STENCIL_ATTACHMENT,// This attachment point can only have Images with stencil formats bound to it.The Image attached becomes the stencil buffer for the FBO.
-		DEPTH_STENCIL = GL_DEPTH_STENCIL_ATTACHMENT// This is shorthand for "both depth and stencil".The Image attached becomes both the depth and stencil buffers. Note : If you use GL_DEPTH_STENCIL_ATTACHMENT, you should use a packed depth - stencil internal format for the texture or renderbuffer you are attaching.
-	};
-	AttachmentPoint_t Attachments[10] = {};
+    /* Returns the Width of our Frame Buffer Object */
+    uint32_t Width()  { return static_cast<uint32_t>(Size.x); }
+    /* Returns the Height of our Frame Buffer Object */
+    uint32_t Height() { return static_cast<uint32_t>(Size.y); }
+   
+
+    /* Binds the Frame Buffer Object to OpenGL*/
+    void Bind();
+    /* Unbinds the Frame Buffer Object and falls back to OpenGL default Frame Buffer*/
+    void Unbind();
+    /* Clears the Color and Depth Channels for the Frame Buffer Object */
+    void Clear();
+
+    /* Test the Frame Buffer to see if it is complete.
+       Returns: True if complete.
+       Returns: False if incomplete and displays a message to the console explaining why FrameBuffer creation failed */
+	bool ValidateFrameBuffer();    
 };
 
 
@@ -673,6 +671,52 @@ struct OpenGLState
 
 
 
+
+
+/*  #FRAMEBUFFEROBJECT   2-26-2020
+
+
+    enum AttachmentPoint_t
+    {
+        COLOR = GL_COLOR_ATTACHMENT0, // These are an implementation - dependent number of attachment points.You can query GL_MAX_COLOR_ATTACHMENTS to determine the number of color attachments that an implementation will allow.The minimum value for this is 8, so you are guaranteed to be able to have at least color attachments 0 - 7. These attachment points can only have Images bound to them with color - renderable formats.All compressed Image formats are not color - renderable, and thus cannot be attached to an FBO.
+        COLOR1 = GL_COLOR_ATTACHMENT1,
+        COLOR2 = GL_COLOR_ATTACHMENT2,
+        COLOR3 = GL_COLOR_ATTACHMENT3,
+        COLOR4 = GL_COLOR_ATTACHMENT4,
+        COLOR5 = GL_COLOR_ATTACHMENT5,
+        COLOR6 = GL_COLOR_ATTACHMENT6,
+        COLOR7 = GL_COLOR_ATTACHMENT7,
+        COLOR10 = GL_COLOR_ATTACHMENT10,
+        COLOR11 = GL_COLOR_ATTACHMENT11,
+        COLOR12 = GL_COLOR_ATTACHMENT12,
+        COLOR13 = GL_COLOR_ATTACHMENT13,
+        COLOR14 = GL_COLOR_ATTACHMENT14,
+        COLOR15 = GL_COLOR_ATTACHMENT15,
+        COLOR16 = GL_COLOR_ATTACHMENT16,
+        COLOR17 = GL_COLOR_ATTACHMENT17,
+        COLOR18 = GL_COLOR_ATTACHMENT18,
+        COLOR19 = GL_COLOR_ATTACHMENT19,
+        COLOR20 = GL_COLOR_ATTACHMENT20,
+        COLOR21 = GL_COLOR_ATTACHMENT21,
+        COLOR22 = GL_COLOR_ATTACHMENT22,
+        COLOR23 = GL_COLOR_ATTACHMENT23,
+        COLOR24 = GL_COLOR_ATTACHMENT24,
+        COLOR25 = GL_COLOR_ATTACHMENT25,
+        COLOR26 = GL_COLOR_ATTACHMENT26,
+        COLOR27 = GL_COLOR_ATTACHMENT27,
+        COLOR28 = GL_COLOR_ATTACHMENT28,
+        COLOR29 = GL_COLOR_ATTACHMENT29,
+        COLOR30 = GL_COLOR_ATTACHMENT30,
+        COLOR31 = GL_COLOR_ATTACHMENT31,
+        DEPTH = GL_DEPTH_ATTACHMENT,//GL_DEPTH_ATTACHMENT : This attachment point can only have Images with depth formats bound to it.The Image attached becomes the Depth Buffer for the FBO. **NOTE** Even if you don't plan on reading from this depth_attachment, an off screen buffer that will be rendered to should have a depth attachment.
+        STENCIL = GL_STENCIL_ATTACHMENT,// This attachment point can only have Images with stencil formats bound to it.The Image attached becomes the stencil buffer for the FBO.
+        DEPTH_STENCIL = GL_DEPTH_STENCIL_ATTACHMENT// This is shorthand for "both depth and stencil".The Image attached becomes both the depth and stencil buffers. Note : If you use GL_DEPTH_STENCIL_ATTACHMENT, you should use a packed depth - stencil internal format for the texture or renderbuffer you are attaching.
+    };
+    AttachmentPoint_t Attachments[10];
+*/
+
+
+
 /*
 Striped down version https://pastebin.com/Kr8U7mGu
 Persistantly Mapped Uniform Buffer with Coherent memory access making writes immediately availible to the GPU
@@ -688,26 +732,7 @@ PersistantUniformBufferObject<STRUCT> UBOobject(Pointer to Shader, Uniforms Bloc
 
 //glBufferStorage(GL_UNIFORM_BUFFER, BlockSize, 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 //BufferHandle = (GPUptr*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, BlockSize, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-//GLenum glCheckError_(const char *file, int line)
-//{
-//	GLenum errorCode;
-//	while ((errorCode = glGetError()) != GL_NO_ERROR)
-//	{
-//		std::string error;
-//		switch (errorCode)
-//		{
-//		case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-//		case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-//		case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-//		case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-//		case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-//		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
-//		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
-//		}
-//		std::cout << error << " | " << file << " (" << line << ")" << std::endl;
-//	}
-//	return errorCode;
-//}
+
 //  1280 GL_INVALID_ENUM
 //  1281 GL_INVALID_VALUE
 //  1282 GL_INVALID_OPERATION

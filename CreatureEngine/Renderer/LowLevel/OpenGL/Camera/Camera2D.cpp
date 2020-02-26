@@ -75,7 +75,7 @@ void Camera2D::Update()
 
 void Camera2D::Resize(Vec2 _size)
 {
-    glViewport(0, 0, (uint32_t)_size.x, (uint32_t)_size.y);
+    glViewport(0, 0, (GLsizei)_size.x, (GLsizei)_size.y);
     Zoom(0.0f);
 }
 
@@ -83,6 +83,12 @@ void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
     REFACTOR("I believe it is fixed although it appears ever so slightly off on the Y axis. Perhaps I need to adjust for aspect ratio or something idk");
     ZoomLevel += (_amount / 100);
+    if (ZoomLevel < 0)
+    {// Prevent Projection Matrix from Inverting
+        ZoomLevel = 0;  
+        return;
+    }
+
     ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
  	ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(Size.x * 0.5f, Size.y * 0.5f,0));
     ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));

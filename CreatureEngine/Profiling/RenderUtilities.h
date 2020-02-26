@@ -90,9 +90,9 @@ namespace Profiling
                 }
             }
 
-            ColorTemplate = new Pixel[(size_t)Size.x];
+            ColorTemplate = new Pixel[static_cast<size_t>(Size.x)];
             for_loop(x, Size.x)
-            {
+            {// This is a hack because Memcpy does not allow me to copy over a bit pattern so if I allocate a single line of a color I can do something similar 
                 ColorTemplate[x] = Pixel(255, 0, 0, 150);
             }
 

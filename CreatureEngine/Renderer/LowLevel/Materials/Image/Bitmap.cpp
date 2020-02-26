@@ -1,4 +1,7 @@
 #include"Bitmap.h"
+
+#include"../Bin/SOIL/src/SOIL.h" //   ../../../../
+
 namespace Graphics
 {
 	Bitmap::Bitmap(void * _memory, Vec2 _dimensions)
@@ -13,4 +16,21 @@ namespace Graphics
 		}
 		BytesPerPixel = 4;
 	}
+
+
+    /* Creates a Bitmap from a Specified Image */
+    Bitmap::Bitmap(std::string _file)
+    {
+        int32_t 
+            Sx{ 0 }, 
+            Sy{ 0 };
+        int BPP{ 0 };
+
+        rawData = SOIL_load_image(_file.c_str(), &Sx, &Sy, &BPP, SOIL_LOAD_AUTO);
+
+        Size = Vec2(Sx, Sy);
+        BytesPerPixel = BPP;
+    }
+
+
 }

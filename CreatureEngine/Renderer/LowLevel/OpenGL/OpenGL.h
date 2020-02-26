@@ -247,6 +247,9 @@ namespace OpenGL
 	//============================================================================================
 
 
+
+
+    CREATURE_API GLenum glCheckError_(const char *file, int line);
 }
 
 
