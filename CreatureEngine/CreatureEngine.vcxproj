@@ -79,7 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(Solution)../Bin/SOIL/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir);$(Solution)..\Bin\;$(IncludePath)</IncludePath>
