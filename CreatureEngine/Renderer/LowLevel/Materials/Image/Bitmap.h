@@ -1,5 +1,12 @@
 #include"../../../../Core/Common.h"
 
+#if _DEBUG
+//#    pragma comment(lib, "debugSOIL.lib")
+#    pragma comment(lib, "SOIL.lib")
+#else
+#    pragma comment(lib, "SOIL.lib")
+#endif
+
 namespace Graphics
 {
 	class CREATURE_API Bitmap
@@ -10,6 +17,9 @@ namespace Graphics
 
 		/* Create a Bitmap from a Memory  block */
 		Bitmap(void* _memory, Vec2 _dimensions);
+
+        /* Creates a Bitmap from a Specified Image */
+        Bitmap(std::string _file);
 
 		/* Returns Image Width */
 		uint32_t Width() { return Size.x; }

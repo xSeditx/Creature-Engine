@@ -325,19 +325,19 @@ void Shader::SetUniform(const char* _name, Mat4 _val)
 
 void Shader::SetUniform(const char* _name, std::vector < Vec2>& _array)
 {
-	_GL(glUniform2fv(glGetUniformLocation(GL_Handle, _name), _array.size(), glm::value_ptr(_array[0])));
+	_GL(glUniform2fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0])));
 }
 void Shader::SetUniform(const char* _name, std::vector < Vec3>& _array)
 {
-	_GL(glUniform3fv(glGetUniformLocation(GL_Handle, _name), _array.size(), glm::value_ptr(_array[0])));
+	_GL(glUniform3fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0])));
 }
 void Shader::SetUniform(const char* _name, std::vector < Vec4>& _array)
 {
-	_GL(glUniform4fv(glGetUniformLocation(GL_Handle, _name), _array.size(), glm::value_ptr(_array[0])));
+	_GL(glUniform4fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0])));
 }
 void Shader::SetUniform(const char* _name, std::vector < Mat3>& _array)
 {
-	_GL(glUniformMatrix3fv(glGetUniformLocation(GL_Handle, _name), _array.size(), GL_FALSE, glm::value_ptr(_array[0])));
+	_GL(glUniformMatrix3fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), GL_FALSE, glm::value_ptr(_array[0])));
 }
 void Shader::SetUniform(const char* _name, std::vector<Mat4>& _array)
 {

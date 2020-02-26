@@ -336,7 +336,7 @@ DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 #    define DEBUG_CODE(_code)   _code
 #else
 /* Code Currently turned off */
-#    define DEBUG_CODE(_code)   _code
+#    define DEBUG_CODE(_code)   
 #endif
 
 

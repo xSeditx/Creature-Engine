@@ -514,7 +514,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_SIZE:
 	{
-		Vec2 sz = SplitLParam(lParam);
+		Vec2 sz = SplitLParam((int)lParam);
 		Application::get().Resize({ sz.x,sz.y });
 	}break;
 

@@ -90,9 +90,9 @@ namespace Profiling
                 }
             }
 
-            ColorTemplate = new Pixel[Size.x];
+            ColorTemplate = new Pixel[static_cast<size_t>(Size.x)];
             for_loop(x, Size.x)
-            {
+            {// This is a hack because Memcpy does not allow me to copy over a bit pattern so if I allocate a single line of a color I can do something similar 
                 ColorTemplate[x] = Pixel(255, 0, 0, 150);
             }
 
@@ -183,7 +183,7 @@ namespace Profiling
 			    PreviousX = val;
 
                 float Y = (_value * (_value / DataRange.x)) * (1.0f / Size.x);
-                val = std::log(_value) * Size.x / std::log(DataRange.x);
+                val = static_cast<int>(std::log(_value) * Size.x / std::log(DataRange.x));
 				swapBuffer();
                 DisplayTexture.Update((uint8_t*)ReadBuffer);
             }

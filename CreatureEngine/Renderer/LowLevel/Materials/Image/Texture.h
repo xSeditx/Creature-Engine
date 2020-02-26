@@ -6,6 +6,9 @@
 #include"Bitmap.h"
 #include<vector>
 
+#include "../../OpenGL/Camera/Camera2D.h"
+#include "../../OpenGL/Shader/Shader.h"
+
 /*
 Texture Base Class
 Discussion: Should Derivation from the Asset class really be a thing or should there be an Asset Manager object in each Asset composing instead of inheriting.
@@ -59,9 +62,13 @@ namespace Graphics
 			Filtering = std::move(_other.Filtering);
 			InternalFormat = std::move(_other.InternalFormat);
 			Handle = std::move(_other.Handle);
+            memset(&_other, 0, sizeof(_other));
 			DEBUGPrint(CON_Red, " I believe I messed this up but do not really have time to think about this right now");
+             
 			return *this;
 		}
+
+        Texture(Vec2 _size, int32_t _dataFormat, int32_t _internalFormat = GL_RGBA, uint32_t _wrap = GL_CLAMP_TO_EDGE, uint32_t _filtering = GL_NEAREST, uint32_t _type = GL_FLOAT);
 
 		void Update(uint8_t *_memory)
 		{
@@ -71,7 +78,7 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
  need to load up the texture functions as pointers so their functionality can be assigned inside of an Init function somewhere,\
  ALSO: Likely should make it update Bitmap then Texture but currently Bitmap contains original");
 
-DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
+            DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 			Bind();
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Picture->Width(), Picture->Height(), GL_RGBA, GL_UNSIGNED_BYTE, _memory);
 			Unbind();
@@ -102,10 +109,14 @@ DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 			glBindTexture(Target, 0);
 		}
 
+        /* Generates Mipmaps for a Texture */
+        void CreateMipmap();
+        /* Turns ON Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~ */
+        inline void MipmapOn();
+        /* Turns OFF  Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~  */
+        inline void MipmapOff();
 
-		inline void MipmapOn();
-		inline void MipmapOff();
-
+        /* Debug Render which Sends a Rect with the given Texture to the Screen */
 		void Render(int _x, int _y, int _w, int _h);
 
 		/* Gets the OpenGL Handle of the Texture*/
@@ -118,6 +129,7 @@ DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 
 		Bitmap *Picture{ nullptr };
 		uint32_t GL_Handle{ 0 };
+
 		uint32_t Target{ GL_TEXTURE_2D };
 
 		uint32_t
@@ -127,12 +139,39 @@ DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 			Filtering{ GL_LINEAR },
 			InternalFormat{ GL_RGB };
 
+        uint32_t Border{ 0 };
+        /* Bindless Pointer for AZDO */
 		GPUptr Handle{ NULL };
 
 
 		bool MipmapComplete{ false };
 		bool ImageFormatComplete{ false };
-	};
+
+
+
+
+
+
+        //====================== DEBUG STUFF ==============================================================
+        static std::string VdebugRenderer;
+        static std::string FdebugRenderer;
+        static uint32_t debugVAO;
+        static uint32_t debugVBO;
+        static Shader* debugShader;
+        static Camera2D debugCamera; 
+
+        static Vec2 QuadData[6];
+        static Vec2 TexCoords[6];
+
+       
+
+        public:
+        static void InitDebug();
+
+        //================================================================================================
+
+    };
+
 
 
 
@@ -237,3 +276,34 @@ void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
 //#endif
 
  */
+
+
+
+/*
+
+    glTexImage2D(
+        Target, 0,
+        _internalFormat,
+        _size.x, _size.y,
+        Border,
+        _dataFormat,
+        _type, (void*)NULL);
+
+    Texture(Vec2 _size,
+        int32_t _dataFormat = GL_RGBA,
+        int32_t _internalFormat = GL_RGBA,
+        uint32_t _wrap = GL_CLAMP_TO_EDGE,
+        uint32_t _filtering = GL_NEAREST,
+        uint32_t _type = GL_FLOAT);
+
+ //   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1024, 768, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+ 
+ */
+
+
+
+ //GLuint TextureID;
+ //GLuint DepthTexture;
+ //GLenum InternalFormat;
+ //GLenum PixelFormat;
+ //GLenum DataType;
