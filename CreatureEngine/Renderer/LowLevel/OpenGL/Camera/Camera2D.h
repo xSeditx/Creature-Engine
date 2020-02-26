@@ -56,10 +56,10 @@ private:
 	float TargetRotation{ 0 };
 
 	float
-		Top,
-		Bottom,
-		Right,
-		Left;
+		Top{ 0.0f },
+		Bottom{ 0.0f },
+		Right{ 0.0f },
+		Left{ 0.0f };
 
 	float LERP{ .1f };
 

@@ -117,7 +117,7 @@ public:
 protected:
 	GLuint GL_Handle{ 0 };//8
 	unsigned int RecursionCount{ 0 };//8
-	GLuint VertID, FragID; // Now these are destroyed at the end.. Find a better solution to handling the Shader errors as Currently I need to store this in order to pass to the Error response
+	GLuint VertID{ 0 }, FragID{ 0 }; // Now these are destroyed at the end.. Find a better solution to handling the Shader errors as Currently I need to store this in order to pass to the Error response
 
 	const char* Filepath{nullptr};
 	bool Active{ false };

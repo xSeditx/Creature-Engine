@@ -8,7 +8,8 @@ int GameObject::ObjectCount{ 0 };
 Mesh::Mesh()
 	:
 	GameObject(Vec3(0), Vec3(0), Vec3(1.0f)),
-	MaterialID(NULL)
+	MaterialID(NULL), 
+	VAO({ 0 })
 {
 }
 
@@ -17,7 +18,8 @@ Mesh::Mesh(std::string file)
 	:
 	GameObject(Vec3(0), Vec3(0), Vec3(1.0f)),
 	Filepath(file),
-	MaterialID(NULL)
+	MaterialID(NULL),
+	VAO({0})
 {
 	__debugbreak();
 }

@@ -336,7 +336,7 @@ public:
 		STENCIL = GL_STENCIL_ATTACHMENT,// This attachment point can only have Images with stencil formats bound to it.The Image attached becomes the stencil buffer for the FBO.
 		DEPTH_STENCIL = GL_DEPTH_STENCIL_ATTACHMENT// This is shorthand for "both depth and stencil".The Image attached becomes both the depth and stencil buffers. Note : If you use GL_DEPTH_STENCIL_ATTACHMENT, you should use a packed depth - stencil internal format for the texture or renderbuffer you are attaching.
 	};
-	AttachmentPoint_t Attachments[10];
+	AttachmentPoint_t Attachments[10] = {};
 };
 
 

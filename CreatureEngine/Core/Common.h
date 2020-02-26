@@ -2,6 +2,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define SCREEN_X 1280
+#define SCREEN_Y 720
 /*
 
 

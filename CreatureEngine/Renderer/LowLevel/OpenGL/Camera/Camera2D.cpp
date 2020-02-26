@@ -75,7 +75,7 @@ void Camera2D::Update()
 
 void Camera2D::Resize(Vec2 _size)
 {
-    glViewport(0, 0, _size.x, _size.y);
+    glViewport(0, 0, (uint32_t)_size.x, (uint32_t)_size.y);
     Zoom(0.0f);
 }
 

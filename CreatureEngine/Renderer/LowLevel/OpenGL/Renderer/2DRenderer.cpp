@@ -55,7 +55,7 @@ namespace OpenGL
         InstanceRenderer->Bind();
         {
             mainCamera.Bind();
-            Renderer::drawArrayInstanced(6, InstanceCount);
+            Renderer::drawArrayInstanced(6, (uint32_t)InstanceCount);
         }
         InstanceRenderer->Unbind();
     }

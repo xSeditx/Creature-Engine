@@ -134,12 +134,11 @@ class App
     std::vector<Vec2> TestBatch;
     std::vector<Vec2> TestBatch2;
 
-	OpenGL::QuadBatch RealBatch;
 	virtual void OnCreate()
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
 
-		MainRenderer = new OpenGL::Renderer2D({1280.0f, 970.0});// { 640.0f, 480.0f });
+		MainRenderer = new OpenGL::Renderer2D({ SCREEN_X,SCREEN_Y });// { 640.0f, 480.0f });
 		getWindow().s_Camera(&MainRenderer->g_Camera());
 		WorldCamera = &getCamera();
 
@@ -256,7 +255,6 @@ class App
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
 	}
-
 };
 
 

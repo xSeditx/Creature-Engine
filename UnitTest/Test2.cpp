@@ -187,6 +187,7 @@ namespace UnitTest
 
 			Profiling::DisplayWindow MemoryBlock =
 			Profiling::DisplayWindow({ PosX,PosY }, { SizeX , SizeY });
+
 			MemoryBlock.setPixel(0, 0, 0xFFFFFFFF);
 			MemoryBlock.Update(1);
 			Assert::AreEqual(0xFFFFFFFF , (unsigned int)MemoryBlock.getPixel(0, 1));

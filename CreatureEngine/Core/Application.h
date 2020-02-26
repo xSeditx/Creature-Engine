@@ -240,7 +240,7 @@ private:
     }  mainWindow;// Window
 
  public:
-    size_t FPS;
+     size_t FPS{ 0 };
     Application();
     Application(int _width, int _height, std::string _name);
     ~Application();

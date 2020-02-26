@@ -9,6 +9,24 @@
 
 #include "Mesh.h"
 
+/* Sort or Bucket Visible Objects
+foreach( render target )    // framebuffer
+foreach( pass )             // depth, blending, etc... states
+foreach( material )         // shaders
+foreach( material instance) // textures, normals, diffuse,
+foreach( vertex format )    // vertex buffers
+foreach( object )           //
+{
+ WriteUniformData( object );
+ glDrawElementBaseVertex(
+     GL_TRIANGLES,
+	 object->indexCount,
+	 GL_UNSIGNED_SHORT,
+	 object->indexDataOffset,
+	 object->baseVertex );
+}
+
+*/
 namespace OpenGL
 {
 
