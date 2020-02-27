@@ -153,35 +153,98 @@ void VertexArrayObject::Render()
 }
 
 
+
+
+
+_static Shader* FrameBufferObject::ScreenShader{ nullptr };
+_static uint32_t FrameBufferObject::ScreenVAO{ 0 };
+_static uint32_t FrameBufferObject::ScreenVBO{ 0 };
+_static uint32_t FrameBufferObject::ScreenIBO{ 0 };
+
+_static Vec2 FrameBufferObject::ScreenQuad[4] =
+{
+   Vec2( -1.0f,-1.0f),
+   Vec2(  1.0f,-1.0f),
+   Vec2(  1.0f, 1.0f),
+   Vec2( -1.0f, 1.0f)
+};
+_static uint32_t FrameBufferObject::Indices[6] =
+{
+    0,1,3, 1,2,0
+};
+
+
+_static std::string
+FrameBufferObject::Vrenderer = "#version 330 core  \n\
+layout(location = 0) in vec4 aPos;                 \n\
+out vec2 TexCoords;                                \n\
+void main()                                        \n\
+{                                                  \n\
+    TexCoords = aPos.xy;                           \n\
+    gl_Position = vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+}";
+
+_static std::string
+FrameBufferObject::Frenderer = "#version 330 core \n\
+uniform sampler2D FrameBufferTexture;             \n\
+in  vec2 TexCoords;                               \n\
+out vec4 FragColor;                               \n\
+void main()                                       \n\
+{                                                 \n\
+    FragColor = vec4(texture(FrameBufferTexture,TexCoords.xy).xyzw);  \n\
+}";
+
+
+
+
 /* Creates a Frame Buffer Object for the user to Render to */
 FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format)
 	:
 	Size(_width, _height)
 {
 
+    static bool _Initialized__ = false;
+    if (_Initialized__ == false)
+    {
+        ScreenShader = new Shader(Vrenderer, Frenderer);
+        ScreenVAO = OpenGL::create_VAO();
+        ScreenVBO = OpenGL::create_VBO();
+        ScreenIBO = OpenGL::create_IBO();
+
+        OpenGL::bind_VAO(ScreenVAO);
+ 
+        OpenGL::bind_VBO(ScreenVBO);
+        OpenGL::set_BufferData(sizeof(ScreenQuad), ScreenQuad);
+
+        OpenGL::bind_IBO(ScreenIBO);
+        OpenGL::set_BufferData(sizeof(Indices), Indices);
+
+        _Initialized__ = true;
+    }
+    DEBUG_CODE(CheckGLERROR());
+
 	glGenFramebuffers(1, &GL_Handle);
 	glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);
+    DEBUG_CODE(CheckGLERROR());
 
     RenderTarget = new Graphics::Texture(Size, GL_RGBA);
     DepthTarget = new  Graphics::Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
+    DEBUG_CODE(CheckGLERROR());
 
 	DEBUG_CODE(CheckGLERROR());
 
-	const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0_EXT };
-	DEBUG_CODE(CheckGLERROR());
-	glDrawBuffer(GL_FRONT_AND_BACK);
-	DEBUG_CODE(CheckGLERROR());
-	glDrawBuffers(sizeof(draw_buffers) / sizeof(draw_buffers[0]), draw_buffers);
-	DEBUG_CODE(CheckGLERROR());
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTarget->g_Handle(), 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTarget->g_Handle(), 0);
+    DEBUG_CODE(CheckGLERROR());
 
 	ValidateFrameBuffer();
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+    glViewport(0, 0, _width, _height);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    DEBUG_CODE(CheckGLERROR());
 
 }
 void FrameBufferObject::Bind()
@@ -241,40 +304,40 @@ bool FrameBufferObject::ValidateFrameBuffer()
     return error_number == GL_FRAMEBUFFER_COMPLETE;
 }
 
+#include"Renderer.h"
+
+/* Render to the Default FBO, Will likely change name of this to SwapBuffer */
+void FrameBufferObject::Render()
+{
+    DEBUG_CODE(CheckGLERROR());
+
+    glClear( GL_DEPTH_BUFFER_BIT);/// Is this Correct. Why are they erasing it first?GL_COLOR_BUFFER_BIT |
+    DEBUG_CODE(CheckGLERROR());
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    ScreenShader->Bind();
+    {
+        OpenGL::bind_VAO(ScreenVAO);   
+
+        DEBUG_CODE(CheckGLERROR());
+
+        glActiveTexture(GL_TEXTURE0);
+        RenderTarget->Bind();  
+        DEBUG_CODE(CheckGLERROR());
+
+        ScreenShader->SetUniform("ColorTexture", 1);
+        DEBUG_CODE(CheckGLERROR());
 
 
+        OpenGL::Renderer::drawArray(ScreenVBO,6);
+        DEBUG_CODE(CheckGLERROR());
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        DEBUG_CODE(CheckGLERROR());
+    }
+    ScreenShader->Unbind();
+    DEBUG_CODE(CheckGLERROR());
 
-
-
-_static std::string
-FrameBufferObject::Vrenderer = "#version 330 core \n\
-layout(location = 0) in vec4 aPos;          \n\
-out vec2 TexCoords;                         \n\
-void main()                                 \n\
-{                                           \n\
-    TexCoords = aPos.xy;                          \n\
-    gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
-}";
-
-_static std::string
-FrameBufferObject::Frenderer = "#version 330 core \n\
-uniform sampler2D FrameBufferTexture;                       \n\
-out vec4 FragColor;                               \n\
-in  vec2 TexCoords;                               \n\
-void main()                                       \n\
-{                                                 \n\
-    FragColor = vec4(texture(FrameBufferTexture,TexCoords.xy).xyzw);  \n\
-}";
-
-
-
-
-_static float  FrameBufferObject::ScreenQuad[6] = { 0.0f,0.0f,0.0f,0.0f,0.0f,0.0f };
-
-
-
-
+}
 
 
 

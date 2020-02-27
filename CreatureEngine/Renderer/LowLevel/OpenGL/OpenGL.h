@@ -61,7 +61,7 @@ namespace OpenGL
 	};
 	CREATURE_API enum Mode_t
 	{
-		Nices = GL_NICEST,
+		Nicest = GL_NICEST,
 		Fastest = GL_FASTEST,
 		Default = GL_DONT_CARE
 	};
@@ -97,6 +97,7 @@ namespace OpenGL
 		uint32_t dwVisibleMask;
 		uint32_t dwDamageMask;
 	};
+    CREATURE_API GLenum glCheckError_(const char *file, int line);
 
 
 	CREATURE_API void InitOpenGL();
@@ -235,8 +236,14 @@ namespace OpenGL
 
 
 
-
-
+    /* Creates a Unique ID for a Vertex Array Object */
+    uint32_t create_IBO();
+    /*  Sets Vertex Buffer Object as Current */
+    void bind_IBO(int32_t _IboID);
+    /*  Unbinds all Vertex Buffer Objects from OpenGL */   
+    void unbind_IBO();
+    /*  Is an ID a Index Buffer Object */
+    bool isIBO(int _array);
 
 
 	//============================================================================================
@@ -246,10 +253,6 @@ namespace OpenGL
 	CREATURE_API void ActivateTexture(uint32_t _slot);
 	//============================================================================================
 
-
-
-
-    CREATURE_API GLenum glCheckError_(const char *file, int line);
 }
 
 

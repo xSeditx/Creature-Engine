@@ -313,7 +313,33 @@ namespace OpenGL
 	}
 
 
+    /* ==========================================================
+                     Index Buffer Object Management
+    /* ==========================================================*/
 
+    uint32_t create_IBO()
+    {// Creates a Unique ID for a Vertex Array Object
+        uint32_t result;
+        glGenBuffers(1, &result);
+        DEBUG_CODE(CheckGLERROR());
+        return result;
+    }
+    void bind_IBO(int32_t _IboID)
+    { // Sets Vertex Buffer Object as Current 
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IboID);
+        DEBUG_CODE(CheckGLERROR());
+    }
+    void unbind_IBO()
+    { // Unbinds all Vertex Buffer Objects from OpenGL
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        DEBUG_CODE(CheckGLERROR());
+    }
+    bool isIBO(int _array)
+    {// Is an ID a Vertex Buffer Object 
+        REFACTOR("Not sure if this is complete. isIBO() in OpenGL.cpp");
+        return (bool)(glIsBuffer(_array));
+    }   
+ 
 
 	/* ==========================================================
 				Texture Management

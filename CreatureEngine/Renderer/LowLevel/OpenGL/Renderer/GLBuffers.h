@@ -336,10 +336,18 @@ public:
        Returns: False if incomplete and displays a message to the console explaining why FrameBuffer creation failed */
 	bool ValidateFrameBuffer();    
 
+    /* Render to the Default FBO, Will likely change name of this to SwapBuffer */
+    void Render();
 
-	static std::string Frenderer;
+    static Shader* ScreenShader;
+    static uint32_t ScreenVAO;
+    static uint32_t ScreenVBO;
+    static uint32_t ScreenIBO;
+
+    static std::string Frenderer;
 	static std::string Vrenderer;
-	static float ScreenQuad[6];
+	static Vec2 ScreenQuad[4];
+    static uint32_t Indices[6];
 };
 
 
@@ -463,7 +471,7 @@ struct PersistantUniformBufferObject
 		Index(NULL),
 		GL_Handle(NULL),
 		Pointer(NULL),
-		Program(_program->g_ID())
+		Program(_program->g_Handle())
 	{
 		Index = fetchIndex(Name);
 		SetBinding(Slot);

@@ -27,10 +27,6 @@ int LOOP_COUNT{ 1000000 };
 ///http://eel.is/c++draft/meta.trans.other
 
 
-
-//
-//#include <intrin.h>
-
 // Getting the Stack frame caller
 // https://social.msdn.microsoft.com/Forums/vstudio/en-US/da4e85c5-407e-4a57-87e7-14bf994504d9/error-asm-keyword-not-supported-on-this-architecture?forum=vcgeneral
 // void * memoryAllocator = _ReturnAddress();
@@ -151,7 +147,7 @@ class App
 		VBO = OpenGL::create_VBO();
 		OpenGL::bind_VBO(VBO);
 		OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
-		OpenGL::set_Attribute(getWindow().defaultShader().g_ID(), 2, "aPos");
+		OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
 
 		DEBUG_CODE(CheckGLERROR());
 
@@ -228,18 +224,19 @@ class App
 
         FBO = new FrameBufferObject(1280, 970);
         FBO->Bind();
-        glViewport(0, 0, 1280, 970);
-
-      //  Graphics::Texture::InitDebug();
+        glViewport(0, 0,1280, 970);
+        //  Graphics::Texture::InitDebug();
+        DEBUG_CODE(CheckGLERROR());
 
         //(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format)
 	}
 
 	virtual void OnRender() override
 	{
-
+        DEBUG_CODE(CheckGLERROR());
         FBO->Bind();
-        {
+        {	
+
             FBO->Clear();
 
             OpenGL::bind_VAO(VAO);
@@ -251,16 +248,13 @@ class App
             }
             getWindow().defaultShader().Unbind();
 
-
-
             MainRenderer->Render();
-            OpenGL::glCheckError_(__FILE__, __LINE__);
-            CheckGLERROR();
-
             ProfilerTest->Render();
-        }
+        }    
+
         FBO->Unbind();
-      //  FBO->RenderTarget->Render(0,0, 640,480);
+        FBO->Render();
+        DEBUG_CODE(CheckGLERROR());
 	}
 
 	
