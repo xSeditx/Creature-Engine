@@ -468,7 +468,7 @@ https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf
 */
 
 #define CheckGLERROR() {uint32_t ERR = 0;\
-if((ERR = glGetError()))\
+if((ERR = OpenGL::glCheckError_(__FILE__, __LINE__)))\
 {\
 	Print("Error" << ERR);\
 	__debugbreak();\

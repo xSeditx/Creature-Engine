@@ -163,7 +163,7 @@ private:
         HDC g_DeviceContext() { return DeviceContext; }
 
         /* Return the Most basic and default Shader */
-        uint32_t defaultShaderHandle() { return WindowShader->g_ID(); }
+        uint32_t defaultShaderHandle() { return WindowShader->g_Handle(); }
 
         /* Gets the default Shader Object */
         Shader& defaultShader() { return *WindowShader; }

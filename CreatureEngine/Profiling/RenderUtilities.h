@@ -126,7 +126,7 @@ namespace Profiling
 
             // Get the Attribute Location and Check for Errors
             {
-                OpenGL::set_Attribute(QuadRenderer.g_ID(), 4, "aPos");
+                OpenGL::set_Attribute(QuadRenderer.g_Handle(), 4, "aPos");
             }
         }
 

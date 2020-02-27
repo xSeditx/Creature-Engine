@@ -61,7 +61,7 @@ public:
 	GLint GetUniformLocation(const char  *name);
 
 	/* returns the OpenGL ID name */
-	GLuint g_ID() { return GL_Handle; }
+	GLuint g_Handle() { return GL_Handle; }
 
 	static void Push(Shader& shad);
 	static Shader& Pop();
@@ -111,7 +111,7 @@ public:
 	static void set_Shader(uint32_t _program)	{ glUseProgram(_program);	}
 
 	static Shader& get()       { return *ActiveShader.top();        }
-	static GLuint  getHandle() { return  ActiveShader.top()->g_ID();}
+	static GLuint  getHandle() { return  ActiveShader.top()->g_Handle();}
 
 
 protected:
