@@ -242,6 +242,7 @@ namespace OpenGL
 	iVec4 get_Viewport()
 	{	// Returns the Viewport of the OpenGL context 
 		iVec4 result;
+
 		glGetIntegerv(GL_VIEWPORT, (int*)&result);
 		DEBUG_CODE(CheckGLERROR());
 		return result;

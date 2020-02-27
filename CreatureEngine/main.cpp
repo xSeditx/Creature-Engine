@@ -135,7 +135,7 @@ class App
     std::vector<Vec2> TestBatch2;
 
     FrameBufferObject *FBO;
-    virtual void OnCreate()
+    virtual void OnCreate() override
 	{
 		RegisterListener(WM_KEYDOWN, KeyListener);
          
@@ -143,6 +143,7 @@ class App
 		getWindow().s_Camera(&MainRenderer->g_Camera());
 		WorldCamera = &getCamera();
 		getWindow().defaultShader().Bind();
+		DEBUG_CODE(CheckGLERROR());
 
 		VAO = OpenGL::create_VAO();
 		OpenGL::bind_VAO(VAO);
@@ -152,6 +153,7 @@ class App
 		OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
 		OpenGL::set_Attribute(getWindow().defaultShader().g_ID(), 2, "aPos");
 
+		DEBUG_CODE(CheckGLERROR());
 
 		Vec2 _size = Vec2(8, 8);
 		Vec2 Space = Vec2(1, 1);
@@ -222,8 +224,9 @@ class App
 			}
 		}
 
+		DEBUG_CODE(CheckGLERROR());
 
-        FBO = new FrameBufferObject(1280.0f, 970.0);
+        FBO = new FrameBufferObject(1280, 970);
         FBO->Bind();
         glViewport(0, 0, 1280, 970);
 
@@ -281,6 +284,7 @@ int main()
     TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
 	App MyApp;
 	MyApp.Init();
+	DEBUG_CODE(CheckGLERROR());
 
 	iVec2 r = OpenGL::get_MaximumViewportDimensions();
 	Print("Max Viewport Dimensions: " << r.x << " : " << r.y);

@@ -165,6 +165,18 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
     RenderTarget = new Graphics::Texture(Size, GL_RGBA);
     DepthTarget = new  Graphics::Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
 
+	//unsigned int attachment_index_color_texture = 0;   //to keep track of our textures
+	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment_index_color_texture, texture_color, 0);
+	//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_depth, 0);//optional
+	DEBUG_CODE(CheckGLERROR());
+
+	const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0_EXT };
+	DEBUG_CODE(CheckGLERROR());
+	glDrawBuffer(GL_FRONT_AND_BACK);
+	DEBUG_CODE(CheckGLERROR());
+	glDrawBuffers(sizeof(draw_buffers) / sizeof(draw_buffers[0]), draw_buffers);
+	DEBUG_CODE(CheckGLERROR());
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTarget->g_Handle(), 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTarget->g_Handle(), 0);
 
@@ -238,10 +250,30 @@ bool FrameBufferObject::ValidateFrameBuffer()
 
 
 
+_static std::string
+FrameBufferObject::Vrenderer = "#version 330 core \n\
+layout(location = 0) in vec4 aPos;          \n\
+out vec2 TexCoords;                         \n\
+void main()                                 \n\
+{                                           \n\
+    TexCoords = aPos.xy;                          \n\
+    gl_Position = ModelViewProjectionMatrix * vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+}";
+
+_static std::string
+FrameBufferObject::Frenderer = "#version 330 core \n\
+uniform sampler2D FrameBufferTexture;                       \n\
+out vec4 FragColor;                               \n\
+in  vec2 TexCoords;                               \n\
+void main()                                       \n\
+{                                                 \n\
+    FragColor = vec4(texture(FrameBufferTexture,TexCoords.xy).xyzw);  \n\
+}";
 
 
 
 
+_static float  FrameBufferObject::ScreenQuad[6] = { 0.0f,0.0f,0.0f,0.0f,0.0f,0.0f };
 
 
 

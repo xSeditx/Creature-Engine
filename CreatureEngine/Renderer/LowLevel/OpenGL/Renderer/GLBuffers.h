@@ -335,6 +335,11 @@ public:
        Returns: True if complete.
        Returns: False if incomplete and displays a message to the console explaining why FrameBuffer creation failed */
 	bool ValidateFrameBuffer();    
+
+
+	static std::string Frenderer;
+	static std::string Vrenderer;
+	static float ScreenQuad[6];
 };
 
 

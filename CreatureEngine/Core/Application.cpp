@@ -33,7 +33,8 @@ USAGE:
  {
 	 set(*this);
 	 CreateApplicationWindow();
- 
+	 DEBUG_CODE(CheckGLERROR());
+
 	 //--------Gathering information about OpenGL state and Display it -----------------------------------------------
 	 //  int NumberOfExtensions = 0;
 	 //  _GL(glGetIntegerv(GL_NUM_EXTENSIONS, &NumberOfExtensions));
