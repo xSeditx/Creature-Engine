@@ -165,9 +165,6 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
     RenderTarget = new Graphics::Texture(Size, GL_RGBA);
     DepthTarget = new  Graphics::Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
 
-	//unsigned int attachment_index_color_texture = 0;   //to keep track of our textures
-	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment_index_color_texture, texture_color, 0);
-	//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_depth, 0);//optional
 	DEBUG_CODE(CheckGLERROR());
 
 	const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0_EXT };
