@@ -279,11 +279,77 @@ public:
 
 
 
-
-
-
-
 #include"../../Materials/Image/Texture.h"
+
+enum Attachment_t
+{
+	Color = GL_COLOR_ATTACHMENT0,
+	Depth = GL_DEPTH_ATTACHMENT,
+	Stencil = GL_STENCIL_ATTACHMENT,
+	DepthStencil = GL_DEPTH_ATTACHMENT | GL_STENCIL_ATTACHMENT //<- WARNING! Dunno if this is correct or not... GL_DEPTH_STENCIL_ATTACHMMENT
+};
+
+
+class RenderBufferObject
+{
+	/* DEFAULT STATE:
+	If renderbuffer is 0, the current image, if any,
+	attached to the attachment logical buffer of the currently bound framebuffer object is detached. 
+	The value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is set to GL_NONE. 
+	The value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME is set to 0.
+	GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL and GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE are set to the default values 0 
+	GL_TEXTURE_CUBE_MAP_POSITIVE_X, respectively. */
+public:
+	RenderBufferObject(iVec2 _size, uint32_t _internalFormat = GL_RGBA, uint32_t _samples = 0)
+		:
+		Size(_size),
+		SampleCount(_samples),
+		InternalFormat(_internalFormat)
+	{
+		glGenRenderbuffers(1, &GL_Handle);
+		glBindRenderbuffer(GL_RENDERBUFFER, GL_Handle);
+
+		if(Samples() == 0)
+		{// If no multisampled
+			glRenderbufferStorage(GL_RENDERBUFFER, InternalFormat, Width(),Height());
+		}
+		else
+		{ // We have Enabled Multisampling
+			glRenderbufferStorageMultisample(GL_RENDERBUFFER, Samples(), InternalFormat, Width(), Height());
+		}
+	}
+
+	void AttachtoFrameBuffer(uint32_t _fbo, Attachment_t _point = Color)
+	{
+		AttachmentPoint = _point;
+		glBindRenderbuffer(GL_RENDERBUFFER, GL_Handle);
+
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, AttachmentPoint, GL_RENDERBUFFER, GL_Handle);
+	}
+	/// Can i change the Read or Write functionality here?
+
+	Attachment_t AttachmentPoint{ Color };
+	uint32_t GL_Handle{ 0 };
+	//TODO: Create a Read function here to return the contents of the Render Buffer
+	// void *Read(){return Data;}
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Width(), Height());
+		//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, GL_Handle);
+
+
+	/* Returns the Width of the Render Buffer */
+	const GLsizei Width() const  { return static_cast<GLsizei>(Size.x); }
+	/* Returns the Height of the Render Buffer */
+	const GLsizei Height()const  { return static_cast<GLsizei>(Size.y); }
+	/* Number of Samples taken */
+	const GLsizei Samples()const { return static_cast<GLsizei>(SampleCount); }
+	/* Checks to see if our Render Buffer is Multisamples*/
+	const bool isMultisampled() { return (Samples() != 0); }
+private:
+	uint32_t InternalFormat{ GL_RGBA };
+	iVec2 Size{ 0,0 };
+	size_t SampleCount{ 0 };
+};
+
 
 /* Sort or Bucket Visible Objects
 foreach( render target )    // framebuffer
@@ -326,10 +392,21 @@ public:
 
     /* Binds the Frame Buffer Object to OpenGL*/
     void Bind();
+	/* Bind for Reading */
+	void BindWrite();
+	/* Bind for Writing */
+	void BindRead();
     /* Unbinds the Frame Buffer Object and falls back to OpenGL default Frame Buffer*/
     void Unbind();
     /* Clears the Color and Depth Channels for the Frame Buffer Object */
-    void Clear();
+	void Clear();
+	/* Clears Color Buffers */
+	void ClearColorBuffer();
+	/* Clears Depth Buffer */
+	void ClearDepthBuffer();
+
+	/* Destroys the Frame Buffer Object releasing its ID to OpenGL */
+	void Destroy();
 
     /* Test the Frame Buffer to see if it is complete.
        Returns: True if complete.
@@ -346,8 +423,22 @@ public:
 
     static std::string Frenderer;
 	static std::string Vrenderer;
-	static Vec2 ScreenQuad[4];
+	static Vec2 ScreenQuad[6];
     static uint32_t Indices[6];
+	/* Checks an ID to see if it is a Frame Buffer Object already */
+	static bool isFBO(uint32_t _fbo)
+	{
+		bool results{ false };
+		return static_cast<bool>(glIsFramebuffer((GLuint)_fbo));
+	}
+
+
+	enum Target_t
+	{
+	    Write = GL_DRAW_FRAMEBUFFER, 
+	    Read = GL_READ_FRAMEBUFFER,
+	    Both = GL_FRAMEBUFFER
+	};
 };
 
 

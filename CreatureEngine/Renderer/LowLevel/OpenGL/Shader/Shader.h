@@ -95,8 +95,10 @@ public:
 
 
 
-
-
+	uint32_t SetAttribute(uint8_t _elements, const char* _name)
+	{
+		return OpenGL::set_Attribute(GL_Handle, _elements, _name);
+	}
 
 
 	void SetArrayUniform(const char* _name, std::vector<Mat4>& _array);
