@@ -104,7 +104,7 @@ USAGE:
 	 while (PeekMessage(&msg, Application::getWindow().g_Handle(), 0, 0, PM_REMOVE))
 	 {
 		 Application::Window::EventHandler::get().PostMSG(msg);
-		 Print("Message" << msg.message);
+//		 Print("Message" << msg.message);
 		 DispatchMessage(&msg);
 	 }
  }
@@ -160,7 +160,7 @@ USAGE:
 		 Print(" Define the virtual function with the specifications for your applications Window before calling CreateWindow() ");
 		 __debugbreak();
 	 }
-	 mainWindow = Window( 640,480, "TestWIndow",0);
+	 mainWindow = Window( SCREEN_X, SCREEN_Y, "TestWIndow",0);
  }
 
 ///==================================================================================================================
@@ -203,7 +203,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 			"OpenGL",
 			Title.c_str(),
 			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-			(int)g_PositionX(), (int)g_PositionY(), (int)Width(), (int)Height(),
+			(int)g_PositionX(), (int)g_PositionY(), (int)Width() , (int)Height() ,
 			NULL,
 			NULL,
 			Application::get().Instance,
@@ -290,7 +290,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		glEnable(GL_DEPTH_TEST);                               // Enables Depth Testing
 		glDepthFunc(GL_LEQUAL);                                // The Type Of Depth Test To Do
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);     // Really Nice Perspective Calculations
-    	glViewport(0, 0, _width, _height);
+    	OpenGL::set_Viewport(0, 0, _width, _height);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -339,19 +339,11 @@ void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)       
 		_height = 1;                                   
 	}
 
-	Size = { (float)_width,(float)_height };
-	
-	glViewport(0, 0, _width, _height);               // Reset The Current Viewport
-	glMatrixMode(GL_PROJECTION);                     // Select The Projection Matrix
-	glLoadIdentity();                                // Reset The Projection Matrix
-	
-	//// Calculate The Aspect Ratio Of The Window
-	gluPerspective(45.0f, (GLfloat)_width / (GLfloat)_height, 0.1f, 100.0f);
-	
-	glMatrixMode(GL_MODELVIEW);                      // Select The Modelview Matrix
-	glLoadIdentity();                                // Reset The Modelview Matrix
+    Size = { (float)_width,(float)_height };
 
-	MoveWindow
+    OpenGL::set_Viewport(0, 0, _width, _height);     // Reset The Current Viewport
+
+    MoveWindow
 	(
 		Handle,
 		(int)Position.x,
@@ -377,6 +369,20 @@ void Application::Window::create_DefaultShader()
 	WindowShader->Bind();
 }
 
+Vec2 Application::Window::get_WindowSize()
+{
+    RECT rect;
+    if (GetWindowRect(Handle, &rect))
+    {
+        Size =
+        {
+            rect.right - rect.left,
+            rect.bottom - rect.top
+        };
+        return Size;
+    }
+    return Vec2(0);
+}
 ///==================================================================================================================
 
 void Application::Window::EventHandler::PostMSG(Event msg)
@@ -484,7 +490,6 @@ Vec2 getMouseCursor()
 
 void Application::Resize(Vec2 _size)
 {
-	
 	mainWindow.g_Camera().Resize(_size);
 }
 
@@ -508,15 +513,27 @@ Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	//Event msg = make_msg(hwnd, uMsg, wParam, lParam);
-	//Dispatch(msg);
-	switch (uMsg)
+
+    switch (uMsg)
 	{
+    case WM_MOUSEWHEEL:
+    {
+        float Wheel = (int16_t)SplitLParam((int)wParam).y / 120.0f;
+        Vec2 Mpos = SplitLParam((int)lParam);
+        Application::getMouse().Update(Mpos, Wheel);
+    }break;
+
+    case WM_MOUSEMOVE:
+    {
+         Application::getMouse().Update(SplitLParam((int)lParam), 0);
+    }break;
 
 	case WM_SIZE:
 	{
 		Vec2 sz = SplitLParam((int)lParam);
-		Application::get().Resize({ sz.x,sz.y });
+        sz += 16;
+        sz += 39;
+		Application::get().Resize({ sz.x, sz.y });
 	}break;
 
 	case WM_DESTROY:
@@ -532,12 +549,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 _static Application::Window::InputDevices::_mouse    Application::Window::InputDevices::Mouse;
 _static Application::Window::InputDevices::_keyboard Application::Window::InputDevices::Keyboard;
-
 _static Application::Window::EventHandler& Application::Window::EventHandler::get()
 {
 	static Application::Window::EventHandler instance;
 	return instance;
 }
+
+
 
 std::string VertexShader =
 "#version 330 core \n\

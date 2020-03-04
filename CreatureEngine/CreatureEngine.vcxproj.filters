@@ -122,6 +122,12 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera3D.cpp">
       <Filter>Source Files\Graphics\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\DefaultShaders.cpp">
+      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Utility.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">

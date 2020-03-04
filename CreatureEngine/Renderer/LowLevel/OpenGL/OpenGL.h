@@ -1,10 +1,10 @@
 #pragma once
 
-
-#include"Core\Common.h"
+#include"Core/Common.h"
 
 #include<GL/gl.h>
 #include<GL/glu.h>
+
 #define _USING_OPENGL_API /* Are we using OpenGL or something else like DX*/
 #pragma comment(lib, "OpenGL32.lib") 
 #pragma comment(lib, "glu32.lib")
@@ -99,8 +99,6 @@ namespace OpenGL
 	};
     CREATURE_API GLenum glCheckError_(const char *file, int line);
 
-
-	CREATURE_API void InitOpenGL();
 	
 	/* Creates an OpenGL context from an OS native Device Context */
 	CREATURE_API HGLRC create_OpenGLContext(HDC _dc);
@@ -111,16 +109,7 @@ namespace OpenGL
 	/* Returns the maximum number of Vertex buffers that can be bound as attributes */
 	CREATURE_API int get_MaxAttributes();
 
-	/* Return the Active Texture unit */
-	CREATURE_API int  get_ActiveTexture();
-
-	/* returns Maximum Texture Units*/
-	CREATURE_API int  get_MaximumTextureUnits();
-
-	/* Sets the active Texture Unit */
-	CREATURE_API void set_ActiveTexture(uint32_t _slot);
-
-	/* Returns the Currently active Shader Object */
+    /* Returns the Currently active Shader Object */
 	CREATURE_API int  get_CurrentShader();
 
 	/* Sets the Current Shader */
@@ -195,11 +184,17 @@ namespace OpenGL
     CREATURE_API uint32_t set_Attribute(uint8_t _elements, const char* _name);
 	CREATURE_API void set_Divisor(uint8_t _location, uint32_t _divisor);
 
-	//============================================================================================
+
+    CREATURE_API void set_Viewport(int _x, int _y, int _width, int _height);
+    //============================================================================================
 	// VERTEX ARRAY OBJECT 
 	//============================================================================================
 	/* Creates a Unique ID for a Vertex Array Object*/
-	CREATURE_API uint32_t create_VAO();
+	CREATURE_API uint32_t new_VAO();
+    /* Creates a Unique ID for a Vertex Array Object*/
+    CREATURE_API void delete_VAO(uint32_t _id);
+
+
 	/* Is an ID a Vertex Array Object */
 	CREATURE_API bool isVAO(int _array);
 	/* Sets Vertex Array Object as Current */
@@ -214,13 +209,20 @@ namespace OpenGL
 	// VERTEX BUFFER OBJECT 
 	//============================================================================================
 	/* Creates a Unique ID for a Vertex Array Object*/
-	CREATURE_API uint32_t create_VBO();
+	CREATURE_API uint32_t new_VBO();
+
+    /* Frees ID for a Vertex Array Object*/
+    CREATURE_API void delete_VBO(uint32_t _id);
+
 	/* Sets Vertex Buffer Object as Current */
 	CREATURE_API void bind_VBO(int32_t _vboID);
+
 	/*  Unbinds all Vertex Buffer Objects from OpenGL */
 	CREATURE_API void unbind_VBO();
+
 	/* Is an ID a Vertex Buffer Object */
 	CREATURE_API bool isVBO(int _array);
+
 	/* Sets the Data in the currently bound Vertex Buffer */
  	template<typename _Ty> 
 	CREATURE_API void set_BufferData( std::vector<_Ty>& _data)
@@ -235,30 +237,59 @@ namespace OpenGL
 	//============================================================================================
 
 
+    /* Creates a Unique ID for a Element Array Object */
+    CREATURE_API uint32_t new_IBO();
 
-    /* Creates a Unique ID for a Vertex Array Object */
-    uint32_t create_IBO();
+    /* Frees the ID for the Element Array Object */
+    CREATURE_API void delete_IBO(uint32_t _id);
+
     /*  Sets Vertex Buffer Object as Current */
-    void bind_IBO(int32_t _IboID);
+    CREATURE_API void bind_IBO(int32_t _IboID);
+
     /*  Unbinds all Vertex Buffer Objects from OpenGL */   
-    void unbind_IBO();
+    CREATURE_API void unbind_IBO();
+
     /*  Is an ID a Index Buffer Object */
-    bool isIBO(int _array);
+    CREATURE_API bool isIBO(int _array);
 
 
 	//============================================================================================
 	// TEXTURE MANAGEMENT 
 	//============================================================================================
+
+    /* Generates a New Texture ID for OpenGL */
+    CREATURE_API uint32_t new_TextureHandle();
+
 	/* Sets _slot as the Currently Active Texture */
 	CREATURE_API void ActivateTexture(uint32_t _slot);
-	//============================================================================================
+
+
+    /* Set the Alignment of the Pixel pack and unpack processed for a texture */
+    CREATURE_API void PixelAlignment(uint32_t _pack, uint32_t _unpack);
+
+    /* Set the Alignment of the Pixel Pack processe for a texture */
+    CREATURE_API void PixelAlignmentPack(uint32_t _align);
+
+    /* Set the Alignment of the Pixel Unpack processed for a texture */
+    CREATURE_API void PixelAlignmentUnpack(uint32_t _align);
+
+
+    /* Return the Active Texture unit */
+    CREATURE_API int  get_ActiveTexture();
+
+    /* Sets the active Texture Unit */
+    CREATURE_API void set_ActiveTexture(uint32_t _slot);
+
+    /* returns Maximum Texture Units*/
+    CREATURE_API int  get_MaximumTextureUnits();
+
+
+    //============================================================================================
 
 }
 
 
-
-
-
+ 
 
 
 

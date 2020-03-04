@@ -37,12 +37,21 @@ namespace OpenGL
 		///Shader* mainProgram; Comment to avoid Minor confusion until its working
 	public:
 		Renderer() = default;
-		static void drawArray(uint32_t _vbo, uint32_t _elementCount)
+
+        /* Binds a Specific VBO and Renders it */
+        static void drawArray(uint32_t _vbo, uint32_t _elementCount)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 			glDrawArrays(GL_TRIANGLES, 0, _elementCount);
 			DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
 		}	
+        /* Renders _elementCount number of Vertices from the Currently bound Vertex Buffer Object */
+        static void drawArray(uint32_t _elementCount)
+        {
+            glDrawArrays(GL_TRIANGLES, 0, _elementCount);
+            DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        }
+
 
         static void drawArrayLines(uint32_t _vbo, uint32_t _elementCount)
         {

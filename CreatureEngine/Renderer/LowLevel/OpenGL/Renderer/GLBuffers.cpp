@@ -188,8 +188,8 @@ layout(location = 0) in vec2 aPos;                 \n\
 out vec2 TexCoords;                                \n\
 void main()                                        \n\
 {                                                  \n\
-    TexCoords = (aPos.xy + 1.0f) * 0.5f;          \n\
-    gl_Position = vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
+    TexCoords = (aPos.xy + 1.0f) * 0.5f;           \n\
+    gl_Position = vec4( aPos.x , aPos.y  , -1.0,  1.0); \n\
 }";
 
 _static std::string
@@ -199,7 +199,8 @@ in  vec2 TexCoords;                               \n\
 out vec4 FragColor;                               \n\
 void main()                                       \n\
 {                                                 \n\
-    FragColor =  vec4(texture(FrameBufferTexture,TexCoords.xy).xyz, 1);  \n\
+vec4 col1 = vec4(texture(FrameBufferTexture,TexCoords.xy+1).xyz, 1.0); \n\
+    FragColor = vec4(texture(FrameBufferTexture,TexCoords.xy).xyz, 1.0);  \n\
 }";
 
 //  vec4(TexCoords.x, TexCoords.y, 0.0, 1.0) +;  vec4(TexCoords.x, TexCoords.y,1,1)
@@ -221,10 +222,11 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
     static bool _Initialized__ = false;
     if (_Initialized__ == false)
     {// Initialize the default Shader for FBOs the first time we create a FrameBufferObject
+        REFACTOR("This shit is Deprecated. There is an imageRender(x,y,w,h) which can be used for the FBO rendering")
         ScreenShader = new Shader(Vrenderer, Frenderer);
-        ScreenVAO = OpenGL::create_VAO();
-        ScreenVBO = OpenGL::create_VBO();
-        ScreenIBO = OpenGL::create_IBO();
+        ScreenVAO = OpenGL::new_VAO();
+        ScreenVBO = OpenGL::new_VBO();
+        ScreenIBO = OpenGL::new_IBO();
 
         OpenGL::bind_VAO(ScreenVAO);
         OpenGL::bind_VBO(ScreenVBO);
@@ -246,25 +248,24 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
 
     RenderTarget = new Graphics::Texture(Size, GL_RGBA);
     DepthTarget = new  Graphics::Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
-    DEBUG_CODE(CheckGLERROR());
-
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTarget->g_Handle(), 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTarget->g_Handle(), 0);
-
-	/// ONLY ACTIVE OPENGL > 4.0
-	//glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, _width);
-	//glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, _height);
-	//glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_SAMPLES, 4);
-
 	ValidateFrameBuffer();
-
-	glEnable(GL_DEPTH_TEST);
+    OpenGL::EnableDepthTest();
+  
 	glDepthFunc(GL_LEQUAL);
-    glViewport(0, 0, _width, _height);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    OpenGL::set_Viewport(0, 0, _width, _height);
+    Unbind();
+
     DEBUG_CODE(CheckGLERROR());
 }
+
+/// ONLY ACTIVE OPENGL > 4.0
+//glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, _width);
+//glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, _height);
+//glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_SAMPLES, 4);
+
 
 void FrameBufferObject::Destroy()
 {// Destroys the Frame Buffer Object releasing its ID to OpenGL 
@@ -353,33 +354,17 @@ bool FrameBufferObject::ValidateFrameBuffer()
 void FrameBufferObject::Render()
 {
     DEBUG_CODE(CheckGLERROR());
-
-    glClear( GL_DEPTH_BUFFER_BIT);/// Is this Correct. Why are they erasing it first?GL_COLOR_BUFFER_BIT |
-    DEBUG_CODE(CheckGLERROR());
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    Unbind();
     ScreenShader->Bind();
     {
         OpenGL::bind_VAO(ScreenVAO);   
-
-        DEBUG_CODE(CheckGLERROR());
-
-        glActiveTexture(GL_TEXTURE0);
-        RenderTarget->Bind();  
-        DEBUG_CODE(CheckGLERROR());
-
-        ScreenShader->SetUniform("ColorTexture", 1);
-        DEBUG_CODE(CheckGLERROR());
-
-
-        OpenGL::Renderer::drawArray(ScreenVBO,6);
-        DEBUG_CODE(CheckGLERROR());
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        ScreenShader->SetTextureUniform("FrameBufferTexture", RenderTarget->g_Handle(), 2);
+        OpenGL::Renderer::drawArray(6);
 
         DEBUG_CODE(CheckGLERROR());
     }
     ScreenShader->Unbind();
     DEBUG_CODE(CheckGLERROR());
-
 }
 
 

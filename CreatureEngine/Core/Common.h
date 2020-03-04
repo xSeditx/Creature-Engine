@@ -48,7 +48,7 @@
 #define NO_WARNINGS             TRUE
 
 /* Defines the level of Messages the user wishes to see */
-#define MESSAGE_LEVEL           TODO_MESSAGES//FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE//USER_WARNING_MESSAGES//
+#define MESSAGE_LEVEL          ERROR_MESSAGE_DISPLAY // TODO_MESSAGES//FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE//USER_WARNING_MESSAGES//
 
 /* Test block of code for testing Threadspools Speeds */
 ///#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
@@ -386,14 +386,15 @@ we will have more functionality for tracking the stack and functions while easil
 #define DEGREES(x)            ((x) * 57.2957795131)
 
 /* Creates a 32bit word from RGB Values */
-#define _RGB(r,g,b) (((b << 16)| (g << 8)) | (r))
+#define _RGB(r,g,b)     (((b << 16) | (g << 8)) | (r))
+#define _RGBA(r,g,b,a)  ((a << 24)  | _RGB(r,g,b))
 
- /*
-Idk how to handle this yet in a platform independent way so we will cast a void * to the Native Application Instance for now, 
-In this case a Windows HINSTANCE
-*/
-#define  GetInstance() (HINSTANCE)Application::get().OSInstance 
 
+
+std::ostream& operator<<(std::ostream& _stream, const Vec2& _vector);
+std::ostream& operator<<(std::ostream& _stream, const Vec3& _vector);
+std::ostream& operator<<(std::ostream& _stream, const Vec4& _vector);
+std::ostream& operator<<(std::ostream& _stream, const Mat4& _matrix);
 
 
 

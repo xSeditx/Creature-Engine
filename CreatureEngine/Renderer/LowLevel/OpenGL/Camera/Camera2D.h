@@ -41,6 +41,12 @@ public:
 	/*  Zooms out on a scene by manipulating the Projection Matrix */
 	void ZoomOut(float _amount);
 
+    /*  Zooms in or out of a scene by manipulating the Projection Matrix */
+    void ZoomInto(Vec2 _pos, float _amount);
+    /*  Zooms in or out of a scene by manipulating the Projection Matrix */
+    void ZoomOutFrom(Vec2 _pos, float _amount);
+
+
 	/* Resizes the Projection Matrix to the given _size */
 	void Resize(Vec2 _size);
 private:

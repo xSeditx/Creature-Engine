@@ -1,8 +1,6 @@
 #pragma once
 
-
-
-#include"Core\Common.h"
+#include"Core/Common.h"
 #include"Bitmap.h"
 #include<vector>
 
@@ -18,9 +16,12 @@ an Object of static Asset<T> type should be created in its place instead.
 */
 namespace Graphics
 {
-
-	///struct Shader {};
-
+    /* ==============================================================
+    /* TEXTURE CLASS
+    /* Image Uploaded to the GPU for Reading/Writing
+    /* - Texture(std::string file) noexcept;
+    /* - Texture(Bitmap &image) noexcept;
+    /* ============================================================== */
 	class CREATURE_API Texture
 	{
 	public:
@@ -68,8 +69,11 @@ namespace Graphics
 			return *this;
 		}
 
+        /* Create an Empty Texture from the Given Size _size and Format parameters */
         Texture(Vec2 _size, int32_t _dataFormat, int32_t _internalFormat = GL_RGBA, uint32_t _wrap = GL_CLAMP_TO_EDGE, uint32_t _filtering = GL_NEAREST, uint32_t _type = GL_FLOAT);
 
+        /* Updates the Texture with the Memory Pointed to in _memory. 
+         NOTE: User is responsible for ensuring memory is proper size */
 		void Update(uint8_t *_memory)
 		{
 			/* Depending on if we are using Bindldess TYextures or not determines how we update this */
@@ -84,26 +88,38 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 			Unbind();
   		}
 
+        /* Sets the Target for the Texture. Default is GL_TEXTURE2D. 
+         NOTE: Further work might be needed before it takes effect */
 		void SetTarget(unsigned int param);
 
+        /* Sets the Min Mag filering for Texture */
 		void SetFiltering(unsigned int param);
-		void SetMagFiltering(unsigned int param);
-		void SetMinFiltering(unsigned int param);
+        /* Sets the Magnification filering for Texture */
+        void SetMagFiltering(unsigned int param);
+        /* Sets the Minification filering for Texture */
+        void SetMinFiltering(unsigned int param);
 
+        /* Set the X and Y Wrap params for the Texture */
 		void SetWrap(unsigned int param);
-		void SetWrapX(unsigned int param);
-		void SetWrapY(unsigned int param);
+        /* Set the X Wrap params for the Texture */
+        void SetWrapX(unsigned int param);
+        /* Set the Y Wrap params for the Texture */
+        void SetWrapY(unsigned int param);
 
 		//	OpenGL has a particular syntax for writing its color format enumerants.It looks like this: GL_[components?][size?][type?]
 
+        /* Bind Texture Handle to OpenGL State */
 		inline void Bind()
 		{
-			////UniformLocation = glGetUniformLocation(Shader::getHandle(), "Texture1");
-			//glUniform1i(UniformLocation, 0);
-			//glActiveTexture(GL_TEXTURE0 + 0);
-
 			glBindTexture(Target, GL_Handle);
 		}
+        /* Bind Texture Handle to OpenGL State as well as the Slot in the Active Shader */
+        inline void Bind(uint32_t _slot)
+        {
+            glActiveTexture(GL_TEXTURE0 + _slot);
+            glBindTexture(Target, GL_Handle);
+        }
+        /* Disable Texture from bound slot*/
 		inline void Unbind()
 		{
 			glBindTexture(Target, 0);
@@ -140,60 +156,41 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 			InternalFormat{ GL_RGB };
 
         uint32_t Border{ 0 };
+
         /* Bindless Pointer for AZDO */
 		GPUptr Handle{ NULL };
 
 
 		bool MipmapComplete{ false };
 		bool ImageFormatComplete{ false };
-
-
-
-
-
-
-        //====================== DEBUG STUFF ==============================================================
-        static std::string VdebugRenderer;
-        static std::string FdebugRenderer;
-        static uint32_t debugVAO;
-        static uint32_t debugVBO;
-        static Shader* debugShader;
-        static Camera2D debugCamera; 
-
-        static Vec2 QuadData[6];
-        static Vec2 TexCoords[6];
-
-       
-
-        public:
-        static void InitDebug();
-
-        //================================================================================================
-
     };
 
 
+    
 
-
-	/*
-	TextureBufferObject
-    	Accept a flat formated block of memory for sequential writing in the Shader
-    	Discussion:
-    	Should this be in the GLBuffers.h header instead of here as it functions more like a Buffer Object then a Texture Object
-	*/
+    
+    /*==================================================================================================================================
+	/*                    TEXTURE BUFFER OBJECT 
+    /*	Accept a flat formated block of memory for sequential writing in the Shader
+    /*	Discussion:
+    /*	Should this be in the GLBuffers.h header instead of here as it functions more like a Buffer Object then a Texture Object
+	/*==================================================================================================================================*/
 
 	template<typename T>
 	struct CREATURE_API TextureBufferObject
 	{
 		TextureBufferObject() = default;
 		TextureBufferObject(std::string _name, std::vector<T> _data);
-		void Bind(GLuint _slot);
 
-		GLuint TextureID;
-		GLuint BufferID;
-		GLuint UniformLocation;
-		size_t Size;
-		std::string Name;
+        void Bind();
+		void Bind(GLuint _slot);
+        void Unbind();
+
+        GLuint GL_Handle{ 0 };
+        GLuint BufferID{ 0 };
+        GLuint UniformLocation{0};
+        size_t Size{ 0 };
+        std::string Name{};
 		std::vector<T> Data;
 	};
 
@@ -206,104 +203,25 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 		glGenBuffers(1, &BufferID);
 		glBindBuffer(GL_TEXTURE_BUFFER, BufferID);
 		glBufferData(GL_TEXTURE_BUFFER, sizeof(_Ty) * _data.size(), _data.data(), GL_STATIC_DRAW);
-		glGenTextures(1, &TextureID);
-		glBindTexture(GL_TEXTURE_BUFFER, TextureID);
+		glGenTextures(1, &GL_Handle);
+		glBindTexture(GL_TEXTURE_BUFFER, GL_Handle);
 		glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, BufferID);
 	}
+    template<typename _Ty>
+    void TextureBufferObject<_Ty>::Bind()
+    {
+        glBindTexture(GL_TEXTURE_BUFFER, GL_Handle);
+    }
 
 	template<typename _Ty>
 	void TextureBufferObject<_Ty>::Bind(GLuint _slot)
 	{
 		UniformLocation = glGetUniformLocation(Shader::GetActiveShader()->GetName(), Name.c_str());
-		glUniform1i(UniformLocation, _slot);
 		glActiveTexture(GL_TEXTURE0 + _slot);
-		glBindTexture(GL_TEXTURE_BUFFER, TextureID);
+		glUniform1i(UniformLocation, _slot);
+		glBindTexture(GL_TEXTURE_BUFFER, GL_Handle);
 	}
-
-
-
 }// NS Graphics
 
 
 //http://ogldev.atspace.co.uk/www/tutorial25/tutorial25.html
-
-	// Simple move assignment operator
- //VertexArrayObject& operator=(VertexArrayObject&& other)
- //{
- //   // *this = 
- //    return *std::move(other);//
- //}
-/*
-#ifdef BINDLESS_ATTRIBUTES
-void Bind() {}
-void Unbind() {}
-
-template<typename T>
-void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
-{
-	if (GL_Handle == NULL)
-	{
-		glGenVertexArrays(1, &GL_Handle);
-	}
-	Bind();
-	GLint Amount = sizeof(T) / sizeof(float);
-	Buffers.push_back(buffer);
-
-	switch (bufferT)
-	{
-	case INDICE:
-		buffer->AttributeType = INDICE;
-		return;
-		break;
-	case VERTEX:
-		buffer->AttributeType = VERTEX;
-		break;
-	case COLOR:
-		buffer->AttributeType = COLOR;
-		break;
-	case NORMAL:
-		buffer->AttributeType = NORMAL;
-		break;
-	case UVCOORD:
-		buffer->AttributeType = UVCOORD;
-		break;
-	case TANGENT:
-		buffer->AttributeType = TANGENT;
-		break;
-	}
-}
-#else
-//#endif
-
- */
-
-
-
-/*
-
-    glTexImage2D(
-        Target, 0,
-        _internalFormat,
-        _size.x, _size.y,
-        Border,
-        _dataFormat,
-        _type, (void*)NULL);
-
-    Texture(Vec2 _size,
-        int32_t _dataFormat = GL_RGBA,
-        int32_t _internalFormat = GL_RGBA,
-        uint32_t _wrap = GL_CLAMP_TO_EDGE,
-        uint32_t _filtering = GL_NEAREST,
-        uint32_t _type = GL_FLOAT);
-
- //   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1024, 768, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
- 
- */
-
-
-
- //GLuint TextureID;
- //GLuint DepthTexture;
- //GLenum InternalFormat;
- //GLenum PixelFormat;
- //GLenum DataType;

@@ -144,6 +144,7 @@
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
     <ClCompile Include="Core\Threading\TestFunctions.cpp" />
     <ClCompile Include="Core\Threading\Threadpool.cpp" />
+    <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
     <ClCompile Include="Profiling\SystemInfo.cpp" />
@@ -157,6 +158,7 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\DefaultShaders.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
   </ItemGroup>
