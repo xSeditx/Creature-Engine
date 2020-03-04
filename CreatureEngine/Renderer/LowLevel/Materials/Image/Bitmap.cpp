@@ -1,6 +1,6 @@
 #include"Bitmap.h"
 
-#include"../Bin/SOIL/src/SOIL.h" //   ../../../../
+#include"../Bin/SOIL/src/SOIL.h"
 
 namespace Graphics
 {
@@ -12,7 +12,7 @@ namespace Graphics
 	{
 		if (size() % 3 == 0)
 		{
-		//	BytesPerPixel = 4;
+            BytesPerPixel = 3;
 		}
 		BytesPerPixel = 4;
 	}
@@ -24,6 +24,7 @@ namespace Graphics
         int32_t 
             Sx{ 0 }, 
             Sy{ 0 };
+
         int BPP{ 0 };
 
         rawData = SOIL_load_image(_file.c_str(), &Sx, &Sy, &BPP, SOIL_LOAD_AUTO);
@@ -33,4 +34,4 @@ namespace Graphics
     }
 
 
-}
+}// NS Graphics

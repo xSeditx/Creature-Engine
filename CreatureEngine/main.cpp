@@ -7,6 +7,9 @@
 //#define CacheLineFlush(Address) _mm_clflush(Address)
 //#pragma optimize( "", off )
 
+//CORONA VIRUS STUDY
+//https://jamanetwork.com/journals/jama/fullarticle/2762130
+
 #define _PROFILE_MEMORY
 
 #include"Profiling/SystemInfo.h"
@@ -16,12 +19,12 @@
 
 #include"Core/Common.h"
 #include"../CreatureEngine/Renderer/LowLevel/OpenGL/OpenGL.h"
+#include"Core/Threading/TestFunctions.h"
+
 using namespace Core;
 using namespace Threading;
 
-int LOOP_COUNT{ 1000000 };
 
-#include"Core/Threading/TestFunctions.h"
 
 //Nice
 ///http://eel.is/c++draft/meta.trans.other
@@ -114,6 +117,21 @@ Listener KeyListener(
 
 
 
+Listener MouseWheel(
+    [](Event _msg)
+{
+    Vec2 Mpos = SplitLParam((int)_msg.lParam);
+
+    if ((int16_t)SplitLParam((int)_msg.wParam).y > 0)
+    {// Mouse Wheel UP
+        WorldCamera->ZoomInto(Mpos, ZOOM_SPEED);
+    }
+    else
+    {// Mouse Wheel DOWN
+        WorldCamera->ZoomOutFrom(Mpos, ZOOM_SPEED);
+    }
+});
+
 class App
 	: public Application
 {
@@ -121,7 +139,7 @@ class App
 	Vec2 UVcoords[3] = { {  0.0,   0.0 },  {   1.0,   0.0 },  { 1.0,   1.0 } };
 
 	GLuint Indices[3] = { 0, 1, 2 };
-	GLuint VAO{ 0 }, VBO{ 0 }, IBO{ 0 };
+    GLuint VAO{ 0 }, VBO{ 0 };
 
 	OpenGL::Renderer2D *MainRenderer;
 	Profiling::DisplayWindow *ProfilerTest;
@@ -131,115 +149,98 @@ class App
     std::vector<Vec2> TestBatch2;
 
     FrameBufferObject *FBO;
+    Graphics::Texture *TestTexture;
+    Graphics::Texture *TestTexture2;
+
+
+
     virtual void OnCreate() override
 	{
-		RegisterListener(WM_KEYDOWN, KeyListener);
-         
-		MainRenderer = new OpenGL::Renderer2D({1280.0f, 970.0});// { 640.0f, 480.0f });
-		getWindow().s_Camera(&MainRenderer->g_Camera());
-		WorldCamera = &getCamera();
+        /* Load up the Listeners for the Various Input Events */
+        {
+            RegisterListener(WM_KEYDOWN, KeyListener);
+            RegisterListener(WM_MOUSEWHEEL, MouseWheel);
+        }
+
+        /* Creates a Renderer for our Application */
+		MainRenderer = new OpenGL::Renderer2D({SCREEN_X, SCREEN_Y});
+
+        /* Set the Application window Camera and World Camera to the Renderer */
+        {
+            getWindow().s_Camera(&MainRenderer->g_Camera());
+            WorldCamera = &getCamera();
+        }
+
+        
+        /* Create a Triangle to Test with */
 		getWindow().defaultShader().Bind();
-		DEBUG_CODE(CheckGLERROR());
+        {
+            VAO = OpenGL::new_VAO();
+            OpenGL::bind_VAO(VAO);
 
-		VAO = OpenGL::create_VAO();
-		OpenGL::bind_VAO(VAO);
+            VBO = OpenGL::new_VBO();
+            OpenGL::bind_VBO(VBO);
+            OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
+            OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
+        }
 
-		VBO = OpenGL::create_VBO();
-		OpenGL::bind_VBO(VBO);
-		OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
-		OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
+ 		/*   Make a Profiler Window which Displays the FPS as a graph */
+        {
+            float Aspect = getCamera().AspectRatio;
+            float Size = 100;
+            ProfilerTest = new Profiling::DisplayWindow
+            (
+                { SCREEN_X / 2  , SCREEN_Y / 2 },
+                { std::floor((Size)* Aspect), std::floor((Size * 2)) },
+                { std::floor(Size*.35 * Aspect), std::floor((Size)) }
+            );
+            ProfilerTest->Update(1);
+        }
 
-		DEBUG_CODE(CheckGLERROR());
+        /* Create a Bunch of Quads to Test Render */
+        {
+            uint8_t R{ 100 }, G{ 0 }, B{ 0 };
+            Vec2 Sz{ 160, 120 };
+            for_loop(y, Sz.y)
+            {
+                for_loop(x, Sz.x)
+                {
+                    R += 5;
+                    if (R >= 255) { G += 5; R = 0; }
+                    if (G >= 255) { B += 5; G = 0; }
 
-		Vec2 _size = Vec2(8, 8);
-		Vec2 Space = Vec2(1, 1);
-		Vec2 Count = Vec2(80, 60);
-		MainRenderer->SetRenderColor(255, 0, 0, 255);
-		for_loop(y, Count.y)
-		{
-			for_loop(x, Count.x)
-			{
-				Vec2 _topleft
-				(
-					x * (_size.x + Space.x),
-					y * (_size.y + Space.y)
-				);
+                    MainRenderer->renderQuad({ x * 8.0f,y * 8.0f }, { 7,7 }, MainRenderer->CreateColor(R, G, B, 255));
+                }
+            }
+  		DEBUG_CODE(CheckGLERROR());
+      }
 
-				TestBatch.push_back(Vec2(_topleft.x, _topleft.y));
-				TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-				TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-				TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
-				TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-				TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-			}
-		}
-		MainRenderer->SetRenderColor(0, 255, 255, 255);
-		for_loop(y, Count.y)
-		{
-			for_loop(x, Count.x)
-			{
-				Vec2 _topleft
-				(
-					x * (_size.x + Space.x), 
-					(y + Count.y) * (_size.y + Space.y)
-				);
+        /* Create FBO to Test with */
+        {
+            FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
+            FBO->Bind();
+        }
+       
+        Init_DefaultShaders();
 
-				TestBatch2.push_back(Vec2(_topleft.x, _topleft.y));
-				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-				TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
-				TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-				TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-			}
-		}
-		/* 
-		/*   Make a Profiler Window which Displays the FPS as a graph
-		/*/
-		float Aspect = getCamera().AspectRatio;
-		float Size = 100;
-		ProfilerTest = new Profiling::DisplayWindow
-		(
-			{ (640 / 2) , 480 / 2 },
-			{ std::floor(Size * Aspect), std::floor((Size)) },
-			{ std::floor(Size * Aspect), std::floor((Size)) }
-		);
-		ProfilerTest->Update(1);
+        /* Load Test Textures to Test With using two different Texture Constructors */
+        {
+            Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
+            TestTexture = new Graphics::Texture(*Bmp);
+            TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
+        }
 
 
-		uint8_t R{ 100 }, G{ 0 }, B{ 0 };
-		Vec2 Sze{ 160,120 };
-		for_loop(y, Sze.y)
-		{
-			for_loop(x, Sze.x)
-			{
-				R += 5;
-				if (R >= 255) { G += 5; R = 0; }
-				if (G >= 255) { B += 5; G = 0; }
-
-				MainRenderer->renderQuad({ x * 8.0f,y * 8.0f }, { 7,7 }, MainRenderer->CreateColor(R, G, B, 255));
-			}
-		}
-
-		DEBUG_CODE(CheckGLERROR());
-
-        FBO = new FrameBufferObject(1280, 970);
-        FBO->Bind();
-        glViewport(0, 0,1280, 970);
-        //  Graphics::Texture::InitDebug();
         DEBUG_CODE(CheckGLERROR());
-
-        //(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format)
 	}
 
-	virtual void OnRender() override
-	{
-        DEBUG_CODE(CheckGLERROR());
+    virtual void OnRender() override
+    {
         FBO->Bind();
-        {	
-
+        {
             FBO->Clear();
-
             OpenGL::bind_VAO(VAO);
+
             getWindow().defaultShader().Bind();
             {
                 ModelMatrix.Bind();
@@ -250,18 +251,21 @@ class App
 
             MainRenderer->Render();
             ProfilerTest->Render();
-        }    
 
+            TestTexture->g_Handle();
+             
+            MainRenderer->renderImage({ 100, 100 }, { 300, 300 }, TestTexture);
+            MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
+        }
         FBO->Unbind();
-        FBO->Render();
+
+        MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
         DEBUG_CODE(CheckGLERROR());
 	}
 
-	
 	size_t PreviousTime;
 	virtual void OnUpdate() override
 	{
-		//MainRenderer->renderQuad({ 100,100 }, { 10,10 });
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
@@ -278,7 +282,6 @@ int main()
     TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
 	App MyApp;
 	MyApp.Init();
-	DEBUG_CODE(CheckGLERROR());
 
 	iVec2 r = OpenGL::get_MaximumViewportDimensions();
 	Print("Max Viewport Dimensions: " << r.x << " : " << r.y);
@@ -295,6 +298,7 @@ int main()
   
 
 
+int LOOP_COUNT{ 1000000 };
 
 #define MY_WRAPPER
 #define NUMBER_OF_THREADS 200
@@ -514,13 +518,25 @@ bool TEST_PROFILE_WINDOW()
 	return true;
 }
 
+//1265 681   1280 720 = (15,39)
+//  _width += 15;
+//   _height += 39;
 
 
+/*
+PFNGLVIEWPORTPROC glad_glViewport = NULL;
+PFNGLVIEWPORTARRAYVPROC glad_glViewportArrayv = NULL;
+PFNGLVIEWPORTINDEXEDFPROC glad_glViewportIndexedf = NULL;
+PFNGLVIEWPORTINDEXEDFVPROC glad_glViewportIndexedfv = NULL;
+glad_glViewportPositionWScaleNV
+*/
 
 /*
 =====================================================================================================================
 									  NOTES:
 =====================================================================================================================
+ OpenGL & Window System Integration
+ https://www.cs.montana.edu/courses/fall2004/425/course24.pdf
 
  Pragmas for C++ Compilers, Good resource
  https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.cbclx01/prag_ishome.htm
@@ -533,8 +549,6 @@ bool TEST_PROFILE_WINDOW()
 
  Physics Solver:
  https://www.gdcvault.com/play/1013359/High-Performance-Physics-Solver-Design
-
-
 
  Advanced Programming with Microsoft Quick C
  https://books.google.com/books?id=IjCjBQAAQBAJ&pg=PA41&lpg=PA41&dq=%23pragma+check_stack(+%5B%7B+on+%7C+off+%7D%5D+)+what+does+it+do&source=bl&ots=44JLKNArHT&sig=ACfU3U3eSXG1JpiNDv9IgKbrUv3ByJrJqw&hl=en&sa=X&ved=2ahUKEwj3rrKygeTmAhVxkuAKHbx8C1YQ6AEwAXoECAkQAQ#v=onepage&q=%23pragma%20check_stack(%20%5B%7B%20on%20%7C%20off%20%7D%5D%20)%20what%20does%20it%20do&f=false
@@ -691,4 +705,62 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
 
 
 
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+        Vec2 _size = Vec2(8, 8);
+        Vec2 Space = Vec2(1, 1);
+        Vec2 Count = Vec2(80, 60);
+
+ for_loop(y, Count.y)
+ {
+     for_loop(x, Count.x)
+     {
+         Vec2 _topleft
+         (
+             x * (_size.x + Space.x),
+             y * (_size.y + Space.y)
+         );
+ 
+         TestBatch.push_back(Vec2(_topleft.x, _topleft.y));
+         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+         TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+         TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+     }
+ }
+ MainRenderer->SetRenderColor(0, 255, 255, 255);
+ for_loop(y, Count.y)
+ {
+     for_loop(x, Count.x)
+     {
+         Vec2 _topleft
+         (
+             x * (_size.x + Space.x),
+             (y + Count.y) * (_size.y + Space.y)
+         );
+ 
+         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y));
+         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+     }
+ }
+ 
 */

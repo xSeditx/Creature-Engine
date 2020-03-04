@@ -12,6 +12,12 @@
 
 #include"Shader.h"
 
+
+Shader::Shader(std::string _vertstring, std::string _fragstring)
+{
+    CompileStrings(_vertstring, _fragstring);
+}
+
 Shader::Shader(const char* filepath)
 	:
 	Filepath(filepath),
@@ -52,26 +58,8 @@ void Shader::Unbind()
 	int Prog = Pop().GL_Handle;
 	glUseProgram(Prog);
 	//DEBUG_CODE(Print("Reenabling Shader:" << Shader::get_CurrentShader()));
-	//DEBUG_CODE(CheckGLERROR(););
-}
-//
-//void Shader::Enable()
-//{
-//	glUseProgram(GL_Handle);
-//	//Print("Enabling Shader: " << GL_Handle);
-//	Push(*this);
-//	DEBUG_CODE(CheckGLERROR(););
-//}
-//void Shader::Disable()
-//{
-//	REFACTOR("Perhaps return just the Shader ID instead of dereferencing a pointer here.");
-//	//DEBUG_CODE(Print("Disabling Shader:" << Shader::get_CurrentShader()));
-//	int Prog = Pop().GL_Handle;
-//	glUseProgram(Prog);
-//	//DEBUG_CODE(Print("Reenabling Shader:" << Shader::get_CurrentShader()));
-//	//DEBUG_CODE(CheckGLERROR(););
-//}
-
+ }
+ 
 void Shader::Push(Shader& shad)
 {
 	ActiveShader.push(&shad);
@@ -277,17 +265,21 @@ void Shader::SetUniform(const char* _name, float _val, float _val2, float _val3)
 {
 	_GL(glUniform3f(glGetUniformLocation(GL_Handle, _name), _val, _val2, _val3));
 }
+void Shader::SetUniform(const char* _name, float _val, float _val2, float _val3, float _val4)
+{
+    _GL(glUniform4f(glGetUniformLocation(GL_Handle, _name), _val, _val2, _val3, _val4));
+}
+
+ 
+
 void Shader::SetUniform(const char* _name, int _val)
 {
 	_GL(glUniform1i(glGetUniformLocation(GL_Handle, _name), _val));
 }
 
-
-
 void Shader::SetUniform(const char* _name, uint64_t _val)
 {
 	GLuint Location = glGetUniformLocation(GL_Handle, _name);
-	//glUniform1ui(Location, _val);
 	_GL(glProgramUniformui64NV(GL_Handle, glGetUniformLocation(GL_Handle, _name), _val));
 }
 
@@ -353,14 +345,16 @@ void Shader::SetTextureUniform(const char *_name, uint64_t _tex)
 {
 	_GL(glProgramUniformui64NV(GL_Handle, glGetUniformLocation(GL_Handle, _name), _tex));
 }
+void Shader::SetTextureUniform(const char *_name, uint32_t _textureID, int _slot)
+{
+    glActiveTexture(GL_TEXTURE0 + _slot);
+    glBindTexture(GL_TEXTURE_2D, _textureID);
+   SetUniform(_name, _slot);
+}
 
 int Shader::AttributeLocation(const char *_name)
 {
 	return glGetAttribLocation(GL_Handle, _name);
-}
-Shader::Shader(std::string _vertstring, std::string _fragstring)
-{
-	CompileStrings(_vertstring, _fragstring);
 }
  
 void Shader::CompileStrings(std::string _vertstring, std::string _fragstring)

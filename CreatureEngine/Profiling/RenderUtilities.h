@@ -60,7 +60,7 @@ namespace Profiling
             ReadBuffer ( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
             WriteBuffer( new Pixel[static_cast<size_t>(_dataRange.x) * static_cast<size_t>(_dataRange.y)]),
 			Model      ({ Vec3(0.0f), Vec3(0.0f), "Model" }),
-			Camera     (Camera2D(Vec2(640, 480 )))
+			Camera     (Camera2D(Vec2(SCREEN_X, SCREEN_Y)))
         {
             TODO("Still much work to do here. Perhaps just store a list of values and make a line drawing routine to draw lines from one data point to the other.");
 
@@ -104,7 +104,7 @@ namespace Profiling
 
             // Creates the display texture
             DisplayTexture = Graphics::Texture(*(new Graphics::Bitmap(ReadBuffer, _dataRange)));// We dereference the Memory Address where the object was constructed than we pass that into Texture for construction and this should give us in place construction of the returned texture???
-            VAO = OpenGL::create_VAO();// Create an ID for our VAO
+            VAO = OpenGL::new_VAO();// Create an ID for our VAO
             OpenGL::bind_VAO(VAO);     // Enable our VAO
 
             // Create the Vertex Buffer Object containing the Vertices and UV Coords
@@ -119,7 +119,7 @@ namespace Profiling
                     Vec4( Size.x ,   Size.y   ,    1.0f,  1.0f)
                 };
 
-                VBO = OpenGL::create_VBO();
+                VBO = OpenGL::new_VBO();
                 OpenGL::bind_VBO(VBO);
                 OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
             }

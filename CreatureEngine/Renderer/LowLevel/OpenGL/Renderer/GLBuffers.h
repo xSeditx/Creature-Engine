@@ -372,7 +372,6 @@ class FrameBufferObject
 public:
 	FrameBufferObject() = default;
 
-
     /* Creates a Frame Buffer Object for the user to Render to */
 	FrameBufferObject(int _width, int _height, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
 
@@ -436,8 +435,8 @@ public:
 	enum Target_t
 	{
 	    Write = GL_DRAW_FRAMEBUFFER, 
-	    Read = GL_READ_FRAMEBUFFER,
-	    Both = GL_FRAMEBUFFER
+	    Read  = GL_READ_FRAMEBUFFER,
+	    Both  = GL_FRAMEBUFFER
 	};
 };
 

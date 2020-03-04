@@ -75,14 +75,16 @@ void Camera2D::Update()
 
 void Camera2D::Resize(Vec2 _size)
 {
-    glViewport(0, 0, (GLsizei)_size.x, (GLsizei)_size.y);
+    OpenGL::set_Viewport(0, 0, (GLsizei)_size.x, (GLsizei)_size.y);
     Zoom(0.0f);
 }
 
 void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
+    TODO("Make a Zoom In To Function that Zooms to an XY location regardless of specifically where the cameras Center is at that moment");
     REFACTOR("I believe it is fixed although it appears ever so slightly off on the Y axis. Perhaps I need to adjust for aspect ratio or something idk");
     ZoomLevel += (_amount / 100);
+
     if (ZoomLevel < 0)
     {// Prevent Projection Matrix from Inverting
         ZoomLevel = 0;  
@@ -96,3 +98,38 @@ void Camera2D::Zoom(float _amount)
 }
 void Camera2D::ZoomIn(float _amount) {  Zoom(-_amount);  }
 void Camera2D::ZoomOut(float _amount){  Zoom(_amount); }
+
+
+
+/*  Zooms in or out of a scene by manipulating the Projection Matrix */
+void Camera2D::ZoomInto(Vec2 _pos, float _amount)
+{
+    ZoomLevel += (-(_amount) / 100);
+    if (ZoomLevel < 0)
+    {// Prevent Projection Matrix from Inverting
+        ZoomLevel = 0;
+        return;
+    }
+
+    ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
+    ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(_pos.x, _pos.y, 0));
+    ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
+    ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(_pos.x), -(_pos.y), 0));
+}
+
+
+/*  Zooms in or out of a scene by manipulating the Projection Matrix */
+void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
+{
+    ZoomLevel += ((_amount) / 100);
+    if (ZoomLevel < 0)
+    {// Prevent Projection Matrix from Inverting
+        ZoomLevel = 0;
+        return;
+    }
+
+    ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
+    ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(_pos.x, _pos.y, 0));
+    ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
+    ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(_pos.x), -(_pos.y), 0));
+}

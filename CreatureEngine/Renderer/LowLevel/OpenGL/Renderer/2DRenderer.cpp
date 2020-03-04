@@ -1,6 +1,42 @@
 #include "2DRenderer.h"
 
 
+
+GLuint DebugQuadVAO{ 0 };
+GLuint DebugQuadVBO{ 0 };
+Shader *QuadRenderer{ nullptr };
+Camera2D *debugCamera{ nullptr };
+
+
+//===============================================================================================================
+
+std::string VQuadRenderer =
+"#version 330 core     \n\
+layout(location = 0) in vec2 aPos; \n\
+uniform vec4 Position; \n\
+uniform mat4 ProjectionMatrix;     \n\
+uniform mat4 ViewMatrix;           \n\
+out vec2 TexCoords; \n\
+void main()                        \n\
+{                                  \n\
+ TexCoords = aPos; \n\
+    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+}";
+
+std::string FQuadRenderer =
+"#version 330 core \n\
+uniform sampler2D DiffuseTexture;\n\
+in vec2 TexCoords; \n\
+out vec4 FragColor;            \n\
+void main()                    \n\
+{                              \n\
+    FragColor = texture(DiffuseTexture, TexCoords);\n\
+}";
+
+
+
 namespace OpenGL
 {
 
@@ -9,10 +45,10 @@ namespace OpenGL
         mainCamera = Camera2D(_size);
         InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
 
-        QuadVAO      = OpenGL::create_VAO();
-        QuadVBO      = OpenGL::create_VBO();
-        ColorVBO     = OpenGL::create_VBO();
-        TransformVBO = OpenGL::create_VBO();
+        QuadVAO      = OpenGL::new_VAO();
+        QuadVBO      = OpenGL::new_VBO();
+        ColorVBO     = OpenGL::new_VBO();
+        TransformVBO = OpenGL::new_VBO();
 
         InstanceRenderer->Bind();
         {// Sets up the VAO for the Quads
@@ -27,10 +63,19 @@ namespace OpenGL
             OpenGL::bind_VBO(ColorVBO);
             OpenGL::set_Divisor(OpenGL::set_Attribute(4, "Color"), 1);
         }
-        InstanceRenderer->Unbind();
+        InstanceRenderer->Bind();
 
         OpenGL::bind_VBO(QuadVBO); 
         OpenGL::set_BufferData(sizeof(QuadData), QuadData);
+
+
+
+        /* Load a Test Texture to Test With */
+        {
+            Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
+            TestTexture = new Graphics::Texture(*Bmp);
+        }
+
     }
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size, Vec4 _color)
     {
@@ -97,24 +142,6 @@ namespace OpenGL
         return result;
     }
 
-
-
-
-
-    /*
-    
-    	enum  Surface_t { Normals, Albedo, Metallic };
-
-        using SurfaceFragment = std::pair<Surface_t, Texture_ID_t>;
-        using Surface = std::vector<SurfaceFragment>;
-        using Material = std::pair<Surface, Shader_ID_t>;
-        using RenderPair = std::pair<Material, Mesh_ID_t>;
-
-        std::vector<Shader*> Shaders;
-        std::vector<Graphics::Texture*> Textures;
-        std::vector<Mesh*> Meshes;
-    */
-
     void Renderer2D::Submit(Shader& _shader, Graphics::Texture& _texture, Mesh& _mesh)
     {
         uint32_t Shader_Index = static_cast<uint32_t>(Shaders.size());
@@ -129,10 +156,10 @@ namespace OpenGL
         Surf.emplace_back( Surface_t::Diffuse, Texture_Index );
 
         Material Mat = { Surf, Shader_Index };
-        RenderPair Bucket = { Mat, Mesh_Index };
+     
+        Buckets.emplace_back(Mat, Mesh_Index); //  RenderPair Bucket = { Mat, Mesh_Index };
+
     }
-
-
     void  Renderer2D::Render_Buckets()
     {
         std::vector<FrameBufferObject*> FrameBuffers;
@@ -141,30 +168,70 @@ namespace OpenGL
         {// This and the Following Loop are literally the same thing
             for (auto& S : Shaders)
             {
-                int TextureSlot{ 0 };
-                for (auto& T : Textures)
-                {// Binds all relavent Textures. Not needed in AZDO
-                    glActiveTexture(GL_TEXTURE0 + TextureSlot);
-                    glBindTexture(GL_TEXTURE_2D, T->g_Handle());
-                    ++TextureSlot;
+                S->Bind();
+                {
+                    int TextureSlot{ 0 };
+                    for (auto& T : Textures)
+                    {// Binds all relavent Textures. Not needed in AZDO
+                        glActiveTexture(GL_TEXTURE0 + (TextureSlot++));
+                        glBindTexture(GL_TEXTURE_2D, T->g_Handle());
+                    }// PBR Material is now bound and Active in the Shader 
                 }
+                for (auto& B : Buckets)
+                {
+                    // B.first.first.
+                }
+                S->Unbind();
             }
         }
+
+
+
     }
 
+
+    void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image)
+    {
+        OpenGL::bind_VAO(DebugQuadVAO);   
+        debugCamera->Update();
+
+        QuadRenderer->Bind();
+        {
+            debugCamera->Bind();
+            QuadRenderer->SetUniform("Position", _pos.x, _pos.y, _size.x, _size.y);
+            QuadRenderer->SetTextureUniform("DiffuseTexture", _image->g_Handle(), 1);
+            Renderer::drawArray(DebugQuadVBO,  6 );
+        }
+        QuadRenderer->Unbind();
+    }
 }//NS OpenGL
 
-/*
 
 
+bool Init_DefaultShaders()
+{
+    QuadRenderer = new Shader(VQuadRenderer, FQuadRenderer);
+    DebugQuadVAO = OpenGL::new_VAO();
+    DebugQuadVBO = OpenGL::new_VBO();
+    debugCamera = new Camera2D(SCREEN_X, SCREEN_Y);
+    Vec2 QuadData[6] =
+    {
+        Vec2(0, 0),  Vec2(1, 0),  Vec2(0, 1),
+        Vec2(1, 1),  Vec2(0, 1),  Vec2(1, 0)
+    };
+    QuadRenderer->Bind();
+    {
+        OpenGL::bind_VAO(DebugQuadVAO);
 
-for(auto& S: Shaders)
-        {
-            for(auto& T: Textures)
-            { }
-        }
-*/
+        OpenGL::bind_VBO(DebugQuadVBO);
+        OpenGL::set_Attribute(2, "aPos");
+        OpenGL::set_BufferData(sizeof(QuadData), QuadData);
+    }
+    QuadRenderer->Unbind();
 
+
+    return true;
+}
 
 
 /*

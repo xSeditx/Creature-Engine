@@ -63,6 +63,8 @@ private:
                 // We are going to likely want to access this a number of ways
                 Vec2 Relative{ 0,0 };
 
+                // We need this to get the Delta between a Click and a Release Event
+                Vec2 DragSpace{ 0,0 };
                 struct
                 {//TODO: Union to Access Buttons as Array might be useful as well
                     bool
@@ -73,8 +75,25 @@ private:
                         X2{ false };
                 }Buttons;
 
+                float Wheel{ 0 };
+
                 void Hide() { Print("Hide Mouse"); }
                 void Show() { Print("Hide Mouse"); }
+
+                void Update(Vec2 _pos, float _wheel)
+                {
+                    OldPosition = Position;
+                    Position = _pos;
+                    Relative = Position - OldPosition;
+                    WheelDelta = _wheel;
+                    Wheel += Wheel;
+                    //Print("rX: " << Relative.x); 
+                   // Print("rY: " << Relative.y);
+                }
+
+            private:
+                Vec2 OldPosition{0,0};
+                float WheelDelta{0};
             }static Mouse;
             struct _keyboard
             {
@@ -168,16 +187,22 @@ private:
         /* Gets the default Shader Object */
         Shader& defaultShader() { return *WindowShader; }
  
+        /* Return the OS Dimensions of the Window */
+        Vec2 get_WindowSize();
+
         /* returns the default Camera for our Window */
         Camera2D& g_Camera()
         {
             return *defaultCamera;
         }
+
         /* Sets the Default Camera for our Window */
         void s_Camera(Camera2D* _camera)
         {
             defaultCamera = _camera;
         }
+        
+
     protected:
         Shader* WindowShader{ nullptr };
         Camera2D* defaultCamera{ nullptr };
@@ -185,7 +210,6 @@ private:
     private:
 
         Window* Parent = nullptr;
-
 
         HGLRC GL_Context{ 0 };
 
@@ -352,7 +376,7 @@ public:
 };// Application
 
 
-
+Vec2 SplitLParam(int lParam);
 
 /* =============================================================================================================================================
 /*                                                TRASH
