@@ -188,7 +188,7 @@ layout(location = 0) in vec2 aPos;                 \n\
 out vec2 TexCoords;                                \n\
 void main()                                        \n\
 {                                                  \n\
-    TexCoords = (aPos.xy + 1.0f) * 0.5f;           \n\
+    TexCoords = (aPos.xy + 1.0f) * 0.5f;          \n\
     gl_Position = vec4(aPos.x, aPos.y, -1.0, 1.0); \n\
 }";
 
@@ -199,7 +199,7 @@ in  vec2 TexCoords;                               \n\
 out vec4 FragColor;                               \n\
 void main()                                       \n\
 {                                                 \n\
-    FragColor =  vec4(texture(FrameBufferTexture,TexCoords.xy).xyz, 1.0);  \n\
+    FragColor =  vec4(texture(FrameBufferTexture,TexCoords.xy).xyz, 1);  \n\
 }";
 
 //  vec4(TexCoords.x, TexCoords.y, 0.0, 1.0) +;  vec4(TexCoords.x, TexCoords.y,1,1)
