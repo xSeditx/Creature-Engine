@@ -283,7 +283,6 @@ int main()
  	Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w );
 
 	MyApp.Run();
-	MyApp.End();
 
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();
