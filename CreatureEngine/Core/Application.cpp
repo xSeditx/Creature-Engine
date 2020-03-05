@@ -98,24 +98,8 @@ USAGE:
 	 End();
  }
 
- void Application::Window::EventHandler::PollEvents()
- {
-	 MSG msg;
-	 while (PeekMessage(&msg, Application::getWindow().g_Handle(), 0, 0, PM_REMOVE))
-	 {
-		 Application::Window::EventHandler::get().PostMSG(msg);
-//		 Print("Message" << msg.message);
-		 DispatchMessage(&msg);
-	 }
- }
- void Application::Window::EventHandler::Dispatch(Event msg)
- {
 
-	 for (auto& Callback : ListenerMap[msg.message])
-	 {
-		 Callback->Handler(msg);
-	 }
- } 
+
  void Application::Update()
  { // Calls User defined Application Update function
 	 OnUpdate();
@@ -383,61 +367,6 @@ Vec2 Application::Window::get_WindowSize()
     }
     return Vec2(0);
 }
-///==================================================================================================================
-
-void Application::Window::EventHandler::PostMSG(Event msg)
-{
-	Messages.push(msg);
-}
-void Application::Window::EventHandler::RegisterListener(MsgType msg, Listener& handler)
-{
-	ListenerMap[msg].push_back(&handler);
-}
-void Application::Window::EventHandler::RemoveListener(MsgType msg, Listener& handler)
-{
-	ListenerMap[msg].erase(std::find(ListenerMap[msg].begin(), ListenerMap[msg].end(), &handler));
-}
-bool Application::Window::EventHandler::PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags)
-{
-	if (Messages.size())
-	{
-		msg = Event(Messages.front());
-		if (msg.message > rangemin && msg.message < rangemax)
-		{
-			switch (handlingflags)
-			{
-			case 0:
-			{// ONLY USE THIS FOR NOW
-				Messages.pop();
-				return true;
-			}break;
-			case 2:
-			{
-				__debugbreak();
-			}break;
-			case 3:
-			{/// THIS WILL CURRENTLY BE A PROBLEM DO NOT USE IT
-				Messages.pop();
-				PostMSG(msg);
-				__debugbreak();
-			}break;
-
-			}
-		}
-	}
-	return false;//Messages.size() > 0;
-}
-bool Application::Window::EventHandler::PeekMSG(Event& msg)
-{
-	
-	if (Messages.size() > 0) 
-	{
-		msg = Event(Messages.front());
-		Messages.pop();
-		return true;
-	}
-	return false;
-}
 
 void Application::RemoveListener  (MsgType _msg, Listener& _handler)
 {
@@ -494,21 +423,6 @@ void Application::Resize(Vec2 _size)
 }
 
 
-Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	Event result;
-	result.hwnd = hwnd;
-	result.message = uMsg;
-	result.wParam = wParam;
-	result.lParam = lParam;
-
-	POINT p;
-	GetCursorPos(&p);
-	result.pt = p;
-
-	result.time = GetTickCount();
-	return result;
-}
 
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -549,12 +463,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 _static Application::Window::InputDevices::_mouse    Application::Window::InputDevices::Mouse;
 _static Application::Window::InputDevices::_keyboard Application::Window::InputDevices::Keyboard;
-_static Application::Window::EventHandler& Application::Window::EventHandler::get()
-{
-	static Application::Window::EventHandler instance;
-	return instance;
-}
-
+//_static Application::Window::EventHandler& Application::Window::EventHandler::get()
+//{
+//	static Application::Window::EventHandler instance;
+//	return instance;
+//}
+//
 
 
 std::string VertexShader =

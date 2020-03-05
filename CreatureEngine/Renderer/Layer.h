@@ -1,5 +1,6 @@
-#include"EventSystem.h"
- 
+#include"Core/Common.h"
+#include"Core/Application.h"
+#include"Core/EventSystem.h"
 
 class CREATURE_API Layer
 {
@@ -10,13 +11,17 @@ public:
 	virtual void OnAttach();
 	virtual void OnDetach();
 	virtual void OnUpdate();
-	virtual void OnEvent(Event& _msg);
+
+//	virtual void OnEvent(Event& _msg);
 
 	/* Returns the Debug name of our current Layer */
-	inline const std::string& g_Name() const { return LayerName; }
+    inline const std::string& g_Name() const { return LayerName; }
 
 	/* Tells if current layer is enabled or not */
-	bool is_Enabled() { return Enabled _EQUALS_ true; }
+    bool is_Enabled();
+
+    EventHandler Observer;
+    
 private:
 	bool Enabled;
 	std::string LayerName;
@@ -39,8 +44,9 @@ public:
 
 	void CreateOverlays();
 	void DeleteOverlays();
-	std::vector<Layer*>::iterator begin() { return Stack.begin(); }
-	std::vector<Layer*>::iterator end() { return Stack.end(); }
+
+    std::vector<Layer*>::iterator begin();
+    std::vector<Layer*>::iterator end();
 
 	layerStack* Overlays;
 private:

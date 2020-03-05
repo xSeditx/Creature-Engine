@@ -1,10 +1,6 @@
 #include "Renderer.h"
 #include "Core/Common.h"
-
-
-namespace OpenGL
-{
-
+#include "../../../Layer.h"
 /*     foreach(render target)    // framebuffer
         foreach(pass)             // depth, blending, etc... states
 
@@ -24,6 +20,35 @@ namespace OpenGL
     }
  */
 
+namespace OpenGL
+{
+
+    struct GPU_MemoryPool
+    {
+        /* Create a pool of Memory on the GPU */
+        GPU_MemoryPool(uint32_t _size)
+        {
+            GL_Handle = OpenGL::new_VBO();
+            OpenGL::bind_VBO(GL_Handle);
+            OpenGL::set_BufferData(_size, nullptr);
+        }
+        /* Make memory buffer current in OpenGL state */
+        void Bind() 
+        { 
+            OpenGL::bind_VBO(GL_Handle); 
+        }
+        
+        void *Map()
+        {
+            return glMapBuffer(Target, GL_READ_BUFFER);
+        } 
+        void *MapRange(uint32_t _start, uint32_t _length)
+        {//target offset length access
+            return glMapBufferRange(Target, _start, _length, GL_READ_BUFFER);
+        }
+        uint32_t GL_Handle{ 0 };
+        uint32_t Target{ GL_ARRAY_BUFFER };
+    };
     struct Object
     {
         uint32_t GL_Handle;
@@ -42,7 +67,21 @@ namespace OpenGL
 
         size_t size() { return Size; }
 
+/*
+        uint32_t size() { return Length; }
+        char* get() { return Data; }
+
     private:
+        uint32_t Start{ 0 };
+        uint32_t Length{ 0 };
+        char *Data;
+*/
+
+    private:
+        uint32_t Start{ 0 };
+        uint32_t Length{ 0 };
+
+
         uint32_t VAO;
         Vec2 *Data;
         size_t Size{ 0 };
@@ -99,9 +138,8 @@ namespace OpenGL
 	public:
 		NO_COPY_OR_ASSIGNMENT(Renderer2D);
 
+        layerStack Layers;
 
-        Graphics::Texture *TestTexture{ nullptr };
-   
         using Texture_ID_t = uint32_t;
         using Mesh_ID_t = uint32_t;
         using Shader_ID_t = uint32_t;

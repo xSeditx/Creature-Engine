@@ -8,6 +8,7 @@
 #include<windowsx.h>
 #include<unordered_map>
 
+#include"EventSystem.h"
 #include"../Core/Common.h"
 #include"../Renderer/LowLevel/OpenGL/OpenGL.h"
 #include"../Renderer/LowLevel/OpenGL/Shader/Shader.h"
@@ -19,31 +20,8 @@ extern std::string BasicFragmentShader;
 extern std::string VertexShader;
 extern std::string FragmentShader;
 
-using MsgType = uint32_t;
-using Event = MSG;
 
-Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-/* Creates a Listener Object to Handle whatever message is assigned to it
-Syntax:   Listener(void(*func)(Event))   */
-struct Listener
-{
-public:
-    Listener(void(*func)(Event))
-        :
-        _handler(func)
-    {}
-    void SetHandler(void(*func)(Event))
-    {
-        _handler = func;
-    }
-    inline void Handler(Event msg)
-    {
-        _handler(msg);
-    };
-private:
-    void(*_handler)(Event msg);
-};
 class Application
 {
 private:
@@ -233,8 +211,8 @@ private:
     private:
 
         void create_DefaultShader();
-
-        struct EventHandler
+        EventHandler Observer;
+        /* struct EventHandler
         {
             EventHandler() = default;
         public:
@@ -257,10 +235,11 @@ private:
         private:
             std::queue<Event> Messages;
             std::unordered_map<MsgType, std::vector<Listener*>> ListenerMap;
-        };
+        };*/
 
     public:
-        static EventHandler& Messenger() { return EventHandler::get(); }
+        //  static EventHandler& Messenger() { return EventHandler::get(); } 
+        EventHandler& Messenger() { return Observer; }
     }  mainWindow;// Window
 
  public:
@@ -360,7 +339,7 @@ public:
 
     static Application& get() { return *AppInstance; }
     static Application::Window& getWindow() { return AppInstance->mainWindow; }
-    static void setWindow(Application::Window& _window) { AppInstance->mainWindow = _window; }
+    static void setWindow(Application::Window& _window) { AppInstance->mainWindow = std::forward<Application::Window>(_window); }
 
     static Application::Window::InputDevices& getDevice() { return AppInstance->mainWindow.Input; }
     static Window::InputDevices::_mouse& getMouse() { return AppInstance->getDevice().Mouse; }

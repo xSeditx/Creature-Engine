@@ -185,6 +185,7 @@ namespace OpenGL
         glHint(_hint, _mode);
         DEBUG_CODE(CheckGLERROR());
     }
+
     /* ==========================================================
                      Vertex Array Object Management
     /* ==========================================================*/
@@ -217,6 +218,16 @@ namespace OpenGL
     }
 
     /* ==========================================================
+                     Generic Buffer Object Management
+    /* ==========================================================*/
+
+    void bind_Buffer( uint32_t _bufferID, uint32_t _target = GL_ARRAY_BUFFER)
+    {// Binds an OpenGL Buffer Object of type _target
+        glBindBuffer(_target, _bufferID);
+        DEBUG_CODE(CheckGLERROR());
+    }
+
+    /* ==========================================================
                      Vertex Buffer Object Management
     /* ==========================================================*/
 
@@ -232,11 +243,12 @@ namespace OpenGL
         glDeleteBuffers(1, &_id);
     }
 
-    void bind_VBO(int32_t _vboID)
+    void bind_VBO(uint32_t _vboID)
     { // Sets Vertex Buffer Object as Current 
         glBindBuffer(GL_ARRAY_BUFFER, _vboID);
         DEBUG_CODE(CheckGLERROR());
     }
+
     void unbind_VBO()
     { // Unbinds all Vertex Buffer Objects from OpenGL
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -278,7 +290,7 @@ namespace OpenGL
     bool isIBO(int _array)
     {// Is an ID a Vertex Buffer Object 
         REFACTOR("Not sure if this is complete. isIBO() in OpenGL.cpp");
-        return (bool)(glIsBuffer(_array));
+        return (bool)(glIsBuffer(_array)); 
     }
 
 
