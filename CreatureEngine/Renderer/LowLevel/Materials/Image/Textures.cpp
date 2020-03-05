@@ -3,12 +3,19 @@
 
 namespace Graphics
 {
-
+    Texture::~Texture()
+    {
+        if (imageOwned)
+        {
+            delete(Picture);
+        }
+    }
     Texture::Texture(std::string _file) noexcept 
 		:
 		Type(0),
 		Picture(nullptr),
-		ImageFormatComplete(false)
+		ImageFormatComplete(false) ,
+        imageOwned{ false }
 	{
 		WARN_ME("SOIL Load on the Texture constructor is Deactivated right now");
         Picture = new Bitmap(_file);

@@ -6,8 +6,12 @@
 #include"../OpenGL.h"
 #include"Core/Common.h"
 
-class uniform_t;
 
+#define   VERTEX_LOCATION    0
+#define   NORMALS_LOCATION   1
+#define   UVCOORD_LOCATION   2
+#define   COLORS_LOCATION    3
+#define   TANGENT_LOCATION   4
 
 class Shader
 {

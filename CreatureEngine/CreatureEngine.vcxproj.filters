@@ -128,6 +128,15 @@
     <ClCompile Include="Core\Utility.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Layer.cpp">
+      <Filter>Source Files\Graphics\Renderer\LowLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\EventSystem.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">
@@ -219,6 +228,15 @@
     </ClInclude>
     <ClInclude Include="Core\Defines.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Layer.h">
+      <Filter>Source Files\Graphics\Renderer\LowLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\EventSystem.h">
+      <Filter>Source Files\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

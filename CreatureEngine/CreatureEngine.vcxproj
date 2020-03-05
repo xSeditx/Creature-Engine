@@ -142,12 +142,14 @@
     <ClCompile Include="Core\ECS\ECS.cpp" />
     <ClCompile Include="Core\ECS\ECScomponent.cpp" />
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
+    <ClCompile Include="Core\EventSystem.cpp" />
     <ClCompile Include="Core\Threading\TestFunctions.cpp" />
     <ClCompile Include="Core\Threading\Threadpool.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
     <ClCompile Include="Profiling\SystemInfo.cpp" />
+    <ClCompile Include="Renderer\Layer.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp" />
@@ -157,6 +159,7 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\DefaultShaders.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
@@ -169,6 +172,7 @@
     <ClInclude Include="Core\ECS\ECS.h" />
     <ClInclude Include="Core\ECS\ECScomponent.h" />
     <ClInclude Include="Core\ECS\ECSsystem.h" />
+    <ClInclude Include="Core\EventSystem.h" />
     <ClInclude Include="Core\Threading\Future.h" />
     <ClInclude Include="Core\Threading\TestFunctions.h" />
     <ClInclude Include="Core\Threading\Threadpool.h" />
@@ -178,6 +182,7 @@
     <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
     <ClInclude Include="Profiling\Timing\Timer.h" />
+    <ClInclude Include="Renderer\Layer.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h" />
@@ -188,6 +193,7 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GameObject.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primitives.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h" />

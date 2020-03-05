@@ -10,10 +10,9 @@ public:
 		Scale(0),
 		Position(0),
 		Rotation(0),
-		Transform(Mat4(0)),
+		Transform(Mat4(1.0f)),
 		Handle(ObjectCount++)
 	{
-		Transform = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
 		Transform = glm::translate(Transform, Position);
 		Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
 		Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
@@ -42,7 +41,6 @@ public:
 
 	//TagID GetID() { return Object_ID; }
 
-
 	void s_Position(Vec3 _position) { Position = _position; }
 	void s_Rotation(Vec3 _rotation) { Rotation = _rotation; }
 	void s_Scale(Vec3 _scale) { Scale = _scale; }
@@ -51,7 +49,6 @@ public:
 
 	void UpdateTransform()
 	{
-
 		Transform = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
 		Transform = glm::translate(Transform, Position);
 		Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
@@ -59,8 +56,6 @@ public:
 		Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
 	}
 
-
- 
 
     /* Compares if two objects refer to a different object. */
 	bool operator !=(GameObject& _other)
@@ -75,15 +70,16 @@ public:
 	}
 
 
-	Mat4 Transform;
-	Vec3 Position, Rotation, Scale;
-	static int ObjectCount;
+    Mat4 Transform{ 1.0f };
+    Vec3 Position{ 0 }, Rotation{ 0 }, Scale{ 1.0f };
 
 	/* Gets the OpenGL VAO handle of the Mesh */
 	const uint32_t g_Handle() const
 	{
 		return GL_Handle;
 	}
+
+	static int ObjectCount;
 
 private:
 	uint32_t GL_Handle{ 0 };

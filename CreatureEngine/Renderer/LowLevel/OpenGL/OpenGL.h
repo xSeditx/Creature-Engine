@@ -204,6 +204,23 @@ namespace OpenGL
 	//============================================================================================
 
 
+    //============================================================================================
+    // GENERIC BUFFER OBJECT 
+    //============================================================================================
+
+    /* Sets Buffer Object as Current using the given target */
+    CREATURE_API void bind_Buffer(uint32_t _bufferID, uint32_t _target);
+
+    template<typename _Ty>
+    CREATURE_API _Ty *map_Buffer(uint32_t _target = GL_ARRAY_BUFFER)
+    {
+        return (_Ty*)glMapBuffer(_target, GL_READ_BUFFER);
+    }
+    template<typename _Ty>
+    CREATURE_API _Ty *map_Range(uint32_t _start, uint32_t _length, uint32_t _target = GL_ARRAY_BUFFER)
+    {//target offset length access
+        return (_Ty*)glMapBufferRange(_target, _start, _length * sizeof(_Ty), GL_READ_BUFFER);
+    }
 
 	//============================================================================================
 	// VERTEX BUFFER OBJECT 
@@ -215,7 +232,7 @@ namespace OpenGL
     CREATURE_API void delete_VBO(uint32_t _id);
 
 	/* Sets Vertex Buffer Object as Current */
-	CREATURE_API void bind_VBO(int32_t _vboID);
+	CREATURE_API void bind_VBO(uint32_t _vboID);
 
 	/*  Unbinds all Vertex Buffer Objects from OpenGL */
 	CREATURE_API void unbind_VBO();

@@ -24,19 +24,6 @@
 using namespace Core;
 using namespace Threading;
 
-
-
-//Nice
-///http://eel.is/c++draft/meta.trans.other
-
-
-// Getting the Stack frame caller
-// https://social.msdn.microsoft.com/Forums/vstudio/en-US/da4e85c5-407e-4a57-87e7-14bf994504d9/error-asm-keyword-not-supported-on-this-architecture?forum=vcgeneral
-// void * memoryAllocator = _ReturnAddress();
-
-//#pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
-//https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
-
 int TestRecursion(int _param)
 {
 	_param--;
@@ -153,7 +140,14 @@ class App
     Graphics::Texture *TestTexture2;
 
 
-
+    virtual void OnEnd() override
+    {
+        delete(TestTexture);
+        delete(TestTexture2);
+        delete(FBO);
+        delete(MainRenderer);
+        delete(ProfilerTest);
+    }
     virtual void OnCreate() override
 	{
         /* Load up the Listeners for the Various Input Events */
@@ -518,23 +512,26 @@ bool TEST_PROFILE_WINDOW()
 	return true;
 }
 
-//1265 681   1280 720 = (15,39)
-//  _width += 15;
-//   _height += 39;
 
-
-/*
-PFNGLVIEWPORTPROC glad_glViewport = NULL;
-PFNGLVIEWPORTARRAYVPROC glad_glViewportArrayv = NULL;
-PFNGLVIEWPORTINDEXEDFPROC glad_glViewportIndexedf = NULL;
-PFNGLVIEWPORTINDEXEDFVPROC glad_glViewportIndexedfv = NULL;
-glad_glViewportPositionWScaleNV
-*/
 
 /*
 =====================================================================================================================
 									  NOTES:
 =====================================================================================================================
+
+ Found 100
+ Cancer found it 5pm 3/4/2020 Moon in Cancer Sun in Pisces 
+
+ Nice
+ http://eel.is/c++draft/meta.trans.other
+
+
+ Getting the Stack frame caller
+ https://social.msdn.microsoft.com/Forums/vstudio/en-US/da4e85c5-407e-4a57-87e7-14bf994504d9/error-asm-keyword-not-supported-on-this-architecture?forum=vcgeneral
+ 
+ pragma message (__FILE__ "[" STRING(__LINE__) "]: test")
+ https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=vs-2019
+
  OpenGL & Window System Integration
  https://www.cs.montana.edu/courses/fall2004/425/course24.pdf
 
@@ -594,96 +591,9 @@ glad_glViewportPositionWScaleNV
     			 threadprivate Specifies that a variable is private to a thread.
 */
 
-
-
-
-
-
-
-
-
-
-
-
-//glVertexAttribPointer(
-//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-//	3,                  // size
-//	GL_FLOAT,           // type
-//	GL_FALSE,           // normalized?
-//	0,                  // stride
-//	(void*)0            // array buffer offset
-//);
-
-
-		 //glGenVertexArrays(1, &VAO);
-		// glBindVertexArray(VAO);
-	   //  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	   //  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
-		 //glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		// GLuint Location = 4;
-		  //Location = glGetAttribLocation(getWindow().defaultShader().g_ID(), "aPos");
-		 //glEnableVertexAttribArray(Location);
-		 //glVertexAttribPointer(Location, 2, GL_FLOAT, GL_FALSE, 0, (char *)NULL);
-
-
-
-
-
-
-
-
-
 /*
-	Vec2 ProfilerVerts[4] =
-	{
-		{-1.0,-1.0 },
-		{ 1.0,-1.0 },
-		{ 0.0, 1.0 },
-		{ 1.0, 1.0 }
-	};
-
-	Vec2 ProfilerUV[4] =
-	{
-		{ 0.0, 0.0 },
-		{ 1.0, 0.0 },
-		{ 1.0, 1.0 },
-		{ 0.0, 1.0 }
-	};
-
-	GLuint ProfilerIndices[3] =
-	{
-		0,1,2,
-	};
-*/
-
-
-//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//	{
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
-//	}
-//	glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //for_loop(y, 100)
-        //{
-        //	for_loop(x, 100)
-        //	{
-        //		float
-        //			Px = x * 21,
-        //			Py = y * 21;
-        //		MainRenderer->renderQuad(Vec2(Px, Py), Vec2(20, 20));
-        //	}
-        //}
-
-
-
-
-
-
-
-
-
-
-/*
-FASTEST RELEASE SETTINGS IN MSVC
+                  FASTEST RELEASE SETTINGS IN MSVC
+                 ==================================
 Disable Vtable Init         	__declspec (novtable)	Stops compiler from generating code to initialize the vfptr in the constructor. Apply to pure interface classes.
 No Throw	                    __declspec (nothrow)	Stops compiler from tracking unwindable objects. Apply to functions that don’t throw exceptions. Recommend using the Std C exception specification throw() instead.
 Pentium Pro	                    /G6	Optimize for PentiumPro and above (program might not run on Pentium)
@@ -703,64 +613,4 @@ Omit frame pointer	            /Oy	Omit frame pointer
 Ctor displacement	            /vd0	Disable constructor displacement.
 Best case ptrs	                /vmb	Use best case “pointer to class member” representation
 
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-        Vec2 _size = Vec2(8, 8);
-        Vec2 Space = Vec2(1, 1);
-        Vec2 Count = Vec2(80, 60);
-
- for_loop(y, Count.y)
- {
-     for_loop(x, Count.x)
-     {
-         Vec2 _topleft
-         (
-             x * (_size.x + Space.x),
-             y * (_size.y + Space.y)
-         );
- 
-         TestBatch.push_back(Vec2(_topleft.x, _topleft.y));
-         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-         TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
-         TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-     }
- }
- MainRenderer->SetRenderColor(0, 255, 255, 255);
- for_loop(y, Count.y)
- {
-     for_loop(x, Count.x)
-     {
-         Vec2 _topleft
-         (
-             x * (_size.x + Space.x),
-             (y + Count.y) * (_size.y + Space.y)
-         );
- 
-         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y));
-         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
-         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
-         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
-     }
- }
- 
 */

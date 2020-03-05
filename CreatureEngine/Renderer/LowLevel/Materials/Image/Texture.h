@@ -28,7 +28,7 @@ namespace Graphics
 		NO_COPY_OR_ASSIGNMENT(Texture);
 
 		Texture() = default;
-
+        ~Texture();
 		/* Load Texture from Image file*/
 		Texture(std::string file) noexcept;
 
@@ -160,7 +160,7 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
         /* Bindless Pointer for AZDO */
 		GPUptr Handle{ NULL };
 
-
+        bool imageOwned{ false };
 		bool MipmapComplete{ false };
 		bool ImageFormatComplete{ false };
     };

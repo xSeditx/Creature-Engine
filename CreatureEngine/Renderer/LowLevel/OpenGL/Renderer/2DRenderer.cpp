@@ -69,25 +69,19 @@ namespace OpenGL
         OpenGL::set_BufferData(sizeof(QuadData), QuadData);
 
 
-
-        /* Load a Test Texture to Test With */
-        {
-            Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
-            TestTexture = new Graphics::Texture(*Bmp);
-        }
-
+        Layers.push(new Layer("Root Layer"));
     }
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size, Vec4 _color)
     {
-        ++InstanceCount;
         Positions.emplace_back(Vec4(_topleft.x, _topleft.y, _size.x, _size.y));
         ColorData.emplace_back(_color);
+        ++InstanceCount;
     }
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size)
     {
-        ++InstanceCount;
-        Positions.emplace_back(Vec4(_topleft.x, _topleft.y, _size.x, _size.y  ));
+        Positions.emplace_back(Vec4(_topleft.x, _topleft.y, _size.x, _size.y));
         ColorData.emplace_back(CurrentRenderColor);
+        ++InstanceCount;
     }
     void Renderer2D::renderQuadBatch(const std::vector<Vec2> _batch)
     {

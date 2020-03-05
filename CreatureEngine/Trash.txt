@@ -1,4 +1,124 @@
+// ============================================================================================================================================================================
+//                                 3/4/2020
+//          Clean up  #Main.cpp
+// ============================================================================================================================================================================
 
+
+//glVertexAttribPointer(
+//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+//	3,                  // size
+//	GL_FLOAT,           // type
+//	GL_FALSE,           // normalized?
+//	0,                  // stride
+//	(void*)0            // array buffer offset
+//);
+//1265 681   1280 720 = (15,39)
+//  _width += 15;
+//   _height += 39;
+
+
+/*
+PFNGLVIEWPORTPROC glad_glViewport = NULL;
+PFNGLVIEWPORTARRAYVPROC glad_glViewportArrayv = NULL;
+PFNGLVIEWPORTINDEXEDFPROC glad_glViewportIndexedf = NULL;
+PFNGLVIEWPORTINDEXEDFVPROC glad_glViewportIndexedfv = NULL;
+glad_glViewportPositionWScaleNV
+*/
+
+//glGenVertexArrays(1, &VAO);
+// glBindVertexArray(VAO);
+//  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
+  //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+ // GLuint Location = 4;
+   //Location = glGetAttribLocation(getWindow().defaultShader().g_ID(), "aPos");
+  //glEnableVertexAttribArray(Location);
+  //glVertexAttribPointer(Location, 2, GL_FLOAT, GL_FALSE, 0, (char *)NULL);
+
+
+    Vec2 ProfilerVerts[4] =
+    {
+        {-1.0,-1.0 },
+        { 1.0,-1.0 },
+        { 0.0, 1.0 },
+        { 1.0, 1.0 }
+    };
+
+    Vec2 ProfilerUV[4] =
+    {
+        { 0.0, 0.0 },
+        { 1.0, 0.0 },
+        { 1.0, 1.0 },
+        { 0.0, 1.0 }
+    };
+
+    GLuint ProfilerIndices[3] =
+    {
+        0,1,2,
+    };
+*/
+
+
+//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//	{
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+//	}
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //for_loop(y, 100)
+        //{
+        //	for_loop(x, 100)
+        //	{
+        //		float
+        //			Px = x * 21,
+        //			Py = y * 21;
+        //		MainRenderer->renderQuad(Vec2(Px, Py), Vec2(20, 20));
+        //	}
+        //}
+/*
+
+        Vec2 _size = Vec2(8, 8);
+        Vec2 Space = Vec2(1, 1);
+        Vec2 Count = Vec2(80, 60);
+
+ for_loop(y, Count.y)
+ {
+     for_loop(x, Count.x)
+     {
+         Vec2 _topleft
+         (
+             x * (_size.x + Space.x),
+             y * (_size.y + Space.y)
+         );
+ 
+         TestBatch.push_back(Vec2(_topleft.x, _topleft.y));
+         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+         TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+         TestBatch.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+     }
+ }
+ MainRenderer->SetRenderColor(0, 255, 255, 255);
+ for_loop(y, Count.y)
+ {
+     for_loop(x, Count.x)
+     {
+         Vec2 _topleft
+         (
+             x * (_size.x + Space.x),
+             (y + Count.y) * (_size.y + Space.y)
+         );
+ 
+         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y));
+         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y + _size.y));
+         TestBatch2.push_back(Vec2(_topleft.x, _topleft.y + _size.y));
+         TestBatch2.push_back(Vec2(_topleft.x + _size.x, _topleft.y));
+     }
+ }
+ 
+*/
 // ============================================================================================================================================================================
 //                                 3/3/2020
 //          Clean up  #Texture.cpp
