@@ -230,6 +230,7 @@ class App
             TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
         }
 
+		init_DefaultShaders();
 
         DEBUG_CODE(CheckGLERROR());
 	}
