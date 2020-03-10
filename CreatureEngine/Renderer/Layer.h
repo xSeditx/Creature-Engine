@@ -12,8 +12,6 @@ public:
 	virtual void OnDetach();
 	virtual void OnUpdate();
 
-//	virtual void OnEvent(Event& _msg);
-
 	/* Returns the Debug name of our current Layer */
     inline const std::string& g_Name() const { return LayerName; }
 
@@ -23,8 +21,8 @@ public:
     EventHandler Observer;
     
 private:
-	bool Enabled;
-	std::string LayerName;
+    bool Enabled{ false };
+    std::string LayerName{};
 };
 
 class CREATURE_API layerStack
@@ -52,5 +50,4 @@ public:
 private:
 	std::vector<Layer*> Stack;
 	std::vector<Layer*>::iterator Inserter_iter;
-
 };

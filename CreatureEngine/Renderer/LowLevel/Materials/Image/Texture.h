@@ -70,11 +70,11 @@ namespace Graphics
 		}
 
         /* Create an Empty Texture from the Given Size _size and Format parameters */
-        Texture(Vec2 _size, int32_t _dataFormat, int32_t _internalFormat = GL_RGBA, uint32_t _wrap = GL_CLAMP_TO_EDGE, uint32_t _filtering = GL_NEAREST, uint32_t _type = GL_FLOAT);
+        Texture(Vec2 _size, int32_t _dataFormat, int32_t _internalFormat = GL_RGBA, uint32_t _wrap = GL_CLAMP_TO_EDGE, uint32_t _filtering = GL_NEAREST, uint32_t _type = GL_FLOAT) noexcept;
 
         /* Updates the Texture with the Memory Pointed to in _memory. 
          NOTE: User is responsible for ensuring memory is proper size */
-		void Update(uint8_t *_memory)
+		void Update(uint8_t *_memory) noexcept
 		{
 			/* Depending on if we are using Bindldess TYextures or not determines how we update this */
 REFACTOR("Change this for Bindless Textures later on. Odds are we should instead generate two sets of Texture code for the Engine\
@@ -90,53 +90,53 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
         /* Sets the Target for the Texture. Default is GL_TEXTURE2D. 
          NOTE: Further work might be needed before it takes effect */
-		void SetTarget(unsigned int param);
+		void SetTarget(unsigned int param) noexcept;
 
         /* Sets the Min Mag filering for Texture */
-		void SetFiltering(unsigned int param);
+		void SetFiltering(unsigned int param) noexcept;
         /* Sets the Magnification filering for Texture */
-        void SetMagFiltering(unsigned int param);
+        void SetMagFiltering(unsigned int param) noexcept;
         /* Sets the Minification filering for Texture */
-        void SetMinFiltering(unsigned int param);
+        void SetMinFiltering(unsigned int param) noexcept;
 
         /* Set the X and Y Wrap params for the Texture */
-		void SetWrap(unsigned int param);
+		void SetWrap(unsigned int param) noexcept;
         /* Set the X Wrap params for the Texture */
-        void SetWrapX(unsigned int param);
+        void SetWrapX(unsigned int param) noexcept;
         /* Set the Y Wrap params for the Texture */
-        void SetWrapY(unsigned int param);
+        void SetWrapY(unsigned int param) noexcept;
 
 		//	OpenGL has a particular syntax for writing its color format enumerants.It looks like this: GL_[components?][size?][type?]
 
         /* Bind Texture Handle to OpenGL State */
-		inline void Bind()
+		inline void Bind() noexcept
 		{
 			glBindTexture(Target, GL_Handle);
 		}
         /* Bind Texture Handle to OpenGL State as well as the Slot in the Active Shader */
-        inline void Bind(uint32_t _slot)
+        inline void Bind(uint32_t _slot) noexcept
         {
             glActiveTexture(GL_TEXTURE0 + _slot);
             glBindTexture(Target, GL_Handle);
         }
         /* Disable Texture from bound slot*/
-		inline void Unbind()
+		inline void Unbind() noexcept
 		{
 			glBindTexture(Target, 0);
 		}
 
         /* Generates Mipmaps for a Texture */
-        void CreateMipmap();
+        void CreateMipmap() noexcept;
         /* Turns ON Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~ */
-        inline void MipmapOn();
+        inline void MipmapOn() noexcept;
         /* Turns OFF  Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~  */
-        inline void MipmapOff();
+        inline void MipmapOff() noexcept;
 
         /* Debug Render which Sends a Rect with the given Texture to the Screen */
-		void Render(int _x, int _y, int _w, int _h);
+		void Render(int _x, int _y, int _w, int _h) noexcept;
 
 		/* Gets the OpenGL Handle of the Texture*/
-		const uint32_t g_Handle() const
+		const uint32_t g_Handle() const noexcept
 		{
 			return GL_Handle;
 		}

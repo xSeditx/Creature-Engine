@@ -21,6 +21,13 @@
 #include"../CreatureEngine/Renderer/LowLevel/OpenGL/OpenGL.h"
 #include"Core/Threading/TestFunctions.h"
 
+#include"Profiling/RenderUtilities.h"
+#include"FrontEnd/Window.h"
+#include"Core/Application.h"
+#include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
+#include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
+
+
 using namespace Core;
 using namespace Threading;
 
@@ -48,13 +55,6 @@ std::mutex DEBUGMutex;
 
 
 bool TEST_PROFILE_WINDOW();
-
-#include"Profiling/RenderUtilities.h"
-#include"FrontEnd/Window.h"
-#include"Core/Application.h"
-#include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
-#include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
-
 #define CAMERA_SPEED 4.0f
 #define ZOOM_SPEED 1.0
 Camera2D* WorldCamera{ nullptr };
@@ -101,9 +101,6 @@ Listener KeyListener(
 
 	}// End of Switch
 });
-
-
-
 Listener MouseWheel(
     [](Event _msg)
 {
@@ -119,26 +116,125 @@ Listener MouseWheel(
     }
 });
 
+#include"Core/ECS/ECS.h"
+#include"Core/ECS/TestComponents.h"
+
+
+EntityComponentSystem *TestECS;
+SystemList MainSystems;
+
+COMPONENT(MovementComponent)
+{
+    Vec3 Velocity;
+    Vec3 Acceleration;
+};
+
+COMPONENT(PositionComponent)
+{
+    Vec3 Position;
+};
+
+struct MovementSystem
+    :
+    public BaseSystem
+{
+    MovementSystem()
+        :
+        BaseSystem()
+    {
+        AddComponentType(PositionComponent::ID);
+        AddComponentType(MovementComponent::ID);
+
+        DEBUG_CODE(SystemName = (typeid(this).name()));
+    }
+
+    virtual void UpdateComponents(float _delta, BaseComponent** _components)
+    {
+        PositionComponent* Pos = (PositionComponent*)_components[0];
+        MovementComponent *Movement = (MovementComponent*)_components[1];
+
+        Movement->Velocity += Movement->Acceleration;
+        Pos->Position += Movement->Velocity;
+        Movement->Velocity *= .9;
+    };
+};
+MovementSystem movementSys;
+PositionComponent PosComponent;
+MovementComponent TestMovementComponent;
+
+
+#include"Creatures/Creatures.h"
+#include"Core/Memory.h"
+//
+//struct Organ
+//{
+//     Organ() = default;
+//     static Memory_Pool<Organ> Pool;
+//
+//     Organ(int _value)
+//         :
+//         Value(_value)
+//     { }
+//
+//    uint32_t  Value{ 0 };
+//
+//     void *operator new(size_t _size)
+//     {
+//         return Pool.Allocate();;
+//     }
+//     void operator delete(void *_item)
+//     {
+//         Pool.Deallocate(_item);
+//     }
+//};
+//Memory_Pool<Organ> Organ::Pool(100);
+
 class App
 	: public Application
 {
+
+    EntityComponentSystem *ECS{ nullptr };
+
 	Vec2 Vertices[3] = { {200.0, 200.0 },  { 400.0, 200.0 },  { 0.0, 400.0 } };
 	Vec2 UVcoords[3] = { {  0.0,   0.0 },  {   1.0,   0.0 },  { 1.0,   1.0 } };
 
 	GLuint Indices[3] = { 0, 1, 2 };
     GLuint VAO{ 0 }, VBO{ 0 };
 
-	OpenGL::Renderer2D *MainRenderer;
-	Profiling::DisplayWindow *ProfilerTest;
+	OpenGL::Renderer2D *MainRenderer{ nullptr };
+	Profiling::DisplayWindow *ProfilerTest{ nullptr };
 	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
 
-    std::vector<Vec2> TestBatch;
-    std::vector<Vec2> TestBatch2;
+    FrameBufferObject *FBO{ nullptr };
+    Graphics::Texture *TestTexture{ nullptr };
+    Graphics::Texture *TestTexture2{ nullptr };
 
-    FrameBufferObject *FBO;
-    Graphics::Texture *TestTexture;
-    Graphics::Texture *TestTexture2;
+    Shader *TextureShader{ nullptr };
+    Mesh *TestMesh{ nullptr };
 
+    std::string VTextureRenderer =
+        "#version 330 core     \n\
+                layout(location = 0) in vec2 aPos; \n\
+                layout(location = 1) in vec4 Position; \n\
+                uniform mat4 ProjectionMatrix;     \n\
+                uniform mat4 ViewMatrix;           \n\
+                out  vec2 TexCoords;               \n\
+                void main()                        \n\
+                {                                  \n\
+                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+                }";
+
+    std::string FTextureRenderer =
+          "#version 330 core \n\
+          uniform sampler2D DiffuseTexture; \n\
+          in  vec2 TexCoords;               \n\
+          out vec4 FragColor;            \n\
+          void main()                    \n\
+          {                              \n\
+              FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);    \n\
+          }";
 
     virtual void OnEnd() override
     {
@@ -147,9 +243,14 @@ class App
         delete(FBO);
         delete(MainRenderer);
         delete(ProfilerTest);
+        delete(ECS);
     }
+
     virtual void OnCreate() override
 	{
+
+     //   assert( TEST_Memory_Pool_Class());
+        assert(TEST_Ring_Buffer_Class());
         /* Load up the Listeners for the Various Input Events */
         {
             RegisterListener(WM_KEYDOWN, KeyListener);
@@ -224,11 +325,32 @@ class App
             TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
         }
 
-		init_DefaultShaders();
+		//init_DefaultShaders();
+        TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
 
+        // Entity Component System
+        //ECS = new EntityComponentSystem();
+        //SystemList mainSystems;
+        //ECStest::TransformComponent transformComp;
+        //ECS->AddComponent(transformComp);
+
+        ECStest::InitECS();
+
+        TestECS = new EntityComponentSystem();
+
+        /// Create Entities
+        EntityPTR Entity = TestECS->MakeEntity(PosComponent, TestMovementComponent);
+
+        /// Create Systems
+
+        MainSystems.AddSystem(movementSys);
+ 
+        TestECS->AddComponent(Entity, &PosComponent);
+        TestECS->AddComponent(Entity, &TestMovementComponent);
+
+         
         DEBUG_CODE(CheckGLERROR());
 	}
-
     virtual void OnRender() override
     {
         FBO->Bind();
@@ -265,7 +387,12 @@ class App
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
+
+        MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
+        TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
+
 	}
+
 
 };
 
@@ -613,5 +740,86 @@ Fast code	                    /Ot	Favor code speed over size
 Omit frame pointer	            /Oy	Omit frame pointer
 Ctor displacement	            /vd0	Disable constructor displacement.
 Best case ptrs	                /vmb	Use best case “pointer to class member” representation
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+\
+
+
+        Organ *Test1[100];
+
+        for (int i = 0; i < 100; ++i)
+        {
+            Test1[i] = new Organ(i);
+        }
+
+        for (int i = 0; i < 50; ++i)
+        {
+            delete(Test1[i]);
+        }
+        for (int i = 0; i < 50; ++i)
+        {
+            Test1[i] = new Organ(i);
+        }
+        for (int i = 0; i < 25; ++i)
+        {
+            delete(Test1[i]);
+        }
+        for (int i = 0; i < 25; ++i)
+        {
+            Test1[i] = new Organ(i);
+        }
+
+        size_t ElementTest{ 0 };
+        for (auto& T : Organ::Pool)
+        {// Cycle over ever Block in the Pool
+            Print("Range ForLoop: " << T.Value);
+            ++ElementTest;
+        }
+        assert(ElementTest   == Organ::Pool.chunkCount());
+        assert(sizeof(Organ) == Organ::Pool.chunkSize());
+
+        for (int i{ 0 }; i < Organ::Pool.size(); ++i)
+        {// Cycle over every Byte in the Raw Data
+            Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
+        }
+
+        Print("Pool Size" << Organ::Pool.size());
+
+        Organ::Pool.clear();
+        for (int i{ 0 }; i < Organ::Pool.size(); ++i)
+        {
+            Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
+        }
+
+
+        Print("Is It Full : " << Organ::Pool.is_Empty());
+        assert(Organ::Pool.is_Full() == true);
+
+        delete(Test1[1]);
+        Print("Testing Delete to Free up Space... Is it Still Full : " << Organ::Pool.is_Full());
+        assert(Organ::Pool.is_Full() == false);
+
+
+        Print("Is It Empty : " << Organ::Pool.is_Full());
+        assert(Organ::Pool.is_Empty() == false);
+
+        Test1[1] = new Organ(1);
+        Print("Allocating Again Is it Full Again: " << Organ::Pool.is_Full());
+        assert(Organ::Pool.is_Full() == true);
+\
 
 */

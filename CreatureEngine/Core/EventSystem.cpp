@@ -15,7 +15,6 @@ void EventHandler::PollEvents() noexcept
 }
 void EventHandler::Dispatch(Event msg) noexcept
 {
-
     for (auto& Callback : ListenerMap[msg.message])
     {
         Callback->Handler(msg);
@@ -77,7 +76,7 @@ bool EventHandler::PeekMSG(Event& msg) noexcept
     return false;
 }
 
-
+/*
 Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     Event result;
@@ -93,3 +92,16 @@ Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     result.time = GetTickCount();
     return result;
 }
+ */
+
+/* ==============================================================================
+                                   NOTES:
+   ==============================================================================
+
+   Observer Pattern:
+   https://gameprogrammingpatterns.com/observer.html
+
+   Event Queue
+   https://gameprogrammingpatterns.com/event-queue.html
+
+*/

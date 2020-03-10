@@ -504,5 +504,11 @@ private:
 
 #define Property (_getter, _setter) __declspec(property(get = _getter, put = _setter))
 
-
+#define Squared(x)   ((x) * (x))
 #endif// COMMON_H
+
+
+
+
+#define TEST_PASSED   true
+#define TEST_FAILED   false

@@ -32,7 +32,7 @@ namespace Graphics
         Size = Vec2(Sx, Sy);
         BytesPerPixel = BPP;
 
-        FlipXAxis();
+       // FlipXAxis();
     }
 
 
@@ -56,24 +56,25 @@ namespace Graphics
 
     void Bitmap::FlipXAxis()
     { // FLIP THE Image TO PLAY NICE WITH OPENGL
-        size_t RowSize = Width() * sizeof(unsigned char) * Channels();
-        size_t ImageSize = RowSize * Height();
-        uint8_t* TempImage = new uint8_t[ImageSize] {0};
-        TODO("Broken FlipXAxis in Bitmap.cpp");
-        for (int Y{ 0 }; Y < Height() ; ++Y)
-        {
-            for (int X = Width() - 1; X > 0; --X)
-            {
-                uint8_t* Source = rawData + (((X + Width() * Y) * Channels()) - Channels());
-                int
-                    Src = (X + Width() * Channels()) * Y ,
-                    Dest= (X + Width() * Channels()) * Y ;
-                memcpy(TempImage + Dest, Source + Src, Channels());
-                // memcpy(TempImage + ((size_t)I * RowSize), (rawData + (ImageSize - (((size_t)I + 1) * RowSize))), RowSize);// Copy bottom row into top of Temp buffer
-            }
-        }
+         size_t RowSize = Width() * sizeof(unsigned char) * Channels();
+         size_t ImageSize = RowSize * Height();
 
-        memcpy(rawData, TempImage, ImageSize);
-        delete[](TempImage);
+         uint8_t* TempImage = new uint8_t[ImageSize] {0};
+
+         for (int Y{ 0 }; Y < Height() ; ++Y)
+         {
+             for (int X = Width() ; X > 0; --X)
+             {
+                 uint8_t* Source = rawData;
+                 int
+                     Src = (((X ) * Channels()) - Channels()),
+                     Dest = ((Width() - X) * Channels()) * Y;
+                 memcpy(TempImage + Dest, Source + Src, Channels());
+             }
+         }
+         
+         memcpy(rawData, TempImage, ImageSize);
+         delete[](TempImage);
     }
 }// NS Graphics
+ 

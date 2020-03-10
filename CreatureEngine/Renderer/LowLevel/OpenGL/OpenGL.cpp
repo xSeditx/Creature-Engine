@@ -545,12 +545,28 @@ namespace OpenGL
     }
 
     //============================================================================================
+    //     SHADER FUNCTIONALITY
+    //============================================================================================
 
+    uint32_t new_ShaderHandle()
+    {
+        return glCreateProgram();
+    }
+    uint32_t new_VertexShader()
+    {
+        return glCreateShader(GL_VERTEX_SHADER);
+
+    }
+    uint32_t new_FragmentShader()
+    {
+        return glCreateShader(GL_FRAGMENT_SHADER);
+    }
 }
 
 
 
 
+//            glCreateShader();
 
 
 
