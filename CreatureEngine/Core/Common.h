@@ -512,3 +512,41 @@ private:
 
 #define TEST_PASSED   true
 #define TEST_FAILED   false
+
+
+
+/*============ Comparison =========== */
+#define _EQUALS_                == 
+#define _NOT_EQUALS_            != 
+#define _IS_GREATER_THAN_       >
+#define _IS_LESS_THAN_          <
+#define _EQUAL_OR_GREATER_      >= 
+#define _EQUAL_OR_LESS_THAN_    <=
+
+/*======== Logical Operators =========*/
+#define _AND_                   &&
+#define _OR_                    ||
+
+
+
+
+
+//   if(!_expression){ DEBUG_Print(CON_Red, _msg);} 
+//assert(0)
+
+
+
+
+
+
+
+
+
+
+//_wassert
+
+//_wassert(Msg, File, Line);
+
+
+#define CREATURE_ASSERT(_expression, _msg) (void) ((!!(_expression)) _OR_ (_wassert(_CRT_WIDE(#_expression##_msg), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)) , 0));
+

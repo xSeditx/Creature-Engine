@@ -161,27 +161,47 @@ bool TEST_Memory_Pool_Class()
     return TEST_PASSED;
 }
 
-
 bool TEST_Ring_Buffer_Class()
-{
-    ring_buffer<uint32_t, 100> TestRingBuffer;
-    ring_buffer<uint32_t, 100> TestRingBuffer2;
+{// Returns true if all tests of the Ring Buffer Pass
+    const size_t Size{ 100 };
+    ring_buffer<uint32_t, Size> TestRingBuffer;
+    ring_buffer<uint32_t, Size> TestRingBuffer2;
+
+
 
     /* ==============================================================================
     /*   TEST:  Push ability to add Items to end of Buffer                  
     /* ============================================================================== */
-    for (uint32_t i = 0; i < 10; i++)
+    DEBUGPrint(CON_Yellow, "TESTING: Ability to Add Elements to Buffer and Asserting its Size Equals the amount of Elements we Pushed into it \n\n ");
+    for (uint32_t i = 0; i < Size; i++)
     {
         TestRingBuffer.push(i);
     }
+    CREATURE_ASSERT(TestRingBuffer.size() _NOT_EQUALS_ Size, "FAILING: Buffer Size is not Equal to the Size we created it with");
+
+
+    DEBUGPrint(CON_Yellow, "TESTING: Ensuring each Element has the Proper Value that we placed in it \n\n");
+    for (uint32_t i = 0; i < Size; i++)
+    {
+        CREATURE_ASSERT(TestRingBuffer.get_Index(TestRingBuffer.get_Ptr(i)) _EQUALS_ i , "/n/n FAILING: Elements being in proper location");
+    }
+
     /* ==============================================================================
     /*   TEST:  Push ability to add Items to end of Buffer
     /* ============================================================================== */
+    DEBUGPrint(CON_Yellow, "");
+
+    uint32_t val{ 0 };
     for (uint32_t j = 0; j < 10; j++)
     {
         for (uint32_t i = 0; i < 10; i++)
         {
             TestRingBuffer.push(i);
+        }
+        for (uint32_t i = 0; i < 10; i++)
+        {
+            TestRingBuffer.pop(val);
+            TestRingBuffer2.push(val);
         }
     }
 
@@ -189,7 +209,7 @@ bool TEST_Ring_Buffer_Class()
     /*   TEST:     Ability to Pop value off then move it to second RingBuffer                                                           
     /* ============================================================================== */
 
-    for (uint32_t i = 0; i < 200; i++)
+    for (uint32_t i = 0; i < Size * 2; i++)
     {
         uint32_t Item{ 0 };
         TestRingBuffer.push(i);
@@ -197,10 +217,63 @@ bool TEST_Ring_Buffer_Class()
         TestRingBuffer2.push(Item);
     }
 
-
+    uint32_t Val;
+    for (uint32_t i = 0; i < Size; i++)
+    {// Empty Ring Buffer
+        TestRingBuffer.pop(Val);
+    }
+    for (uint32_t i = 0; i < Size; i++)
+    {// Refill it
+        TestRingBuffer.push(i);
+    }
     /* ==============================================================================
-    /*   TEST:                                                                        
+    /*   TEST:  RangeBased For_Loop                                                                      
+    /* ============================================================================== */
+   //for (auto& RB : TestRingBuffer)
+   //{
+   //    Print("Range For: " << RB);
+   //}
+
+    uint32_t Element = 13;
+    void* MemoryAddress = (void*)TestRingBuffer.get_Ptr(Element);
+    uint32_t Ind = TestRingBuffer.get_Index(static_cast<std::atomic<uint32_t>*>(MemoryAddress));
+    //assert(*TestRingBuffer.get_Ptr(Ind) == TestRingBuffer.get_Index(MemoryAddress));
+
+
+    /* ============================================================================== */
+     DEBUGPrint(CON_Yellow, 
+         "Test to see if the Memory Address get_Ptr(index) returns is the same Address \n\
+that get_Ptr() returns when you feed it that Index;\n\
+Wrapping is also adjusted for in this Test which means if it passes it properly wraps when feeding it an Index and returns the proper Memory Address\n\
+and Index information"
+);
+
+    for (int i = 0; i < Size; ++i)
+    {
+        int Index = rand() % (TestRingBuffer.element_Count() * 10);
+        Print("Testing get_Ptr() wrapping using Index " << Index << " at address " << (void*)TestRingBuffer.get_Ptr(Index));
+        CREATURE_ASSERT((void*)TestRingBuffer.get_Ptr(Index) _EQUALS_ (void*)TestRingBuffer.get_Ptr(Index + TestRingBuffer.element_Count()), "FAILING: Pointer and Index Test");
+    }
     /* ============================================================================== */
 
-    return TEST_FAILED;
+
+    return TEST_PASSED;
 }
+
+
+
+
+
+
+
+
+  //  assert(*TestRingBuffer.get_Ptr(12) == *TestRingBuffer.get_Ptr(113));
+
+
+
+
+
+
+
+
+

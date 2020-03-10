@@ -3,6 +3,70 @@
 #include<atomic>
 
 
+/* ==============================================================================================================
+       LIKELY NOTHING BUT JUST MULLING OVER THE IDEA OF USING PROPERTY GETTERS AND SETTERS
+
+	   C++ Properties:    https://www.codeproject.com/Articles/118921/C-Properties
+	   Public Fields or Properties: http://www.cplusplus.com/forum/beginner/95862/
+   ==============================================================================================================
+
+#define PROPERTY(t,n)  __declspec( property (put = property__set_##n, get = property__get_##n)) t n; \
+	typedef t property__tmp_type_##n
+
+#define READONLY_PROPERTY(t,n) __declspec( property (get = property__get_##n) ) t n;\
+	typedef t property__tmp_type_##n
+
+#define WRITEONLY_PROPERTY(t,n) __declspec( property (put = property__set_##n) ) t n;\
+	typedef t property__tmp_type_##n
+
+#define GET(n) property__tmp_type_##n property__get_##n()
+#define SET(n) void property__set_##n(const property__tmp_type_##n& value)
+
+#ifndef _PROPERTIES_H
+#define _PROPERTIES_H
+
+#define PROPERTY(t,n)  __declspec( property (put = property__set_##n, get = property__get_##n)) t n; \
+	typedef t property__tmp_type_##n
+
+#define READONLY_PROPERTY(t,n) __declspec( property (get = property__get_##n) ) t n;\
+	typedef t property__tmp_type_##n
+
+#define WRITEONLY_PROPERTY(t,n) __declspec( property (put = property__set_##n) ) t n;\
+	typedef t property__tmp_type_##n
+
+#define GET(n) property__tmp_type_##n property__get_##n()
+#define SET(n) void property__set_##n(const property__tmp_type_##n& value)
+
+#endif  _PROPERTIES_H
+
+//#define Property(_Data_Type, __get, __set)  __declspec(property (__set = setFunction, __get = getFunction)) _Data_Type property - name;
+
+
+#define Property(__PUT, __GET)  __declspec(property(put = __PUT, get = __GET))
+
+//__DATA_N_TYPE
+
+struct PropTest{
+private:
+	int _x;
+	float SecondProperty{ 0 };
+public:
+
+
+	// SecondProperty Variable
+	Property(set_SecondProp, get_SecondProp) float Second;
+	float get_SecondProp()                                  { return SecondProperty; }
+	void  set_SecondProp(float _val)                        { SecondProperty = _val; }
+
+	// _x Variable
+	Property(property__set_x , property__get_x) int x;
+	int  property__get_x()                 { return _x;  }
+	void property__set_x(const int& value) { _x = value; }
+};*/
+// ===========================================================================================================================================================
+// ===========================================================================================================================================================
+
+
 
 //
 //template<typename T, typename N, typename O>
