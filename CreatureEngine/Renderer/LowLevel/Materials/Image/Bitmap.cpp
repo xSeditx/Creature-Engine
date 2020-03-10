@@ -68,6 +68,7 @@ namespace Graphics
                 int
                     Src = (X + Width() * Channels()) * Y ,
                     Dest= (X + Width() * Channels()) * Y ;
+
                 memcpy(TempImage + Dest, Source + Src, Channels());
                 // memcpy(TempImage + ((size_t)I * RowSize), (rawData + (ImageSize - (((size_t)I + 1) * RowSize))), RowSize);// Copy bottom row into top of Temp buffer
             }
