@@ -13,13 +13,13 @@
 using MsgType = uint32_t;
 using Event = MSG;
 
-Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+// Event& make_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 
 
 /* Creates a Listener Object to Handle whatever message is assigned to it
 Syntax:   Listener(void(*func)(Event))   */
-struct Listener
+struct CREATURE_API Listener
 {
 public:
     Listener(void(*func)(Event)) noexcept
@@ -39,17 +39,15 @@ private:
 };
 
 
-struct EventHandler
+struct CREATURE_API EventHandler
 {
 public:
-    //static EventHandler& get();                 // Initializes EventSystem when called first time
-
     EventHandler() = default;
 
     void PollEvents() noexcept;
     void PostMSG(Event msg) noexcept;
-    bool PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags) noexcept;
     bool PeekMSG(Event& msg) noexcept;
+    bool PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags) noexcept;
 
     void Dispatch(Event msg) noexcept;
 

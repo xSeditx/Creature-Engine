@@ -379,6 +379,7 @@ void Shader::CompileStrings(std::string _vertstring, std::string _fragstring)
 	uint32_t ERR = 0;
 
 	CheckGLERROR();
+
 	GL_Handle = glCreateProgram();
 	glAttachShader(GL_Handle, VertID);
 	glAttachShader(GL_Handle, FragID);

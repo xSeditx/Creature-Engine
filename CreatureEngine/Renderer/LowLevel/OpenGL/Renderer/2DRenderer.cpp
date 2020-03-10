@@ -19,7 +19,7 @@ uniform mat4 ViewMatrix;           \n\
 out vec2 TexCoords; \n\
 void main()                        \n\
 {                                  \n\
- TexCoords = aPos; \n\
+    TexCoords = aPos; \n\
     mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
     gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
@@ -43,8 +43,9 @@ namespace OpenGL
     Renderer2D::Renderer2D(Vec2 _size)
     {
         mainCamera = Camera2D(_size);
+        /// ==== This IS CRASHING ON COMPILE =======*/
         InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
-
+        ///==========================================
         QuadVAO      = OpenGL::new_VAO();
 
         QuadVBO      = OpenGL::new_VBO();

@@ -34,8 +34,6 @@ public:
 
 	std::vector<Mesh> Children;
 
-///	std::vector<Material> Surfaces;
-
 	Mesh();
 	Mesh(std::string file);
 

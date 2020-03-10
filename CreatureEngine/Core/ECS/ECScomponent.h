@@ -8,7 +8,7 @@
 
 #define NULL_ENTITY nullptr
 #define COMPONENT(x) struct x : Component<x>
-
+#define CREATE(x)   x():Component()
 // TODO: 
 ///Fix All these Typedefs to more accurately reflect what they accomplish in the ECS as a whole
 
@@ -85,11 +85,12 @@ struct CREATURE_API BaseComponent
 //-----------------------------------------------------------------------------------
 
 
-template<typename T>
+template<typename _Ty>
 struct CREATURE_API Component
 	: 
 	public BaseComponent
 {
+    using type = _Ty;
     static const ComponentCreateFunc Create_Function;
     static const ComponentDeleteFunc Delete_Function;
     static const idTag ID;
@@ -103,7 +104,7 @@ struct CREATURE_API Component
 template<typename _C_Ty>
 Component_Handle CreateComponent(std::vector<uint8_t>& memory, EntityPTR _entity, BaseComponent *comp)
 {
-    unsigned int Index = memory.size();
+    unsigned int Index = static_cast<unsigned int>(memory.size());
     memory.resize(Index + _C_Ty::SIZE);
 
     _C_Ty *component = new (&memory[Index])_C_Ty(*(_C_Ty*)comp);

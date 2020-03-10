@@ -2,6 +2,7 @@
 
 #include "ECScomponent.h"
 
+#define SYSTEM(_cl)  struct _cl : public BaseSystem
 
 typedef size_t System_ID;
 
