@@ -46,6 +46,7 @@ namespace OpenGL
         InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
 
         QuadVAO      = OpenGL::new_VAO();
+
         QuadVBO      = OpenGL::new_VBO();
         ColorVBO     = OpenGL::new_VBO();
         TransformVBO = OpenGL::new_VBO();
@@ -187,11 +188,11 @@ namespace OpenGL
     void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image)
     {
         OpenGL::bind_VAO(DebugQuadVAO);   
-        debugCamera->Update();
+        mainCamera.Update();
 
         QuadRenderer->Bind();
         {
-            debugCamera->Bind();
+            mainCamera.Bind();
             QuadRenderer->SetUniform("Position", _pos.x, _pos.y, _size.x, _size.y);
             QuadRenderer->SetTextureUniform("DiffuseTexture", _image->g_Handle(), 1);
             Renderer::drawArray(DebugQuadVBO,  6 );

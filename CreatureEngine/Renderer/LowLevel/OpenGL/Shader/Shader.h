@@ -114,6 +114,14 @@ protected:
 };
 
 
+extern Shader* TextureRenderer;
+
+void init_DefaultShaders();
+
+
+
+
+
 //class GPU_program
 //    : public Shader
 //{

@@ -400,3 +400,23 @@ void Shader::CompileStrings(std::string _vertstring, std::string _fragstring)
 	return;
 }
 
+extern std::string VTextureRenderer;
+extern std::string FTextureRenderer;
+extern GLuint ImageQuadVAO;
+extern GLuint ImageQuadVBO;
+
+
+void init_DefaultShaders()
+{
+	ImageQuadVAO = OpenGL::new_VAO();
+	ImageQuadVBO = OpenGL::new_VBO();
+
+
+	TextureRenderer = new Shader(VTextureRenderer, FTextureRenderer);
+	TextureRenderer->Bind();
+	{
+		OpenGL::set_Attribute(2, "aPos");
+	}
+	TextureRenderer->Unbind();
+
+}

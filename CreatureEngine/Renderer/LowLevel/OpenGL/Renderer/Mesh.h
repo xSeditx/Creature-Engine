@@ -67,7 +67,6 @@ public:
 	}
 
 
-
 	std::string VertexShader = " #version 330 core \n\
 layout(location = 0) in vec3 aPos; 			\n\
 out vec4 vertexColor; 						\n\

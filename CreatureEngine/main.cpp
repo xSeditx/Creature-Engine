@@ -224,6 +224,7 @@ class App
             TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
         }
 
+		init_DefaultShaders();
 
         DEBUG_CODE(CheckGLERROR());
 	}
@@ -283,6 +284,7 @@ int main()
  	Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w );
 
 	MyApp.Run();
+
 
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();

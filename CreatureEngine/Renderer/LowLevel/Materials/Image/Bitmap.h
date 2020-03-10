@@ -39,6 +39,11 @@ namespace Graphics
 		/* Return how many channels in the form of RGBA our image contains RGBA being 4*/
 		uint8_t Channels() { return BytesPerPixel;	}
 
+		/* Flip Image on Y axis to be inline with OpenGL */
+		void FlipYAxis();
+
+		/* Flip Image on Y axis to be inline with OpenGL */
+		void FlipXAxis();
 	private:
 		uint8_t* rawData;// Raw Mapped Data 
 		iVec2     Size{0,0}; // A int[2] containing the Width and Height of our Image
