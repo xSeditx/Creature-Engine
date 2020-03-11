@@ -1,3 +1,6 @@
+#pragma once
+
+
 #include"Core/Common.h"
 #include"../Shader/Shader.h"
 

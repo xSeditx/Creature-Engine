@@ -1,3 +1,6 @@
+#pragma once
+
+
 #include"Core/Common.h"
 #include<vector>
 #include"EventSystem.h"

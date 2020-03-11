@@ -3,7 +3,7 @@
 #include"Common.h"
 #include<stack>
 
-#pragma warning(disable: 4267)//Warning size_t to uint32_t 
+#pragma warning(disable: 4267) //Warning size_t to uint32_t 
 
 
 /* =======================================================================================
@@ -123,6 +123,10 @@ public:
 
     class iterator
     {
+        /*  RANGE FOR Returns an Iterator for Begin and End. Inorder to properly wrap the Ring Buffer that Iterator needs to wrap
+            auto __begin = begin_expr;
+            auto __end = end_expr;
+        /* =======================================================================================================================*/
     public:
         using self_type  = iterator;
         using value_type = std::atomic<_Ty>;
@@ -316,14 +320,47 @@ bool TEST_Ring_Buffer_Class();
          NOTES:
 /*=========================================================================================
 
-RANGE_FOR_LOOP()
-{
-  auto && __range = range_expression ;
-  auto __begin = begin_expr;
-  auto __end = end_expr;
-  for (;__begin != __end; ++__begin) {
-    range_declaration = *__begin;
-    loop_statement
+   RANGE FOR LOOP Implementation
+ ---------------------------------
+  RANGE_FOR_LOOP()
+  {
+    auto && __range = range_expression ;
+    auto __begin = begin_expr;
+    auto __end = end_expr;
+    for (;__begin != __end; ++__begin) {
+      range_declaration = *__begin;
+      loop_statement
+    }
   }
-}
+
+
+
+     OPERATOR NEW Implementation
+ -----------------------------------
+  _CRT_SECURITYCRITICAL_ATTRIBUTE
+  void* __CRTDECL operator new(size_t const size)
+  {
+      for (;;)
+      {
+          if (void* const block = malloc(size))
+          {
+              return block;
+          }
+  
+          if (_callnewh(size) == 0)
+          {
+              if (size == SIZE_MAX)
+              {
+                  __scrt_throw_std_bad_array_new_length();
+              }
+              else
+              {
+                  __scrt_throw_std_bad_alloc();
+              }
+          }
+  
+          // The new handler was successful; try to allocate again...
+      }
+  }
+
 /*=========================================================================================*/

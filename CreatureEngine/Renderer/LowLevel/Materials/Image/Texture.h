@@ -1,9 +1,9 @@
 #pragma once
-
-#include"Core/Common.h"
-#include"Bitmap.h"
 #include<vector>
 
+#include"Bitmap.h"
+
+#include"Core/Common.h"
 #include "../../OpenGL/Camera/Camera2D.h"
 #include "../../OpenGL/Shader/Shader.h"
 
@@ -29,6 +29,7 @@ namespace Graphics
 
 		Texture() = default;
         ~Texture();
+
 		/* Load Texture from Image file*/
 		Texture(std::string file) noexcept;
 

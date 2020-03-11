@@ -77,8 +77,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(Solution)CreatureEngine;C:\Users\Sedit\source\repos\Creature-Engine\CreatureEngine;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\CreatureEngine\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(Solution)/CreatureEngine;$(ProjectDir);$(Solution)../Bin/;$(ProjectDir)../CreatureEngine;$(IncludePath)</IncludePath>
+    <LibraryPath>$(Solution)/CreatureEngine/x64/Debug;$(Solution)../Bin/SOIL/lib;$(Solution)../CreatureEngine/x64/Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -104,6 +104,8 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <SDLCheck>true</SDLCheck>
+      <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

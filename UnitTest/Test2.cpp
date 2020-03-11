@@ -11,9 +11,14 @@
 
 #include"../CreatureEngine/Profiling/RenderUtilities.h"
 
+#include"../CreatureEngine/Renderer/LowLevel/Materials/Image/Texture.h"
 #include <type_traits> 
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+
+
+#pragma comment(lib, "user32.lib")
+
 
 namespace UnitTest
 {
@@ -167,10 +172,12 @@ namespace UnitTest
 			uint32_t
 				SizeX = 50,
 				SizeY = 150;
-
+            uint32_t
+                RangeX = 50,
+                RangeY = 150;
 
 			Profiling::DisplayWindow MemoryBlock =
-				Profiling::DisplayWindow({ PosX,PosY }, { SizeX , SizeY });
+                Profiling::DisplayWindow({ PosX, PosY }, { SizeX , SizeY }, {RangeX, RangeY});
 
 			Assert::AreEqual(MemoryBlock.size(), SizeX * SizeY * sizeof(uint32_t));
 		}
@@ -183,16 +190,22 @@ namespace UnitTest
 			uint32_t
 				SizeX = 1,
 				SizeY = 50;
+            uint32_t
+                RangeX = 50,
+                RangeY = 150;
 
 
 			Profiling::DisplayWindow MemoryBlock =
-			Profiling::DisplayWindow({ PosX,PosY }, { SizeX , SizeY });
+                Profiling::DisplayWindow({ PosX, PosY }, { SizeX , SizeY }, {RangeX, RangeY} );
 
 			MemoryBlock.setPixel(0, 0, 0xFFFFFFFF);
+
 			MemoryBlock.Update(1);
 			Assert::AreEqual(0xFFFFFFFF , (unsigned int)MemoryBlock.getPixel(0, 1));
+
 			MemoryBlock.Update(1);
 			Assert::AreEqual(0xFFFFFFFF , (unsigned int)MemoryBlock.getPixel(0, 2));
+
 			MemoryBlock.Update(1);
 			Assert::AreEqual(0xFFFFFFFF , (unsigned int)MemoryBlock.getPixel(0, 3));
 		}

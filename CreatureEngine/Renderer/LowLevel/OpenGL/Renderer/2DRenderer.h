@@ -1,14 +1,16 @@
+#pragma once
+
 #include "Renderer.h"
 #include "Core/Common.h"
 #include "../../../Layer.h"
-/*     foreach(render target)    // framebuffer
-        foreach(pass)             // depth, blending, etc... states
+/*     foreach(render target)      // framebuffer
+        foreach(pass)              // depth, blending, etc... states
 
-        foreach(material)         // shaders
+        foreach(material)          // shaders
         foreach(material instance) // textures, normals, diffuse,
 
-        foreach(vertex format)    // vertex buffers
-        foreach(object)           //
+        foreach(vertex format)     // vertex buffers
+        foreach(object)            //
     {
         WriteUniformData(object);
         glDrawElementBaseVertex(

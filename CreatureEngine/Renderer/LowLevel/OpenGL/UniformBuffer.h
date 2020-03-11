@@ -1,3 +1,6 @@
+#pragma once
+
+
 #include"OpenGL.h"
 
 namespace OpenGL

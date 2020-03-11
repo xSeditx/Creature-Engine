@@ -1,4 +1,5 @@
 #pragma once
+
 #include"../../Core/Common.h"
 /*
 Copyright (c) 2002, 2008 Curtis Bartley

@@ -1,3 +1,5 @@
+#pragma
+
 #include"../../../../Core/Common.h"
 
 #if _DEBUG
@@ -31,7 +33,7 @@ namespace Graphics
 		size_t size() { return  ((size_t)Size.x * (size_t)Size.y * (size_t)BytesPerPixel); }
 
 		/* Return pointer to Raw data */
-		uint8_t* Data()            { return rawData; }
+		uint8_t* Data() { return rawData; }
 
 		/* Return pointer to specific byte offset in Raw BMP data */
 		uint8_t* Data(size_t _pos) { return rawData + _pos; }

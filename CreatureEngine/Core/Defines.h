@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * ========================================================================================
  *    DEFINES USED TO CONTROL THE COMPILER AND TO A LESSER EXTENT RUNTIME BEHAVIOR 

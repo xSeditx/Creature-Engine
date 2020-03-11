@@ -1,3 +1,6 @@
+#pragma once
+
+
 #include"Core/Common.h"
 #include"Core/Application.h"
 #include"Core/EventSystem.h"

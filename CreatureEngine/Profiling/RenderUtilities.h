@@ -1,5 +1,10 @@
 #pragma once
 
+
+
+#include<cmath>
+#include<atomic>
+
 #include"../Core/Common.h"
 #include"../Renderer/LowLevel/Materials/Image/Texture.h"
 #include"../Renderer/LowLevel/OpenGL/Shader/Shader.h"
@@ -7,7 +12,6 @@
 #include"../Renderer/LowLevel/OpenGL/Renderer/Renderer.h"
 #include"../Renderer/LowLevel/OpenGL/Renderer/Transform.h"
 #include"../Profiling/Timing/Timer.h"
-#include<atomic>
 
 /*===================================================================*/
 /* Union to specify an RGBA value and convert a DWORD into
@@ -32,7 +36,6 @@ union Pixel
 };
 /*===================================================================*/
 
-#include<cmath>
 
 namespace Profiling
 {
@@ -46,12 +49,14 @@ namespace Profiling
 		Transform Model;
         Pixel* ColorTemplate{ nullptr };
 
-        /* X Axis represents Value
-           Y Axis represents Time  
-           Optional RGB values for additional dimensions 
-		   _position:  The Location on the Screen XY for the Window to start
-		   _size:      The Size in ScreenXY to Display the Window
-		   _dataRange: The Range of the values Displayed*/
+        /* ====================================================================
+        /*  X Axis represents Value
+        /*  Y Axis represents Time  
+        /*  Optional RGB values for additional dimensions 
+		/*  _position:  The Location on the Screen XY for the Window to start
+		/*  _size:      The Size in ScreenXY to Display the Window
+		/*  _dataRange: The Range of the values Displayed 
+        /* ==================================================================== */
         DisplayWindow(Vec2 _position, Vec2 _size, Vec2 _dataRange)
             :
             Size       (_size),
