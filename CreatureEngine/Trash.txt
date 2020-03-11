@@ -1,3 +1,82 @@
+
+
+//_wassert(_CRT_WIDE(#_msg), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)) , 0));
+
+/// ====================================================================================================================================
+
+//  #define CREATURE_ASSERT(_expression, _msg) (void) ((!!(_expression)) _OR_ \
+//  (int)(\
+//  []()->bool {DEBUGPrint(\
+//  CON_Red,\
+//  "\n ~ERROR~: " << _CRT_WIDE(#_msg)\
+//  << "\n FILE: " <<  _CRT_WIDE(__FILE__)\
+//  << "\n LINE: " << (unsigned)(__LINE__)\
+//  ); return 1;}\
+//  )\            //std::cerr 
+
+//  );
+/* If !(condition) it means Assertion Failed and displays */
+/* Colored Debug Console Printer                          */
+ /* Expression to Evaluate                                 */
+ /* FILE NAME                                              */
+ /* LINE NUMBER                                            */
+ /* ERROR MESSAGE                                          */
+ /* Only Terminate if Terminate On Error Flag is Set       */
+ /*  If it reaches here the Expression PASSED: */
+ /*  Likely will replace this with a Scoped Static Bool    */
+/*  It will prevent it from rapidly repeating in Loops    */
+ /*  Expression to Evaluate                                */
+ /*  FILE NAME                                             */
+ /*  LINE NUMBER                                           */
+ /*  SUCCESS MESSAGE                                       */
+#ifndef NDEBUG
+#   define ASSERT(condition, message) \
+    do { \
+        if (!(condition)) {\
+DEBUGPrint(CON_Red,  "\n Assertion: `" << #condition << "\n File: " << __FILE__ \
+<< "\n Line: " << __LINE__ << "\n Msg: " << message );\
+            std::terminate(); \
+        } \
+    } while (false)
+#else
+#   define ASSERT(condition, message) do { } while (false)
+#endif
+
+/// ====================================================================================================================================
+
+#define CREATURE_ASSERT(condition, message) do { \
+if (!(condition)) { DEBUGPrint(CON_Red,(message)); } \
+assert ((condition)); } while(false)
+
+
+
+/// ====================================================================================================================================
+#ifdef NDEBUG
+constexpr std::uint_least64_t debug_mode = 0;
+#else
+constexpr std::uint_least64_t debug_mode = 1;
+#endif
+
+template< typename... Args >
+void print_assertion(std::ostream& out, Args&&... args)
+{
+    out.precision(20);
+    if constexpr (debug_mode)
+    {
+        (out << ... << args) << std::endl;
+        abort();
+    }
+}
+#ifdef better_assert
+#undef better_assert
+#endif
+#define better_assert(EXPRESSION, ... ) ((EXPRESSION) ? (void)0 : print_assertion(std::cerr, "Assertion failure: ",  #EXPRESSION, " in File: ", __FILE__, " in Line: ",  __LINE__ __VA_OPT__(,) __VA_ARGS__))
+/// ====================================================================================================================================
+
+
+
+
+
 // ============================================================================================================================================================================
 //                                 3/4/2020
 //          Clean up  #Main.cpp

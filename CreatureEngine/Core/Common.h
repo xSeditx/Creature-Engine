@@ -4,10 +4,9 @@
 
 #define SCREEN_X 1280
 #define SCREEN_Y 720
-/*
 
 
-*/
+
 #include<cstdint>
 #include<string>
 #include<iostream>
@@ -271,14 +270,6 @@ pure_Virtual tells if a function is pure virtual in plain english*/
 
 #define Concat(x,y) x##y
 #define paster( n ) printf_s( "token" #n " = %d", token##n )
-/*
-NOTES: 
-
-CppCon 2016: Jason Jurecka “Game engine using STD C++ 11"
-https://www.youtube.com/watch?v=8AjRD6mU96s
-
-*/
-
 
 //======================================================================================
 //========================= DEBUG INFOMATION ======================================================
@@ -319,15 +310,25 @@ extern std::mutex DEBUGMutex;
 
 //======================================================================================
 
+#define TEST_PASSED   true
+#define TEST_FAILED   false
 
-#define _EQUALS_          ==
-#define _NOT_EQUAL_TO_    !=
-#define _OR_              ||
-#define _AND_             &&
+/*============ Comparison =========== */
+#define _EQUALS_                == 
+#define _NOT_EQUALS_            != 
+#define _NOT_EQUAL_TO_          !=
+#define _IS_GREATER_THAN_       >
+#define _IS_LESS_THAN_          <
+#define _EQUAL_OR_GREATER_      >= 
+#define _EQUAL_OR_LESS_THAN_    <=
+
+/*======== Logical Operators =========*/
+#define _AND_                   &&
+#define _OR_                    ||
+
+
 #define pure_virtual      0
-
 #define _static 
-
 
 
 #define TEST_UNIT(x)   assert((x) == true);\
@@ -341,11 +342,6 @@ DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 #    define DEBUG_CODE(_code)   
 #endif
 
-
-
-
-
-
 //#define _STACK_TRACE_
 
 /* Trace calls in and our of specified functions
@@ -353,7 +349,7 @@ DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 This will likely become so much more in which ALL of our function calls will be wrapped in a method that traces their creation and destruction so when desired
 we will have more functionality for tracking the stack and functions while easily being capable of turning it off at will
 */
-//#define _STACK_TRACE_
+
 #ifdef _STACK_TRACE_
 #    define trace_IN(x)   std::cout << "IN: "<< x << typeid(*this).name() << "\n"
 #    define trace_OUT(x)  std::cout <<"OUT: "<< x << typeid(*this).name() << "\n"
@@ -367,19 +363,14 @@ we will have more functionality for tracking the stack and functions while easil
 #endif
 
 
-
 /* For new versions of C++ that allows Attributes */
 #define   UNLIKELY   //[[unlikely]]
-
-
 
 /* May used this for code that is only present in specific versions
 /* of OpenGL */
 #define  _GL(_code)    _code
-
 #define OpenGL4_6(_code)
 #define OpenGL3_1(_code) _code
-
 
 
 #define RADIANS(x)            ((x) * 0.01745329251)
@@ -389,12 +380,113 @@ we will have more functionality for tracking the stack and functions while easil
 #define _RGB(r,g,b)     (((b << 16) | (g << 8)) | (r))
 #define _RGBA(r,g,b,a)  ((a << 24)  | _RGB(r,g,b))
 
-
+/* Prints a bool as a True/False string */
+#define PBool(x)  ((x == true) ? " True" : "False")
 
 std::ostream& operator<<(std::ostream& _stream, const Vec2& _vector);
 std::ostream& operator<<(std::ostream& _stream, const Vec3& _vector);
 std::ostream& operator<<(std::ostream& _stream, const Vec4& _vector);
 std::ostream& operator<<(std::ostream& _stream, const Mat4& _matrix);
+
+#define CheckGLERROR() {uint32_t ERR = 0;\
+if((ERR = OpenGL::glCheckError_(__FILE__, __LINE__)))\
+{\
+	Print("Error" << ERR);\
+	__debugbreak();\
+}\
+}
+
+
+#include<atomic>
+template<typename _Ty>
+struct CREATURE_API Protected_Value
+{
+	void Store(_Ty _value)
+	{
+		while (Flag.test_and_set(std::memory_order_acquire))
+		{}// maybe an atomic test wait?
+		
+		Value = _value;
+		Flag.clear(std::memory_order_release);
+	}
+	_Ty Load()
+	{
+		return Value;
+	}
+private:
+	std::atomic_flag Flag{ ATOMIC_FLAG_INIT };
+	_Ty Value{ 0 };
+};
+
+
+#define Property (_getter, _setter) __declspec(property(get = _getter, put = _setter))
+#define Squared(x)   ((x) * (x))
+
+
+#ifndef NDEBUG
+#   define              TEST_ASSERT(condition, FAIL_MSG, PASS_MSG) do{if (!(condition)){\
+/* Colored Debug Console Logger */ DEBUGPrint(CON_Red,                                  \
+/* Expression to Evaluate       */        "\n Assertion: " << #condition                \
+/* FILE NAME                    */     << "\n File: "      << __FILE__                  \
+/* LINE NUMBER                  */     << "\n Line: "      << __LINE__                  \
+/* ERROR MESSAGE                */     << "\n FAILED: "    << FAIL_MSG);                \
+/* Terminate if Flag is Set     */     if (TerminateOnError){ std::terminate(); }       \
+/* Expression PASSED:           */ }else{                                               \
+/* Prevent same test triggering */ static bool          _seenAlready = false;           \
+/* Multiple Logs                */ if( !_seenAlready ){ _seenAlready = true;            \
+/* is Console Display On        */ if(ConsoleMessages){                                 \
+/*                              */ DEBUGPrint(CON_Green,                                \
+/* Expression to Evaluate       */        "\n Condition: " << #condition                \
+/* FILE NAME                    */     << "\n File: "      << __FILE__                  \
+/* LINE NUMBER                  */     << "\n Line: "      << __LINE__                  \
+/* SUCCESS MESSAGE              */     << "\n PASSED: "    << PASS_MSG);                \
+                                  }}}} while (false)
+#else
+#   define TEST_ASSERT(condition, message) do { } while (false)
+#endif
+
+
+#endif// COMMON_H
+
+
+
+
+
+/*
+==========================================================================================================================================================================
+                                                           NOTES:
+ ==========================================================================================================================================================================
+
+ Preprocessor Directives (push/pop
+ https://docs.microsoft.com/en-us/cpp/preprocessor/pop-macro?view=vs-2019
+ Push/Pop Macros
+ #pragma push_macro("Y") / #pragma pop_macro("X")
+
+ vtordisp(On/Off)
+ https://docs.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=vs-2019
+
+
+
+ Github Markdown Cheat
+ https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf
+
+ CppCon 2016: Jason Jurecka “Game engine using STD C++ 11"
+ https://www.youtube.com/watch?v=8AjRD6mU96s
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -441,112 +533,4 @@ my Error handling module before moving forward with this project */
 //	return os;
 //}
 
-
-
-/*
-==========================================================================================================================================================================
-														   NOTES:
-==========================================================================================================================================================================
-
-Preprocessor Directives (push/pop
-https://docs.microsoft.com/en-us/cpp/preprocessor/pop-macro?view=vs-2019
-Push/Pop Macros
-#pragma push_macro("Y") / #pragma pop_macro("X")
-
-vtordisp(On/Off)
-
-https://docs.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=vs-2019
-
-
-
-
-Github Markdown Cheat
-https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf
-
-
-
-
-*/
-
-#define CheckGLERROR() {uint32_t ERR = 0;\
-if((ERR = OpenGL::glCheckError_(__FILE__, __LINE__)))\
-{\
-	Print("Error" << ERR);\
-	__debugbreak();\
-}\
-}
-
-
-
-
-
-
-#include<atomic>
-template<typename _Ty>
-struct CREATURE_API Protected_Value
-{
-	void Store(_Ty _value)
-	{
-		while (Flag.test_and_set(std::memory_order_acquire))
-		{}// maybe an atomic test wait?
-		
-		Value = _value;
-		Flag.clear(std::memory_order_release);
-	}
-	_Ty Load()
-	{
-		return Value;
-	}
-private:
-	std::atomic_flag Flag{ ATOMIC_FLAG_INIT };
-	_Ty Value{ 0 };
-};
-
-#define Property (_getter, _setter) __declspec(property(get = _getter, put = _setter))
-
-#define Squared(x)   ((x) * (x))
-#endif// COMMON_H
-
-
-
-
-#define TEST_PASSED   true
-#define TEST_FAILED   false
-
-
-
-/*============ Comparison =========== */
-#define _EQUALS_                == 
-#define _NOT_EQUALS_            != 
-#define _IS_GREATER_THAN_       >
-#define _IS_LESS_THAN_          <
-#define _EQUAL_OR_GREATER_      >= 
-#define _EQUAL_OR_LESS_THAN_    <=
-
-/*======== Logical Operators =========*/
-#define _AND_                   &&
-#define _OR_                    ||
-
-
-
-
-
-//   if(!_expression){ DEBUG_Print(CON_Red, _msg);} 
-//assert(0)
-
-
-
-
-
-
-
-
-
-
-//_wassert
-
-//_wassert(Msg, File, Line);
-
-
-#define CREATURE_ASSERT(_expression, _msg) (void) ((!!(_expression)) _OR_ (_wassert(_CRT_WIDE(#_expression##_msg), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)) , 0));
 

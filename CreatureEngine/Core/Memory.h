@@ -2,9 +2,10 @@
 
 #include"Common.h"
 #include<stack>
-// 2467 Warning size_t to uint32_t 
 
-#pragma warning(disable: 4267)
+#pragma warning(disable: 4267)//Warning size_t to uint32_t 
+
+
 /* =======================================================================================
 /*      Pool Of Memory for Objects which are all the same size and are numerous. 
 /*  The Type of data we wish to place in Arrays yet regularly add and Delete 
@@ -13,14 +14,14 @@ template<typename _Ty>
 struct Memory_Pool
 {/* Currently Requires an Object be default Constructable but might change in near future*/
     
-        /* Ensure Pool is not Copies or Copy Assigned */
+    /* Ensure Pool is not Copies or Copy Assigned */
     Memory_Pool(Memory_Pool&) = delete;
     Memory_Pool& operator=(const Memory_Pool&) = delete;
 
     using data_type = _Ty;
 
     /* Control Pool with _size number of free Blocks*/
-    Memory_Pool(size_t _size)
+    Memory_Pool(size_t _size) noexcept
         :
         Data(new _Ty[_size]),
         BlockCount(_size)
@@ -32,35 +33,21 @@ struct Memory_Pool
     }
 
     /* Return pointer to free block of Memory */
-    inline void *Allocate()
+    inline void *Allocate() noexcept
     {
         void *Address = &Data[freeIDs.top()];
         freeIDs.pop();
         return static_cast<void*> (Address);
     }
     /* Returns block of Memory Index to the Pool */
-    inline void Deallocate(void *_item)
+    inline void Deallocate(void *_item) noexcept
     {
-        freeIDs.push(((char *)_item - (char*)Data) / sizeof(data_type));
+        freeIDs.push(get_id(_item));
     }
-
-    /* Start of Raw Data in the pool*/
-    data_type *begin() 
-    {
-        return Data;
-    }
-    /* End of the Raw Data in the pool. Points to the Very last Block at the start of it */
-    data_type *end()
-    {
-        Print("Data size" << sizeof(Data));
-        return &Data[BlockCount];//Data + (BlockSize * BlockCount) - BlockSize; // Data[BlockCount] <- Same thing? 
-    }
-    /* Returns Size of the Raw Data in all the Blocks */
-    size_t size() { return BlockCount * BlockSize; }
 
 
     /* Wipe all Elements clear to Zero */
-    void clear()
+    void clear() noexcept
     {
         memset(Data, 0, size());
         while (!freeIDs.empty())
@@ -72,34 +59,38 @@ struct Memory_Pool
             freeIDs.push(chunkCount() - i);
         }
     }
-    /* Currently just calls clear, very likely more functionality will be added soon */
-    void reset() 
-    {
-        clear();
-    }
 
+    /* Currently just calls clear,
+    /* NOTE: very likely more functionality will be added soon */
+    void reset() noexcept                                           { clear();     }
+
+    /* Start of Raw Data in the pool*/
+    data_type *begin() noexcept                                     { return Data; }
+    /* Last Block in the pool */
+    data_type *end() noexcept                                       { return &Data[BlockCount];           }
+    /* Returns Size of the Raw Data in all the Blocks */
+    size_t size() noexcept                                          { return BlockCount * BlockSize;      }
 
     /* Determines if the Memory Pool is Empty */
-    bool is_Empty() { return freeIDs.size() >= BlockSize; }
+    bool is_Empty() noexcept                                        { return freeIDs.size() >= BlockSize; }
     /* Determines if the Memory Pool is Full */
-    bool is_Full() 
-    {
-        bool result = freeIDs.empty(); 
-        return result;
-    }
-    /* Returns if there is still room to Allocate  */
-    bool is_Not_Full()
-    {
-        return !freeIDs.empty();
-    }
+    bool is_Full() noexcept                                         { return freeIDs.empty();             }
+    /* Returns if there is still room to Allocate  */                                            
+    bool is_Not_Full() noexcept                                     { return !freeIDs.empty();            }
 
     /* Returns Pointer to the Start of the raw Data */
-    char *get_Data(size_t _at) { return (char*)(Data)+_at; }
+    char *get_Data(size_t _at) noexcept                             { return reinterpret_cast<char*>(Data) + _at; }
+    /* Calculates the Index of a Memory block via pointer*/
+    uint32_t get_id(void *_item) noexcept                           { return static_cast<uint32_t>(((char*)_item - (char*)Data) / sizeof(data_type));    }
+
 
     /* Size of each Element allocated by this class */
-    size_t chunkSize()  { return BlockSize;  }
-    /* Max number of Objects this Allocator is able to create */
-    size_t chunkCount() { return BlockCount; }
+    size_t chunkSize() noexcept                                     { return BlockSize;    }
+    /* Max number of Objects Allocator is able to create */                         
+    size_t chunkCount() noexcept                                    { return BlockCount;   }
+
+    /* Returns the Object at the Specified _Index */
+    data_type& operator[](size_t _index) noexcept                   { return Data[_index]; }
 
 private:
     uint32_t BlockCount{ 0 };
@@ -108,16 +99,18 @@ private:
     data_type *Data{ nullptr };
     std::stack<uint32_t> freeIDs;
 };
+
 /* Assertive Test of the Memory Pool Class */
 bool TEST_Memory_Pool_Class();
 /* =======================================================================================*/
 
-
-
+        
 
 
 
 #include<array>
+
+
 /* =======================================================================================
 /*      Ring Buffer class. Static Array of Data which cycles around when it reaches the 
 /*  end The below Implementation is Thread Safe and Lock Free
@@ -162,26 +155,21 @@ public:
         pointer ptr_;
         ring_buffer<_Ty, _SZ> *Parent;
     };
-    /// Difference in Memory Address is 4 for a single element meaning it is likely sizeof(_Ty) so element is (end() - begin()) / sizeof(_Ty)
-    // begin to allow for Range For Loops 
+
+    /* begin() to allow for Range For Loops */
     iterator begin()
     {
-        _first = &Data[ReadPosition];  
         CurrentPosition.store(ReadPosition.load());
         return iterator(&Data[ReadPosition], this);
     }
-    // end to allow for Range For Loops  
+    /* end() to allow for Range For Loops  */
     iterator end()
     {       // iterator Itr = iterator(&Data[WritePosition], this);//Address;
-        _last = &Data[WritePosition];  
         return iterator(&Data[WritePosition], this);
     }
 
-    std::atomic<_Ty>* _first{ nullptr };
-    std::atomic<_Ty>* _last{ nullptr };
-    std::atomic<_Ty>* _current{ nullptr };
-
     ring_buffer() = default;
+
     using value_type = _Ty;
     using reference = _Ty&;
     using pointer = const _Ty*;
@@ -189,14 +177,13 @@ public:
     using atomic_value_type = std::atomic<_Ty>;
     using atomic_ptr = std::atomic<_Ty>*;
 
-    // Returns Index from a pointer by Subtracting the Starting Address from provided Address
-
+    /* Returns Index from a pointer by Subtracting the Starting Address from provided Address */
     size_t get_Index(void *_ptr) 
     {
-        size_t result = (static_cast<atomic_ptr>(_ptr) - front());// / sizeof(value_type);
+        size_t result = (static_cast<atomic_ptr>(_ptr) - front());
         return result;
     }
-    // Gets a Pointer to _element in the Ring Buffer 
+    /* Gets a Pointer to _element in the Ring Buffer */
     void* get_Ptr(size_t _element)
     {
         atomic_ptr result = &Data[_element % BufferSize];
@@ -208,10 +195,11 @@ public:
     {
         return BufferSize ;
     }
-   // pushRange(InputIterator* first, InputIterator* last);
-   // pushElements(InputIterator* first, size_t numElements);
-   // popElements(outputIterator* itr, size_t numElements);
-   // popAll(Output* itr);
+
+   /* pushRange   (InputIterator* first, InputIterator* last); */
+   /* pushElements(InputIterator* first, size_t numElements);  */
+   /* popElements (outputIterator*  itr, size_t numElements);  */
+   /* popAll      (Output* itr);                               */
 
 
     /* Forwards an Element to the Ring Buffer */
@@ -270,46 +258,25 @@ public:
     }/// WE MIGHT BE ABLE TO PACK THE READER AND WRITER INTO THE SAME ATOMIC INTEGER WHICH WILL REDUCE THE OVERHEAD
 
     /* Get the Start of the Ring Buffer */
-    auto front()
-    {
-        return &Data[0];
-    } 
+    auto front()    { return &Data[0];    } 
     /* Get the Start of the Ring Buffer */
-    auto back()
-    {
-        return &Data[BufferSize - 1];
-    }
+    auto back()    { return &Data[BufferSize - 1];    }
 
     /* Remove the First Element in the Ring Buffer */
-    void pop_front()
-    {
-        ReadPosition = nextElement(ReadPosition);
-    }
+    void pop_front()    { ReadPosition = nextElement(ReadPosition);    }
 
     /* Test if container is Empty
        NOTE: Change this to is_Empty() because the STL naming convention is retarded */
-    bool is_Empty()
-    {
-        return (ReadPosition == WritePosition);
-    }
+    bool is_Empty()    { return (ReadPosition == WritePosition);    }
 
     /* Deletes the Ring Buffers Data */
-    bool destroy()
-    {
-        delete[](Data);
-    }
+    bool destroy()    { delete[](Data);    }//return BufferSize; b<0- This is not Correct, We need WritePosition - ReadPosition;
 
     /* Current size of the Ring Buffer from Start to End */
-    size_t size()
-    {
-        return WritePosition - ReadPosition; //return BufferSize; b<0- This is not Correct, We need WritePosition - ReadPosition;
-    }
-
+    size_t size()    { return WritePosition - ReadPosition;     }
+ //[ReadPosition % BufferSize];
     /* Overload to properly wrap the _offset in the Ring Buffer */
-    reference operator[](const int _offset)
-    {
-        return Data[_offset % BufferSize]; //[ReadPosition % BufferSize];
-    }
+    reference operator[](const int _offset)    { return Data[_offset % BufferSize];    }
 
 private:
 
@@ -326,8 +293,6 @@ private:
     }
 
 
-
-
     std::atomic<size_t>
         ReadPosition{ 0 },
         WritePosition{ 0 },
@@ -336,6 +301,7 @@ private:
     size_t BufferSize = _SZ + 1;
     std::array<std::atomic<_Ty>, _SZ + 1> Data;
 };
+
 /* Assertive Test of Ring Buffer Class */
 bool TEST_Ring_Buffer_Class();
 /* =======================================================================================*/
@@ -346,47 +312,10 @@ bool TEST_Ring_Buffer_Class();
 
 
 
-/* Not sure if I can make this work or not 
+/*=======================================================================================
+         NOTES:
+/*=========================================================================================
 
-
-*/
-
-
-/*
-
-
-
-
-
-//memory.h(167) :
-//error C2664 : 'bool std::_Atomic_ullong::compare_exchange_strong(unsigned __int64 &,unsigned __int64,std::memory_order) noexcept' :
-//cannot convert argument 1 from 'unsigned __int64' to 'unsigned __int64 &' _returnElement = Data[OldReadPosition.load()].load();
-
-
-
-
-
-
-
-/*
-
-                DEBUG_CODE
-                (
-                    Print("Error: Ring Buffer Full and you are Attempting to Add more Elements to it"); assert(false);
-                );
-
-
-
-
-*/
-
-
-
-
-
-
-
-/* Note:
 RANGE_FOR_LOOP()
 {
   auto && __range = range_expression ;
@@ -397,14 +326,4 @@ RANGE_FOR_LOOP()
     loop_statement
   }
 }
-*/
-
-
-
-
-
-
-// bool push_back(reference _element)
-// {/// Just deferring this function to make it compatible with older Queue system for Threadpool
-//     return push(_element);
-// }
+/*=========================================================================================*/

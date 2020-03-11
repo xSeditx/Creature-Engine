@@ -249,8 +249,8 @@ class App
     virtual void OnCreate() override
 	{
         
-     //   assert( TEST_Memory_Pool_Class());
-        assert(TEST_Ring_Buffer_Class());
+        assert( TEST_Memory_Pool_Class() );
+        assert( TEST_Ring_Buffer_Class() );
 
         /* Load up the Listeners for the Various Input Events */
         {
