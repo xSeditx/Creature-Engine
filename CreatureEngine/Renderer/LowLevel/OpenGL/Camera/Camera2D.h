@@ -47,6 +47,9 @@ public:
     void ZoomOutFrom(Vec2 _pos, float _amount);
 
 
+
+    virtual Vec2 get_Center() override { return { Width() * 0.5f, Height() * 0.5f }; }
+
 	/* Resizes the Projection Matrix to the given _size */
 	void Resize(Vec2 _size);
 private:

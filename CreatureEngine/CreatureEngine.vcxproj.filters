@@ -66,6 +66,9 @@
     <Filter Include="Source Files\System\Memory">
       <UniqueIdentifier>{35153a47-9cb6-4fa3-97b7-2a072d36e791}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Physics">
+      <UniqueIdentifier>{f9289999-2260-4d4b-9652-eb70969fac3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -169,6 +172,12 @@
     </ClCompile>
     <ClCompile Include="Core\Memory.cpp">
       <Filter>Source Files\System\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Physics.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Quadtree.cpp">
+      <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -291,6 +300,12 @@
     </ClInclude>
     <ClInclude Include="Core\Memory.h">
       <Filter>Source Files\System\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Physics.h">
+      <Filter>Source Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Quadtree.h">
+      <Filter>Source Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

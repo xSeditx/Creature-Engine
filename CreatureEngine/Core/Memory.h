@@ -2,7 +2,7 @@
 
 #include"Common.h"
 #include<stack>
-
+#include<atomic>
 #pragma warning(disable: 4267) //Warning size_t to uint32_t 
 
 
@@ -13,90 +13,172 @@
 template<typename _Ty>
 struct Memory_Pool
 {/* Currently Requires an Object be default Constructable but might change in near future*/
-    
+    using Lock_t = std::unique_lock<std::mutex>;
+    using data_type = _Ty;
+
     /* Ensure Pool is not Copies or Copy Assigned */
     Memory_Pool(Memory_Pool&) = delete;
     Memory_Pool& operator=(const Memory_Pool&) = delete;
 
-    using data_type = _Ty;
 
-    /* Control Pool with _size number of free Blocks*/
+    /*W Control Pool with _size number of free Blocks*/
     Memory_Pool(size_t _size) noexcept
         :
-        Data(new _Ty[_size]),
+        Data(static_cast<_Ty*>(malloc(_size * sizeof(_Ty)))),
         BlockCount(_size)
     {
+        // No Need for Critical section as c_Tor is Naturally Thread Safe
         for (uint32_t i = 0; i < _size; ++i)
         {// Push indices in reverse Order to the Stack 
-            freeIDs.push(_size - i );
+            freeIDs.push(_size - i);
+        }
+    }
+    ~Memory_Pool()
+    {
+        DEBUGPrint(CON_DarkRed, " Releasing Memory for our Memory_Pool Class in the Destructor");
+        Destroy_Memory_Pool();
+    }
+    void Destroy_Memory_Pool()
+    {
+        if (Data)
+        {
+            reset();
+            free(Data);
+            Data = nullptr;
         }
     }
 
-    /* Return pointer to free block of Memory */
+    /*RW Return pointer to free block of Memory */
     inline void *Allocate() noexcept
     {
-        void *Address = &Data[freeIDs.top()];
-        freeIDs.pop();
-        return static_cast<void*> (Address);
+        {/* ~ CRITICAL SECTION ~*/
+            Lock_t Lock(PoolMtx);
+
+            void *Address = &Data[freeIDs.top()];
+            freeIDs.pop();
+            return static_cast<void*> (Address);   
+        }
     }
-    /* Returns block of Memory Index to the Pool */
+
+    /*RW Returns block of Memory Index to the Pool */
     inline void Deallocate(void *_item) noexcept
     {
-        freeIDs.push(get_id(_item));
+        // Needing to lock on every deallocation feels like 
+        // it might get expensive however idk anyway around it
+
+        {/* ~ CRITICAL SECTION ~*/
+            Lock_t Lock(PoolMtx);
+
+            freeIDs.push(get_id(_item));
+        }
     }
 
 
-    /* Wipe all Elements clear to Zero */
+    /*W Wipe all Elements clear to Zero */
     void clear() noexcept
     {
-        memset(Data, 0, size());
-        while (!freeIDs.empty())
-        { // Make sure we are not putting IDs onto a stack that has elements already
-            freeIDs.pop(); 
-        }
-        for (uint32_t i = 0; i < chunkCount(); ++i)
-        {// Push indices in reverse Order to the Stack 
-            freeIDs.push(chunkCount() - i);
+        {/* ~ CRITICAL SECTION ~*/
+            Lock_t Lock(PoolMtx);
+
+            memset(Data, 0, size());
+            while (!freeIDs.empty())
+            { // Make sure we are not putting IDs onto a stack that has elements already
+                freeIDs.pop();
+            }
+            for (uint32_t i = 0; i < chunkCount(); ++i)
+            {// Push indices in reverse Order to the Stack 
+                freeIDs.push(chunkCount() - i);
+            }
         }
     }
 
-    /* Currently just calls clear,
+    /*W Currently just calls clear,
     /* NOTE: very likely more functionality will be added soon */
-    void reset() noexcept                                           { clear();     }
+    void reset() noexcept                                                 { clear();     }
+                                                                          
+    /*R Start of Raw Data in the pool*/                                   
+    data_type *begin() noexcept                                           { return Data; }
+    /*R Last Block in the pool */                                         
+    data_type *end() noexcept                                             { return &Data[BlockCount];           }
 
-    /* Start of Raw Data in the pool*/
-    data_type *begin() noexcept                                     { return Data; }
-    /* Last Block in the pool */
-    data_type *end() noexcept                                       { return &Data[BlockCount];           }
-    /* Returns Size of the Raw Data in all the Blocks */
-    size_t size() noexcept                                          { return BlockCount * BlockSize;      }
 
-    /* Determines if the Memory Pool is Empty */
-    bool is_Empty() noexcept                                        { return freeIDs.size() >= BlockSize; }
-    /* Determines if the Memory Pool is Full */
-    bool is_Full() noexcept                                         { return freeIDs.empty();             }
-    /* Returns if there is still room to Allocate  */                                            
-    bool is_Not_Full() noexcept                                     { return !freeIDs.empty();            }
+    /*R Returns Size of the Raw Data in all the Blocks */
+    size_t size() const noexcept                                          { return BlockCount * BlockSize;      }
 
-    /* Returns Pointer to the Start of the raw Data */
-    char *get_Data(size_t _at) noexcept                             { return reinterpret_cast<char*>(Data) + _at; }
-    /* Calculates the Index of a Memory block via pointer*/
-    uint32_t get_id(void *_item) noexcept                           { return static_cast<uint32_t>(((char*)_item - (char*)Data) / sizeof(data_type));    }
+    /*R Determines if the Memory Pool is Empty */
+    bool is_Empty() const noexcept                                        { return freeIDs.size() >= BlockSize; }
+    /*R Determines if the Memory Pool is Full */
+    bool is_Full() const noexcept                                         { return freeIDs.empty();             }
+    /*R Returns if there is still room to Allocate  */                                            
+    bool is_Not_Full() const noexcept                                     { return !freeIDs.empty();            }
+
+    /*R Returns Pointer to the Start of the raw Data */
+    char *get_Data(size_t _at) noexcept                                   { return reinterpret_cast<char*>(Data) + _at; }
+    /*R Calculates the Index of a Memory block via pointer*/              
+    uint32_t get_id(void *_item) noexcept                                 { return static_cast<uint32_t>(((char*)_item - (char*)Data) / sizeof(data_type));    }
 
 
     /* Size of each Element allocated by this class */
-    size_t chunkSize() noexcept                                     { return BlockSize;    }
-    /* Max number of Objects Allocator is able to create */                         
-    size_t chunkCount() noexcept                                    { return BlockCount;   }
+    size_t chunkSize() const noexcept                               { return BlockSize;    }
+    /* Max number of Objects Allocator is able to create */                              
+    size_t chunkCount() const noexcept                              { return BlockCount;   }
 
-    /* Returns the Object at the Specified _Index */
-    data_type& operator[](size_t _index) noexcept                   { return Data[_index]; }
+    /*R Returns the Object at the Specified _Index */
+    data_type& operator[](size_t _index) const noexcept             { return Data[_index]; }
+
+    /*W Locks the Pool while we read Item at the Specified _Index */
+    data_type& operator[](size_t _index) noexcept                         {/*~CRITICAL SECTIONS~*/ 
+                                                                          { Lock_t Lock;  return Data[_index]; } }
+
+
+    /*======================================================================================================================================================================
+    /*  POSSIBLE FIXES FOR MEMORY CORRUPTION TAKING PLACE WHENEVER THE PROGRAM USES NEW OR DELETE ANYWHERE ELSE AFTER THE TEST RUN FOR THIS CLASS
+    /*======================================================================================================================================================================
+    /*
+    /*  REPLACE MALLOC WITH THIS ONCE EVERYTHING WORKS:
+    /*  _aligned_malloc(size, alignof(_Ty));
+    /*
+    /*  You delete pointers which you have allocated with operator new. You have a static array of pointers there with automatic storage. – DeiDei Sep 10 '16 at 18:50
+    /*===================================================================================================================================================================== */
+    void *operator new(size_t _size)
+    {
+        std::cout << " Memory Pool :: new() " << std::endl;
+        return malloc(_size);
+    }
+    void operator delete(void *_item)
+    {
+        std::cout << " Memory Pool :: delete()" << std::endl;
+        if (_item)
+        {
+            free(_item);
+        }
+    }
+    // Overloading Global new[] operator
+    void* operator new[](size_t sz)
+    {
+
+        std::cout << " Memory Pool  :: new []()" << std::endl;
+        __debugbreak();
+      //  void* m = malloc(sz);
+        
+        return malloc(sz);
+    }
+    // Overloading Global delete[] operator
+    void operator delete[](void* m)
+    {
+        std::cout << " Memory Pool :: delete[]()" << std::endl;
+        __debugbreak();
+        free(m);
+    }
 
 private:
-    uint32_t BlockCount{ 0 };
-    uint32_t BlockSize{ sizeof(data_type) };
+    uint32_t BlockCount{ 0 };// Number of Items Pools is Capable of Storing
+    uint32_t BlockSize{ sizeof(data_type) };// Size of each block in the Pool
 
     data_type *Data{ nullptr };
+
+    std::mutex PoolMtx;
+
     std::stack<uint32_t> freeIDs;
 };
 
@@ -214,7 +296,7 @@ public:
 
         if (NewWritePosition == ReadPosition.load())
         {/* If Read position and Write position are the same Buffer is Full */
-            DEBUG_CODE(Print("Error: Ring Buffer Full attempting to Forward a value:");)
+         //   DEBUG_CODE(Print("Error: Ring Buffer Full attempting to Forward a value:");)
             return false;
         }
         Data[OldWritePosition].store(std::forward<value_type>(_element));
@@ -230,7 +312,7 @@ public:
 
         if (NewWritePosition == ReadPosition.load())
         {/* If Read position and Write position are the same Buffer is Full */
-            DEBUG_CODE(Print("Error: Ring Buffer Full and you are Attempting to Add more Elements to it:" << _element);)
+           // DEBUG_CODE(Print("Error: Ring Buffer Full and you are Attempting to Add more Elements to it:" << _element);)
             return false;
         }
         Data[OldWritePosition].store(_element);
@@ -248,7 +330,7 @@ public:
 
             if (OldWritePosition == OldReadPosition)
             {// If attempting to read the same position again or buffer is full return false;
-                DEBUG_CODE(Print("Error: Ring Buffer Empty. You are Attempting to Pop Elements from empty buffer"); );
+             //   DEBUG_CODE(Print("Error: Ring Buffer Empty. You are Attempting to Pop Elements from empty buffer"); );
                 return false;
             }
 
@@ -337,6 +419,8 @@ bool TEST_Ring_Buffer_Class();
 
      OPERATOR NEW Implementation
  -----------------------------------
+ --> new_scalar.cpp
+
   _CRT_SECURITYCRITICAL_ATTRIBUTE
   void* __CRTDECL operator new(size_t const size)
   {
@@ -363,4 +447,24 @@ bool TEST_Ring_Buffer_Class();
       }
   }
 
+  AFTER SETTING ALL THE LOCKS AND CRITICAL SECTIONS UP
+  -->delete_scalar.cpp
+// +--+--------------+  +------+-------------+
+// |delete_array_size|  |delete_array_nothrow|
+// +-----------------+  +--------------------+
+
+_CRT_SECURITYCRITICAL_ATTRIBUTE
+void __CRTDECL operator delete(void* const block) noexcept
+{
+    #ifdef _DEBUG
+    _free_dbg(block, _UNKNOWN_BLOCK);
+    #else
+    free(block);
+    #endif
+}
+
+
 /*=========================================================================================*/
+
+
+ 

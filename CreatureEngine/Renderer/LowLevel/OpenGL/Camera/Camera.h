@@ -27,7 +27,9 @@ public:
 
 	Mat4 GetViewMatrix();
 
-	//=======================================================================================================================================================
+
+    virtual Vec2 get_Center() { WARN_ME("get_Canter in Viewport Class is just returning junk: Be sure to correct this"); return Vec2(SCREEN_X, SCREEN_Y); }
+    //=======================================================================================================================================================
 
 	void Set_ViewMatrix(Mat4 mat);
 	void Set_ProjectionMatrix(Mat4 mat);

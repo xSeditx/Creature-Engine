@@ -24,6 +24,67 @@
 
 namespace OpenGL
 {
+    template<typename _Ty>
+    struct Geometry
+    {
+        Geometry(_Ty *_data, size_t _sz)
+            :
+            GL_Handle(OpenGL::new_VBO()),
+            Vertices(_data),
+            ElementCount(_sz)
+        {}
+        Geometry(size_t _sz)
+            :
+            GL_Handle(OpenGL::new_VBO()),
+            Vertices(new _Ty[_sz]),
+            ElementCount(_sz)
+        {}
+        Geometry(std::vector<_Ty>& _data)
+            :
+            GL_Handle(OpenGL::new_VBO()),
+            Vertices(_data),
+            ElementCount(_data.size())
+        {}
+
+
+        void set_Data(std::vector<_Ty> _data) 
+        {
+            ElementCount = _data.size();
+            OpenGL::set_BufferData(_data);
+
+        }
+        void set_Data(_Ty* _data, size_t _sz)
+        {
+            ElementCount = _sz;
+            OpenGL::bind_VBO(GL_Handle);
+            OpenGL::set_BufferData( _data, _sz);
+        }
+
+        void Bind()
+        {
+            OpenGL::bind_VBO(GL_Handle);
+        }
+        void Unbind()
+        {
+            OpenGL::bind_VBO(0);
+        }
+
+
+        /* Number of Elements in the Vertex Array */
+        size_t count() { return ElementCount; }
+
+        /* Returns size in bytes of Vertex Data */
+        size_t size() { return ElementCount * sizeof(_Ty); }
+
+        /* Returns pointer to Start of Vertices */
+        _Ty* data_Ptr() { return Vertices; }
+    private:
+        uint32_t GL_Handle{ 0 };
+
+        _Ty *Vertices;
+        size_t ElementCount;
+    };
+
 
     struct GPU_MemoryPool
     {

@@ -249,12 +249,12 @@ class App
     virtual void OnCreate() override
 	{
         
-        assert( TEST_Memory_Pool_Class() );
-        assert( TEST_Ring_Buffer_Class() );
+         TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
+         TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
 
         /* Load up the Listeners for the Various Input Events */
         {
-            RegisterListener(WM_KEYDOWN, KeyListener);
+            RegisterListener(   WM_KEYDOWN, KeyListener);
             RegisterListener(WM_MOUSEWHEEL, MouseWheel);
         }
 

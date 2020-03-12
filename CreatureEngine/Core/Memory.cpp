@@ -32,11 +32,29 @@ struct TestClass
 
     void *operator new(size_t _size)
     {
+        std::cout << "User Defined :: Operator new() " << std::endl;
         return Pool.Allocate();;
     }
     void operator delete(void *_item)
     {
+        std::cout << "User Defined :: Operator delete()" << std::endl;
         Pool.Deallocate(_item);
+    }
+    // Overloading Global new[] operator
+    void* operator new[](size_t sz)
+    {
+
+        std::cout << "User Defined :: Operator new []()" << std::endl;
+        __debugbreak();
+        void* m = malloc(sz);
+        return m;
+    }
+    // Overloading Global delete[] operator
+    void operator delete[](void* m)
+    {
+        std::cout << "User Defined :: Operator delete[]()" << std::endl;
+        __debugbreak();
+        free(m);
     }
 };
 Memory_Pool<TestClass> TestClass::Pool(100);
@@ -89,7 +107,7 @@ bool TEST_Memory_Pool_Class()
     size_t ElementTest{ 0 };
     for (auto& T : TestClass::Pool)
     {// Cycle over ever Block in the Pool
-        Print("Range For_Loop: " << T.Value);
+     //   Print("Range For_Loop: " << T.Value);
         ++ElementTest;
     }
     TEST_ASSERT(      ElementTest == TestClass::Pool.chunkCount(),"Improper Element Count being Created "     ," Correct Element Could on Pool Creation");
@@ -273,10 +291,39 @@ and Index information"
     for (int i = 0; i < Size; ++i)
     {
         int Index = rand() % (TestRingBuffer.element_Count() * 10);
-        Print("Testing get_Ptr() wrapping using Index " << Index << " at address " << (void*)TestRingBuffer.get_Ptr(Index));
+        //Print("Testing get_Ptr() wrapping using Index " << Index << " at address " << (void*)TestRingBuffer.get_Ptr(Index));
         TEST_ASSERT((void*)TestRingBuffer.get_Ptr(Index) _EQUALS_ (void*)TestRingBuffer.get_Ptr(Index + TestRingBuffer.element_Count()), "Pointer and Index Test", "Pointer and Index Test" );
     }
     /* ============================================================================== */
 
     return TEST_PASSED;
 }
+
+
+
+
+
+/*
+
+
+
+
+
+  -----------------------------------------------------------------------------------------------------------------------------------
+    Segmemnt Violation Memory errors:
+    
+      ~ Heap memory errors:
+        Attempting to free memory already freed.
+        Freeing memory that was not allocated.
+        Attempting to read/write memory already freed.
+        Attempting to read/write to memory which was never allocated.
+        Memory allocation error.
+        Reading/writing to memory out of the bounds of a dynamically allocated array
+      
+      ~ Stack memory errors:
+        Reading/writing to memory out of the bounds of a static array. (array index overflow - index too large/underflow - negative index)
+        Function pointer corruption: Invalid passing of function pointer and thus a bad call to a function.
+  -----------------------------------------------------------------------------------------------------------------------------------
+  
+
+*/

@@ -316,6 +316,7 @@ extern std::mutex DEBUGMutex;
 
 /*============ Comparison =========== */
 #define _EQUALS_                == 
+#define _IS_EQUAL_TO_           == 
 #define _NOT_EQUALS_            != 
 #define _NOT_EQUAL_TO_          !=
 #define _IS_GREATER_THAN_       >
@@ -326,7 +327,7 @@ extern std::mutex DEBUGMutex;
 /*======== Logical Operators =========*/
 #define _AND_                   &&
 #define _OR_                    ||
-
+#define _NOT_                   !
 
 #define pure_virtual      0
 #define _static 
@@ -384,10 +385,13 @@ we will have more functionality for tracking the stack and functions while easil
 /* Prints a bool as a True/False string */
 #define PBool(x)  ((x == true) ? " True" : "False")
 
-std::ostream& operator<<(std::ostream& _stream, const Vec2& _vector);
-std::ostream& operator<<(std::ostream& _stream, const Vec3& _vector);
-std::ostream& operator<<(std::ostream& _stream, const Vec4& _vector);
-std::ostream& operator<<(std::ostream& _stream, const Mat4& _matrix);
+
+std::ostream& operator <<(std::ostream& _stream, const Vec2& _vector);
+std::ostream& operator <<(std::ostream& _stream, const Vec3& _vector);
+std::ostream& operator <<(std::ostream& _stream, const Vec4& _vector);
+std::ostream& operator <<(std::ostream& _stream, const Mat4& _matrix);
+
+
 
 #define CheckGLERROR() {uint32_t ERR = 0;\
 if((ERR = OpenGL::glCheckError_(__FILE__, __LINE__)))\
@@ -446,6 +450,8 @@ private:
 #   define TEST_ASSERT(condition, message) do { } while (false)
 #endif
 
+extern bool ConsoleMessages;
+extern bool TerminateOnError;
 
 #endif// COMMON_H
 
@@ -495,43 +501,44 @@ private:
 ///================= SIMPLE ERROR HANDLING ========================================================================
 ///================================================================================================================
 /* Later on we will use this Error flag as a global that is checked as we will be turning off Exceptions. Should make
-my Error handling module before moving forward with this project */
-//struct ErrorMessage
-//{
-//	ErrorMessage(uint32_t _error, uint32_t _level)
-//		:
-//		Level(_level),
-//		ErrorNumber(_error)
-//	{
-//		GetSystemTime(Time);
-//	}
-//	uint32_t Level;
-//	uint32_t ErrorNumber;
-//	LPSYSTEMTIME Time;
-//
-//	static bool isError() { return !Errors.empty(); }
-//	static void RaiseException(uint32_t _error, uint32_t _level)
-//	{
-//		Errors.push({ _error, _level });
-//	}
-//	static bool GetError(ErrorMessage& _msg)
-//	{
-//		if (isError())
-//		{
-//			_msg = Errors.top();
-//			Errors.pop();
-//		}
-//		return Errors.empty();
-//	}
-//	static std::stack<ErrorMessage> Errors;
-//	friend std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg);
-//};
-//std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg);
-//
-//std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg)
-//{
-//	os << "Error: " << _msg.ErrorNumber << "\n At: " << _msg.Time << "\n ";
-//	return os;
-//}
+   my Error handling module before moving forward with this project
 
+      struct ErrorMessage
+      {
+      	ErrorMessage(uint32_t _error, uint32_t _level)
+      		:
+      		Level(_level),
+      		ErrorNumber(_error)
+      	{
+      		GetSystemTime(Time);
+      	}
+      	uint32_t Level;
+      	uint32_t ErrorNumber;
+      	LPSYSTEMTIME Time;
+      
+      	static bool isError() { return !Errors.empty(); }
+      	static void RaiseException(uint32_t _error, uint32_t _level)
+      	{
+      		Errors.push({ _error, _level });
+      	}
+      	static bool GetError(ErrorMessage& _msg)
+      	{
+      		if (isError())
+      		{
+      			_msg = Errors.top();
+      			Errors.pop();
+      		}
+      		return Errors.empty();
+      	}
+      	static std::stack<ErrorMessage> Errors;
+      	friend std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg);
+      };
 
+      std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg);
+      std::ostream& operator <<(std::ostream& os, ErrorMessage& _msg)
+      {
+      	os << "Error: " << _msg.ErrorNumber << "\n At: " << _msg.Time << "\n ";
+      	return os;
+      }
+
+*/
