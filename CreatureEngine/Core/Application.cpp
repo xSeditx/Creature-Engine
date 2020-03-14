@@ -495,7 +495,7 @@ void main()         \n\
 
 
 
-
+//https://www.worldometers.info/coronavirus/country/south-korea/
 
 /* =============================================================================================================================================
 /*                                          NOTES       
@@ -509,3 +509,101 @@ void main()         \n\
  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee418748(v%3Dvs.85)
 
 */
+
+
+
+
+
+
+
+
+/* 
+
+Odds of Winning Powerball : 1 in 292,201,338
+
+
+US Population:  327,200,000 Million
+Infection Rate: Double every 4 Days
+
+Currently Infected [3/12/2020]: 202
+
+Mortality:
+ 
+ [Note]: I do not wish to use the current percentage for mortality in the
+    USA because it's initial infection started at an anomaly in a Nursing
+    home meaning the data will be skewed until we have more information 
+    Currently it is extremely high mortality rate.
+     
+     
+     
+      ___________________________________________________________________
+     |                           MORTALITY RATE                          |    
+     |___________________________________________________________________|
+     |   Worst Case (World Average)    | Best Case (South Korea Numbers) |
+     |_________________________________|_________________________________|
+     |             3.4%                |           0.7%                  |
+     |_________________________________|_________________________________|
+     | 11,124,800 Theoretical max      |    2,290,440 Theoretical max    |      
+     |_________________________________|_________________________________|
+     
+     
+       1 in 49.432 Will contract it over the next 60 days
+     
+      ______________________________________________________
+     | DAY   |  INFECTIONS |      World Avg    |  SK Avg    |
+     |_______|_____________|___________________|____________|
+     |  4    |    404      |                   |            |
+     |  8    |    808      |                   |            |
+     |  12   |    1616     |                   |            |
+     |  16   |    3232     |                   |            |
+     |  20   |    6464     |                   |            |
+     |  24   |    12928    |                   |            |
+     |  28   |    25856    |                   |            |
+     |  32   |    51712    |                   |            |
+     |  26   |    103424   |                   |            |
+     |  40   |    206848   |                   |            |
+     |  44   |    413696   |                   |            |
+     |  48   |    827392   |                   |            |
+     |  52   |    1654784  |                   |            |
+     |  56   |    3309568  |                   |            |
+     |  60   |    6619136  |   225,050.264     |   46,333   |
+     |_____________________|___________________|____________|
+     
+                       Population / Deaths
+     ________________________________________________________
+      World Mortality Avg:                 1  in  1453
+      South Korea Mortality Avg:           1  in  7061
+     ________________________________________________________
+      The above is your odds of dying in the next 60 days
+      Take note this is if you are even currently healthy 
+      and not infected at the moment. 
+     ________________________________________________________
+     
+     
+     
+     
+     
+     
+
+
+
+
+
+
+
+
+
+
+
+|
+|
+|                                 |                                 |
+|                                 |                                 |
+|                                 |                                 |
+|                                 |                                 |
+|
+
+
+
+
+ */

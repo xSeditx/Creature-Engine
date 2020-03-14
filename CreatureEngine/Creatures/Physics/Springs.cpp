@@ -7,7 +7,7 @@
 
 
 
-
+#include"Springs.h"
 
 
 
@@ -39,4 +39,14 @@ namespace Physics
         velocity += acceleration * delta;
         pos += velocity * delta;
     }
+
+
+
+} 
+
+
+namespace Creatures
+{
+    _static Joint_id Spring::Joint_Count{ 0 };
+
 }
