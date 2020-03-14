@@ -431,20 +431,24 @@ private:
 #ifndef NDEBUG
 #   define              TEST_ASSERT(condition, FAIL_MSG, PASS_MSG) do{if (!(condition)){\
 /* Colored Debug Console Logger */ DEBUGPrint(CON_Red,                                  \
-/* Expression to Evaluate       */        "\n Assertion: " << #condition                \
+                        "\n ========================================= "                 \
+/* Expression to Evaluate       */     << "\n Assertion: " << #condition                \
 /* FILE NAME                    */     << "\n File: "      << __FILE__                  \
 /* LINE NUMBER                  */     << "\n Line: "      << __LINE__                  \
-/* ERROR MESSAGE                */     << "\n FAILED: "    << FAIL_MSG);                \
+/* ERROR MESSAGE                */     << "\n FAILED: "    << FAIL_MSG  <<              \
+                        "\n ========================================= ");               \
 /* Terminate if Flag is Set     */     if (TerminateOnError){ std::terminate(); }       \
 /* Expression PASSED:           */ }else{                                               \
 /* Prevent same test triggering */ static bool          _seenAlready = false;           \
 /* Multiple Logs                */ if( !_seenAlready ){ _seenAlready = true;            \
 /* is Console Display On        */ if(ConsoleMessages){                                 \
 /*                              */ DEBUGPrint(CON_Green,                                \
-/* Expression to Evaluate       */        "\n Condition: " << #condition                \
+                        "\n ========================================= "                 \
+/* Expression to Evaluate       */     << "\n Condition: " << #condition                \
 /* FILE NAME                    */     << "\n File: "      << __FILE__                  \
 /* LINE NUMBER                  */     << "\n Line: "      << __LINE__                  \
-/* SUCCESS MESSAGE              */     << "\n PASSED: "    << PASS_MSG);                \
+/* SUCCESS MESSAGE              */     << "\n PASSED: "    << PASS_MSG <<               \
+                        "\n ========================================= ");               \
                                   }}}} while (false)
 #else
 #   define TEST_ASSERT(condition, message) do { } while (false)
