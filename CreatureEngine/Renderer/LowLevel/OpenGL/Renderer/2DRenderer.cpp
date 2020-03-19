@@ -39,9 +39,10 @@ void main()                    \n\
 
 namespace OpenGL
 {
-
+    
     Renderer2D::Renderer2D(Vec2 _size)
     {
+        WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
         mainCamera = Camera2D(_size);
         /// ==== This IS CRASHING ON COMPILE =======*/
         InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
