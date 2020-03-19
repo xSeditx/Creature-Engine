@@ -1,7 +1,6 @@
 #pragma once
-#include"Common.h"
-#include"SDL_defines.h"
-
+#include"Core/Common.h"
+ 
 #include<optional>
 
 #define DEFAULT_WEIGHT 10.0f
@@ -73,8 +72,8 @@ struct Collider
 	///=============================================================================================================================================================================================================================================
 	/// I have so many concerns about this right now but I need to access the Colliding objects by what Gameobject they are not what collider type.
 	/// Perhaps I will figure a solution but currently my structure does not go well with what I need for this.
+	
 	void* User_Ptr;
-
 	void s_UserPointer(void* _ptr);
 	template<typename _Ty> inline _Ty& g_UserPointer();
 
@@ -82,12 +81,14 @@ struct Collider
 
 	GameObject* Parent;
 	inline GameObject& g_Parent();    void s_Parent(GameObject* _parent);
+
 	///==============================================================================================================================================================================================================================
 	/// This should likely go inside of the GameObject class since they are connected now
 	/// It should also be replaced by a Bitfield so that all uses of the Engine can define their own properties
 
 	PropertiesEnum Group;
 	inline PropertiesEnum g_Group();    void s_Group(PropertiesEnum _group);
+
 	///==============================================================================================================================================================================================================================
 
 	Vec2
