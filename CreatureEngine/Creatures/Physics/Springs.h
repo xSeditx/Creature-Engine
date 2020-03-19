@@ -221,7 +221,7 @@ namespace Creatures
         _count = _COUNT;// Just Temp until I get the System Working
         for_loop(i, _count)
         {
-            Springs[i] = Spring(Vec3(), Vec3(), 1.0, 1.0f, 0.5f, 0.5f);
+            Springs[i] = Spring(Vec3(0), Vec3(0), 1.0, 1.0f, 0.5f, 0.5f);
         }
     }
 }// NS Creatures
@@ -230,12 +230,12 @@ namespace Creatures
 
 
 
-var springForceY = -k * (positionY - anchorY);
-var dampingForceY = damping * velocityY;
-var forceY = springForceY + mass * gravity - dampingForceY;
-var accelerationY = forceY / mass;
-velocityY = velocityY + accelerationY * timeStep;
-positionY = positionY + velocityY * timeStep;
+// var springForceY = -k * (positionY - anchorY);
+// var dampingForceY = damping * velocityY;
+// var forceY = springForceY + mass * gravity - dampingForceY;
+// var accelerationY = forceY / mass;
+// velocityY = velocityY + accelerationY * timeStep;
+// positionY = positionY + velocityY * timeStep;
 
 
 

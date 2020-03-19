@@ -45,9 +45,9 @@ private:
 };
 
 
-Mat4 OrthographicMatrix(int width, int height);
-
-
+Mat4 OrthographicMatrix(int _width, int _height);
+Mat4 PerspectiveMatrix(float _fovY, float _aspect, float _near, float _far);
+ 
 
 
 /*=======================================================================================================================================================
