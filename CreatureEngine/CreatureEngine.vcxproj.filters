@@ -179,6 +179,9 @@
     <ClCompile Include="Physics\Quadtree.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Profiling\Timing\Profiling.cpp">
+      <Filter>Source Files\Profiling\Benchmarking</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">

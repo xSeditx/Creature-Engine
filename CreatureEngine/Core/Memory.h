@@ -10,64 +10,77 @@
 /*      Pool Of Memory for Objects which are all the same size and are numerous. 
 /*  The Type of data we wish to place in Arrays yet regularly add and Delete 
 /* =======================================================================================*/
-template<typename _Ty>
+template<typename _Ty, size_t _SZ>
 struct Memory_Pool
 {/* Currently Requires an Object be default Constructable but might change in near future*/
-    using Lock_t = std::unique_lock<std::mutex>;
     using data_type = _Ty;
+
+    using value_type = _Ty;
+    using pointer = _Ty * ;
+    using const_pointer = const _Ty*;
+
+    using reference = _Ty & ;
+    using constant_reference = const _Ty&;
+
+    using size_type = size_t;
+    using difference_type = size_t;
+
+    using Lock_t = std::unique_lock<std::mutex>;
+
+
+
 
     /* Ensure Pool is not Copies or Copy Assigned */
     Memory_Pool(Memory_Pool&) = delete;
     Memory_Pool& operator=(const Memory_Pool&) = delete;
 
-
     /*W Control Pool with _size number of free Blocks*/
-    Memory_Pool(size_t _size) noexcept
+    Memory_Pool() noexcept
         :
-        Data(static_cast<_Ty*>(malloc(_size * sizeof(_Ty)))),
-        BlockCount(_size)
+        BlockCount(_SZ)
     {
+        if (!Data)
+        {
+            Alignment = alignof(data_type);
+            size_t Extra = sizeof(data_type) % Alignment;
+            BlockSize = sizeof(data_type) + ( Extra);
+            Size = BlockSize * BlockCount;
+          //  Data = static_cast<_Ty*>(malloc(Size));  
+        }
         // No Need for Critical section as c_Tor is Naturally Thread Safe
-        for (uint32_t i = 0; i < _size; ++i)
+        for (uint32_t i = 0; i < _SZ; ++i)
         {// Push indices in reverse Order to the Stack 
-            freeIDs.push(_size - i);
+            freeIDs.push(_SZ - i - 1);
         }
     }
     ~Memory_Pool()
     {
-        DEBUGPrint(CON_DarkRed, " Releasing Memory for our Memory_Pool Class in the Destructor");
         Destroy_Memory_Pool();
     }
     void Destroy_Memory_Pool()
     {
-        if (Data)
-        {
-            reset();
-            free(Data);
-            Data = nullptr;
-        }
     }
 
     /*RW Return pointer to free block of Memory */
-    inline void *Allocate() noexcept
+    void *Allocate()// noexcept
     {
         {/* ~ CRITICAL SECTION ~*/
-            Lock_t Lock(PoolMtx);
+//            Lock_t Lock(PoolMtx);
 
-            void *Address = &Data[freeIDs.top()];
+            void *Address = &Data[freeIDs.top()];   //+ (BlockSize * freeIDs.top());// [freeIDs.top()];
             freeIDs.pop();
             return static_cast<void*> (Address);   
         }
     }
 
     /*RW Returns block of Memory Index to the Pool */
-    inline void Deallocate(void *_item) noexcept
+    void Deallocate(void *_item) // noexcept
     {
         // Needing to lock on every deallocation feels like 
         // it might get expensive however idk anyway around it
 
         {/* ~ CRITICAL SECTION ~*/
-            Lock_t Lock(PoolMtx);
+            //Lock_t Lock(PoolMtx);
 
             freeIDs.push(get_id(_item));
         }
@@ -119,16 +132,16 @@ struct Memory_Pool
 
 
     /* Size of each Element allocated by this class */
-    size_t chunkSize() const noexcept                               { return BlockSize;    }
-    /* Max number of Objects Allocator is able to create */                              
-    size_t chunkCount() const noexcept                              { return BlockCount;   }
-
-    /*R Returns the Object at the Specified _Index */
-    data_type& operator[](size_t _index) const noexcept             { return Data[_index]; }
-
-    /*W Locks the Pool while we read Item at the Specified _Index */
-    data_type& operator[](size_t _index) noexcept                         {/*~CRITICAL SECTIONS~*/ 
-                                                                          { Lock_t Lock;  return Data[_index]; } }
+    size_t chunkSize() const noexcept                                     { return BlockSize;    }
+    /* Max number of Objects Allocator is able to create */                                    
+    size_t chunkCount() const noexcept                                    { return BlockCount;   }
+                                                                          
+    /*R Returns the Object at the Specified _Index */                     
+    data_type& operator[](size_t _index) const noexcept                   { return const_cast<_Ty&>(Data[_index]); }
+//
+//   /*W Locks the Pool while we read Item at the Specified _Index */
+//   data_type& operator[](size_t _index) noexcept                         {/*~CRITICAL SECTIONS~*/ 
+//                                                                         { Lock_t Lock(PoolMtx);  return Data[_index]; } }
 
 
     /*======================================================================================================================================================================
@@ -142,11 +155,13 @@ struct Memory_Pool
     /*===================================================================================================================================================================== */
     void *operator new(size_t _size)
     {
+        Lock_t Lock;
         std::cout << " Memory Pool :: new() " << std::endl;
         return malloc(_size);
     }
     void operator delete(void *_item)
     {
+        Lock_t Lock(PoolMtx);
         std::cout << " Memory Pool :: delete()" << std::endl;
         if (_item)
         {
@@ -156,7 +171,7 @@ struct Memory_Pool
     // Overloading Global new[] operator
     void* operator new[](size_t sz)
     {
-
+        Lock_t Lock(PoolMtx);
         std::cout << " Memory Pool  :: new []()" << std::endl;
         __debugbreak();
       //  void* m = malloc(sz);
@@ -173,14 +188,17 @@ struct Memory_Pool
 
 private:
     uint32_t BlockCount{ 0 };// Number of Items Pools is Capable of Storing
-    uint32_t BlockSize{ sizeof(data_type) };// Size of each block in the Pool
+    uint32_t BlockSize{ sizeof(data_type)};// Size of each block in the Pool
+    size_t Size{ 0 };
+    size_t Alignment{ 0 };
 
-    data_type *Data{ nullptr };
+    data_type Data[_SZ];
 
     std::mutex PoolMtx;
 
     std::stack<uint32_t> freeIDs;
 };
+
 
 /* Assertive Test of the Memory Pool Class */
 bool TEST_Memory_Pool_Class();

@@ -27,6 +27,7 @@
 #include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
 #include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
 
+// https://www.scmp.com/news/china/society/article/3075567/people-blood-type-may-be-more-vulnerable-coronavirus-china-study?utm_content=article&utm_medium=Social&utm_source=Facebook&fbclid=IwAR1VsuqHUzDgoU6-zaafrHJI89Qniyxbzppif6x_SvsC9LXHGjsfwo7tM6k#Echobox=1584436870
 
 using namespace Core;
 using namespace Threading;
@@ -37,8 +38,10 @@ int TestRecursion(int _param)
 	Print("Recursion " << _param);
 	if(_param > 0)
 	{
-		auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
-		E.get();
+       
+            WARN_ME("This is Currently disabled due to Error cant convert _Ty' to 'int (__cdecl *const )(int &) ------ _Ty=int (__cdecl &)(int) ")
+		//auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
+	//	E.get();
 	}
 	Print("Exit " << _param);
 
@@ -165,29 +168,7 @@ MovementComponent TestMovementComponent;
 
 #include"Creatures/Creatures.h"
 #include"Core/Memory.h"
-//
-//struct Organ
-//{
-//     Organ() = default;
-//     static Memory_Pool<Organ> Pool;
-//
-//     Organ(int _value)
-//         :
-//         Value(_value)
-//     { }
-//
-//    uint32_t  Value{ 0 };
-//
-//     void *operator new(size_t _size)
-//     {
-//         return Pool.Allocate();;
-//     }
-//     void operator delete(void *_item)
-//     {
-//         Pool.Deallocate(_item);
-//     }
-//};
-//Memory_Pool<Organ> Organ::Pool(100);
+#include"Creatures/Physics/Springs.h"
 
 class App
 	: public Application
@@ -249,8 +230,13 @@ class App
     virtual void OnCreate() override
 	{
         
+
          TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
+         TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Complete ", " Springs Class Complete ");
          TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
+
+         int *A = new int[1000];
+
 
         /* Load up the Listeners for the Various Input Events */
         {
@@ -651,9 +637,11 @@ bool TEST_PROFILE_WINDOW()
  Found 100
  Cancer found it 5pm 3/4/2020 Moon in Cancer Sun in Pisces 
 
+ Lost Art of Structure Packing:
+ http://www.catb.org/esr/structure-packing/
+
  Nice
  http://eel.is/c++draft/meta.trans.other
-
 
  Getting the Stack frame caller
  https://social.msdn.microsoft.com/Forums/vstudio/en-US/da4e85c5-407e-4a57-87e7-14bf994504d9/error-asm-keyword-not-supported-on-this-architecture?forum=vcgeneral

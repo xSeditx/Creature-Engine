@@ -1,5 +1,12 @@
 #include"Memory.h"
 
+//template<typename _Ty>
+//_static _Ty *Memory_Pool<_Ty>::Data{ nullptr };
+//
+//template<typename _Ty>
+//_static std::mutex Memory_Pool<_Ty>::PoolMtx;
+ 
+
 
 bool ConsoleMessages{ true };
 bool TerminateOnError{ true };
@@ -12,33 +19,51 @@ static void AssertDisplayOff() { ConsoleMessages = false; }
 struct TestClass
 {
     TestClass() = default;
-    float F1{ 0 };
-    size_t Sz1{ 0 };
-    bool B1{ 0 } , B2{ 0 }, B3{ 0 };
-    size_t Sz2{ 0 };;
-    uint32_t Int1{ 0 };;
-    float F2{ 0 };;
-    char C1{ 0 };;
-    float F3{ 0 };;
-    static Memory_Pool<TestClass> Pool;
+    float F1;
+    size_t Sz1;
+    bool B1, B2, B3;
+    size_t Sz2;
+    uint32_t Int1;
+    float F2;
+    char C1;
+    float F3;
 
+    static Memory_Pool<TestClass, 100> Pool;
+
+    static std::mutex Mtx;
 
     TestClass(int _value)
-        :
-        Value(_value)
-    {}
+    {
+        Value = _value;
+        float F1= 0 ;
+        size_t Sz1 = 0;
+        bool
+            B1 = 0,
+            B2 = 0,
+            B3 = 0;
+        size_t Sz2= 0 ;
+        uint32_t Int1= 0 ;
+        float F2= 0 ;
+        char C1= 0 ;
+        float F3= 0 ;
+    
+    
+    }
 
-    uint32_t  Value{ 0 };
-
+    uint32_t  Value;
     void *operator new(size_t _size)
     {
-        std::cout << "User Defined :: Operator new() " << std::endl;
-        return Pool.Allocate();;
+       // std::unique_lock< std::mutex> Lock(Mtx);
+    //    std::cout << "User Defined :: Operator new() " << std::endl;
+        return Pool.Allocate();//(void*)(::new char[sizeof(TestClass)]);//
     }
     void operator delete(void *_item)
     {
-        std::cout << "User Defined :: Operator delete()" << std::endl;
-        Pool.Deallocate(_item);
+    //    std::unique_lock< std::mutex> Lock(Mtx);
+      //  TODO("Look up more Pool Allocator Techniques because something is seriously fucky right now");
+      //  std::cout << "User Defined :: Operator delete()" << std::endl;
+       Pool.Deallocate(_item);// delete(_item);//
+//       free(_item);
     }
     // Overloading Global new[] operator
     void* operator new[](size_t sz)
@@ -57,12 +82,57 @@ struct TestClass
         free(m);
     }
 };
-Memory_Pool<TestClass> TestClass::Pool(100);
+Memory_Pool<TestClass, 100> TestClass::Pool;
 
+
+
+struct SpeedTest
+{
+    SpeedTest() = default;
+    float F1;
+    size_t Sz1;
+    bool B1, B2, B3;
+    size_t Sz2;
+    uint32_t Int1;
+    float F2;
+    char C1;
+    float F3;
+
+ 
+    static std::mutex Mtx;
+
+    SpeedTest(int _value)
+    {
+        Value = _value;
+        float F1 = 0;
+        size_t Sz1 = 0;
+        bool
+            B1 = 0,
+            B2 = 0,
+            B3 = 0;
+        size_t Sz2 = 0;
+        uint32_t Int1 = 0;
+        float F2 = 0;
+        char C1 = 0;
+        float F3 = 0;
+
+
+    }
+
+    uint32_t  Value;
+ };
+ 
+
+
+
+
+#include"../Profiling/Timing/Benchmark.h"
+
+
+_static std::mutex TestClass::Mtx;
 
 bool TEST_Memory_Pool_Class()
 {
-
     // Test Array to fill with TestClass objects. These will be contiguous in Memory
     // Allocator returns an Index to a preallocated Block of Memory, delete frees 
     // That memory up for use by additional Objects
@@ -195,6 +265,58 @@ bool TEST_Memory_Pool_Class()
     Print("Allocating Again Is it Full Again: " << PBool(TestClass::Pool.is_Full()));
     TEST_ASSERT(TestClass::Pool.is_Full() _EQUALS_ true," Pool is not full and it should be"," Pool is properly filled although I question this test a bit");
 
+    TestClass::Pool.clear();
+
+
+    //==============================================================================
+    //  Test Speed Allocator. It should be faster than New else WTF are we doing 
+    //==============================================================================
+    SpeedTest *Test2[100];
+    for (int i = 0; i < 100; ++i)
+    {
+        Test2[i] = new SpeedTest(i);
+    }
+
+    size_t S1{ 0 }, S2{ 0 };
+
+    /* Test the Speed of Overloaded New and Delete */
+    {
+        Timing::Profiling::Profile_Timer Bench("Overloaded");// Dont use the current Threaded Version its broke.
+        
+        for_loop(j, 10000)
+        {
+            for_loop(i, 99)
+            {
+                Test1[i] = new TestClass(300);
+            }
+            for_loop(i, 99)
+            {
+                delete(Test1[i]);
+            }
+        }
+    //    S1 = Bench.Sample();
+    }
+
+    /* Test the Speed of Normal New and Delete */
+    {
+        Timing::Profiling::Profile_Timer Bench("Normal");// Dont use the current Threaded Version its broke.
+        for_loop(j, 10000)
+        {
+            for_loop(i, 99)
+            {
+                Test2[i] = new SpeedTest(300);
+            }
+            for_loop(i, 99)
+            {
+                delete(Test2[i]);
+            }
+        }
+       // S2 = Bench.Sample();
+       // Bench.Duration
+    }
+
+    //(S1 < S2, " Allocation is Slower", "Allocation is Faster");
+
     //==============================================================================
     // Return Successful 
     //==============================================================================
@@ -307,9 +429,15 @@ and Index information"
 
 
 
-
-
-  -----------------------------------------------------------------------------------------------------------------------------------
+   The standard requires the allocator to define the following type:
+  -----------------------------------------------------------------------------------------------------------------------------------------------------
+   value_type:                       the type of allocated elements, T
+   pointer and const_pointer:        pointer and constant pointer to T
+   reference && constant_reference:  reference and constant reference to T
+   size_type:                        an unsigned integral type that can represent the size of the largest object in the allocation model
+   difference_type:                  a signed integral type that can represent the difference between any two pointers in the allocation model
+   
+  -----------------------------------------------------------------------------------------------------------------------------------------------------
     Segmemnt Violation Memory errors:
     
       ~ Heap memory errors:
