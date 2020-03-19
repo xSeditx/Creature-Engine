@@ -2,6 +2,11 @@
 
 _static Simulation *Simulation::Instance{ nullptr };
 
+// Set the default for the Static variables
+_static float Mass::Current_Timestep = 2.0f;
+_static float Mass::Gravity = 0.1f;
+
+
 
 
 #include<algorithm>

@@ -179,8 +179,8 @@
     <ClCompile Include="Physics\Quadtree.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Profiling\Timing\Profiling.cpp">
-      <Filter>Source Files\Profiling\Benchmarking</Filter>
+    <ClCompile Include="Physics\Colliders.cpp">
+      <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -308,6 +308,9 @@
       <Filter>Source Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Quadtree.h">
+      <Filter>Source Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Colliders.h">
       <Filter>Source Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>

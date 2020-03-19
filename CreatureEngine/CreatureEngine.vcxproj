@@ -178,6 +178,7 @@
     <ClCompile Include="Creatures\Creatures.cpp" />
     <ClCompile Include="Creatures\Physics\Springs.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Physics\Colliders.cpp" />
     <ClCompile Include="Physics\Physics.cpp" />
     <ClCompile Include="Physics\Quadtree.cpp" />
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="Creatures\AI\NeuralNetwork.h" />
     <ClInclude Include="Creatures\Creatures.h" />
     <ClInclude Include="Creatures\Physics\Springs.h" />
+    <ClInclude Include="Physics\Colliders.h" />
     <ClInclude Include="Physics\Physics.h" />
     <ClInclude Include="Physics\Quadtree.h" />
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
