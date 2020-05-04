@@ -98,7 +98,10 @@ private:
         /* return the Dimensions of a Window */
         Vec2   g_Size() const noexcept { return Size; }
         /* Gets the Name of the Window */
-        std::string g_Title() { return Name; }
+        std::string g_Title() 
+        { 
+            return Title; 
+        }
         /* Return the Parent Window if this is a Child */
         Window& g_Parent() const { return *Parent; }
 
@@ -180,7 +183,6 @@ private:
             defaultCamera = _camera;
         }
         
-
     protected:
         Shader* WindowShader{ nullptr };
         Camera2D* defaultCamera{ nullptr };
@@ -195,14 +197,13 @@ private:
         HDC  DeviceContext{ 0 };
         Vec2 Size{ 0,0 };
         Vec2 Position{ 0,0 };
-        std::string Name;
 
         /* NOTE: This and PFD both need to be sent to Application class */
         WNDCLASS WindowProperties{ 0 };
         PIXELFORMATDESCRIPTOR PixelFormatDescriptor{ 0 }; // This is where our Hints are going to be coming from.
 
         int PixelFormat{ 0 };
-        std::string Title{ "" };
+        std::string Title{ "Initialization" };
 
         bool Active{ true };
         bool Alive{ true };
@@ -212,31 +213,6 @@ private:
 
         void create_DefaultShader();
         EventHandler Observer;
-        /* struct EventHandler
-        {
-            EventHandler() = default;
-        public:
-            static EventHandler& get();                 // Initializes EventSystem when called first time
-
-
-            void PollEvents();
-            void PostMSG(Event msg);
-            bool PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags);
-            bool PeekMSG(Event& msg);
-
-            void Dispatch(Event msg);
-
-            void RegisterListener(MsgType msg, Listener& handler);
-            void RemoveListener(MsgType msg, Listener& handler);
-
-            EventHandler(EventHandler const&) = delete; // and prevents Copies from being made
-            void operator = (EventHandler const&) = delete;
-
-        private:
-            std::queue<Event> Messages;
-            std::unordered_map<MsgType, std::vector<Listener*>> ListenerMap;
-        };*/
-
     public:
         //  static EventHandler& Messenger() { return EventHandler::get(); } 
         EventHandler& Messenger() { return Observer; }
@@ -264,7 +240,10 @@ private:
     void Terminate() { Running = false; }
 
     /* Returns the Title of the Applications Window */
-    std::string Name() { return mainWindow.g_Title(); }
+    std::string Name()
+    { 
+        return mainWindow.g_Title();
+    } ///Print("Getting Applications Name " << mainWindow.g_Title());
     /* Return the Width dimension of the Main Window */
     int   Width() const noexcept { return (int)mainWindow.Width(); }
     /* Return the Height Dimension of the Main Window */
@@ -279,19 +258,19 @@ private:
     float g_PositionY() const noexcept { return mainWindow.g_PositionY(); }
 
     /* Sets the location of a Window */
-    void  s_Position(Vec2 _pos)  noexcept { mainWindow.s_Position(_pos); }
+    void  s_Position(Vec2 _pos)  noexcept {  mainWindow.s_Position(_pos); }
     /* Sets the X location for a Window */
-    Vec2  s_PositionX(float _x) noexcept { mainWindow.s_PositionX(_x); }
+    Vec2  s_PositionX(float _x) noexcept  {  mainWindow.s_PositionX(_x);  }
     /* Sets the Y location for a Window */
-    Vec2  s_PositionY(float _y) noexcept { mainWindow.s_PositionY(_y); }
+    Vec2  s_PositionY(float _y) noexcept  {  mainWindow.s_PositionY(_y);  }
     /* Sets the Size for the base Window of Application */
-    void  s_Size(Vec2 _size) noexcept { mainWindow.s_Size(_size); }
+    void  s_Size(Vec2 _size) noexcept     {  mainWindow.s_Size(_size);    }
     /* Sets the Width for the base Window of Application */
-    void  s_Width(int _x) const noexcept { mainWindow.s_Width(_x); }
+    void  s_Width(int _x) const noexcept  {  mainWindow.s_Width(_x);      }
     /* Sets the Height for the base Window of Application */
-    void  s_Height(int _y) const noexcept { mainWindow.s_Height(_y); }
+    void  s_Height(int _y) const noexcept {  mainWindow.s_Height(_y);     }
     /* Sets the Title for the base Window of Application */
-    void  s_Name(std::string _name) { mainWindow.s_Title(_name); }
+    void  s_Name(std::string _name)       {  mainWindow.s_Title(_name);   }
 
 
     /* Removes an Event from our Listener Queue   */
@@ -339,7 +318,10 @@ public:
 
     static Application& get() { return *AppInstance; }
     static Application::Window& getWindow() { return AppInstance->mainWindow; }
-    static void setWindow(Application::Window& _window) { AppInstance->mainWindow = std::forward<Application::Window>(_window); }
+    static void setWindow(Application::Window& _window) 
+    { 
+         AppInstance->mainWindow = std::move(_window);
+    }
 
     static Application::Window::InputDevices& getDevice() { return AppInstance->mainWindow.Input; }
     static Window::InputDevices::_mouse& getMouse() { return AppInstance->getDevice().Mouse; }
@@ -360,11 +342,64 @@ Vec2 SplitLParam(int lParam);
 /* =============================================================================================================================================
 /*                                                TRASH
 /* =============================================================================================================================================
+        ///Window operator=(const Window& _other)
+        ///{
+        ///    WindowShader = _other.WindowShader;
+        ///    defaultCamera = _other.defaultCamera;
+        ///    Parent = _other.Parent;
+        ///    GL_Context = _other.GL_Context;
+        ///    Handle = _other.Handle;
+        ///    DeviceContext = _other.DeviceContext;
+        ///    Size = _other.Size;
+        ///    Position = _other.Position;
+        ///    WindowProperties = _other.WindowProperties;
+        ///    PixelFormatDescriptor = _other.PixelFormatDescriptor;
+        ///    PixelFormat = _other.PixelFormat;
+        ///    Title = _other.Title;
+        ///    Active = _other.Active;
+        ///    Alive = _other.Alive;
+        ///    Visible = _other.Visible;
+        ///
+        ///    Observer = std::move(_other.Observer);
+        ///}
+
+
+        /* struct EventHandler
+        {
+            EventHandler() = default;
+        public:
+            static EventHandler& get();                 // Initializes EventSystem when called first time
+
+
+            void PollEvents();
+            void PostMSG(Event msg);
+            bool PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags);
+            bool PeekMSG(Event& msg);
+
+            void Dispatch(Event msg);
+
+            void RegisterListener(MsgType msg, Listener& handler);
+            void RemoveListener(MsgType msg, Listener& handler);
+
+            EventHandler(EventHandler const&) = delete; // and prevents Copies from being made
+            void operator = (EventHandler const&) = delete;
+
+        private:
+            std::queue<Event> Messages;
+            std::unordered_map<MsgType, std::vector<Listener*>> ListenerMap;
+        };*/
 
 
 
 
-
+      //  AppInstance->mainWindow = std::forward<Application::Window>(_window);
+     //   std::string N = _window.g_Title();
+    //    Print("Application Name is    : " << AppInstance->mainWindow.g_Title());
+   //     Print("Setting Application To : " << N);
+        //AppInstance->mainWindow = *(_window);
+     //   std::swap(AppInstance->mainWindow, _window);
+       // *&AppInstance->mainWindow = &_window;
+    //  memcpy(&AppInstance->mainWindow, &_window, sizeof(Application::Window));
 
 
 /* =============================================================================================================================================*/

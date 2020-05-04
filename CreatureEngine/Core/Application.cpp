@@ -67,7 +67,7 @@ USAGE:
  {
 	 MSG msg;
 	 size_t PreviousTime{ 0 };
-
+     std::string Name = getWindow().g_Title()  + " FPS: ";
 	 while (isRunning())
 	 {
 		 size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
@@ -75,22 +75,16 @@ USAGE:
 		 ++FPS;
 		 if (Time > 1000)
 		 {
-			 Print("FPS: " << FPS);
+             getWindow().s_Title(Name + std::to_string((int)FPS));
 			 FPS = 0;
 			 PreviousTime = NewTime;
 		 }
-
 		 Application::PollEvents();
 		 while (Application::PeekMSG(msg))
 		 {
 			 TranslateMessage(&msg);
-//			 Print(msg.message << " : " << WM_SIZE);
 			 Application::Dispatch(msg);
-			 /// Print(msg.message);
-			 if (msg.message == WM_DESTROY)
-			 {
-				 Print("Exit");
-			 }
+			 if (msg.message _EQUALS_ WM_DESTROY) Print("Exit");
 		 }
 		 Update();
 		 Render();
@@ -158,9 +152,9 @@ Application* Application::AppInstance{ nullptr };
 Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name, DWORD _flags)
 	:
 	Parent(nullptr),
-	Size({ (float)_width, (float)_height }),
-	Title(_name)
+	Size({ (float)_width, (float)_height })
 {
+    s_Title(_name);
 	/// Create Window Handle and Device Context
 	{
 		assert(&Application::get() != nullptr);
@@ -265,6 +259,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		ShowWindow(Handle, SW_SHOW);
 		UpdateWindow(Handle);
 	}
+    s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));
 
 	/// Set OpenGL State
 	{
@@ -339,6 +334,7 @@ void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)       
 }
 void Application::Window::s_Title(std::string _name)
 {
+///    Print("Name IS: " << Title << "  Changing it to " << _name << " Address: " << (void*)this);
 	Title = _name;
 	SetWindowTextA
 	(

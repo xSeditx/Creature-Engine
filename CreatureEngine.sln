@@ -15,6 +15,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test2", "UnitTest\Test2.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SOIL", "Bin\Simple-OpenGL-Image-Library\projects\VC9\SOIL.vcxproj", "{C32FB2B4-500C-43CD-A099-EECCE079D3F1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{D0892A82-A678-4064-8C82-046C0F1FA9D8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B789A32E-28DA-4128-B23A-0B5531FDFC00} = {B789A32E-28DA-4128-B23A-0B5531FDFC00}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -47,6 +52,14 @@ Global
 		{C32FB2B4-500C-43CD-A099-EECCE079D3F1}.Release|x64.Build.0 = Release|x64
 		{C32FB2B4-500C-43CD-A099-EECCE079D3F1}.Release|x86.ActiveCfg = Release|Win32
 		{C32FB2B4-500C-43CD-A099-EECCE079D3F1}.Release|x86.Build.0 = Release|Win32
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Debug|x64.ActiveCfg = Debug|x64
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Debug|x64.Build.0 = Debug|x64
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Debug|x86.ActiveCfg = Debug|Win32
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Debug|x86.Build.0 = Debug|Win32
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Release|x64.ActiveCfg = Release|x64
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Release|x64.Build.0 = Release|x64
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Release|x86.ActiveCfg = Release|Win32
+		{D0892A82-A678-4064-8C82-046C0F1FA9D8}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

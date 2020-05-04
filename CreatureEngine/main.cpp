@@ -4,6 +4,7 @@
 #include<cmath>
 #include<string>
 
+#pragma comment (lib, "CreatureEngine.lib")
 //#define CacheLineFlush(Address) _mm_clflush(Address)
 //#pragma optimize( "", off )
 
@@ -173,6 +174,9 @@ MovementComponent TestMovementComponent;
 class App
 	: public Application
 {
+    //=================================================================================================================================================================
+    //                                                USER VARIABLES
+    //=================================================================================================================================================================
 
     EntityComponentSystem *ECS{ nullptr };
 
@@ -194,49 +198,41 @@ class App
     Mesh *TestMesh{ nullptr };
 
     std::string VTextureRenderer =
-        "#version 330 core     \n\
-                layout(location = 0) in vec2 aPos; \n\
-                layout(location = 1) in vec4 Position; \n\
-                uniform mat4 ProjectionMatrix;     \n\
-                uniform mat4 ViewMatrix;           \n\
-                out  vec2 TexCoords;               \n\
-                void main()                        \n\
-                {                                  \n\
-                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+        "#version 330 core                                                                                                                               \n\
+                layout(location = 0) in vec2 aPos;                                                                                                       \n\
+                layout(location = 1) in vec4 Position;                                                                                                   \n\
+                uniform mat4 ProjectionMatrix;                                                                                                           \n\
+                uniform mat4 ViewMatrix;                                                                                                                 \n\
+                out  vec2 TexCoords;                                                                                                                     \n\
+                void main()                                                                                                                              \n\
+                {                                                                                                                                        \n\
+                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                                                                     \n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);                                                               \n\
                     gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
                 }";
 
     std::string FTextureRenderer =
-          "#version 330 core \n\
-          uniform sampler2D DiffuseTexture; \n\
-          in  vec2 TexCoords;               \n\
-          out vec4 FragColor;            \n\
-          void main()                    \n\
-          {                              \n\
-              FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);    \n\
-          }";
+          "#version 330 core                                                         \n\
+               uniform sampler2D DiffuseTexture;                                     \n\
+               in  vec2 TexCoords;                                                   \n\
+               out vec4 FragColor;                                                   \n\
+               void main()                                                           \n\
+               {                                                                     \n\
+                   FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
+               }";
 
-    virtual void OnEnd() override
-    {
-        delete(TestTexture);
-        delete(TestTexture2);
-        delete(FBO);
-        delete(MainRenderer);
-        delete(ProfilerTest);
-        delete(ECS);
-    }
-
+    //=================================================================================================================================================================
+    //=================================================================================================================================================================
+  
+    
     virtual void OnCreate() override
-	{
+	{// Initialization
         
-
-         TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
-         TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Complete ", " Springs Class Complete ");
-         TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
+        // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
+        // TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Complete ", " Springs Class Complete ");
+        // TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
 
          int *A = new int[1000];
-
 
         /* Load up the Listeners for the Various Input Events */
         {
@@ -253,7 +249,6 @@ class App
             WorldCamera = &getCamera();
         }
 
-        
         /* Create a Triangle to Test with */
 		getWindow().defaultShader().Bind();
         {
@@ -294,8 +289,8 @@ class App
                     MainRenderer->renderQuad({ x * 8.0f,y * 8.0f }, { 7,7 }, MainRenderer->CreateColor(R, G, B, 255));
                 }
             }
-  		DEBUG_CODE(CheckGLERROR());
-      }
+  		    DEBUG_CODE(CheckGLERROR());
+        }
 
         /* Create FBO to Test with */
         {
@@ -315,38 +310,40 @@ class App
 		//init_DefaultShaders();
         TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
 
-        // Entity Component System
-        //ECS = new EntityComponentSystem();
-        //SystemList mainSystems;
-        //ECStest::TransformComponent transformComp;
-        //ECS->AddComponent(transformComp);
+        //Entity Component System
+        //    ECS = new EntityComponentSystem();
+        //    SystemList mainSystems;
+        //    ECStest::TransformComponent transformComp;
+        //    ECS->AddComponent(transformComp);
 
         ECStest::InitECS();
 
         TestECS = new EntityComponentSystem();
 
         /// Create Entities
-        EntityPTR Entity = TestECS->MakeEntity(PosComponent, TestMovementComponent);
+        //EntityPTR Entity = TestECS->MakeEntity(PosComponent, TestMovementComponent);
 
         /// Create Systems
 
-        MainSystems.AddSystem(movementSys);
+        // MainSystems.AddSystem(movementSys);
  
-        TestECS->AddComponent(Entity, &PosComponent);
-        TestECS->AddComponent(Entity, &TestMovementComponent);
+        //TestECS->AddComponent(Entity, &PosComponent);
+        //TestECS->AddComponent(Entity, &TestMovementComponent);
 
-         
         DEBUG_CODE(CheckGLERROR());
 	}
+
     virtual void OnRender() override
     {
         FBO->Bind();
-        {
+        {// Bind the Framebuffer Object
+
             FBO->Clear();
             OpenGL::bind_VAO(VAO);
 
             getWindow().defaultShader().Bind();
-            {
+            {// Bind the Shader and the Uniforms
+
                 ModelMatrix.Bind();
                 getCamera().Bind();
                 OpenGL::Renderer::drawArray(VBO, 3);
@@ -358,8 +355,8 @@ class App
 
             TestTexture->g_Handle();
              
-            MainRenderer->renderImage({ 100, 100 }, { 300, 300 }, TestTexture);
-            MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
+            MainRenderer->renderImage({ 100, 100 }, { 100, 300 }, TestTexture);
+          //  MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
         }
         FBO->Unbind();
 
@@ -369,17 +366,27 @@ class App
 
 	size_t PreviousTime;
 	virtual void OnUpdate() override
-	{
+	{// User Genrated Per Frame Update
+
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
 
         MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
-        TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
-
+        // TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
 	}
 
+    virtual void OnEnd() override
+    {// Exit of the Application and Clean up
+
+        delete(TestTexture);
+        delete(TestTexture2);
+        delete(FBO);
+        delete(MainRenderer);
+        delete(ProfilerTest);
+        delete(ECS);
+    }
 
 };
 
@@ -389,16 +396,19 @@ int main()
 {
 
     TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
-	App MyApp;
+	
+    App MyApp;
 	MyApp.Init();
 
-	iVec2 r = OpenGL::get_MaximumViewportDimensions();
-	Print("Max Viewport Dimensions: " << r.x << " : " << r.y);
-	iVec4 vp = OpenGL::get_Viewport();
- 	Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w );
+    /* Get the Viewport Dimensions and the Max view dimensions */
+    {
+        iVec2 r = OpenGL::get_MaximumViewportDimensions();
+        Print("Max Viewport Dimensions: " << r.x << " : " << r.y);
+        iVec4 vp = OpenGL::get_Viewport();
+        Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w);
+    }
 
 	MyApp.Run();
-
 
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();

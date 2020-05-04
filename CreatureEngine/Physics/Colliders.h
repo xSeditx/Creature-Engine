@@ -5,6 +5,7 @@
 
 #define DEFAULT_WEIGHT 10.0f
 
+#include<algorithm>
 
 enum PropertiesEnum
 {
@@ -22,23 +23,23 @@ enum PropertiesEnum
 	STRENGTH_POWERUP
 };
 
+class GameObject;
 
-
+using Parent_t = GameObject;
 
 struct Collider;
 struct Sprite;
 struct AABBCollider;
 struct SphereCollider;
-class GameObject;
 
-typedef void(*UserCollisionResponse)(GameObject& _first, GameObject& _other);
+typedef void(*UserCollisionResponse)(Parent_t& _first, Parent_t& _other);
 typedef void(*UserUpdateFunc)(Collider* _object, float _deltaTime);
 //UserCollisionResponse Default_Response;
 
-void Default_Response(GameObject& _first, GameObject& _other);
+void Default_Response(Parent_t& _first, Parent_t& _other);
 void Default_Update(Collider* _object, float _deltaTime);
 
-typedef std::pair<GameObject&, GameObject&> CollisionPair;
+typedef std::pair<Parent_t&, Parent_t&> CollisionPair;
 
 enum Collider_t
 {
@@ -65,9 +66,9 @@ struct Collider
 //	//SOLVED: TODO("Should I do the same thing with the Response that I did with Update? If might allow better implementation down the line if this can just be passed");
 //	/// GOOD IDEA: HIGH FIVE! FUCK YEAH!
 //}
-
+    DEBUG_CODE(uint32_t CollisionTestCounter = 0;)
 	Collider() = delete;
-	Collider(GameObject* _parent, UserCollisionResponse _response, float _weight = DEFAULT_WEIGHT);
+    Collider(Parent_t* _parent, UserCollisionResponse _response, float _weight = DEFAULT_WEIGHT) {}
 
 	///=============================================================================================================================================================================================================================================
 	/// I have so many concerns about this right now but I need to access the Colliding objects by what Gameobject they are not what collider type.
@@ -79,8 +80,8 @@ struct Collider
 
 	///=============================================================================================================================================================================================================================================
 
-	GameObject* Parent;
-	inline GameObject& g_Parent();    void s_Parent(GameObject* _parent);
+    Parent_t* Parent;
+	inline Parent_t& g_Parent();      void s_Parent(Parent_t* _parent);
 
 	///==============================================================================================================================================================================================================================
 	/// This should likely go inside of the GameObject class since they are connected now
@@ -107,24 +108,27 @@ struct Collider
 
 	bool Alive = true;
 
-	virtual Vec4 Overlap(Collider* _other);
-	Vec2 minVec2(Vec2 first, Vec2 _second);
-	Vec2 maxVec2(Vec2 first, Vec2 _second);
+    virtual Vec4 Overlap(Collider* _other) { return Vec4(0); }
+    Vec2 minVec2(Vec2 _first, Vec2 _second) { return { std::min(_first.x,_second.x), std::min(_first.y, _second.y) }; }
+    Vec2 maxVec2(Vec2 _first, Vec2 _second) { return { std::max(_first.x,_second.x), std::max(_first.y, _second.y) }; }
+
+
+
 	//AABBCollider Overlap(AABBCollider *_other);
 
-	virtual bool isCollision(Vec2 _point);
-	virtual bool isCollision(Collider* other);
-	virtual bool isCollision(AABBCollider* other);
-	virtual bool isCollision(SphereCollider* other);
+	virtual bool isCollision(Vec2 _point) { return false; }
+	virtual bool isCollision(Collider* other) { return false; }
+	virtual bool isCollision(AABBCollider* other) { return false; }
+	virtual bool isCollision(SphereCollider* other) { return false; }
 
-	virtual void StaticResolve(Vec2 _point);
-	virtual void StaticResolve(Collider* other);
-	virtual void StaticResolve(AABBCollider* other);
-	virtual void StaticResolve(SphereCollider* other);
+	virtual void StaticResolve(Vec2 _point) {}
+	virtual void StaticResolve(Collider* other) {}
+	virtual void StaticResolve(AABBCollider* other) {}
+	virtual void StaticResolve(SphereCollider* other) {}
 
 	virtual void s_Collider(Vec2  _pos, Vec2 _size) { Print("This should never be called directly"); }
 
-	virtual void Render();
+    virtual void Render() {}
 
 	void s_Weight(float _weight);
 
@@ -133,14 +137,18 @@ struct Collider
 
 	inline void Update(float deltaTime);
 
-	bool Sweep(std::vector<GameObject*>& _test);///CollisionPair Sweep(std::vector<Collider *> _test);/// Should return a Vector of Collision Pairs but I am going to bail early on the first collision detected
+    ///CollisionPair Sweep(std::vector<Collider *> _test);/// Should return a Vector of Collision Pairs but I am going to bail early on the first collision detected
+	bool Sweep(std::vector<Parent_t*>& _test);
 
-	void Respond(GameObject& _other);
+    /// FIX LATER
+    void Respond(Parent_t& _other) {}
 
-	//std::vector<GameObject *> Children;
-	inline bool hasChildren();
+	std::vector<GameObject *> Children;
+    inline bool hasChildren() { return !Children.empty(); }
 
+    inline bool is_Alive() { return Active; }
 protected:
+    bool Active{ true };
 	UserUpdateFunc UserUpdate = Default_Update; // For now we unprotect this
 	UserCollisionResponse Response = Default_Response;
 };
@@ -156,8 +164,8 @@ struct AABBCollider
 	public Collider
 {
 	AABBCollider() = delete;
-	AABBCollider(GameObject* _parent, Vec2 _topleft, Vec2 _size);
-	AABBCollider(GameObject* _parent);
+	AABBCollider(Parent_t* _parent, Vec2 _topleft, Vec2 _size);
+	AABBCollider(Parent_t* _parent);
 
 	void s_Collider(Vec2 _topleft, Vec2 _size)
 	{
@@ -183,25 +191,25 @@ struct AABBCollider
 };
 struct SphereCollider : public Collider
 {
-	SphereCollider(GameObject* _parent, Vec2 _position, float _radius);
-	SphereCollider(GameObject* _parent);
-	SphereCollider(Sprite* _Sprite);
+	SphereCollider(Parent_t* _parent, Vec2 _position, float _radius);
+	SphereCollider(Parent_t* _parent);
+	//SphereCollider(Sprite* _Sprite);
 
 	void s_Collider(Vec2 _position, float _radius)
 	{
 		Position = _position;  Size = Vec2(_radius);
 	}
-	virtual bool isCollision(Vec2 _point);
-	virtual bool isCollision(Collider* other);
-	virtual bool isCollision(AABBCollider* other);
-	virtual bool isCollision(SphereCollider* other);
+    virtual bool isCollision(Vec2 _point) { return false; }
+	virtual bool isCollision(Collider* other) { return false; }
+	virtual bool isCollision(AABBCollider* other) { return false; }
+    virtual bool isCollision(SphereCollider* other) { return false; }
 
-	virtual void StaticResolve(Vec2 _point);
-	virtual void StaticResolve(Collider* other);
-	virtual void StaticResolve(AABBCollider* other);
-	virtual void StaticResolve(SphereCollider* other);
+	virtual void StaticResolve(Vec2 _point) {}
+	virtual void StaticResolve(Collider* other) {}
+	virtual void StaticResolve(AABBCollider* other) {}
+	virtual void StaticResolve(SphereCollider* other) {}
 
-	virtual void Render();
+    virtual void Render() {}
 };
 
 

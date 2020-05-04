@@ -1,12 +1,13 @@
 #pragma once
 
 class Shader;
+#include"../../../../Physics/Colliders.h"
 
-struct Collider
-{
-    void Update(float _dt){}
-    void Sweep(std::vector<Collider*> _potentialPairs) {}// *&SpatialTree->RootNode->QueryRange(C->g_Position(), { 100,100 }));
-};
+// struct Collider
+// {
+//     void Update(float _dt){}
+//     void Sweep(std::vector<Collider*> _potentialPairs) {}// *&SpatialTree->RootNode->QueryRange(C->g_Position(), { 100,100 }));
+// };
 
 
 class GameObject
@@ -67,8 +68,13 @@ public:
     inline float g_RotationZ() { return Rotation.z; }
 
 
-    inline Collider& g_Collider() { WARN_ME("g_Collider() only returns a Temp object for now be sure to correct this in the future");  return *(new Collider()); }
+    inline Collider& g_Collider()
+    {
+        WARN_ME("g_Collider() only returns a Temp object for now be sure to correct this in the future");  
+        return *(new SphereCollider(this));                //        *(new Collider());
+    }
 
+  
 
 
 

@@ -120,15 +120,15 @@ public:
 
     struct convert
     {
-        inline float Pounds_to_Kg(float lb) { return lb * .453; }
-        inline float Newtons_to_Kg(float N) { return N / 9.8; }
-        inline float Kg_to_Newtons(float Kg) { return Kg * 9.8; }
+        inline float Pounds_to_Kg(float lb) { return (float)(lb * .453); }
+        inline float Newtons_to_Kg(float N) { return (float)(N / 9.8); }
+        inline float Kg_to_Newtons(float Kg) { return (float)(Kg * 9.8); }
     }Convert;
 
     struct volume
     {
-        inline float ofBox(Vec3 min, Vec3 max) { return (max.x - min.x) * (max.y - min.y) * (max.z - min.z); }
-        inline float ofSphere(float radius) { return (4 / 3) * (M_PI * (radius * radius * radius)); }
+        inline float ofBox(Vec3 min, Vec3 max) { return (float)((max.x - min.x) * (max.y - min.y) * (max.z - min.z)); }
+        inline float ofSphere(float radius)    { return (float)((4 / 3) * (M_PI * (radius * radius * radius))); }
         //inline float ofBox(AABB &box){return (box.MaxPoint.x - box.MinPoint.x) * (box.MaxPoint.y - box.MinPoint.y) * (box.MaxPoint.z - box.MinPoint.x);}
     }Volume;
 

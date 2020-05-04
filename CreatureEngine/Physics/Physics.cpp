@@ -44,7 +44,7 @@ void Simulation::Update(float _timestep)
 
     for (auto &C : Colliders)
     {// Crude O(log(N)) Test for Collisions. Replace with Quad tree
-        std::vector<Collider*> EMPTYVEC;
+        std::vector<Parent_t*> EMPTYVEC;
         C->g_Collider().Sweep(EMPTYVEC);// *&SpatialTree->RootNode->QueryRange(C->g_Position(), { 100,100 }));
         TODO("Physics.cpp Line 30: I can likely put the Child sweeps here with better results and easier readability");
         TODO("Instead of std::vector best if we had some reusable Memory model that can be Allocated and Deleted every frame with little overhead ")

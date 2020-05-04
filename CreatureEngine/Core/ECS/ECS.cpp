@@ -263,6 +263,7 @@ void EntityComponentSystem::UpdateSystems(SystemList& _systems, float _delta)
 
 	for_loop(i, _systems.size())
 	{// Cycles over all systems
+
 		const std::vector<unsigned int>& componentTypes = _systems[i]->g_ComponentTypes();
 
 		if (componentTypes.size() == 1)
