@@ -1,6 +1,11 @@
 #include"Application.h"
+#include"../Profiling/Timing/Timer.h"
+
 #include<iostream>
 #include<cassert>
+#include<string>
+
+
 /*=====================================================================================================
 _________________________________ APPLICATION CLASS ___________________________________________________
 =======================================================================================================
@@ -16,14 +21,15 @@ USAGE:
 */
 
 
-#include<string>
- Application::Application()
+
+
+
+ Application::Application() 
  { 
-	 Instance = GetModuleHandle(NULL);
+	 Instance = GetModuleHandle(nullptr);
 	 set(*this); 
  }
- Application::~Application()
- { }
+
 
  //=======================================================================================================
  //_______________________________ STATE and FLOW HANDLING _______________________________________________
@@ -57,7 +63,6 @@ USAGE:
 	 //-------------------------------------------------------------------------------------------------------------
 	 OnCreate();
  }
-#include"../Profiling/Timing/Timer.h"
  void Application::Pause() {}
  void Application::End()
  {
@@ -149,7 +154,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 Application* Application::AppInstance{ nullptr };
 
-Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name, DWORD _flags)
+Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name, DWORD _flags) noexcept
 	:
 	Parent(nullptr),
 	Size({ (float)_width, (float)_height })
@@ -291,7 +296,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	}
 	create_DefaultShader();
 }
-Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, std::string _name, DWORD _flags)
+Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, std::string _name, DWORD _flags) noexcept
 	:
 	Window(_width, _height, _name, _flags)
 {

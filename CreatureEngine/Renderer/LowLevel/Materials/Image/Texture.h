@@ -75,7 +75,7 @@ namespace Graphics
 
         /* Updates the Texture with the Memory Pointed to in _memory. 
          NOTE: User is responsible for ensuring memory is proper size */
-		void Update(uint8_t *_memory) noexcept
+		void Update(const uint8_t *_memory) noexcept
 		{
 			/* Depending on if we are using Bindldess TYextures or not determines how we update this */
 REFACTOR("Change this for Bindless Textures later on. Odds are we should instead generate two sets of Texture code for the Engine\

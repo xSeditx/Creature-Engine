@@ -4,7 +4,6 @@
 #include<cmath>
 #include<string>
 
-#pragma comment (lib, "CreatureEngine.lib")
 //#define CacheLineFlush(Address) _mm_clflush(Address)
 //#pragma optimize( "", off )
 
@@ -13,41 +12,11 @@
 
 #define _PROFILE_MEMORY
 
-#include"Profiling/SystemInfo.h"
-#include"Profiling/MemoryPerf/MemTracker.h"
-#include"Core/Threading/Threadpool.h"
-#include"Profiling/Timing/Benchmark.h"
-
-#include"Core/Common.h"
-#include"../CreatureEngine/Renderer/LowLevel/OpenGL/OpenGL.h"
-#include"Core/Threading/TestFunctions.h"
-
-#include"Profiling/RenderUtilities.h"
-#include"FrontEnd/Window.h"
-#include"Core/Application.h"
-#include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
-#include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
-
+#include"Creature_Engine.h"
 // https://www.scmp.com/news/china/society/article/3075567/people-blood-type-may-be-more-vulnerable-coronavirus-china-study?utm_content=article&utm_medium=Social&utm_source=Facebook&fbclid=IwAR1VsuqHUzDgoU6-zaafrHJI89Qniyxbzppif6x_SvsC9LXHGjsfwo7tM6k#Echobox=1584436870
 
 using namespace Core;
 using namespace Threading;
-
-int TestRecursion(int _param)
-{
-	_param--;
-	Print("Recursion " << _param);
-	if(_param > 0)
-	{
-       
-            WARN_ME("This is Currently disabled due to Error cant convert _Ty' to 'int (__cdecl *const )(int &) ------ _Ty=int (__cdecl &)(int) ")
-		//auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
-	//	E.get();
-	}
-	Print("Exit " << _param);
-
-	return 65;
-}
 
 #include<stack>
 #include<utility>
@@ -167,9 +136,7 @@ PositionComponent PosComponent;
 MovementComponent TestMovementComponent;
 
 
-#include"Creatures/Creatures.h"
-#include"Core/Memory.h"
-#include"Creatures/Physics/Springs.h"
+
 
 class App
 	: public Application
@@ -198,7 +165,7 @@ class App
     Mesh *TestMesh{ nullptr };
 
     std::string VTextureRenderer =
-        "#version 330 core                                                                                                                               \n\
+               "#version 330 core                                                                                                                        \n\
                 layout(location = 0) in vec2 aPos;                                                                                                       \n\
                 layout(location = 1) in vec4 Position;                                                                                                   \n\
                 uniform mat4 ProjectionMatrix;                                                                                                           \n\
@@ -212,7 +179,7 @@ class App
                 }";
 
     std::string FTextureRenderer =
-          "#version 330 core                                                         \n\
+              "#version 330 core                                                     \n\
                uniform sampler2D DiffuseTexture;                                     \n\
                in  vec2 TexCoords;                                                   \n\
                out vec4 FragColor;                                                   \n\
@@ -822,3 +789,35 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
 \
 
 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//int TestRecursion(int _param)
+//{
+//	_param--;
+//	Print("Recursion " << _param);
+//	if(_param > 0)
+//	{
+//       
+//            WARN_ME("This is Currently disabled due to Error cant convert _Ty' to 'int (__cdecl *const )(int &) ------ _Ty=int (__cdecl &)(int) ")
+//		//auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
+//	//	E.get();
+//	}
+//	Print("Exit " << _param);
+//
+//	return 65;
+//}
+//

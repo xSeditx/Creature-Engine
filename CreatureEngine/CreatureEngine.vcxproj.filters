@@ -69,6 +69,9 @@
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{f9289999-2260-4d4b-9652-eb70969fac3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{c59ef4a8-1a60-4024-95c1-cf48d2ddb2d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp">
@@ -134,9 +137,6 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera3D.cpp">
       <Filter>Source Files\Graphics\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\DefaultShaders.cpp">
-      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Utility.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
@@ -181,6 +181,12 @@
     </ClCompile>
     <ClCompile Include="Profiling\Timing\Profiling.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Math\Math.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp">
+      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -312,6 +318,9 @@
     </ClInclude>
     <ClInclude Include="Physics\Colliders.h">
       <Filter>Source Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Math\Math.h">
+      <Filter>Source Files\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

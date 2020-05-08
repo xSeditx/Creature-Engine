@@ -9,7 +9,7 @@
 	class Transform
 	{
 	public:
-		Transform()
+		Transform() noexcept
 			:
 			Scale(0),
 			Position(0),
@@ -64,23 +64,20 @@
 			Matrix = glm::scale(Matrix, Scale);
 		}
 
+ 		void set_Position(Vec3 _position)    noexcept { Position = _position; }
+		void set_Rotation(Vec3 _rotation)    noexcept { Rotation = _rotation; }
+		void set_Scale(Vec3 _scale)          noexcept { Scale = _scale;       } 
+		void set_Scale(float _scale)         noexcept { Scale = Vec3(_scale); }
+		void set_Transform(Mat4 _transform)  noexcept { Matrix = _transform;  }
+		void set_Name(std::string _name)     noexcept { Name = _name;         }
 
 
 
-		void set_Position(Vec3 _position)   { Position = _position; }
-		void set_Rotation(Vec3 _rotation)   { Rotation = _rotation; }
-		void set_Scale(Vec3 _scale)         { Scale = _scale;       } 
-		void set_Scale(float _scale)        { Scale = Vec3(_scale); }
-		void set_Transform(Mat4 _transform) { Matrix = _transform;  }
-		void set_Name(std::string _name)    { Name = _name;         }
-
-
-
-		void Bind()
+		void Bind() noexcept
 		{
 			Shader::get().SetUniform(Name.c_str(), Matrix);
 		}
-		void Update()
+		void Update() noexcept
 		{
 			
 			Matrix = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
@@ -90,7 +87,7 @@
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
 			Matrix = glm::scale(Matrix, Scale);
 		}
-		void UpdateBy(Vec3 _pos, Vec3 _rot)
+		void UpdateBy(Vec3 _pos, Vec3 _rot) noexcept
 		{
 			Matrix = glm::translate(Matrix, _pos);
 			Matrix = glm::rotate(Matrix, glm::radians(_rot.x), Vec3(1.0f, 0.0f, 0.0f));
@@ -99,15 +96,14 @@
 			Matrix = glm::scale(Matrix, Scale);
 		}
 
-		void Identity()
+		void Identity() noexcept
 		{
 			Matrix = Mat4(1);
 		}
-		void Translate(Vec3 _pos)
+		void Translate(Vec3 _pos) noexcept
 		{
 			Matrix = glm::translate(	glm::mat4(1.0f), _pos);
 			Matrix = glm::scale(Matrix, Scale);
-
 		}
 		void Rotate_Translate(Vec3 _pos, Vec3 _rot)
 		{

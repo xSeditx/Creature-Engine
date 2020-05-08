@@ -15,7 +15,7 @@ namespace ECStest {
 
     COMPONENT(MeshComponent)
     {
-        MeshComponent();
+        MeshComponent() noexcept;
  
         Vec3 *Data;
         size_t Size;
@@ -23,17 +23,18 @@ namespace ECStest {
     COMPONENT(SurfaceComponent)
     {
         SurfaceComponent() = default;
-        SurfaceComponent(Graphics::Texture* _diffuse, Graphics::Texture* _normals, Graphics::Texture* _roughness, Graphics::Texture* _specular);
+        SurfaceComponent(Graphics::Texture* _diffuse, Graphics::Texture* _normals, Graphics::Texture* _roughness, Graphics::Texture* _specular) noexcept;
 
-        Graphics::Texture* Diffuse;
-        Graphics::Texture* Normals;
-        Graphics::Texture* Roughness;
-        Graphics::Texture* Specular;
+        Graphics::Texture* Diffuse{ nullptr };
+        Graphics::Texture* Normals{ nullptr };
+        Graphics::Texture* Roughness{ nullptr };
+        Graphics::Texture* Specular{ nullptr };
     };
 
     SYSTEM(MovementSystem)
     {
-        MovementSystem();
+        MovementSystem() noexcept;
+        virtual ~MovementSystem() = default;
         void UpdateComponents(float delta, BaseComponent** components);
     };
 
@@ -42,7 +43,8 @@ namespace ECStest {
     SYSTEM(RenderingSystem)
     {
         RenderingSystem();
-        void UpdateComponents(float delta, BaseComponent** components);
+        virtual ~RenderingSystem() = default;
+        void UpdateComponents(float delta, BaseComponent** components) override;
     };
 
 

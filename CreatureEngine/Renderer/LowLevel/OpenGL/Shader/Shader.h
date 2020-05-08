@@ -116,6 +116,30 @@ protected:
 
 extern Shader* TextureRenderer;
 
+
+
+
+extern Shader *shader_Basic; 
+extern Shader *shader_Blur;
+extern Shader *shader_Collider;
+extern Shader *shader_Debug;
+extern Shader *shader_DebugQuad;
+extern Shader *shader_Light;
+extern Shader *shader_Shadow;
+extern Shader *shader_Skybox;
+extern Shader *shader_Sprite;
+
+
+/* Built in Shaders for Rapid usecases
+NOTE: Might Enumerate these in the future to make loading and unloading of specific ones
+      simpler                                                                            */
+bool load_Builtin_Shaders();
+
+/* Frees the memory held by the built in Shaders*/
+bool cleanup_Builting_Shaders();
+
+
+
 void init_DefaultShaders();
 
 

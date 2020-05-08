@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\x64\Debug;$(Solution)..\Bin\Soil\Debug\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\x64\Debug;$(Solution)..\Bin\Soil\Debug\;C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\CreatureEngine\main.cpp" />
+    <ClCompile Include="Utility_Test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

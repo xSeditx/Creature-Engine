@@ -86,8 +86,8 @@ private:
         }
 
         Window() = default;
-        Window(uint32_t _width, uint32_t _height, std::string _name, DWORD _flags);// = RESIZABLE);
-        Window(Window* _parent, uint32_t _width, uint32_t _height, std::string _name, DWORD _flags = 0);
+        Window(uint32_t _width, uint32_t _height, std::string _name, DWORD _flags) noexcept; // = RESIZABLE);
+        Window(Window* _parent, uint32_t _width, uint32_t _height, std::string _name, DWORD _flags = 0) noexcept;
 
         /* Returns Windows Position */
         Vec2   g_Position() const noexcept { return Position; }
@@ -103,11 +103,11 @@ private:
             return Title; 
         }
         /* Return the Parent Window if this is a Child */
-        Window& g_Parent() const { return *Parent; }
+        Window& g_Parent() const noexcept { return *Parent; }
 
 
         /* Sets the Parent Window if this is a Child */
-        Window& s_Parent() const { return *Parent; }
+        Window& s_Parent() const noexcept { return *Parent; }
         /* Sets the location of a Window */
         void   s_Position(Vec2 _pos)  noexcept { Position = _pos; }
         /* Sets the X location for a Window */
@@ -132,9 +132,9 @@ private:
 
 
         /* Return the Width dimension of a Window */
-        int  Width()     const noexcept { return (int)Size.x; }
+        int  Width()     const noexcept { return static_cast<int>(Size.x); }
         /* Return the Height Dimension of a Window */
-        int  Height()    const noexcept { return (int)Size.y; }
+        int  Height()    const noexcept { return static_cast<int>(Size.y); }
 
         /* Return if the Window is Alive
         Note: A Window can be invisible and still be Alive. When the final Window is no longer Alive our Application will terminate*/
@@ -142,10 +142,10 @@ private:
 
         /* Let us know if the Window is currently Visible on Screen
         Note: Intentions are to hide all child Windows if Parent becomes invisible*/
-        bool isVisible() const { return Visible; }
+        bool isVisible() const noexcept { return Visible; }
 
         /* Allow us to see if the Window in Question is the Currently Active window on the screen */
-        bool isActive()  const { return Active; }
+        bool isActive()  const noexcept { return Active; }
 
         /* Display the contents of the back buffer to the Screen (*note:future at VSync if Specified) */
         void Sync();
@@ -154,31 +154,31 @@ private:
         void CLS();      // Clear The Screen And The Depth Buffer
 
         /* Returns the Native Windows Handle (HWND) of the Window */
-        const HWND g_Handle() const { return Handle; }
+        const HWND g_Handle() const noexcept { return Handle; }
 
         /* Changes with Window size and OpenGL Viewport settings */
         void ResizeWindow(uint32_t _x, uint32_t _y);
 
         /* Returns the Windows Device Context */
-        HDC g_DeviceContext() { return DeviceContext; }
+        HDC g_DeviceContext() noexcept { return DeviceContext; }
 
         /* Return the Most basic and default Shader */
-        uint32_t defaultShaderHandle() { return WindowShader->g_Handle(); }
+        uint32_t defaultShaderHandle() noexcept { return WindowShader->g_Handle(); }
 
         /* Gets the default Shader Object */
-        Shader& defaultShader() { return *WindowShader; }
+        Shader& defaultShader() noexcept { return *WindowShader; }
  
         /* Return the OS Dimensions of the Window */
         Vec2 get_WindowSize();
 
         /* returns the default Camera for our Window */
-        Camera2D& g_Camera()
+        Camera2D& g_Camera() noexcept
         {
             return *defaultCamera;
         }
 
         /* Sets the Default Camera for our Window */
-        void s_Camera(Camera2D* _camera)
+        void s_Camera(Camera2D* _camera) noexcept
         {
             defaultCamera = _camera;
         }
@@ -191,10 +191,10 @@ private:
 
         Window* Parent = nullptr;
 
-        HGLRC GL_Context{ 0 };
+        HGLRC GL_Context{ nullptr };
 
-        HWND Handle{ 0 };
-        HDC  DeviceContext{ 0 };
+        HWND Handle{ nullptr };
+        HDC  DeviceContext{ nullptr };
         Vec2 Size{ 0,0 };
         Vec2 Position{ 0,0 };
 
@@ -215,14 +215,15 @@ private:
         EventHandler Observer;
     public:
         //  static EventHandler& Messenger() { return EventHandler::get(); } 
-        EventHandler& Messenger() { return Observer; }
+        EventHandler& Messenger() noexcept { return Observer; }
     }  mainWindow;// Window
 
  public:
      size_t FPS{ 0 };
     Application();
-    Application(int _width, int _height, std::string _name);
-    ~Application();
+    //Application(int _width, int _height, std::string _name) noexcept;
+
+    ~Application() noexcept = default;
 
     /* Called when Application is Initialized */
     void Init();
@@ -237,19 +238,16 @@ private:
     /* Called Once a Frame to Render Application */
     void Render();
     /* Kills our Application */
-    void Terminate() { Running = false; }
+    void Terminate() noexcept { Running = false; }
 
     /* Returns the Title of the Applications Window */
-    std::string Name()
-    { 
-        return mainWindow.g_Title();
-    } ///Print("Getting Applications Name " << mainWindow.g_Title());
+    std::string Name() noexcept  {  return mainWindow.g_Title();  } 
     /* Return the Width dimension of the Main Window */
-    int   Width() const noexcept { return (int)mainWindow.Width(); }
+    int   Width() const noexcept { return static_cast<int>(mainWindow.Width()); }
     /* Return the Height Dimension of the Main Window */
-    int   Height() const noexcept { return (int)mainWindow.Height(); }
+    int   Height() const noexcept { return static_cast<int>(mainWindow.Height()); }
     /* Tells us the application is currently running 	NOTE: Perhaps enumerate this to allow more states */
-    bool  isRunning() { return Running; }
+    bool  isRunning() const noexcept { return Running; }
     /* Returns Applications Position */
     Vec2  g_Position() const noexcept { return mainWindow.g_Position(); }
     /* Returns Applications X location on Screen */
@@ -312,18 +310,18 @@ protected:
     void CreateApplicationWindow();
     virtual void SetWindowProperties();
 
-    static void set(Application& _app) { AppInstance = &_app; }
+    static void set(Application& _app) noexcept { AppInstance = &_app; }
 public:
     static Application* AppInstance;
 
-    static Application& get() { return *AppInstance; }
-    static Application::Window& getWindow() { return AppInstance->mainWindow; }
+    static Application& get() noexcept { return *AppInstance; }
+    static Application::Window& getWindow() noexcept { return AppInstance->mainWindow; }
     static void setWindow(Application::Window& _window) 
     { 
          AppInstance->mainWindow = std::move(_window);
     }
 
-    static Application::Window::InputDevices& getDevice() { return AppInstance->mainWindow.Input; }
+    static Application::Window::InputDevices& getDevice() noexcept { return AppInstance->mainWindow.Input; }
     static Window::InputDevices::_mouse& getMouse() { return AppInstance->getDevice().Mouse; }
     static Window::InputDevices::_keyboard& getKeyboard() { return AppInstance->getDevice().Keyboard; }
     static Camera2D& getCamera() 

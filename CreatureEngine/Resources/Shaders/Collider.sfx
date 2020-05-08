@@ -30,3 +30,6 @@ void main()
 {
     FragColor = vec4( 2.0 * Normals - 1.0, 1.0);
 }
+
+
+// NOTE: DEBUG SHADER Renders a Box using GL_LINES around the objects Collider along with the Normal colors for the object

@@ -35,7 +35,7 @@ Shader::~Shader()
 }
 void Shader::Delete()
 {
-	TODO("Error creatd here if Shader is made on the Stack and destroyed after strings are gone");
+	WARN_ME("Error creatd here if Shader is made on the Stack and destroyed after strings are gone");
 	if (Filepath)
 	{
 		DEBUGPrint(CON_Red, "Called the Shader Destructor: " << Filepath);
@@ -406,7 +406,7 @@ extern std::string FTextureRenderer;
 extern GLuint ImageQuadVAO;
 extern GLuint ImageQuadVBO;
 
-
+/* DEPRECATED: please use load builting shaders */
 void init_DefaultShaders()
 {
 	ImageQuadVAO = OpenGL::new_VAO();

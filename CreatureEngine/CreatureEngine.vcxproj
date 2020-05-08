@@ -106,7 +106,13 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalOptions> /NODEFAULTLIB:msvcrt.lib</AdditionalOptions>
@@ -168,6 +174,7 @@
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
     <ClCompile Include="Core\ECS\TestComponents.cpp" />
     <ClCompile Include="Core\EventSystem.cpp" />
+    <ClCompile Include="Core\Math\Math.cpp" />
     <ClCompile Include="Core\Memory.cpp" />
     <ClCompile Include="Core\Observer.cpp" />
     <ClCompile Include="Core\Threading\TestFunctions.cpp" />
@@ -195,7 +202,7 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
-    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\DefaultShaders.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
   </ItemGroup>
@@ -208,6 +215,7 @@
     <ClInclude Include="Core\ECS\ECSsystem.h" />
     <ClInclude Include="Core\ECS\TestComponents.h" />
     <ClInclude Include="Core\EventSystem.h" />
+    <ClInclude Include="Core\Math\Math.h" />
     <ClInclude Include="Core\Memory.h" />
     <ClInclude Include="Core\Observer.h" />
     <ClInclude Include="Core\Threading\Future.h" />

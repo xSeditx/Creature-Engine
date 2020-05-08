@@ -14,7 +14,7 @@ namespace ECStest
     }
 
     SurfaceComponent::SurfaceComponent
-    (Graphics::Texture* _diffuse, Graphics::Texture* _normals, Graphics::Texture* _roughness, Graphics::Texture* _specular)
+    (Graphics::Texture* _diffuse, Graphics::Texture* _normals, Graphics::Texture* _roughness, Graphics::Texture* _specular) noexcept
         :
         Diffuse(_diffuse),
         Normals(_normals),
@@ -22,7 +22,7 @@ namespace ECStest
         Specular(_specular)
     {}
  
-    MeshComponent::MeshComponent()
+    MeshComponent::MeshComponent() noexcept
         :
         Component()
     {
@@ -30,7 +30,7 @@ namespace ECStest
         Data = new Vec3[Size];
     }
 
-    MovementSystem::MovementSystem()
+    MovementSystem::MovementSystem() noexcept
     {
         AddComponentType(TransformComponent::ID);
         AddComponentType(MeshComponent::ID);
@@ -48,7 +48,7 @@ namespace ECStest
         AddComponentType(MeshComponent::ID);
 
     }
-    void RenderingSystem::UpdateComponents(float delta, BaseComponent** components)
+    void RenderingSystem::UpdateComponents(float delta, BaseComponent** components)  
     {
         Print("Updating Rendering System");
     }

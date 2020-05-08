@@ -4,7 +4,7 @@
 
 namespace Graphics
 {
-	Bitmap::Bitmap(void * _memory, Vec2 _dimensions)
+	Bitmap::Bitmap(void * _memory, Vec2 _dimensions) noexcept
 		:
 		rawData(static_cast<uint8_t*>(_memory)),// Raw Mapped Data 
 		Size{ _dimensions }, // A int[2] containing the Width and Height of our Image
@@ -19,7 +19,7 @@ namespace Graphics
 
 
     /* Creates a Bitmap from a Specified Image */
-    Bitmap::Bitmap(std::string _file)
+    Bitmap::Bitmap(std::string _file) noexcept
     {
         int32_t 
             Sx{ 0 }, 
