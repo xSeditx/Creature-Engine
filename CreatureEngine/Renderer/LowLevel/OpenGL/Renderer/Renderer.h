@@ -70,5 +70,30 @@ namespace OpenGL
 			glDrawElements (GL_TRIANGLES, _elementCount, GL_FLOAT, (char*)0);
 			DEBUG_CODE(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 		}
+
+        /* Returns a vec4 of Normalized Colors for OpenGL Accepts 0-255*/
+        static Vec4 normalize_RGBA_Color(int _r, int _g, int _b, int _a)
+        {
+            constexpr float coef = 1.0f / 255.0f;
+            Vec4 result;
+            result.r = _r * coef;
+            result.g = _g * coef;
+            result.b = _b * coef;
+            result.a = _a * coef;
+            return result;
+        }
+
+        /* Returns a vec3 of Normalized Colors for OpenGL Accepts 0-255*/
+        static Vec3 normalize_RGB_Color(int _r, int _g, int _b)
+        {
+            constexpr float coef = 1.0f / 255.0f;
+            Vec3 result;
+            result.r = _r * coef;
+            result.g = _g * coef;
+            result.b = _b * coef;
+            return result;
+        }
+
+
 	};
 }

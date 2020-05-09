@@ -20,6 +20,9 @@ using namespace Threading;
 
 #include<stack>
 #include<utility>
+#include"Core/ECS/ECS.h"
+#include"Core/ECS/TestComponents.h"
+
 
 std::stack<std::string> CS;
 
@@ -89,9 +92,6 @@ Listener MouseWheel(
     }
 });
 
-#include"Core/ECS/ECS.h"
-#include"Core/ECS/TestComponents.h"
-
 
 EntityComponentSystem *TestECS;
 SystemList MainSystems;
@@ -101,12 +101,10 @@ COMPONENT(MovementComponent)
     Vec3 Velocity;
     Vec3 Acceleration;
 };
-
 COMPONENT(PositionComponent)
 {
     Vec3 Position;
 };
-
 struct MovementSystem
     :
     public BaseSystem
@@ -161,8 +159,8 @@ class App
     Graphics::Texture *TestTexture{ nullptr };
     Graphics::Texture *TestTexture2{ nullptr };
 
-    Shader *TextureShader{ nullptr };
     Mesh *TestMesh{ nullptr };
+    Shader *TextureShader{ nullptr };
 
     std::string VTextureRenderer =
                "#version 330 core                                                                                                                        \n\
@@ -241,10 +239,11 @@ class App
             ProfilerTest->Update(1);
         }
 
+        TODO("Find out why instance count is being capped. It is likely being capped at 64,000 roughly if I had to guess. Check to see if unsigned integer is used");
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
-            Vec2 Sz{ 160, 120 };
+            Vec2 Sz{ 1000, 1000 };
             for_loop(y, Sz.y)
             {
                 for_loop(x, Sz.x)
@@ -253,18 +252,26 @@ class App
                     if (R >= 255) { G += 5; R = 0; }
                     if (G >= 255) { B += 5; G = 0; }
 
-                    MainRenderer->renderQuad({ x * 8.0f,y * 8.0f }, { 7,7 }, MainRenderer->CreateColor(R, G, B, 255));
+                   MainRenderer->renderQuad({ x * 8.0f, y * 8.0f }, { 7,7 }, OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
+                   MainRenderer->draw_Line(x * 8.0f, y * 8.0f ,x * 8.0f + 7 ,y * 8.0f + 7);
+
                 }
             }
   		    DEBUG_CODE(CheckGLERROR());
         }
-
+       //MainRenderer->draw_Line(0,0,1000,1000       );
         /* Create FBO to Test with */
         {
             FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
             FBO->Bind();
         }
-       
+        MainRenderer->draw_Line(100, 100, 10, 10);
+        
+     //   MainRenderer->draw_Line(1000, 0, 1000, 1000);
+        //  MainRenderer->draw_Line({ 0, 0 }, { 200, 10 });
+    //    MainRenderer->draw_Line({ 0, 0, 456, 65 });
+
+
         Init_DefaultShaders();
 
         /* Load Test Textures to Test With using two different Texture Constructors */
@@ -322,12 +329,12 @@ class App
 
             TestTexture->g_Handle();
              
-            MainRenderer->renderImage({ 100, 100 }, { 100, 300 }, TestTexture);
+           // MainRenderer->renderImage({ 100, 100 }, { 100, 300 }, TestTexture);
           //  MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
         }
         FBO->Unbind();
 
-        MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
+         MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
         DEBUG_CODE(CheckGLERROR());
 	}
 
@@ -340,7 +347,8 @@ class App
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
 
-        MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
+    //    MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
+
         // TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
 	}
 

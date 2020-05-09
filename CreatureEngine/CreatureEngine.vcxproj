@@ -119,6 +119,9 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries> /NODEFAULTLIB:mscrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
+    <Lib>
+      <AdditionalDependencies>SOIL.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

@@ -44,15 +44,13 @@ namespace OpenGL
     {
         WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
         mainCamera = Camera2D(_size);
-        /// ==== This IS CRASHING ON COMPILE =======*/
-        InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
-        ///==========================================
-        QuadVAO      = OpenGL::new_VAO();
 
+        QuadVAO      = OpenGL::new_VAO();
         QuadVBO      = OpenGL::new_VBO();
         ColorVBO     = OpenGL::new_VBO();
         TransformVBO = OpenGL::new_VBO();
 
+        InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
         InstanceRenderer->Bind();
         {// Sets up the VAO for the Quads
             OpenGL::bind_VAO(QuadVAO);
@@ -66,13 +64,28 @@ namespace OpenGL
             OpenGL::bind_VBO(ColorVBO);
             OpenGL::set_Divisor(OpenGL::set_Attribute(4, "Color"), 1);
         }
-        InstanceRenderer->Bind();
+        InstanceRenderer->Unbind();
+        WARN_ME("Did you mean Unbind here?");
 
         OpenGL::bind_VBO(QuadVBO); 
         OpenGL::set_BufferData(sizeof(QuadData), QuadData);
 
 
         Layers.push(new Layer("Root Layer"));
+
+        LineVAO = OpenGL::new_VAO();
+        LineVBO = OpenGL::new_VBO();
+        LineRenderer = new Shader(Line_shader_v, Line_shader_f);
+        LineRenderer->Bind();
+        {
+            OpenGL::bind_VAO(LineVAO);
+            OpenGL::bind_VBO(LineVBO);
+            OpenGL::set_Attribute(2, "Position");
+        }
+        LineRenderer->Unbind();
+
+       // OpenGL::set_LineWidth(6);
+
     }
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size, Vec4 _color)
     {
@@ -97,24 +110,43 @@ namespace OpenGL
         InstanceRenderer->Bind();
         {
             mainCamera.Bind();
-            Renderer::drawArrayInstanced(6, (uint32_t)InstanceCount);
+            Renderer::drawArrayInstanced(6, InstanceCount);
         }
         InstanceRenderer->Unbind();
+
+        OpenGL::bind_VAO(LineVAO);
+        LineRenderer->Bind();
+        {
+            mainCamera.Bind();
+            Renderer::drawArrayLines(LineVBO, (uint32_t)Line_Data.size() * 2 );
+        }
+        LineRenderer->Unbind();
+
     }
     void Renderer2D::Flush()
-    {// Clears buffer, perhaps change
+    {// Clears buffer, perhaps change this idk
         ColorData.clear();
         Positions.clear();
+        Line_Data.clear();
     }
     void Renderer2D::Update()
     {
         mainCamera.Update();
  
-        OpenGL::bind_VBO(ColorVBO);
-        OpenGL::set_BufferData(ColorData);
+        if (Positions.size())
+        {
+            OpenGL::bind_VBO(ColorVBO);
+            OpenGL::set_BufferData(ColorData);
 
-        OpenGL::bind_VBO(TransformVBO);
-        OpenGL::set_BufferData(Positions);
+            OpenGL::bind_VBO(TransformVBO);
+            OpenGL::set_BufferData(Positions);
+        }
+
+        if (Line_Data.size())
+        {
+            OpenGL::bind_VBO(LineVBO);
+            OpenGL::set_BufferData(Line_Data);
+        }
     }
     void Renderer2D::Resize(Vec2 _size)
     {
@@ -127,16 +159,6 @@ namespace OpenGL
         CurrentRenderColor.g = _g * coef;
         CurrentRenderColor.b = _b * coef;
         CurrentRenderColor.a = _a * coef;
-    }
-    Vec4 Renderer2D::CreateColor(int _r, int _g, int _b, int _a)
-    {
-        float coef = 1.0f / 255.0f;
-        Vec4 result;
-        result.r = _r * coef;
-        result.g = _g * coef;
-        result.b = _b * coef;
-        result.a = _a * coef;
-        return result;
     }
 
     void Renderer2D::Submit(Shader& _shader, Graphics::Texture& _texture, Mesh& _mesh)
@@ -157,7 +179,7 @@ namespace OpenGL
         Buckets.emplace_back(Mat, Mesh_Index); //  RenderPair Bucket = { Mat, Mesh_Index };
 
     }
-    void  Renderer2D::Render_Buckets()
+    void Renderer2D::Render_Buckets()
     {
         std::vector<FrameBufferObject*> FrameBuffers;
 
@@ -201,6 +223,26 @@ namespace OpenGL
         }
         QuadRenderer->Unbind();
     }
+
+
+
+
+    void Renderer2D::draw_Line(float x1, float y1, float x2, float y2)
+    {// Render a Line in the Current Render color as floats
+        Line_Data.emplace_back(x1,y1,x2,y2);
+    }
+    void Renderer2D::draw_Line(Vec2 _p1, Vec2 _p2)
+    {// Render a Line in the Current Render color as two Points
+        Line_Data.emplace_back(_p1.x, _p1.y, _p2.x, _p2.y);
+    }
+    void Renderer2D::draw_Line(Vec4 _line)
+    { // Render a Line in the Current Render color as Vec4
+        Line_Data.emplace_back(_line.x, _line.y, _line.z, _line.w);
+    }
+
+
+
+    std::vector<Vec4> Line_Data;
 }//NS OpenGL
 
 

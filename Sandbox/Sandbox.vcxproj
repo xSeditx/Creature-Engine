@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\x64\Debug;$(Solution)..\Bin\Soil\Debug\;C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\x64\Debug;$(Solution)..\Bin\Soil\Debug\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -83,6 +83,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

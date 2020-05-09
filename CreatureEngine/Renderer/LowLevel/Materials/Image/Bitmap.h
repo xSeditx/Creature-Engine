@@ -4,9 +4,9 @@
 
 #if _DEBUG
 //#    pragma comment(lib, "debugSOIL.lib")
-#    pragma comment(lib, "SOIL.lib")
+//#    pragma comment(lib, "SOIL.lib")
 #else
-#    pragma comment(lib, "SOIL.lib")
+//#    pragma comment(lib, "SOIL.lib")
 #endif
 
 namespace Graphics

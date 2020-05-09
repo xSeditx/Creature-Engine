@@ -204,8 +204,8 @@ namespace OpenGL
         layerStack Layers;
 
         using Texture_ID_t = uint32_t;
-        using Mesh_ID_t = uint32_t;
-        using Shader_ID_t = uint32_t;
+        using Mesh_ID_t    = uint32_t;
+        using Shader_ID_t  = uint32_t;
         using Texture_ID_t = uint32_t;
         using Texture_ID_t = uint32_t;
 
@@ -242,9 +242,6 @@ namespace OpenGL
 		/* Updates the data in the Camera and the Batchs */
 		void Update();
 
-		/* Returns a vec4 of Normalized Colors for OpenGL Accepts 0-255*/
-		Vec4 CreateColor(int _r, int _g, int _b, int _a);
-
 		/* Clears the Buffers */
 		void Flush();
 
@@ -258,11 +255,31 @@ namespace OpenGL
 		Camera2D& g_Camera() { return mainCamera; }
         void renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image);
 
+        /* Render a Line in the Current Render color as floats */
+        void draw_Line(float _x1, float _y1, float _x2, float _y2);
+
+        /* Render a Line in the Current Render color as two Points*/
+        void draw_Line(Vec2 _p1, Vec2 _p2);
+
+        /* Render a Line in the Current Render color as Vec4*/
+        void draw_Line(Vec4 _line);
+
+
+        /// ========= STATICS ========= May very well change where these are located as they are more of a Utility than a rendering option
+
+
     private:
+        uint32_t LineVAO{ 0 };
+        uint32_t LineVBO{ 0 };
+        std::vector<Vec4> Line_Data;
+
+
+
 		uint32_t QuadVAO{ 0 };
 		uint32_t InstanceCount{ 0 };
 
 		Shader* InstanceRenderer;
+        Shader* LineRenderer;
 
 		uint32_t ColorVBO{ 0 };
 		std::vector<Vec4> ColorData;
@@ -282,30 +299,55 @@ namespace OpenGL
 		Vec4 CurrentRenderColor{ 1, 0, 0, 1 };
 
 //===============================================================================================================
+
+        std::string  Line_shader_v = 
+        "#version 330 core                                     \n\
+         layout(location = 0) in vec2 Position;                \n\
+         uniform mat4 ProjectionMatrix;                        \n\
+         uniform mat4 ViewMatrix;                              \n\
+         void main()                                           \n\
+         {                                                     \n\
+             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+             gl_Position = ModelViewProjectionMatrix * vec4(Position.x, Position.y, -1.0, 1.0); \n\
+         }";
+
+
+        std::string  Line_shader_f = 
+         "#version 330 core                 \n\
+          out vec4 FragColor;               \n\
+          void main()                       \n\
+          {                                 \n\
+                      FragColor = vec4(0.0, 1.0, 1.0, 1.0);    \n\
+          }";
+
+
+
+
 		std::string VinstanceRenderer =
-			"#version 330 core     \n\
-layout(location = 0) in vec2 aPos; \n\
-layout(location = 1) in vec4 Position; \n\
-layout(location = 2) in vec4 Color; \n\
-uniform mat4 ProjectionMatrix;     \n\
-uniform mat4 ViewMatrix;           \n\
-out vec4 Col;                      \n\
-void main()                        \n\
-{                                  \n\
-    Col = Color; \n\
-    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
-}";
+            "#version 330 core                         \n\
+                layout(location = 0) in vec2 aPos;     \n\
+                layout(location = 1) in vec4 Position; \n\
+                layout(location = 2) in vec4 Color; \n\
+                uniform mat4 ProjectionMatrix;     \n\
+                uniform mat4 ViewMatrix;           \n\
+                out vec4 Col;                      \n\
+                void main()                        \n\
+                {                                  \n\
+                    Col = Color; \n\
+                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+                }";
 
 		std::string FinstanceRenderer =
-			"#version 330 core \n\
-in vec4 Col;                   \n\
-out vec4 FragColor;            \n\
-void main()                    \n\
-{                              \n\
-    FragColor = Col;\n\
-}";
+		    "#version 330 core \n\
+                in vec4 Col;                   \n\
+                out vec4 FragColor;            \n\
+                void main()                    \n\
+                {                              \n\
+                    FragColor = Col;\n\
+                }";
 
         std::string VTextureRenderer =
             "#version 330 core     \n\

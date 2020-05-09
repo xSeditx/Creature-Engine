@@ -561,6 +561,15 @@ namespace OpenGL
     {
         return glCreateShader(GL_FRAGMENT_SHADER);
     }
+
+
+
+
+    void set_LineWidth(int _size)
+    {
+        glLineWidth(_size);
+    }
+
 }
 
 
