@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
+#include"../CreatureEngine/Core/Common.h"
 
 #include "../CreatureEngine/Profiling/MemoryPerf/MemTracker.h"
 #include "../CreatureEngine/Profiling/Timing/Benchmark.h"
@@ -18,6 +19,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 
 #pragma comment(lib, "user32.lib")
+#pragma comment(lib, "gdi32.lib")
 
 
 namespace UnitTest

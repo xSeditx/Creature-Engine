@@ -36,23 +36,11 @@
     <Filter Include="Source Files\System\Threading">
       <UniqueIdentifier>{f7a18410-dda6-4711-ab3e-6120d49a7e74}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Graphics\Renderer">
-      <UniqueIdentifier>{4b0d588c-cf0d-4d66-877d-2b1c5ef98f3c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Graphics\Buffers">
       <UniqueIdentifier>{e9431067-58e1-498e-83e9-11c87b682d47}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Graphics\Camera">
       <UniqueIdentifier>{42b9264f-4777-41d5-8a5c-8cac2f2f0cc8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\Renderer\Shader">
-      <UniqueIdentifier>{33765486-aa39-4767-b84f-ba7aab571e21}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\Renderer\LowLevel">
-      <UniqueIdentifier>{a85e03dd-a64c-4c42-8306-8a3fef293968}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\Renderer\LowLevel\Image">
-      <UniqueIdentifier>{ed460fd1-21ca-4e4f-a46b-282e171cba42}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Creatures">
       <UniqueIdentifier>{b2c0ab8f-2568-4f40-8f10-03178b8e972c}</UniqueIdentifier>
@@ -72,6 +60,21 @@
     <Filter Include="Source Files\Math">
       <UniqueIdentifier>{c59ef4a8-1a60-4024-95c1-cf48d2ddb2d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Graphics\OpenGL">
+      <UniqueIdentifier>{a7d6be47-f636-497b-8860-7d2cf53d5e7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\OpenGL\Renderer">
+      <UniqueIdentifier>{4b0d588c-cf0d-4d66-877d-2b1c5ef98f3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\OpenGL\Renderer\Shader">
+      <UniqueIdentifier>{33765486-aa39-4767-b84f-ba7aab571e21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\OpenGL\Renderer\LowLevel">
+      <UniqueIdentifier>{a85e03dd-a64c-4c42-8306-8a3fef293968}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\OpenGL\Renderer\LowLevel\Image">
+      <UniqueIdentifier>{ed460fd1-21ca-4e4f-a46b-282e171cba42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp">
@@ -89,9 +92,6 @@
     <ClCompile Include="Profiling\SystemInfo.cpp">
       <Filter>Source Files\Profiling</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="..\Bin\glad\src\glad.c">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -105,31 +105,28 @@
       <Filter>Source Files\System</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp">
-      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel\Image</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp">
-      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel\Image</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp">
       <Filter>Source Files\Graphics\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp">
       <Filter>Source Files\Graphics\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp">
-      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\Shader</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp">
-      <Filter>Source Files\Graphics\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera2D.cpp">
       <Filter>Source Files\Graphics\Camera</Filter>
@@ -141,10 +138,10 @@
       <Filter>Source Files\System</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Layer.cpp">
-      <Filter>Source Files\Graphics\Renderer\LowLevel</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel</Filter>
     </ClCompile>
     <ClCompile Include="Core\EventSystem.cpp">
       <Filter>Source Files\Input</Filter>
@@ -186,10 +183,16 @@
       <Filter>Source Files\Math</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp">
-      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\Sprite.cpp">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Sprite.cpp">
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp">
+      <Filter>Source Files\Graphics\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp">
+      <Filter>Source Files\Graphics\Buffers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -232,47 +235,41 @@
     <ClInclude Include="Profiling\RenderUtilities.h">
       <Filter>Source Files\Profiling</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Application.h">
       <Filter>Source Files\System</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h">
-      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel\Image</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h">
-      <Filter>Source Files\Graphics\Renderer\LowLevel\Image</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel\Image</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h">
       <Filter>Source Files\Graphics\Buffers</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h">
       <Filter>Source Files\Graphics\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h">
-      <Filter>Source Files\Graphics\Renderer\Shader</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\Shader</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GameObject.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primitives.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera2D.h">
       <Filter>Source Files\Graphics\Camera</Filter>
@@ -284,10 +281,10 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Layer.h">
-      <Filter>Source Files\Graphics\Renderer\LowLevel</Filter>
+      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel</Filter>
     </ClInclude>
     <ClInclude Include="Core\EventSystem.h">
       <Filter>Source Files\Input</Filter>
@@ -325,8 +322,14 @@
     <ClInclude Include="Core\Math\Math.h">
       <Filter>Source Files\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Sprite.h">
-      <Filter>Source Files\Graphics\Renderer</Filter>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Sprite.h">
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h">
+      <Filter>Source Files\Graphics\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h">
+      <Filter>Source Files\Graphics\Buffers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -26,9 +26,6 @@ using namespace Threading;
 
 std::stack<std::string> CS;
 
-HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-std::mutex DEBUGMutex;
-
 
 bool TEST_PROFILE_WINDOW();
 #define CAMERA_SPEED 4.0f
@@ -151,17 +148,20 @@ class App
 	GLuint Indices[3] = { 0, 1, 2 };
     GLuint VAO{ 0 }, VBO{ 0 };
 
-	OpenGL::Renderer2D *MainRenderer{ nullptr };
-	Profiling::DisplayWindow *ProfilerTest{ nullptr };
-	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
+
+    Mesh *TestMesh{ nullptr };
+    Shader *TextureShader{ nullptr };
 
     FrameBufferObject *FBO{ nullptr };
     Graphics::Texture *TestTexture{ nullptr };
     Graphics::Texture *TestTexture2{ nullptr };
 
-    Mesh *TestMesh{ nullptr };
-    Shader *TextureShader{ nullptr };
+	OpenGL::Renderer2D *MainRenderer{ nullptr };
+	Profiling::DisplayWindow *ProfilerTest{ nullptr };
 
+	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
+
+    /// This needs to go
     std::string VTextureRenderer =
                "#version 330 core                                                                                                                        \n\
                 layout(location = 0) in vec2 aPos;                                                                                                       \n\
@@ -189,6 +189,7 @@ class App
     //=================================================================================================================================================================
     //=================================================================================================================================================================
   
+	size_t PreviousTime;
     
     virtual void OnCreate() override
 	{// Initialization
@@ -239,12 +240,13 @@ class App
             ProfilerTest->Update(1);
         }
 
-     //    What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. Idk how the fuck to fix that just yet it means my post processing efforts might be limited or that I need to not scale the texture but need to texture the Images
+        /// What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. 
+        /// Idk how the fuck to fix that just yet it means my post processing efforts might be limited or that I need to not scale the texture but need to texture the Images
         TODO("Find out why instance count is being capped. It is likely being capped at 64,000 roughly if I had to guess. Check to see if unsigned integer is used");
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
-            Vec2 Sz{ 1000, 1000 };
+            Vec2 Sz{ 100, 100 };
             for_loop(y, Sz.y)
             {
                 for_loop(x, Sz.x)
@@ -260,19 +262,13 @@ class App
             }
   		    DEBUG_CODE(CheckGLERROR());
         }
-       //MainRenderer->draw_Line(0,0,1000,1000       );
+ 
         /* Create FBO to Test with */
         {
             FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
             FBO->Bind();
         }
-        MainRenderer->draw_Line(100, 100, 10, 10);
-        
-     //   MainRenderer->draw_Line(1000, 0, 1000, 1000);
-        //  MainRenderer->draw_Line({ 0, 0 }, { 200, 10 });
-    //    MainRenderer->draw_Line({ 0, 0, 456, 65 });
-
-
+  
         Init_DefaultShaders();
 
         /* Load Test Textures to Test With using two different Texture Constructors */
@@ -282,32 +278,27 @@ class App
             TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
         }
 
-		//init_DefaultShaders();
         TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
 
-        //Entity Component System
-        //    ECS = new EntityComponentSystem();
-        //    SystemList mainSystems;
-        //    ECStest::TransformComponent transformComp;
-        //    ECS->AddComponent(transformComp);
+        ///Entity Component System
+        {
+            //    ECS = new EntityComponentSystem();
+            //    SystemList mainSystems;
+            //    ECStest::TransformComponent transformComp;
+            //    ECS->AddComponent(transformComp);
+            //    ECStest::InitECS();
+            //    TestECS = new EntityComponentSystem();
+            /// Create Entities
+            //    EntityPTR Entity = TestECS->MakeEntity(PosComponent, TestMovementComponent);
+            /// Create Systems
+            //    MainSystems.AddSystem(movementSys);
+            //    TestECS->AddComponent(Entity, &PosComponent);
+            //    TestECS->AddComponent(Entity, &TestMovementComponent);
+        }
 
-        ECStest::InitECS();
-
-        TestECS = new EntityComponentSystem();
-
-        /// Create Entities
-        //EntityPTR Entity = TestECS->MakeEntity(PosComponent, TestMovementComponent);
-
-        /// Create Systems
-
-        // MainSystems.AddSystem(movementSys);
- 
-        //TestECS->AddComponent(Entity, &PosComponent);
-        //TestECS->AddComponent(Entity, &TestMovementComponent);
 
         DEBUG_CODE(CheckGLERROR());
 	}
-
     virtual void OnRender() override
     {
         FBO->Bind();
@@ -334,12 +325,11 @@ class App
           //  MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
         }
         FBO->Unbind();
+        // Renders the Frame Buffer Object we Rendered all the Images to
+        MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
 
-         MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
         DEBUG_CODE(CheckGLERROR());
 	}
-
-	size_t PreviousTime;
 	virtual void OnUpdate() override
 	{// User Genrated Per Frame Update
 
@@ -348,11 +338,9 @@ class App
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
 
-    //    MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
-
-        // TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
+        //  MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
+        //  TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
 	}
-
     virtual void OnEnd() override
     {// Exit of the Application and Clean up
 
@@ -362,17 +350,21 @@ class App
         delete(MainRenderer);
         delete(ProfilerTest);
         delete(ECS);
+
     }
 
 };
 
-
+ 
 
 int main()
 {
+    DEBUGPrint(CON_Red,"Problem with the Debug print Symbols hConsole and DEBUGMutex in that they have no real home on where they should be. It is possible Common.h should perhaps have a CPP file for Symbol definition");
 
     TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
-	
+    TODO(" Serious Restructuring needs to take place to the Entire project, it is starting to grow rather large and I am not happy with some of the early design and structure decisions that have begun to slightly conflict. \n\
+ It would be wise to reformat and refactor the project before these minor issues become big ones  ");
+
     App MyApp;
 	MyApp.Init();
 

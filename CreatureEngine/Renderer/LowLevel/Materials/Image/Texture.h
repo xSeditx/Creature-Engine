@@ -2,11 +2,11 @@
 #include<vector>
 
 #include"Bitmap.h"
+#include"Renderer/LowLevel/OpenGL/OpenGL.h"
 
 #include"Core/Common.h"
-#include "../../OpenGL/Camera/Camera2D.h"
-#include "../../OpenGL/Shader/Shader.h"
-
+ #include"Renderer/LowLevel/OpenGL/Camera/Camera2D.h"
+ 
 /*
 Texture Base Class
 Discussion: Should Derivation from the Asset class really be a thing or should there be an Asset Manager object in each Asset composing instead of inheriting.

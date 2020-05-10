@@ -565,7 +565,7 @@ namespace OpenGL
 
 
 
-    void set_LineWidth(int _size)
+    void set_LineWidth(float _size)
     {
         glLineWidth(_size);
     }

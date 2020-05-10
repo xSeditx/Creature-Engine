@@ -204,11 +204,11 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Sprite.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
-    <ClCompile Include="Renderer\Sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h" />
@@ -252,10 +252,10 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Primitives.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Renderer.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Sprite.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
-    <ClInclude Include="Renderer\Sprite.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Trash.txt" />

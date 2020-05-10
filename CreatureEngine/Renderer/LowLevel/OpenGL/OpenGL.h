@@ -303,7 +303,7 @@ namespace OpenGL
 
     //============================================================================================
     /* Sets the Line width for OpenGL */
-    CREATURE_API void  set_LineWidth(int _size);
+    CREATURE_API void  set_LineWidth(float _size);
 
 
     CREATURE_API uint32_t new_ShaderHandle();

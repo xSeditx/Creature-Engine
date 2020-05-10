@@ -1,6 +1,6 @@
 
 #include"Core/Common.h"
-#include"LowLevel/Materials/Image/Texture.h"
+#include"Renderer/LowLevel/Materials/Image/Texture.h"
 
 #include<string>
 
@@ -72,6 +72,7 @@ class Sprite
         Full, 
         Manual
     } Mask_Mode;
+
     /* Sets the Current Mask mode */
     void set_Mask_Mode(Mask_t _mode) { Mask_Mode = _mode; }
     /* Sets Bounding Box from Vec4 */
