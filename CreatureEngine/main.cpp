@@ -239,6 +239,7 @@ class App
             ProfilerTest->Update(1);
         }
 
+     //    What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. Idk how the fuck to fix that just yet it means my post processing efforts might be limited or that I need to not scale the texture but need to texture the Images
         TODO("Find out why instance count is being capped. It is likely being capped at 64,000 roughly if I had to guess. Check to see if unsigned integer is used");
         /* Create a Bunch of Quads to Test Render */
         {

@@ -188,6 +188,9 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp">
       <Filter>Source Files\Graphics\Renderer\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\Sprite.cpp">
+      <Filter>Source Files\Graphics\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">
@@ -321,6 +324,9 @@
     </ClInclude>
     <ClInclude Include="Core\Math\Math.h">
       <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Sprite.h">
+      <Filter>Source Files\Graphics\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

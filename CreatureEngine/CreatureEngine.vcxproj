@@ -208,6 +208,7 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
+    <ClCompile Include="Renderer\Sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h" />
@@ -254,6 +255,7 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Transform.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Shader\Shader.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
+    <ClInclude Include="Renderer\Sprite.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Trash.txt" />

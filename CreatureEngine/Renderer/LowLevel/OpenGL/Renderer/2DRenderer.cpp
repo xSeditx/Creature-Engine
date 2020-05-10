@@ -224,9 +224,6 @@ namespace OpenGL
         QuadRenderer->Unbind();
     }
 
-
-
-
     void Renderer2D::draw_Line(float x1, float y1, float x2, float y2)
     {// Render a Line in the Current Render color as floats
         Line_Data.emplace_back(x1,y1,x2,y2);
@@ -239,8 +236,6 @@ namespace OpenGL
     { // Render a Line in the Current Render color as Vec4
         Line_Data.emplace_back(_line.x, _line.y, _line.z, _line.w);
     }
-
-
 
     std::vector<Vec4> Line_Data;
 }//NS OpenGL
