@@ -317,6 +317,8 @@ class App
             getWindow().defaultShader().Unbind();
 
             MainRenderer->Render();
+            DEBUG_CODE(CheckGLERROR());
+
             ProfilerTest->Render();
 
             TestTexture->g_Handle();

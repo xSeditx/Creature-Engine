@@ -97,8 +97,9 @@ namespace OpenGL
 		uint32_t dwVisibleMask;
 		uint32_t dwDamageMask;
 	};
-    CREATURE_API GLenum glCheckError_(const char *file, int line);
 
+
+    CREATURE_API GLenum glCheckError_(const char *file, int line);
 	
 	/* Creates an OpenGL context from an OS native Device Context */
 	CREATURE_API HGLRC create_OpenGLContext(HDC _dc);
@@ -222,6 +223,18 @@ namespace OpenGL
         return (_Ty*)glMapBufferRange(_target, _start, _length * sizeof(_Ty), GL_READ_BUFFER);
     }
 
+    CREATURE_API bool is_Mapped(uint32_t _target = GL_ARRAY_BUFFER);
+
+
+    template<typename _Ty>
+    CREATURE_API _Ty *map_Buffer(int _target = GL_ARRAY_BUFFER, GLenum _access = GL_READ_BUFFER)
+    {
+        return (_Ty*)glMapBuffer(_target, _access );
+    }
+
+
+
+
 	//============================================================================================
 	// VERTEX BUFFER OBJECT 
 	//============================================================================================
@@ -247,10 +260,23 @@ namespace OpenGL
 		glBufferData(GL_ARRAY_BUFFER, _data.size() * sizeof(_Ty) , &_data[0], DEFAULT_BUFFER_ACCESS);
 		DEBUG_CODE(CheckGLERROR());
 	}
-
-
 	/* Sets the Data in the currently bound Vertex Buffer */
 	CREATURE_API void set_BufferData(uint32_t _size, const void* _data);
+
+    /* Sets the Data in the currently bound Vertex Buffer With defined access */
+    CREATURE_API void set_BufferData(uint32_t _size, const void* _data, GLenum _access);
+
+
+    /* Sets the Data in the currently bound Vertex Buffer */
+    template<typename _Ty>
+    CREATURE_API void set_Subbuffer_Data(std::vector<_Ty>& _data, uint32_t _offset)
+    {
+        glBufferSubData(GL_ARRAY_BUFFER, _offset, _data.size() * sizeof(_Ty), &_data[0]);
+    }
+    CREATURE_API void set_Subbuffer_Data(uint32_t _size, const void* _data, uint32_t _offset);
+
+
+
 	//============================================================================================
 
 
@@ -270,15 +296,15 @@ namespace OpenGL
     CREATURE_API bool isIBO(int _array);
 
 
-	//============================================================================================
-	// TEXTURE MANAGEMENT 
-	//============================================================================================
+	///============================================================================================
+	///                   TEXTURE MANAGEMENT 
+	///============================================================================================
 
     /* Generates a New Texture ID for OpenGL */
     CREATURE_API uint32_t new_TextureHandle();
 
 	/* Sets _slot as the Currently Active Texture */
-	CREATURE_API void ActivateTexture(uint32_t _slot);
+	//CREATURE_API void ActivateTexture(uint32_t _slot);
 
 
     /* Set the Alignment of the Pixel pack and unpack processed for a texture */
@@ -300,6 +326,57 @@ namespace OpenGL
     /* returns Maximum Texture Units*/
     CREATURE_API int  get_MaximumTextureUnits();
 
+    /* Update a Sub part of the bound Texture */
+    CREATURE_API void update_SubImage(const void* _pixels, iVec2 _size, iVec2 _offset, GLenum _format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
+
+    CREATURE_API void update_Texture(const void* _pixels, iVec2 _size, GLenum _internal_format = GL_RGBA, GLenum _format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
+
+    /* Creates Mip map for bound 2D Texture  */
+    CREATURE_API void generate_MipMap();
+    /* Turns Mip Map on for bound 2D texture */
+    CREATURE_API void turn_Mipmap_On();
+    /* Turns Mip Map off for bound 2D Texture */
+    CREATURE_API void turn_Mipmap_Off();
+
+    /* Turns Mip Map on for bound texture of _target type*/
+    CREATURE_API void turn_Mipmap_On(GLenum _target);
+    /* Turns Mip Map off for bound 2D Texture of _target type*/
+    CREATURE_API void turn_Mipmap_Off(GLenum _target);
+
+    CREATURE_API void set_Magnification(uint32_t _param);
+    CREATURE_API void set_Minification(uint32_t _param);
+    CREATURE_API void set_Texture_Magnification(GLenum _target, uint32_t _param);
+    CREATURE_API void set_Texture_Minification(GLenum _target, uint32_t _param);
+
+
+    CREATURE_API void set_WrapX(unsigned int param);
+    CREATURE_API void set_WrapY(unsigned int param);
+    CREATURE_API void set_Texture_WrapX(uint32_t _target, unsigned int param);
+    CREATURE_API void set_Texture_WrapY(uint32_t _target, unsigned int param);
+
+
+    CREATURE_API void bind_Texture(uint32_t _handle);
+    CREATURE_API void bind_Texture(uint32_t _handle, uint32_t _slot);
+    CREATURE_API void unbind_Texture();
+
+
+    CREATURE_API uint32_t new_Buffer();
+    CREATURE_API void bind_TextureBuffer(uint32_t _id);
+    template<typename _Ty>  CREATURE_API void set_TextureBuffer_Data(std::vector<_Ty> _data)
+    {
+        glBufferData(GL_TEXTURE_BUFFER, sizeof(_Ty) * _data.size(), _data.data(), GL_STATIC_DRAW);
+    }
+
+
+    CREATURE_API void bind_Texture_Target(uint32_t _target, uint32_t _handle);
+    CREATURE_API void bind_Texture_Target(uint32_t _target, uint32_t _handle, uint32_t _slot);
+    CREATURE_API void unbind_Texture_Target(uint32_t _target);
+    ///============================================================================================
+    ///============================================================================================
+
+
+
+
 
     //============================================================================================
     /* Sets the Line width for OpenGL */
@@ -307,6 +384,53 @@ namespace OpenGL
 
 
     CREATURE_API uint32_t new_ShaderHandle();
+
+
+
+
+
+
+
+
+
+
+    //============================================================================================
+    // FRAME BUFFER OBJECT 
+    //============================================================================================
+    /* Creates a Unique ID for a Vertex Array Object*/
+    CREATURE_API uint32_t new_FBO();
+
+    /* Frees ID for a Vertex Array Object*/
+    CREATURE_API void delete_FBO(uint32_t _id);
+
+    /* Sets Vertex Buffer Object as Current */
+    CREATURE_API void bind_FBO(uint32_t _vboID);
+
+    /*  Unbinds all Vertex Buffer Objects from OpenGL */
+    CREATURE_API void unbind_FBO();
+
+    /* Is an ID a Vertex Buffer Object */
+    CREATURE_API bool isFBO(int _array);
+
+    /* Checks to see if FrameBuffer Object is complete */
+    CREATURE_API int check_FBO_Status();
+
+
+
+
+
+    //============================================================================================
+    // BINDLESS BUFFER MANAGEMENT 
+    //============================================================================================
+    /* */
+    CREATURE_API size_t get_Bindless_Address();
+    /* */
+    CREATURE_API void make_Buffer_Resident();
+
+    CREATURE_API void clear_DepthBuffer();
+    CREATURE_API void clear_ColorBuffer();
+    CREATURE_API void clear_FrameBuffer();
+
 }
 
 

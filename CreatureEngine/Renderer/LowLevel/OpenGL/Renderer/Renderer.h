@@ -29,7 +29,8 @@ foreach( object )           //
 */
 namespace OpenGL
 {
-
+///TODO: Why the fuck will it not let me extend the OpenGL namespace here, it does then it goes on stopping me from using check_FBO_Status besides bind_FBO being found directly above it and it has no problem with that. 
+///        IT makes not fucking sense''
 	class Renderer
 	{
 	protected:
@@ -58,6 +59,7 @@ namespace OpenGL
             glBindBuffer(GL_ARRAY_BUFFER, _vbo);
             glDrawArrays(GL_LINES, 0, _elementCount);
             DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+            DEBUG_CODE(CheckGLERROR());
         }
 
 		static void drawArrayInstanced( uint32_t _indicesCount, uint32_t _instanceCount)

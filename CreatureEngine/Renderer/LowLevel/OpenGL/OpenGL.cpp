@@ -11,6 +11,10 @@ using namespace Graphics;
 
 namespace OpenGL
 {
+
+
+
+
     /*
     Experimental nonsense more than likely
     ========================================================*/
@@ -23,7 +27,7 @@ namespace OpenGL
     using RenderPair = std::pair<Material, Mesh>;
 
 
- 
+
     HGLRC create_OpenGLContext(HDC _dc)
     { // Create OpenGL Rendering Context
         HGLRC results{ nullptr };
@@ -221,10 +225,17 @@ namespace OpenGL
                      Generic Buffer Object Management
     /* ==========================================================*/
 
-    void bind_Buffer( uint32_t _bufferID, uint32_t _target = GL_ARRAY_BUFFER)
+    void bind_Buffer(uint32_t _bufferID, uint32_t _target = GL_ARRAY_BUFFER)
     {// Binds an OpenGL Buffer Object of type _target
         glBindBuffer(_target, _bufferID);
         DEBUG_CODE(CheckGLERROR());
+    }
+
+    bool is_Mapped(uint32_t _target)
+    {
+        int Result{ 0 };
+        glGetBufferParameteriv(_target, GL_BUFFER_MAPPED, &Result);
+        return (Result != 0);
     }
 
     /* ==========================================================
@@ -290,25 +301,174 @@ namespace OpenGL
     bool isIBO(int _array)
     {// Is an ID a Vertex Buffer Object 
         REFACTOR("Not sure if this is complete. isIBO() in OpenGL.cpp");
-        return (bool)(glIsBuffer(_array)); 
+        return (bool)(glIsBuffer(_array));
     }
 
-
+    ///===============================================================
     /* ==========================================================
                 Texture Management
     /* ==========================================================*/
-    CREATURE_API void ActivateTexture(uint32_t _slot)
-    {// Sets _slot as the Currently Active Texture 
+    ///===============================================================
+
+
+    void bind_Texture(uint32_t _handle) 
+    {
+        glBindTexture(GL_TEXTURE_2D, _handle);
+    }
+    void bind_Texture(uint32_t _handle, uint32_t _slot)
+    {
+        glActiveTexture(GL_TEXTURE0 + _slot);
+        glBindTexture(GL_TEXTURE_2D, _handle);
+    }
+    void unbind_Texture()
+    {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+
+    void bind_Texture_Target(uint32_t _target, uint32_t _handle)
+    {
+        glBindTexture(_target, _handle);
+    }
+    void bind_Texture_Target(uint32_t _target, uint32_t _handle, uint32_t _slot)
+    {
+        glActiveTexture(GL_TEXTURE0 + _slot);
+        glBindTexture(_target, _handle);
+    }
+    void unbind_Texture_Target(uint32_t _target)
+    {
+        glBindTexture(_target, 0);
+    }
+
+
+
+    /* Sets the Active Texture Slot */
+    void set_ActiveTexture(uint32_t _slot)
+    {
         glActiveTexture(GL_TEXTURE0 + _slot);
         DEBUG_CODE(CheckGLERROR());
     }
 
+    /* Update a specified Area of an OpenGL Texture */
+    void update_SubImage(const void* _pixels, iVec2 _size, iVec2 _offset, GLenum _format , GLenum _type )
+    {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, _format, _type, _pixels);
+    }
 
+    /* Update all of the Bound OpenGL Texture */
+    void update_Texture(const void* _pixels, iVec2 _size, GLenum _internal_format ,GLenum _format , GLenum _type )
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _size.x, _size.y, 0, _format, _type, _pixels);
+    }
+
+    /* Creates a new Handle for an OpenGL Texture Object */
+    uint32_t new_TextureHandle()
+    {
+        uint32_t result;
+        glGenTextures(1, &result);
+        DEBUG_CODE(CheckGLERROR());
+        return result;
+    }
+
+    void PixelAlignment(uint32_t _pack, uint32_t _unpack)
+    {
+        glPixelStorei(GL_PACK_ALIGNMENT, _pack);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, _unpack);
+        DEBUG_CODE(CheckGLERROR());
+    }
+    void PixelAlignmentPack(uint32_t _align)
+    {
+        glPixelStorei(GL_PACK_ALIGNMENT, _align);
+        DEBUG_CODE(CheckGLERROR());
+    }
+    void PixelAlignmentUnpack(uint32_t _align)
+    {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, _align);
+        DEBUG_CODE(CheckGLERROR());
+    }
+
+    int  get_ActiveTexture()
+    {//  Return the Active Texture unit 
+        int result{ 0 };
+        glGetIntegerv(GL_ACTIVE_TEXTURE, &result);
+        return result;
+    }
+    int  get_MaximumTextureUnits()
+    {
+        int result{ 0 };
+        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
+        return result;
+    }
+
+
+    void generate_MipMap()
+    {
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    void turn_Mipmap_On() 
+    {// Turns on Mipmap for this texture
+        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+    }
+    void turn_Mipmap_Off() 
+    {// Turns off Mipmaps for this Texture
+        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+    }
+    void turn_Mipmap_On(GLenum _target)
+    {// Turns on Mipmap for this texture
+        glTexParameteri(_target, GL_GENERATE_MIPMAP, GL_TRUE);
+    }
+    void turn_Mipmap_Off(GLenum _target)
+    {// Turns off Mipmaps for this Texture
+        glTexParameteri(_target, GL_GENERATE_MIPMAP, GL_FALSE);
+    }
+
+    void set_Magnification(uint32_t _param)                         { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _param); }
+    void set_Minification(uint32_t _param)                          { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _param); }
+    void set_Texture_Magnification(GLenum _target, uint32_t _param) { glTexParameteri(_target, GL_TEXTURE_MAG_FILTER, _param);       }
+    void set_Texture_Minification(GLenum _target, uint32_t _param)  { glTexParameteri(_target, GL_TEXTURE_MIN_FILTER, _param);       }
+
+    void set_WrapX(unsigned int param) 
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, param);
+
+    }
+    void set_WrapY(unsigned int param) 
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, param);
+    }
+    void set_Texture_WrapX(uint32_t _target, unsigned int param) 
+    {
+        glTexParameteri(_target, GL_TEXTURE_WRAP_S, param);
+    }
+    void set_Texture_WrapY(uint32_t _target, unsigned int param) 
+    {
+        glTexParameteri(_target, GL_TEXTURE_WRAP_T, param);
+    }
+
+    ///=================================================================================
+    /// Texture Buffer Object 
+    ///=================================================================================
+
+    void bind_TextureBuffer(uint32_t _handle)
+    {
+        glBindTexture(GL_TEXTURE_BUFFER, _handle);
+    }
+    void attach_TextureBuffer(uint32_t _buffer, uint32_t _format)
+    {
+          glTexBuffer(GL_TEXTURE_BUFFER, _format, _buffer);
+    }
+    ///=================================================================================
+    ///=================================================================================
 
     //return glIsEnabled(GL_CLIP_DISTANCEi);
 
-
-
+    uint32_t new_Buffer()
+    {
+        uint32_t Result;
+        glGenBuffers(1, &Result);
+        return Result;
+    }
+    
 
     bool isBlendEnabled()
     {
@@ -468,12 +628,21 @@ namespace OpenGL
     }
 
 
+
     void set_BufferData(uint32_t _size, const void* _data)
     { // Sets the Data in the currently bound Vertex Buffer sizeof(_data)
         glBufferData(GL_ARRAY_BUFFER, _size, _data, DEFAULT_BUFFER_ACCESS);
         DEBUG_CODE(CheckGLERROR());
     }
-
+    void set_BufferData(uint32_t _size, const void* _data, GLenum _access)
+    { // Sets the Data in the currently bound Vertex Buffer sizeof(_data)
+        glBufferData(GL_ARRAY_BUFFER, _size, _data, _access);
+        DEBUG_CODE(CheckGLERROR());
+    }
+    void set_Subbuffer_Data(uint32_t _size, const void* _data, uint32_t _offset)
+    {
+        glBufferSubData(GL_ARRAY_BUFFER, _offset, _size, _data);
+    }
 
     GLenum glCheckError_(const char *file, int line)
     {
@@ -502,47 +671,6 @@ namespace OpenGL
     }
 
 
-    uint32_t new_TextureHandle()
-    {
-        uint32_t result;
-        glGenTextures(1, &result);
-        DEBUG_CODE(CheckGLERROR());
-        return result;
-    }
-
-    void PixelAlignment(uint32_t _pack, uint32_t _unpack)
-    {
-        glPixelStorei(GL_PACK_ALIGNMENT, _pack);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, _unpack);
-        DEBUG_CODE(CheckGLERROR());
-    }
-    void PixelAlignmentPack(uint32_t _align)
-    {
-        glPixelStorei(GL_PACK_ALIGNMENT, _align);
-        DEBUG_CODE(CheckGLERROR());
-    }
-    void PixelAlignmentUnpack(uint32_t _align)
-    {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, _align);
-        DEBUG_CODE(CheckGLERROR());
-    }
-
-    int  get_ActiveTexture()
-    {//  Return the Active Texture unit 
-        int result{ 0 };
-        glGetIntegerv(GL_ACTIVE_TEXTURE, &result);
-        return result;
-    }
-    int  get_MaximumTextureUnits()
-    {
-        int result{ 0 };
-        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
-        return result;
-    }
-    void set_ActiveTexture(uint32_t _slot)
-    {
-        glActiveTexture(_slot);
-    }
 
     //============================================================================================
     //     SHADER FUNCTIONALITY
@@ -569,6 +697,75 @@ namespace OpenGL
     {
         glLineWidth(_size);
     }
+
+
+
+
+    //============================================================================================
+    // FRAME BUFFER OBJECT 
+    //============================================================================================
+    /* Creates a Unique ID for a Frame Buffer Object*/
+    uint32_t new_FBO()
+    {
+        uint32_t result;
+        glGenFramebuffers(1, &result);
+        DEBUG_CODE(CheckGLERROR());
+        return result;
+    }
+    int check_FBO_Status() {  return glCheckFramebufferStatus(GL_FRAMEBUFFER);  }
+
+
+
+
+
+    /* Creates a Unique ID for a Frame Buffer Object*/
+    uint32_t new_FBO(uint32_t _count)
+    {
+        uint32_t result;
+        glGenFramebuffers(_count, &result);
+        DEBUG_CODE(CheckGLERROR());
+        return result;
+    }
+
+    /* Frees ID for a Frame Buffer Object*/
+    void delete_FBO(uint32_t _id)
+    {
+        glDeleteFramebuffers(1, &_id);
+        DEBUG_CODE(CheckGLERROR());
+    }  
+
+    /* Sets Frame Buffer Object as Current */
+    void bind_FBO(uint32_t _fboID)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+        DEBUG_CODE(CheckGLERROR());
+    }
+    /*  Unbinds all Frame Buffer Objects from OpenGL */
+    void unbind_FBO()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        DEBUG_CODE(CheckGLERROR());
+    }
+
+    /* Is an ID a Vertex Buffer Object */
+  //  bool isFBO(int _array) { return true; }
+
+
+    size_t get_Bindless_Address()
+    {
+        size_t Result{ 0 };
+        glGetBufferParameterui64vNV(GL_ARRAY_BUFFER, GL_BUFFER_GPU_ADDRESS_NV, &Result);
+        DEBUG_CODE(CheckGLERROR());
+        return Result;
+    }
+    void make_Buffer_Resident() {  glMakeBufferResidentNV(GL_ARRAY_BUFFER, GL_READ_ONLY);   }
+
+
+
+    CREATURE_API void clear_DepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT);  }
+    CREATURE_API void clear_ColorBuffer() { glClear(GL_COLOR_BUFFER_BIT);  }
+    CREATURE_API void clear_FrameBuffer() { glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);    }
+
 
 }
 

@@ -38,35 +38,26 @@ namespace Graphics
 
 		/* Create a Texture other */
 		Texture(Texture&& _other) noexcept
-			:
-			Picture(std::move(_other.Picture)),
-			GL_Handle(std::move(_other.GL_Handle)),
-			Target(std::move(_other.Target)),
-			Type(std::move(_other.Type)),
-			Format(std::move(_other.Format)),
-			WrapMode(std::move(_other.WrapMode)),
-			Filtering(std::move(_other.Filtering)),
-			InternalFormat(std::move(_other.InternalFormat)),
-			Handle(std::move(_other.Handle))
 		{
-			DEBUGPrint(CON_Red, " I believe I messed this up but do not really have time to think about this right now");
-		}
+            *this = std::move(_other);
+        }
 
 		/* Assign this Texture from other*/
 		Texture& operator =(Texture&& _other) noexcept
 		{
-			Picture = std::move(_other.Picture);
-			GL_Handle = std::move(_other.GL_Handle);
-			Target = std::move(_other.Target);
-			Type = std::move(_other.Type);
-			Format = std::move(_other.Format);
-			WrapMode = std::move(_other.WrapMode);
-			Filtering = std::move(_other.Filtering);
-			InternalFormat = std::move(_other.InternalFormat);
-			Handle = std::move(_other.Handle);
-            memset(&_other, 0, sizeof(_other));
-			DEBUGPrint(CON_Red, " I believe I messed this up but do not really have time to think about this right now");
-             
+            if (this != &_other) 
+            {
+                Picture = std::move(_other.Picture);
+                GL_Handle = std::move(_other.GL_Handle);
+                Target = std::move(_other.Target);
+                Type = std::move(_other.Type);
+                Format = std::move(_other.Format);
+                WrapMode = std::move(_other.WrapMode);
+                Filtering = std::move(_other.Filtering);
+                InternalFormat = std::move(_other.InternalFormat);
+                Handle = std::move(_other.Handle);
+                memset(&_other, 0, sizeof(_other));
+            }
 			return *this;
 		}
 
@@ -85,7 +76,9 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
             DEBUG_CODE(memcpy(Picture->Data() , _memory, Picture->size()));
 			Bind();
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Picture->Width(), Picture->Height(), GL_RGBA, GL_UNSIGNED_BYTE, _memory);
+            {
+                OpenGL::update_SubImage(_memory, { 0,0 }, { Picture->Width(), Picture->Height() });
+            }
 			Unbind();
   		}
 
@@ -95,44 +88,27 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
         /* Sets the Min Mag filering for Texture */
 		void SetFiltering(unsigned int param) noexcept;
-        /* Sets the Magnification filering for Texture */
-        void SetMagFiltering(unsigned int param) noexcept;
-        /* Sets the Minification filering for Texture */
-        void SetMinFiltering(unsigned int param) noexcept;
 
         /* Set the X and Y Wrap params for the Texture */
 		void SetWrap(unsigned int param) noexcept;
-        /* Set the X Wrap params for the Texture */
-        void SetWrapX(unsigned int param) noexcept;
-        /* Set the Y Wrap params for the Texture */
-        void SetWrapY(unsigned int param) noexcept;
-
 		//	OpenGL has a particular syntax for writing its color format enumerants.It looks like this: GL_[components?][size?][type?]
 
         /* Bind Texture Handle to OpenGL State */
 		inline void Bind() noexcept
 		{
-			glBindTexture(Target, GL_Handle);
+            OpenGL::bind_Texture_Target(Target, GL_Handle);
 		}
         /* Bind Texture Handle to OpenGL State as well as the Slot in the Active Shader */
         inline void Bind(uint32_t _slot) noexcept
         {
-            glActiveTexture(GL_TEXTURE0 + _slot);
-            glBindTexture(Target, GL_Handle);
+            OpenGL::bind_Texture_Target(Target, GL_Handle, _slot);
         }
         /* Disable Texture from bound slot*/
 		inline void Unbind() noexcept
 		{
-			glBindTexture(Target, 0);
-		}
-
-        /* Generates Mipmaps for a Texture */
-        void CreateMipmap() noexcept;
-        /* Turns ON Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~ */
-        inline void MipmapOn() noexcept;
-        /* Turns OFF  Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~  */
-        inline void MipmapOff() noexcept;
-
+            OpenGL::unbind_Texture_Target(Target);
+ 		}
+         
         /* Debug Render which Sends a Rect with the given Texture to the Screen */
 		void Render(int _x, int _y, int _w, int _h) noexcept;
 
@@ -201,12 +177,13 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 		Name(_name),
 		Data(_data)
 	{
-		glGenBuffers(1, &BufferID);
-		glBindBuffer(GL_TEXTURE_BUFFER, BufferID);
-		glBufferData(GL_TEXTURE_BUFFER, sizeof(_Ty) * _data.size(), _data.data(), GL_STATIC_DRAW);
-		glGenTextures(1, &GL_Handle);
-		glBindTexture(GL_TEXTURE_BUFFER, GL_Handle);
-		glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, BufferID);
+        BufferID = OpenGL::new_Buffer();
+        OpenGL::bind_TextureBuffer( BufferID);
+        OpenGL::set_BufferData();
+        OpenGL::set_TextureBuffer_Data(_data);
+        GL_Handle = OpenGL::new_TextureHandle();
+        OpenGL::bind_TextureBuffer(GL_Handle);
+        OpenGL::attach_TextureBuffer(GL_RGBA32F, BufferID);
 	}
     template<typename _Ty>
     void TextureBufferObject<_Ty>::Bind()
@@ -226,3 +203,71 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 
 
 //http://ogldev.atspace.co.uk/www/tutorial25/tutorial25.html
+
+
+
+
+
+
+
+
+
+
+
+// /* Sets the Magnification filering for Texture */
+// void SetMagFiltering(unsigned int param) noexcept;
+// /* Sets the Minification filering for Texture */
+// void SetMinFiltering(unsigned int param) noexcept;
+//  /* Set the X Wrap params for the Texture */
+//  void SetWrapX(unsigned int param) noexcept;
+//  /* Set the Y Wrap params for the Texture */
+//  void SetWrapY(unsigned int param) noexcept;
+//
+        /* Generates Mipmaps for a Texture */
+// void CreateMipmap() noexcept;
+// /* Turns ON Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~ */
+// inline void MipmapOn() noexcept;
+// /* Turns OFF  Mipmapping for a Texture that already has Mipmaps Generated ~ User Must Bind Texture First ~  */
+// inline void MipmapOff() noexcept;
+
+
+
+
+
+
+
+
+
+// void Texture::SetWrapX(unsigned int param) noexcept
+// {
+// 	glTexParameteri(Target, GL_TEXTURE_WRAP_S, param);
+// 
+// }
+// void Texture::SetWrapY(unsigned int param) noexcept
+// {
+// 	glTexParameteri(Target, GL_TEXTURE_WRAP_T, param);
+// }
+//void Texture::SetMagFiltering(unsigned int _param) noexcept
+//{
+//    OpenGL::set_Texture_Magnification(Target, _param);
+//}
+//void Texture::SetMinFiltering(unsigned int _param) noexcept
+//{
+//    OpenGL::set_Texture_Minification(Target, _param);
+//}
+//void Texture::CreateMipmap() noexcept
+//{// Generates Mipmaps for our Texture
+//    Bind();
+//    OpenGL::generate_MipMap();
+//    MipmapComplete = true;
+//}
+//void Texture::MipmapOn() noexcept
+//{// Turns on Mipmap for this texture
+//    OpenGL::turn_Mipmap_On(Target);
+//}
+//void Texture::MipmapOff() noexcept
+//{// Turns off Mipmaps for this Texture
+//    OpenGL::turn_Mipmap_Off(Target);
+//}
+
+

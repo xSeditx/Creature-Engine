@@ -1,7 +1,6 @@
 #include "2DRenderer.h"
 
 
-
 GLuint DebugQuadVAO{ 0 };
 GLuint DebugQuadVBO{ 0 };
 Shader *QuadRenderer{ nullptr };
@@ -49,7 +48,6 @@ namespace OpenGL
         QuadVBO      = OpenGL::new_VBO();
         ColorVBO     = OpenGL::new_VBO();
         TransformVBO = OpenGL::new_VBO();
-
         InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
         InstanceRenderer->Bind();
         {// Sets up the VAO for the Quads
@@ -75,17 +73,20 @@ namespace OpenGL
 
         LineVAO = OpenGL::new_VAO();
         LineVBO = OpenGL::new_VBO();
+
         LineRenderer = new Shader(Line_shader_v, Line_shader_f);
+        VBO_Test = new VertexBufferObject<Vec4>();
+        DEBUG_CODE(CheckGLERROR());
         LineRenderer->Bind();
         {
             OpenGL::bind_VAO(LineVAO);
-            OpenGL::bind_VBO(LineVBO);
+           // VBO_Test->Bind();
+            // OpenGL::bind_VBO(LineVBO);
+            OpenGL::bind_VBO(VBO_Test->GL_Handle);
             OpenGL::set_Attribute(2, "Position");
         }
         LineRenderer->Unbind();
-
        // OpenGL::set_LineWidth(6);
-
     }
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size, Vec4 _color)
     {
@@ -105,6 +106,8 @@ namespace OpenGL
     }
     void Renderer2D::Render()
     {
+        DEBUG_CODE(CheckGLERROR());
+
         OpenGL::bind_VAO(QuadVAO);
         Update();
         InstanceRenderer->Bind();
@@ -115,16 +118,21 @@ namespace OpenGL
         InstanceRenderer->Unbind();
 
         OpenGL::bind_VAO(LineVAO);
+        DEBUG_CODE(CheckGLERROR());
+
         LineRenderer->Bind();
         {
-            mainCamera.Bind();
-            Renderer::drawArrayLines(LineVBO, (uint32_t)Line_Data.size() * 2 );
+            mainCamera.Bind(); 
+            // Renderer::drawArrayLines(LineVBO, (uint32_t)Line_Data.size() * 2);
+            Renderer::drawArrayLines(VBO_Test->GL_Handle, (uint32_t)Line_Data.size() * 2);
         }
         LineRenderer->Unbind();
+        DEBUG_CODE(CheckGLERROR());
 
     }
     void Renderer2D::Flush()
     {// Clears buffer, perhaps change this idk
+        __debugbreak();
         ColorData.clear();
         Positions.clear();
         Line_Data.clear();
@@ -144,8 +152,11 @@ namespace OpenGL
 
         if (Line_Data.size())
         {
-            OpenGL::bind_VBO(LineVBO);
+            // OpenGL::bind_VBO(LineVBO);
+            // OpenGL::set_BufferData(Line_Data);
+            OpenGL::bind_VBO(VBO_Test->GL_Handle);
             OpenGL::set_BufferData(Line_Data);
+            //*VBO_Test = Line_Data;
         }
     }
     void Renderer2D::Resize(Vec2 _size)
@@ -207,7 +218,6 @@ namespace OpenGL
 
 
     }
-
 
     void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image)
     {

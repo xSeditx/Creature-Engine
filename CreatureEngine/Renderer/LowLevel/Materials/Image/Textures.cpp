@@ -42,7 +42,7 @@ namespace Graphics
             OpenGL::PixelAlignmentPack(4);
         }
 
-        glTexImage2D(Target, 0, InternalFormat, (Picture->Width()), Picture->Height(), 0, Format, GL_UNSIGNED_BYTE, Picture->Data()); // 	_GL(glTexImage2D(Target, 0, GL_RGB, Picture.Size.x, Picture.Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, Picture.Data));
+        OpenGL::update_Texture(Picture->Data(), Picture->Dimensions(), InternalFormat, Format);
 	}
 
 	Texture::Texture(Bitmap& image) noexcept
@@ -82,12 +82,12 @@ namespace Graphics
         :
         Target(GL_TEXTURE_2D)
     {
-        glGenTextures(1, &GL_Handle);
-        glBindTexture(Target, GL_Handle);
+        GL_Handle = OpenGL::new_TextureHandle();
+        Bind();
 
         SetFiltering(_filtering);
         SetWrap(_wrap);
-        glTexImage2D(Target, 0, _internalFormat, (size_t)_size.x, (size_t)_size.y, Border, _dataFormat, _type, (void*)NULL);
+        OpenGL::update_Texture(nullptr, _size, _internalFormat, _dataFormat, _type);
     } 
 
 	void Texture::SetTarget(unsigned int param) noexcept
@@ -95,50 +95,17 @@ namespace Graphics
 		Target = param;
 	}
 
-	void Texture::SetWrap(unsigned int param) noexcept
+	void Texture::SetWrap(unsigned int _param) noexcept
 	{
-		glTexParameteri(Target, GL_TEXTURE_WRAP_S, param);
-		glTexParameteri(Target, GL_TEXTURE_WRAP_T, param);
+        OpenGL::set_Texture_WrapX(Target, _param);
+        OpenGL::set_Texture_WrapY(Target, _param);
 	}
-	void Texture::SetWrapX(unsigned int param) noexcept
+	void Texture::SetFiltering(unsigned int _param) noexcept
 	{
-		glTexParameteri(Target, GL_TEXTURE_WRAP_S, param);
-
-	}
-	void Texture::SetWrapY(unsigned int param) noexcept
-	{
-		glTexParameteri(Target, GL_TEXTURE_WRAP_T, param);
-	}
-
-	void Texture::SetFiltering(unsigned int param) noexcept
-	{
-		glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, param);
-		glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, param);
-	}
-	void Texture::SetMagFiltering(unsigned int param) noexcept
-	{
-		glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, param);
-	}
-	void Texture::SetMinFiltering(unsigned int param) noexcept
-	{
-		glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, param);
+        OpenGL::set_Texture_Magnification(Target, _param);
+        OpenGL::set_Texture_Minification(Target, _param);
 	}
 	
-    void Texture::CreateMipmap() noexcept
-    {// Generates Mipmaps for our Texture
-        Bind();
-        glGenerateMipmap(GL_TEXTURE_2D);
-        MipmapComplete = true;
-    }
-    void Texture::MipmapOn() noexcept
-	{// Turns on Mipmap for this texture
-		glTexParameteri(Target, GL_GENERATE_MIPMAP, GL_TRUE);
-	}
-	void Texture::MipmapOff() noexcept
-	{// Turns off Mipmaps for this Texture
-		glTexParameteri(Target, GL_GENERATE_MIPMAP, GL_FALSE);
-	}
-
 }//End NS Graphics
 
 

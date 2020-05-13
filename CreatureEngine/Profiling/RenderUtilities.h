@@ -200,7 +200,7 @@ namespace Profiling
             {
                 OpenGL::bind_VAO(VAO);
                 {
-                    OpenGL::ActivateTexture(0);
+                    OpenGL::set_ActiveTexture(0);
                     DisplayTexture.Bind();
                     QuadRenderer.SetUniform("texture1" , 0);
 					Model.Bind();

@@ -14,27 +14,29 @@ Attribute::Attribute(BufferTypes t)
 
 void Attribute::Bind()
 {
-	glBindBuffer(GL_ARRAY_BUFFER, GL_Handle);
+    OpenGL::bind_VBO(GL_Handle);
 }
 void Attribute::Unbind()
 {
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
+    OpenGL::bind_VBO(0);
 }
 void Attribute::Release()
 {// Should I just orphan this? Should I delete it? I wish to reclaim the name and free any allocation associate with it.
-	Print("Yeah, idk what the fuck to do with this. Release in VertexBufferObject class"); // Maybe I just need to delete it and forget it ever existed
 	__debugbreak();
+    // Maybe I just need to delete it and forget it ever existed
+	REFACTOR("Yeah, idk what the fuck to do with this. Release in VertexBufferObject class");
 }
 void Attribute::Destroy()
 {// Totaly remove the VAO from Graphic Memory and recover it by the Operating system
-	glDeleteBuffers(1, &GL_Handle);
+    OpenGL::delete_VBO(GL_Handle);
 	delete(this); // This may or maynot work.
 }
 
 void* Attribute::Map(GLenum accessflags)
 {// Map the OpenGL Buffer and return pointer to that memory
 	Bind();
-	void* results = glMapBuffer(GL_ARRAY_BUFFER, accessflags);
+    REFACTOR("Setup OpenGL::map_Buffer(GL_ARRAY_BUFFER, accessflags) to deal with this, Currently there is an Error ");
+    void* results =  glMapBuffer(GL_ARRAY_BUFFER, accessflags);
 	return results;
 }
 void* Attribute::MapRange(int offset, int count, GLenum accessflags)
@@ -46,7 +48,8 @@ void* Attribute::MapRange(int offset, int count, GLenum accessflags)
 size_t Attribute::MappedSize()
 {
 	Bind();
-	int sz;
+    int sz{ 0 };
+    REFACTOR("Add a Target to avoid this Conditional so it being an IBO or VBO is choosen early in the Attributes Lifetime");
 	if (AttributeType == INDICE)
 	{
 		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &sz);
@@ -60,16 +63,16 @@ size_t Attribute::MappedSize()
 bool Attribute::isMapped()
 {
 	Bind();
-	int RETURN;
+    int Result{ 0 };
 	if (AttributeType == INDICE)
 	{
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_MAPPED, &RETURN);
+		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_MAPPED, &Result);
 	}
 	else
 	{
-		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_MAPPED, &RETURN);
+		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_MAPPED, &Result);
 	}
-	return (RETURN != 0);
+	return (Result != 0);
 }
 
 ///=================================================================================================================
@@ -138,43 +141,32 @@ void VertexArrayObject::Unbind() {}
 #else
 void VertexArrayObject::Bind()
 {
-	_GL(glBindVertexArray(GL_Handle));
+    OpenGL::bind_VBO(GL_Handle);
 }
 void VertexArrayObject::Unbind()
 {
-	_GL(glBindVertexArray(0));
+    OpenGL::bind_VBO(0);
 }
 
 #endif
 void VertexArrayObject::Render()
 {
+    REFACTOR("While I almost like this it will likely lead to confusion and should be reconsidered and potentially changed ");
 	Bind();
 	_GL(glDrawElements(GL_TRIANGLES, ElementCount, GL_UNSIGNED_INT, nullptr));
 }
-
-
-
-
 
 _static Shader* FrameBufferObject::ScreenShader{ nullptr };
 _static uint32_t FrameBufferObject::ScreenVAO{ 0 };
 _static uint32_t FrameBufferObject::ScreenVBO{ 0 };
 _static uint32_t FrameBufferObject::ScreenIBO{ 0 };
 
- 
 
 _static Vec2 FrameBufferObject::ScreenQuad[6] =
 {
 	Vec2(-1.0f,-1.0f),  Vec2( 1.0f,-1.0f),  Vec2(-1.0f, 1.0f),
 	Vec2( 1.0f, 1.0f),  Vec2(-1.0f, 1.0f),  Vec2( 1.0f,-1.0f)
 };
-
-//_static Vec2 FrameBufferObject::ScreenQuad[4] =
-//Vec2(-1.0f, -1.0f),
-//Vec2(1.0f, -1.0f),
-//Vec2(1.0f, 1.0f),
-//Vec2(-1.0f, 1.0f)
-//
 
 _static uint32_t FrameBufferObject::Indices[6] =
 {
@@ -199,12 +191,13 @@ in  vec2 TexCoords;                               \n\
 out vec4 FragColor;                               \n\
 void main()                                       \n\
 {                                                 \n\
-vec4 col1 = vec4(texture(FrameBufferTexture,TexCoords.xy+1).xyz, 1.0); \n\
+    vec4 col1 = vec4(texture(FrameBufferTexture,TexCoords.xy+1).xyz, 1.0); \n\
     FragColor = vec4(texture(FrameBufferTexture,TexCoords.xy).xyz, 1.0);  \n\
 }";
 
-//  vec4(TexCoords.x, TexCoords.y, 0.0, 1.0) +;  vec4(TexCoords.x, TexCoords.y,1,1)
-#include"Renderer.h"
+
+
+ #include"Renderer.h"
 
 
 /* Creates a Frame Buffer Object for the user to Render to */
@@ -222,7 +215,7 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
     static bool _Initialized__ = false;
     if (_Initialized__ == false)
     {// Initialize the default Shader for FBOs the first time we create a FrameBufferObject
-        REFACTOR("This shit is Deprecated. There is an imageRender(x,y,w,h) which can be used for the FBO rendering")
+        REFACTOR("This shit is Deprecated. There is an imageRender(x,y,w,h) which can be used for the FBO rendering");
         ScreenShader = new Shader(Vrenderer, Frenderer);
         ScreenVAO = OpenGL::new_VAO();
         ScreenVBO = OpenGL::new_VBO();
@@ -238,13 +231,9 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
 
         _Initialized__ = true;
     }
-    DEBUG_CODE(CheckGLERROR());
-	
+    GL_Handle = OpenGL::new_FBO();
 
-
-	glGenFramebuffers(1, &GL_Handle);
-	glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);
-    DEBUG_CODE(CheckGLERROR());
+    Bind();
 
     RenderTarget = new Graphics::Texture(Size, GL_RGBA);
     DepthTarget = new  Graphics::Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
@@ -269,12 +258,12 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
 
 void FrameBufferObject::Destroy()
 {// Destroys the Frame Buffer Object releasing its ID to OpenGL 
-	glDeleteFramebuffers(1, &GL_Handle);
+	OpenGL::delete_FBO(GL_Handle);
 }
 
 void FrameBufferObject::Bind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);
+	OpenGL::bind_FBO(GL_Handle);
 }
 void FrameBufferObject::BindWrite()
 {// Bind for Reading 
@@ -287,23 +276,23 @@ void FrameBufferObject::BindRead()
 
 void FrameBufferObject::Clear()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Bind();
+    OpenGL::clear_FrameBuffer();
 }
 void FrameBufferObject::ClearColorBuffer()
 {//Clears Color Buffers 
-	glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);
-	glClear(GL_COLOR_BUFFER_BIT);
+    Bind();
+    OpenGL::clear_ColorBuffer();
 }
 void FrameBufferObject::ClearDepthBuffer()
 {// Clears Depth Buffer 
-	glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);
-	glClear(GL_DEPTH_BUFFER_BIT);
+    Bind();
+    OpenGL::clear_DepthBuffer();
 }
 
 void FrameBufferObject::Unbind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    OpenGL::bind_FBO(0);
 }
 bool FrameBufferObject::ValidateFrameBuffer()
 {
@@ -311,7 +300,7 @@ bool FrameBufferObject::ValidateFrameBuffer()
 		ErrorString,
 		PossibleSolution;
 
-	int error_number = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    int error_number = OpenGL::check_FBO_Status();
 	switch (error_number)
 	{
 	case GL_FRAMEBUFFER_COMPLETE:
@@ -353,18 +342,15 @@ bool FrameBufferObject::ValidateFrameBuffer()
 /* Render to the Default FBO, Will likely change name of this to SwapBuffer */
 void FrameBufferObject::Render()
 {
-    DEBUG_CODE(CheckGLERROR());
+    REFACTOR("This should likely be removed and instead move to Renderer Class Render_FBO or something like that.");
     Unbind();
     ScreenShader->Bind();
     {
         OpenGL::bind_VAO(ScreenVAO);   
         ScreenShader->SetTextureUniform("FrameBufferTexture", RenderTarget->g_Handle(), 2);
         OpenGL::Renderer::drawArray(6);
-
-        DEBUG_CODE(CheckGLERROR());
     }
     ScreenShader->Unbind();
-    DEBUG_CODE(CheckGLERROR());
 }
 
 

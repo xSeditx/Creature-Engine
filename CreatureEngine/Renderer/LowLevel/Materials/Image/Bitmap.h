@@ -46,6 +46,8 @@ namespace Graphics
 
 		/* Flip Image on Y axis to be inline with OpenGL */
 		void FlipXAxis();
+
+        iVec2 Dimensions() { return Size; }
 	private:
 		uint8_t* rawData;// Raw Mapped Data 
 		iVec2     Size{0,0}; // A int[2] containing the Width and Height of our Image

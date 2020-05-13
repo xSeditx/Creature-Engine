@@ -3,6 +3,8 @@
 #include "Renderer.h"
 #include "Core/Common.h"
 #include "../../../Layer.h"
+#include"GLBuffers.h"
+
 /*     foreach(render target)      // framebuffer
         foreach(pass)              // depth, blending, etc... states
 
@@ -271,6 +273,8 @@ namespace OpenGL
     private:
         uint32_t LineVAO{ 0 };
         uint32_t LineVBO{ 0 };
+        VertexBufferObject<Vec4> *VBO_Test;
+
         std::vector<Vec4> Line_Data;
 
 

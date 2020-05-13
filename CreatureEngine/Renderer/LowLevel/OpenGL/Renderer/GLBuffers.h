@@ -14,8 +14,8 @@ glDrawElementsBaseVertex()
 }
 */
 
-#include"../OpenGL.h"
 #include"Core/Common.h"
+#include"../OpenGL.h"
 #include"../Shader/Shader.h"
 
 #define BUFFER_OFFSET(i)   ((char *)NULL + (i))
@@ -30,8 +30,8 @@ enum BufferTypes
 
 enum ShaderType
 {/// COMPLETELY TEMPORARY
-	TESSLATION_CONTROL_SHADER = GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER,
 	TESSLATION_EVALUATION_SHADER = GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER,
+	TESSLATION_CONTROL_SHADER = GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER,
 	GEOMETRY_SHADER = GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER,
 	FRAGMENT_SHADER = GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER,
 	COMPUTE_SHADER = GL_UNIFORM_BLOCK_REFERENCED_BY_COMPUTE_SHADER,
@@ -69,10 +69,13 @@ public:
 	void* BufferPtr{ nullptr };
 };
 
+/*=========================================================================================================================================================
+           OpenGL Buffer Object which holds raw Buffer data which can be given to the VAO as a specific Attribute type by assigning it that usecase.
+ ========================================================================================================================================================= */
 template<class T = Vec3>
 class  VertexBufferObject
 	:	public Attribute
-{ // OpenGL Buffer Object which holds raw Buffer data which can be given to the VAO as a specific Attribute type by assigning it that usecase.
+{ 
 public:
 
 	NO_COPY_OR_ASSIGNMENT(VertexBufferObject);
@@ -80,54 +83,83 @@ public:
 	using value_type = T;
 	using pointer_type = T*;
 
-	VertexBufferObject() = default;
+	VertexBufferObject() 
+    {
+        ElementCount = 0;
+        Data.resize(ElementCount);
+
+        Stride = sizeof(value_type);
+        DEBUG_CODE(CheckGLERROR());
+
+        GL_Handle = OpenGL::new_VBO();
+        Bind();
+        OpenGL::set_BufferData(ElementCount*Stride, NULL);
+
+        /// ------------------------Bindless Address stuff---------------------------------
+        /// glGetBufferParameterui64vNV(GL_ARRAY_BUFFER, GL_BUFFER_GPU_ADDRESS_NV, &Address);
+        /// glMakeBufferResidentNV(GL_ARRAY_BUFFER, GL_READ_ONLY);
+        Size = ElementCount * Stride;
+        ///--------------------------------------------------------------------------------
+        Unbind();
+        //BufferPtr = &Data[0];
+    }
+
+
+    /* Create a buffer object that stores data for OpenGL */
 	VertexBufferObject(pointer_type data, GLsizei count)
 	{
 		ElementCount = count;
-		Data.resize(count);
-		Data.insert(Data.begin(), count, *data);
+		Data.resize(ElementCount);
+		Data.insert(Data.begin(), ElementCount, *data);
 
 		Stride = sizeof(value_type);
 
-		glGenBuffers(1, &GL_Handle);
-		glBindBuffer(GL_ARRAY_BUFFER, GL_Handle);
-		glBufferData(GL_ARRAY_BUFFER, (ElementCount)*Stride, data, DEFAULT_BUFFER_ACCESS);
-
+        GL_Handle = OpenGL::new_VBO();
+        Bind();
+        OpenGL::set_BufferData(ElementCount*Stride, data);
 
 		/// ------------------------Bindless Address stuff---------------------------------
-		glGetBufferParameterui64vNV(GL_ARRAY_BUFFER, GL_BUFFER_GPU_ADDRESS_NV, &Address);
-		glMakeBufferResidentNV(GL_ARRAY_BUFFER, GL_READ_ONLY);
+ 
+        Address = OpenGL::get_Bindless_Address();
+        OpenGL::make_Buffer_Resident();
+ 
 		Size = ElementCount * Stride;
 		///--------------------------------------------------------------------------------
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        Unbind();
 		BufferPtr = &Data[0];
 	}
-	VertexBufferObject(GLenum access, pointer_type data, GLsizei count)
+    /* Create a buffer object that stores data for OpenGL while allowing change of Default Access */
+	VertexBufferObject(GLenum _access, pointer_type _data, GLsizei _count)
 		: /// Specify default access
-		ElementCount(count),
+		ElementCount(_count),
 		GL_Handle(0)
 	{
-		Data.resize(count);
-		Data.insert(Data.begin(), count, *data);
+		Data.resize(_count);
+		Data.insert(Data.begin(), _count, *_data);
 		Stride = sizeof(T);
-		glGenBuffers(1, &GL_Handle);
-		glBindBuffer(GL_ARRAY_BUFFER, GL_Handle);
-		glBufferData(GL_ARRAY_BUFFER, ElementCount * sizeof(value_type), data, access);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        GL_Handle = OpenGL::new_VBO();
+        Bind();
+        OpenGL::set_BufferData(ElementCount*Stride, _data, _access);
+
+        Unbind();
 	}
 	VertexBufferObject(std::vector<value_type> _vec)
 	{// Create from a Vector
 		*this = &VertexBufferObject<value_type>(&_vec[0], _vec.size());
 	}
-	void Update(std::vector<value_type>* _data)
+	void Update(std::vector<value_type>& _data)
 	{
+        REFACTOR("This needs to have the Access changed from default Access and to the Access of this Buffer however I see no way to change the Acces type");
 		Bind();
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _data.size() * sizeof(value_type), _data);
+        OpenGL::set_BufferData(_data);
 	}
 	void Update(void* _data, size_t _sz)
 	{
 		Bind();
-		glBufferSubData(GL_ARRAY_BUFFER, 0, _sz * sizeof(value_type), _data);
+        OpenGL::set_Subbuffer_Data(_sz * sizeof(value_type), _data, 0);
+		//glBufferSubData(GL_ARRAY_BUFFER, 0, _sz * sizeof(value_type), _data);
 	}
 
 	GLuint get_BufferSize()
@@ -142,25 +174,44 @@ public:
     {
         return Data.data();
     }
-	/// VertexBufferObject operator = (std::vector<T> data)
-	/// {// Map the whole buffer, resize if needed and make the data of the buffer equal to that of the Rvalue
-	/// 	Update(data);
-	/// }
-	/// VertexBufferObject operator = (VertexBufferObject& other)
-	/// {// Same but perform a shallow copy of the buffer
-	/// 	return *other;
-	/// }
-	VertexBufferObject operator += (VertexBufferObject& other)
+
+    VertexBufferObject(VertexBufferObject&& _other)
+    {
+        *this = std::move(_other);
+    }
+    VertexBufferObject& operator = (VertexBufferObject&& _other)
+    {
+        if (this != &_other)
+        {
+            Data = (std::move(_other.Data));
+            ElementCount = _other.ElementCount;
+            Stride = _other.Stride;
+            BufferPtr = _other.BufferPtr;
+            Size = _other.Size;
+
+            _other.Data = std::vector< value_type>();
+            _other.ElementCount = 0;
+            _other.Stride = 0;
+            _other.BufferPtr = 0;
+            _other.Size = 0;
+        }
+        return *this;
+    }
+
+	VertexBufferObject& operator = (std::vector<T>& data)
+	{// Map the whole buffer, resize if needed and make the data of the buffer equal to that of the Rvalue
+        Data = data;
+		Update(data);
+        return *this;
+	}
+
+    VertexBufferObject operator += (VertexBufferObject& other)
 	{ // Map the buffer and add to the end of it, updating the data, and size while retaining access type and GL_Handle
 		Bind();
-		glBufferData(GL_ARRAY_BUFFER,
-			(size() * sizeof(value_type)) + (other.size() * sizeof(other.value_type)),
-			0,
-			DEFAULT_BUFFER_ACCESS);
-
+        OpenGL::set_BufferData((size() * sizeof(value_type)) + (other.size() * sizeof(other.value_type)), NULL);
 		std::move(other.Data.begin(), other.Data.end(), std::back_inserter(Data));
-		glBufferSubData(GL_ARRAY_BUFFER, 0, size() * sizeof(value_type), Data);
-	}
+        OpenGL::set_Subbuffer_Data(size() * sizeof(value_type), Data, 0);
+ 	}
 
 protected:
 	std::vector<value_type> Data;
