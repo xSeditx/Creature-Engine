@@ -177,6 +177,7 @@
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
     <ClCompile Include="Core\ECS\TestComponents.cpp" />
     <ClCompile Include="Core\EventSystem.cpp" />
+    <ClCompile Include="Core\Math\Easing.cpp" />
     <ClCompile Include="Core\Math\Math.cpp" />
     <ClCompile Include="Core\Memory.cpp" />
     <ClCompile Include="Core\Observer.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="Core\ECS\ECSsystem.h" />
     <ClInclude Include="Core\ECS\TestComponents.h" />
     <ClInclude Include="Core\EventSystem.h" />
+    <ClInclude Include="Core\Math\Easing.h" />
     <ClInclude Include="Core\Math\Math.h" />
     <ClInclude Include="Core\Memory.h" />
     <ClInclude Include="Core\Observer.h" />

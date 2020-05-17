@@ -194,6 +194,9 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp">
       <Filter>Source Files\Graphics\Buffers</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Math\Easing.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">
@@ -330,6 +333,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h">
       <Filter>Source Files\Graphics\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Math\Easing.h">
+      <Filter>Source Files\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
