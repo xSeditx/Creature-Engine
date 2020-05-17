@@ -2,6 +2,16 @@ ___
 # Math
 ___
 
+___
+## Point Functions
+___
+
+
+Function | Description
+---------|-----------------
+float Point_Direction | Return the Angle between two points 
+float Point_Direction(Vec2 _a, Vec2 _b) | Return the Angle between two points 
+
 
 <hr>
 
