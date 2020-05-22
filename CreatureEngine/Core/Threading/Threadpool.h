@@ -117,6 +117,11 @@ bool is_ready(std::future<_R> const& _fut)
     template<>             struct FixReturn<>     { using type = int ;}
  */
 
+
+
+#include<functional>
+
+
 namespace Core
 {
     namespace Threading
@@ -146,8 +151,31 @@ namespace Core
                 std::thread::id LaunchThread{ std::this_thread::get_id() };
             }; // End Wrapper_Base Class
             
+
+            template<typename _Ret, typename _Class, typename ...ARGS>
+            struct member_func
+            {
+                using Return_t = _Ret;
+                _Ret(_Class::*mem_ptr)(ARGS...);
+                member_func(_Ret(_Class::*mptr)(ARGS...)):
+                    mem_ptr{mptr}
+                {}
+
+                template<typename...ARGS>
+                _Ret operator()(_Class&& _obj, ARGS&&... args) const
+                {
+                    return (_obj.*mem_ptr)(std::forward<ARGS>(args)...);
+                }
+            };
+            template<typename _Ret, typename _Class, typename ...ARGS>
+            member_func < _Ret, _Class, ARGS...>mem_fn(_Ret(_Class::*mptr)(ARGS...))
+            {
+                return { mptr };
+            }
+
             /*      ASYNC TASK: Object Binds Function Pointers as well as Arguments into a single unit 
                 and stores its return value inside of an std::promise<_Rty> With _Rty being functions return type */
+            
             template<typename _Func, typename ...ARGS>
             struct asyncTask final
                 : public Executor
@@ -167,6 +195,12 @@ namespace Core
                 {// Signals to user the object is now completed and valid
                     Status = Valid;
                 }
+
+               // asyncTask(mem_fn& _function) 
+                //{}
+ 
+                  //  template< class Res, class T >
+               // std::mem_fun_t<Res, T> mem_fun(Res(T::*f)());
  
                 /*     Calls the Objects Stored function along with its parameters using std::apply
                     Sets the value of the Promise and signals to the User that the value is waiting */
@@ -198,59 +232,8 @@ namespace Core
                 std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
             };// End asyncTask Class
 
-			template<typename _Func, typename ...ARGS>
-			class Suspend
-				: public Executor
-			{
 
-			public:
-				using type = std::invoke_result_t<_Func, ARGS...>; // Return type of our function
 
-				Suspend(std::thread::native_handle_type _thread, _Func _function, ARGS...args)
-					:
-					ThreadID(_thread)
-				{
-					Context.ContextFlags = CONTEXT_ALL;
-					if (setjmp(JumpBuffer) != 1)
-					{
-					    GetThreadContext(ThreadID, &Context);
-						Print("Storing Jump Context");
-					}
-					else
-					{
-						Print("Running Child Function");
-						type Result = _function(args...);
-						set_return(Result);
-					}
-				}
-				virtual void Invoke() noexcept override
-				{
-					Print("Restoring Jump Context");
-					SetThreadContext(ThreadID, &Context);
-					longjmp(JumpBuffer, 1);
-				}
-				void set_return(type& _value)
-				{
-					Print("Setting Return Value");
-					ReturnValue.set_value(_value);
-				}
-
-				/*      To ensure familiarity and usability get_future works to retrieve the
-					std::future object associated with the return values std::promise */
-				auto get_future() noexcept
-				{
-					Print("Getting the Future");
-					Status = Submitted;
-					return ReturnValue.get_future();
-				}
-
-				std::jmp_buf JumpBuffer;
-				std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
-				
-
-				std::thread::native_handle_type ThreadID;
-				CONTEXT Context;
-			};
 
         public:
 
@@ -339,28 +322,6 @@ namespace Core
 				//Executor* _function;
 				auto i = Index++;
 
-				if (ThreadID != Main_ThreadID)
-				{
-
-					auto _function = new Suspend<_FUNC, ARGS... >(GetCurrentThread(), std::move(_func), std::forward<ARGS>(args)...); //Suspend(GetCurrentThread());  // Create our task which binds the functions parameters
-					auto result = _function->get_future(); // Get the future of our async task for later use
-				
-					int Attempts = 5;// Ensure fair work distribution
-					for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n) // Attempts is Tunable for better work distribution
-					{// Cycle over all Queues K times and attempt to push our function to one of them
-
-						if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push_front(static_cast<Executor*>(_function)))
-						{// If succeeded return our functions Future
-							return result;
-						}
-					}
-					// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
-					ThreadQueue[i % ThreadCount].push_front(static_cast<Executor*>(_function));
-					return result;
-
-					return result;
-				}
-				
                 auto  _function = new asyncTask<_FUNC, ARGS... >(std::move(_func), std::forward<ARGS>(args)...);  // Create our task which binds the functions parameters
 			    auto result = _function->get_future(); // Get the future of our async task for later use
 				
@@ -507,4 +468,117 @@ workAvalible.signal();
 
 Signaled: Threads pass through
 Reset:    Threads Wait
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================================
+     REMOVED ON 5/17/2020
+   ==========================================================================
+
+
+   ==========================================================================
+   Taken from Async Function
+   ==========================================================================
+/// if (ThreadID != Main_ThreadID)
+/// {
+///
+/// 	auto _function = new Suspend<_FUNC, ARGS... >(GetCurrentThread(), std::move(_func), std::forward<ARGS>(args)...); //Suspend(GetCurrentThread());  // Create our task which binds the functions parameters
+/// 	auto result = _function->get_future(); // Get the future of our async task for later use
+///
+/// 	int Attempts = 5;// Ensure fair work distribution
+/// 	for (unsigned int n{ 0 }; n != ThreadCount * Attempts; ++n) // Attempts is Tunable for better work distribution
+/// 	{// Cycle over all Queues K times and attempt to push our function to one of them
+///
+/// 		if (ThreadQueue[static_cast<size_t>((i + n) % ThreadCount)].try_push_front(static_cast<Executor*>(_function)))
+/// 		{// If succeeded return our functions Future
+/// 			return result;
+/// 		}
+/// 	}
+/// 	// In the rare instance that all attempts at adding work fail just push it to the Owned Queue for this thread
+/// 	ThreadQueue[i % ThreadCount].push_front(static_cast<Executor*>(_function));
+/// 	return result;
+///
+/// 	return result;
+/// }
+
+
+
+
+
+
+
+template<typename _Func, typename ...ARGS>
+class Suspend
+    : public Executor
+{
+
+public:
+    using type = std::invoke_result_t<_Func, ARGS...>; // Return type of our function
+
+    Suspend(std::thread::native_handle_type _thread, _Func _function, ARGS...args)
+        :
+        ThreadID(_thread)
+    {
+        Context.ContextFlags = CONTEXT_ALL;
+        if (setjmp(JumpBuffer) != 1)
+        {
+            GetThreadContext(ThreadID, &Context);
+            Print("Storing Jump Context");
+        }
+        else
+        {
+            Print("Running Child Function");
+            type Result = _function(args...);
+            set_return(Result);
+        }
+    }
+    virtual void Invoke() noexcept override
+    {
+        Print("Restoring Jump Context");
+        SetThreadContext(ThreadID, &Context);
+        longjmp(JumpBuffer, 1);
+    }
+    void set_return(type& _value)
+    {
+        Print("Setting Return Value");
+        ReturnValue.set_value(_value);
+    }
+
+    /*      To ensure familiarity and usability get_future works to retrieve the
+        std::future object associated with the return values std::promise
+    auto get_future() noexcept
+    {
+        Print("Getting the Future");
+        Status = Submitted;
+        return ReturnValue.get_future();
+    }
+
+    std::jmp_buf JumpBuffer;
+    std::promise<type> ReturnValue;                            // Return Value of our function stored as a Promise
+
+
+    std::thread::native_handle_type ThreadID;
+    CONTEXT Context;
+};
 */

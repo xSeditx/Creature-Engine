@@ -131,7 +131,7 @@ PositionComponent PosComponent;
 MovementComponent TestMovementComponent;
 
 
-
+#include"Core/Math/Easing.h"
 
 class App
 	: public Application
@@ -340,7 +340,7 @@ class App
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
 
-        //  MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
+         //  MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
         //  TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
 	}
     virtual void OnEnd() override
@@ -357,7 +357,23 @@ class App
 
 };
 
- 
+
+
+
+
+struct Dummy
+{
+    Dummy(int _a, int _b) : A(_a), B(_b)
+    {}
+
+    int Add()
+    {
+        return A + B;
+    }
+    int B;
+    int A;
+};
+
 
 int main()
 {
@@ -366,6 +382,13 @@ int main()
     TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
     TODO(" Serious Restructuring needs to take place to the Entire project, it is starting to grow rather large and I am not happy with some of the early design and structure decisions that have begun to slightly conflict. \n\
  It would be wise to reformat and refactor the project before these minor issues become big ones  ");
+
+    Dummy Dum(10, 10);
+
+
+
+  //FUKKKKKKKKKKKKFKFKFKFKFKFK      ThreadPool::get().Async(Core::Threading::ThreadPool::mem_fn<int,Dummy>(int(&Dum(10,10)), 40);
+
 
     App MyApp;
 	MyApp.Init();
