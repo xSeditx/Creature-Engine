@@ -176,9 +176,6 @@
     <ClCompile Include="Physics\Colliders.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Profiling\Timing\Profiling.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Math\Math.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
@@ -196,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="Core\Math\Easing.cpp">
       <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiling\Timing\Profiling.cpp">
+      <Filter>Source Files\Profiling</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -340,6 +340,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Trash.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\Notes.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

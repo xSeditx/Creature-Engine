@@ -22,12 +22,14 @@ using namespace Threading;
 #include<utility>
 #include"Core/ECS/ECS.h"
 #include"Core/ECS/TestComponents.h"
-
+#include"Core/Math/Easing.h"
 
 std::stack<std::string> CS;
 
 
 bool TEST_PROFILE_WINDOW();
+
+
 #define CAMERA_SPEED 4.0f
 #define ZOOM_SPEED 1.0
 Camera2D* WorldCamera{ nullptr };
@@ -131,7 +133,7 @@ PositionComponent PosComponent;
 MovementComponent TestMovementComponent;
 
 
-#include"Core/Math/Easing.h"
+
 
 class App
 	: public Application

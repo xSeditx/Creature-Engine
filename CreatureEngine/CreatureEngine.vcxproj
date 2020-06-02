@@ -79,12 +79,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(Solution)..\Bin\Soil\Debug\</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/</LibraryPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir);$(Solution)..\Bin\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(Solution)..\Bin\Soil\Release\</LibraryPath>
+    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Release/</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -260,6 +260,7 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\UniformBuffer.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\Resources\Notes.txt" />
     <Text Include="Trash.txt" />
   </ItemGroup>
   <ItemGroup>
