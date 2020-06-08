@@ -9,4 +9,5 @@ namespace Math
     /* Return the Angle between two points */
     float Point_Direction(Vec2 _a, Vec2 _b);
 
+
 };

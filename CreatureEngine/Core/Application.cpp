@@ -64,7 +64,21 @@ std::mutex DEBUGMutex;
 	// Print("Current Context: "; Print(glGetCurrentContext()));
 
 	 //-------------------------------------------------------------------------------------------------------------
-	 OnCreate();
+     IMGUI_CHECKVERSION();
+     ImGui::CreateContext();
+     io = &ImGui::GetIO(); (void)io;
+     ::SetCapture(Application::getWindow().g_Handle());
+   
+     ImGui_ImplWin32_Init(Application::getWindow().g_Handle());
+
+     //Init OpenGL Imgui Implementation
+     // GL 3.0 + GLSL 130
+     const char* glsl_version = "#version 130";
+     ImGui_ImplOpenGL3_Init(glsl_version);
+     
+     
+     OnCreate();
+     
  }
  void Application::Pause() {}
  void Application::End()
@@ -105,10 +119,23 @@ std::mutex DEBUGMutex;
  void Application::Update()
  { // Calls User defined Application Update function
 	 OnUpdate();
+     OnUpdateGUI();
  }
  void Application::Render()
  { // Calls User define Application Render function
 	 OnRender();
+
+     ImGui_ImplOpenGL3_NewFrame();
+     ImGui_ImplWin32_NewFrame();
+     ImGui::NewFrame();
+     {
+         OnRenderGUI();
+     }
+     ImGui::End();
+     ImGui::Render();
+     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
 	 mainWindow.Sync();
  }
  void Application::OnStart()
@@ -123,6 +150,11 @@ std::mutex DEBUGMutex;
  void Application::OnRun()    {  }
  void Application::OnUpdate() {  }
  void Application::OnRender() {  }
+ void Application::OnUpdateGUI() { }
+ void Application::OnRenderGUI() { }
+
+
+
 
  // WGL_EXT_swap_control
 
@@ -428,10 +460,9 @@ void Application::Resize(Vec2 _size)
 
 
 
-
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
+    ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam);
     switch (uMsg)
 	{
     case WM_MOUSEWHEEL:

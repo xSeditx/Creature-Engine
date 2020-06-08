@@ -20,13 +20,21 @@ extern std::string BasicFragmentShader;
 extern std::string VertexShader;
 extern std::string FragmentShader;
 
+//../../Bin/glad/include/
+#include "glad/glad.h"
+#include "SDKs/ImGUI/imgui.h"
+#include "SDKs/ImGUI/imgui_impl_win32.h"
+#include "SDKs/ImGUI/imgui_impl_opengl3.h"
+#include "SDKs/ImGUI/imgui_internal.h"
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 class Application
 {
 private:
     bool Running{ true };
     HINSTANCE Instance{ nullptr };
+    ImGuiIO *io;
 
     struct Window
     {
@@ -162,6 +170,9 @@ private:
         /* Returns the Windows Device Context */
         HDC g_DeviceContext() noexcept { return DeviceContext; }
 
+        /* Returns the OpenGL Context*/
+        HGLRC g_GL_Context(){ return GL_Context; };
+
         /* Return the Most basic and default Shader */
         uint32_t defaultShaderHandle() noexcept { return WindowShader->g_Handle(); }
 
@@ -289,6 +300,11 @@ private:
     /* Resize the Application */
     void Resize(Vec2 _size);
 protected:
+
+    /* Updates User Generated GUI */
+    virtual void OnUpdateGUI();
+    /* Renders User Generated GUI */
+    virtual void OnRenderGUI();
 
     /* Executed when Application is Initialized */
     virtual void OnCreate();

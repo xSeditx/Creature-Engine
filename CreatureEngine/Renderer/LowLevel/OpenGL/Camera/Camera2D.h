@@ -70,18 +70,18 @@ private:
 		Right{ 0.0f },
 		Left{ 0.0f };
 
-	float LERP{ .1f };
+	float LERP_Speed{ .1f };
 
 	/* Imprecise method, which does not guarantee v = v1 when t = 1, due to floating-point arithmetic error.
        This form may be used when the hardware has a native fused multiply-add instruction.*/
 	Vec2 lerp()
 	{
-		return TargetPosition + Vec2(LERP) * (Position - TargetPosition);
+		return TargetPosition + Vec2(LERP_Speed) * (Position - TargetPosition);
 	}
 	/* Precise method, which guarantees v = v1 when t = 1 */
 	Vec2 precise_lerp()
 	{
-		return (Vec2(1) - Vec2(LERP)) * TargetPosition + Vec2(LERP) * Position;
+		return (Vec2(1) - Vec2(LERP_Speed)) * TargetPosition + Vec2(LERP_Speed) * Position;
 	}
 };
 
