@@ -4,7 +4,9 @@
 #include<cmath>
 #include<string>
 
-//#define CacheLineFlush(Address) _mm_clflush(Address)
+// CMAKE Pluggin
+// https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
+
 //#pragma optimize( "", off )
 
 //CORONA VIRUS STUDY
@@ -22,12 +24,14 @@ using namespace Threading;
 #include<utility>
 #include"Core/ECS/ECS.h"
 #include"Core/ECS/TestComponents.h"
-
+#include"Core/Math/Easing.h"
 
 std::stack<std::string> CS;
 
 
 bool TEST_PROFILE_WINDOW();
+
+
 #define CAMERA_SPEED 4.0f
 #define ZOOM_SPEED 1.0
 Camera2D* WorldCamera{ nullptr };
@@ -130,8 +134,8 @@ MovementSystem movementSys;
 PositionComponent PosComponent;
 MovementComponent TestMovementComponent;
 
+ 
 
-#include"Core/Math/Easing.h"
 
 class App
 	: public Application
@@ -163,7 +167,7 @@ class App
 
     /// This needs to go
     std::string VTextureRenderer =
-               "#version 330 core                                                                                                                        \n\
+               "#version 330 core \n\
                 layout(location = 0) in vec2 aPos;                                                                                                       \n\
                 layout(location = 1) in vec4 Position;                                                                                                   \n\
                 uniform mat4 ProjectionMatrix;                                                                                                           \n\
@@ -190,7 +194,7 @@ class App
     //=================================================================================================================================================================
   
 	size_t PreviousTime;
-    
+    ImGuiIO io;
     virtual void OnCreate() override
 	{// Initialization
         
@@ -296,6 +300,8 @@ class App
             //    TestECS->AddComponent(Entity, &TestMovementComponent);
         }
 
+        // Setup Dear ImGui binding
+       
 
         DEBUG_CODE(CheckGLERROR());
 	}
@@ -330,6 +336,8 @@ class App
         // Renders the Frame Buffer Object we Rendered all the Images to
         MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
 
+
+        
         DEBUG_CODE(CheckGLERROR());
 	}
 	virtual void OnUpdate() override
@@ -355,6 +363,42 @@ class App
 
     }
 
+
+
+    virtual void OnUpdateGUI() override 
+    {
+    }
+    
+    virtual void OnRenderGUI() override 
+    {
+        bool my_tool_active = true;
+        ImGui::Begin("My First Tool", &my_tool_active, ImGuiWindowFlags_MenuBar);
+        {
+            if (ImGui::BeginMenuBar())
+            {
+                if (ImGui::BeginMenu("File"))
+                {
+                    if (ImGui::MenuItem("Open..", "Ctrl+O")) { }
+                    if (ImGui::MenuItem("Save", "Ctrl+S")) { }
+                    if (ImGui::MenuItem("Close", "Ctrl+W")) { my_tool_active = false; }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenuBar();
+            }
+
+            const float my_values[] = { 0.2f, 0.1f, 1.0f, 0.5f, 0.9f, 2.2f };
+            ImGui::PlotLines("Frame Times", my_values, IM_ARRAYSIZE(my_values));
+
+            ImGui::TextColored(ImVec4(1, 1, 0, 1), "Important Stuff");
+            ImGui::BeginChild("Scrolling");
+            {
+                for (int n = 0; n < 50; n++)
+                    ImGui::Text("%04d: Some text", n);
+            }
+            ImGui::EndChild();
+        }
+        ImGui::ShowDemoWindow();
+    } 
 };
 
 
@@ -377,9 +421,10 @@ struct Dummy
 
 int main()
 {
+   // TEST_ASSERT(condition, FAIL_MSG, PASS_MSG);
     DEBUGPrint(CON_Red,"Problem with the Debug print Symbols hConsole and DEBUGMutex in that they have no real home on where they should be. It is possible Common.h should perhaps have a CPP file for Symbol definition");
 
-    TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. \n Each Module should have its very own Application class. ");
+    TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. /n Each Module should have its very own Application class. ");
     TODO(" Serious Restructuring needs to take place to the Entire project, it is starting to grow rather large and I am not happy with some of the early design and structure decisions that have begun to slightly conflict. \n\
  It would be wise to reformat and refactor the project before these minor issues become big ones  ");
 
@@ -452,7 +497,7 @@ bool THREAD_POOL_TEST()
 #if _TEST_THREADPOOL_SPEED
 		Function_Counter = 0;
 		//	LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
-		Print("\n\n\n\n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions\n");
+		Print("/n/n/n/n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions/n");
 		{
 			Timing::Profiling::Profile_Timer Bench("My Threadpool");
 			std::vector<std::vector<uint32_t>> Test;
@@ -748,7 +793,7 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
 
 
 /*
-\
+/
 
 
         Organ *Test1[100];
@@ -812,7 +857,7 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
         Test1[1] = new Organ(1);
         Print("Allocating Again Is it Full Again: " << Organ::Pool.is_Full());
         assert(Organ::Pool.is_Full() == true);
-\
+/
 
 */
 
@@ -847,3 +892,98 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
 //	return 65;
 //}
 //
+
+
+ /*
+ 
+ add_executable (${PROJECT_NAME} ../Bin/glad/src/glad.c    Core/Application.cpp    Core/ECS/ECS.cpp   Core/ECS/ECScomponent.cpp    Core/ECS/ECSsystem.cpp    Core/ECS/TestComponents.cpp    Core/EventSystem.cpp    Core/Math/Easing.cpp  
+ Core/Math/Math.cpp    Core/Memory.cpp    Core/Observer.cpp    Core/Threading/TestFunctions.cpp    Core/Threading/Threadpool.cpp    Core/Utility.cpp    Creatures/AI/Evolution.cpp    Creatures/AI/NeuralNetwork.cpp    Creatures/Creatures.cpp    Creatures/Physics/Springs.cpp    Physics/Colliders.cpp    Physics/Physics.cpp    Physics/Quadtree.cpp    Profiling/MemoryPerf/MemTracker.cpp    Profiling/SystemInfo.cpp    Profiling/Timing/Profiling.cpp  
+ Renderer/Layer.cpp    Renderer/LowLevel/Materials/Image/Bitmap.cpp    Renderer/LowLevel/Materials/Image/Textures.cpp    Renderer/LowLevel/OpenGL/Camera/Camera.cpp    Renderer/LowLevel/OpenGL/Camera/Camera2D.cpp    enderer/LowLevel/OpenGL/Camera/Camera3D.cpp    Renderer/LowLevel/OpenGL/OpenGL.cpp    Renderer/LowLevel/OpenGL/Renderer/2DRenderer.cpp    Renderer/LowLevel/OpenGL/Renderer/GLBuffers.cpp    Renderer/LowLevel/OpenGL/Renderer/Mesh.cpp   Renderer/LowLevel/OpenGL/Renderer/Pipeline.cpp    Renderer/LowLevel/OpenGL/Renderer/Sprite.cpp    Renderer/LowLevel/OpenGL/Renderer/Transform.cpp    Renderer/LowLevel/OpenGL/Shader/Builtin_Shaders.cpp    Renderer/LowLevel/OpenGL/Shader/Shader.cpp    Renderer/LowLevel/OpenGL/UniformBuffer.cpp   
+)
+ 
+ cmake_minimum_required(VERSION 3.10)
+
+project(CreatureLibrary)
+
+add_executable (${PROJECT_NAME} ../Bin/glad/src/glad.c    Core/Application.cpp    Core/ECS/ECS.cpp   Core/ECS/ECScomponent.cpp    Core/ECS/ECSsystem.cpp    Core/ECS/TestComponents.cpp    Core/EventSystem.cpp    Core/Math/Easing.cpp  
+ Core/Math/Math.cpp    Core/Memory.cpp    Core/Observer.cpp    Core/Threading/TestFunctions.cpp    Core/Threading/Threadpool.cpp    Core/Utility.cpp    Creatures/AI/Evolution.cpp    Creatures/AI/NeuralNetwork.cpp    Creatures/Creatures.cpp    Creatures/Physics/Springs.cpp    Physics/Colliders.cpp    Physics/Physics.cpp    Physics/Quadtree.cpp    Profiling/MemoryPerf/MemTracker.cpp    Profiling/SystemInfo.cpp    Profiling/Timing/Profiling.cpp  
+ Renderer/Layer.cpp    Renderer/LowLevel/Materials/Image/Bitmap.cpp    Renderer/LowLevel/Materials/Image/Textures.cpp    Renderer/LowLevel/OpenGL/Camera/Camera.cpp    Renderer/LowLevel/OpenGL/Camera/Camera2D.cpp    enderer/LowLevel/OpenGL/Camera/Camera3D.cpp    Renderer/LowLevel/OpenGL/OpenGL.cpp    Renderer/LowLevel/OpenGL/Renderer/2DRenderer.cpp    Renderer/LowLevel/OpenGL/Renderer/GLBuffers.cpp    Renderer/LowLevel/OpenGL/Renderer/Mesh.cpp   Renderer/LowLevel/OpenGL/Renderer/Pipeline.cpp    Renderer/LowLevel/OpenGL/Renderer/Sprite.cpp    Renderer/LowLevel/OpenGL/Renderer/Transform.cpp    Renderer/LowLevel/OpenGL/Shader/Builtin_Shaders.cpp    Renderer/LowLevel/OpenGL/Shader/Shader.cpp    Renderer/LowLevel/OpenGL/UniformBuffer.cpp   
+)
+
+#add_library(A STATIC SOIL.lib)
+target_link_libraries(LINK_PUBLIC SOIL.lib)
+                   
+include_directories(${PROJECT_SOURCE_DIR}  ../Bin/ )
+
+Add any required libraries to the target_link_libraries line. For example:
+
+target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c mycustomlibrary)
+
+
+
+
+
+$(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/
+
+
+/OUT:"C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\x64\Debug\CreatureEngine.lib" "SOIL.lib" /MACHINE:X64 /NOLOGO 
+
+
+add_library(B STATIC b.c)
+target_link_libraries(A B)
+target_link_libraries(B A)
+add_executable(main main.c)
+target_link_libraries(main A)
+
+
+ Core/Application.h   
+ Core/Common.h   
+ Core/Defines.h   
+ Core/ECS/ECS.h   
+ Core/ECS/ECScomponent.h   
+ Core/ECS/ECSsystem.h   
+ Core/ECS/TestComponents.h   
+ Core/EventSystem.h   
+ Core/Math/Easing.h   
+ Core/Math/Math.h   
+ Core/Memory.h   
+ Core/Observer.h   
+ Core/Threading/Future.h   
+ Core/Threading/TestFunctions.h   
+ Core/Threading/Threadpool.h   
+ Core/Utility.h   
+ Creatures/AI/Evolution.h   
+ Creatures/AI/NeuralNetwork.h   
+ Creatures/Creatures.h   
+ Creatures/Physics/Springs.h   
+ Physics/Colliders.h   
+ Physics/Physics.h   
+ Physics/Quadtree.h   
+ Profiling/MemoryPerf/MemTracker.h   
+ Profiling/RenderUtilities.h   
+ Profiling/SystemInfo.h   
+ Profiling/Timing/Benchmark.h   
+ Profiling/Timing/Timer.h   
+ Renderer/Layer.h   
+ Renderer/LowLevel/Materials/Image/Bitmap.h   
+ Renderer/LowLevel/Materials/Image/Texture.h   
+ Renderer/LowLevel/OpenGL/Camera/Camera.h   
+ Renderer/LowLevel/OpenGL/Camera/Camera2D.h   
+ Renderer/LowLevel/OpenGL/Camera/Camera3D.h   
+ Renderer/LowLevel/OpenGL/OpenGL.h   
+ Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h   
+ Renderer/LowLevel/OpenGL/Renderer/GameObject.h   
+ Renderer/LowLevel/OpenGL/Renderer/GLBuffers.h   
+ Renderer/LowLevel/OpenGL/Renderer/Mesh.h   
+ Renderer/LowLevel/OpenGL/Renderer/Pipeline.h   
+ Renderer/LowLevel/OpenGL/Renderer/Primitives.h   
+ Renderer/LowLevel/OpenGL/Renderer/Renderer.h   
+ Renderer/LowLevel/OpenGL/Renderer/Sprite.h   
+ Renderer/LowLevel/OpenGL/Renderer/Transform.h   
+ Renderer/LowLevel/OpenGL/Shader/Shader.h   
+ Renderer/LowLevel/OpenGL/UniformBuffer.h   
+ 
+ 
+ 
+ 
+ */

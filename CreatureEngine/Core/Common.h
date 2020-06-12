@@ -35,6 +35,15 @@
 #include"Defines.h"
 #include <Unknwnbase.h>
 
+
+
+#if _MSVC_LANG
+#    define CacheLineFlush(Address) _mm_clflush(Address)
+#endif
+
+
+
+
 /* ===================================================================================================================================================
  *  STATE CONTROLLER FOR THE COMPILE TIME BEHAVIOR OF THE CREATURE GAME ENGINE 
  *  TRUE TURNS FEATURE ON
@@ -544,5 +553,36 @@ extern bool TerminateOnError;
       	os << "Error: " << _msg.ErrorNumber << "\n At: " << _msg.Time << "\n ";
       	return os;
       }
+
+*/
+
+/* 
+CREATURE_ENGINE PROJECT
+========================
+COMPILER :
+/ JMC / permissive - / MP / GS / Qpar / W3 / Zc:wchar_t / ZI / Gm - / Od / sdl / Fd"x64\Debug\CreatureEngine.pdb" / fp : precise / D "_MBCS" / errorReport : prompt / WX - / Zc : forScope / RTC1 / Gd / Oi / MTd / std : c++17 / FC / Fa"x64\Debug\" /EHsc /nologo /Fo"x64\Debug\" /Fp"x64\Debug\CreatureEngine.pch" /diagnostics:classic 
+LINKER:
+/ OUT:"C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\x64\Debug\CreatureEngine.lib" "SOIL.lib" / MACHINE : X64 / NOLOGO
+
+
+
+SANDBOX
+========
+COMPILER:
+/ JMC / permissive - / GS / W3 / Zc:wchar_t / ZI / Gm - / Od / sdl / Fd"x64\Debug\vc141.pdb" / Zc : inline / fp : precise / D "_MBCS" / errorReport : prompt / WX - / Zc : forScope / RTC1 / Gd / MTd / std : c++17 / FC / Fa"x64\Debug\" /EHsc /nologo /Fo"x64\Debug\" /Fp"x64\Debug\Sandbox.pch" /diagnostics:classic 
+
+LINKER:
+/ OUT:"C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\x64\Debug\Sandbox.exe" / MANIFEST / NXCOMPAT / PDB : "C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\x64\Debug\Sandbox.pdb" / DYNAMICBASE "SOIL.lib" "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib" "advapi32.lib" "shell32.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "odbc32.lib" "odbccp32.lib" / DEBUG : FASTLINK / MACHINE : X64 / INCREMENTAL / PGD : "C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\x64\Debug\Sandbox.pgd" / SUBSYSTEM : CONSOLE / MANIFESTUAC : "level='asInvoker' uiAccess='false'" / ManifestFile : "x64\Debug\Sandbox.exe.intermediate.manifest" / ERRORREPORT : PROMPT / NOLOGO / TLBID : 1
+
+
+
+SOIL
+====
+COMPILER:
+/ GS / W3 / Zc:wchar_t / Zi / Gm / Od / Fd"x64\Debug\SOIL.pdb" / Zc : inline / fp : precise / D "WIN32" / D "_DEBUG" / D "_LIB" / D "_UNICODE" / D "UNICODE" / errorReport : prompt / WX - / Zc : forScope / RTC1 / Gd / MTd / FC / Fa"x64\Debug\" /EHsc /nologo /Fo"x64\Debug\" /Fp"x64\Debug\SOIL.pch" /diagnostics:classic 
+
+LINKER:
+/ OUT:"C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\Bin\Soil\Debug\SOIL.lib" / MACHINE : X64 / NOLOGO
+
 
 */

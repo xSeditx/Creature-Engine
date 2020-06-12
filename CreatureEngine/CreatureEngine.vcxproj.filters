@@ -75,6 +75,9 @@
     <Filter Include="Source Files\Graphics\OpenGL\Renderer\LowLevel\Image">
       <UniqueIdentifier>{ed460fd1-21ca-4e4f-a46b-282e171cba42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SDKs">
+      <UniqueIdentifier>{22199540-c9fc-45ac-afb4-bf1f68e9bb68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp">
@@ -176,9 +179,6 @@
     <ClCompile Include="Physics\Colliders.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Profiling\Timing\Profiling.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Math\Math.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
@@ -196,6 +196,27 @@
     </ClCompile>
     <ClCompile Include="Core\Math\Easing.cpp">
       <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiling\Timing\Profiling.cpp">
+      <Filter>Source Files\Profiling</Filter>
+    </ClCompile>
+    <ClCompile Include="SDKs\ImGUI\imgui.cpp">
+      <Filter>Source Files\SDKs</Filter>
+    </ClCompile>
+    <ClCompile Include="SDKs\ImGUI\imgui_demo.cpp">
+      <Filter>Source Files\SDKs</Filter>
+    </ClCompile>
+    <ClCompile Include="SDKs\ImGUI\imgui_draw.cpp">
+      <Filter>Source Files\SDKs</Filter>
+    </ClCompile>
+    <ClCompile Include="SDKs\ImGUI\imgui_widgets.cpp">
+      <Filter>Source Files\SDKs</Filter>
+    </ClCompile>
+    <ClCompile Include="SDKs\ImGUI\imgui_impl_win32.cpp">
+      <Filter>Source Files\SDKs</Filter>
+    </ClCompile>
+    <ClCompile Include="SDKs\ImGUI\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\SDKs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -337,9 +358,36 @@
     <ClInclude Include="Core\Math\Easing.h">
       <Filter>Source Files\Math</Filter>
     </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imconfig.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imgui.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imgui_internal.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imstb_rectpack.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imstb_textedit.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imstb_truetype.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imgui_impl_win32.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="SDKs\ImGUI\imgui_impl_opengl3.h">
+      <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Trash.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\Notes.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

@@ -18,7 +18,7 @@ ___
 
 * ThreadPool: Added 11/19/2019 <br>
 > Scheduler <br>
-> Event Handler : Added 10/12/2019(incomplete) <br>
+> [x] Event Handler <br>
 
 * File handling <br>
 > Importing and Exporting of Engine Assets <br>
@@ -33,8 +33,8 @@ ___
 > GUID <br>
 
 * Input <br>
-> Mouse <br>
-> Keyboard <br>
+> [x] Mouse <br>
+> [x] Keyboard <br>
 > Gamepad Support <br>
 
 * Networking <br>
@@ -47,8 +47,8 @@ ___
 * Platform Specific Handling  <br>
 
 * Profiling <br>
-> Memory Profiler    :         Added 10/9/2019 <br>
-> Benchmarking <br>
+> [x] Memory Profiler    :         Added 10/9/2019 <br>
+> [x] Benchmarking <br>
 > State recording and sampling <br>
 > Thread pool monitoring <br>
 
@@ -77,7 +77,7 @@ ___
 > JSON <br>
 > LUA <br>
 
-* Unit Testing Project: Added 10/13/2019 <br>
+* [x] Unit Testing Project: Added 10/13/2019 <br>
 
 
 

@@ -194,6 +194,7 @@ namespace OpenGL
     };
 
 
+
 	class Renderer2D
 		:
 		public Renderer
@@ -302,31 +303,32 @@ namespace OpenGL
 
 		Vec4 CurrentRenderColor{ 1, 0, 0, 1 };
 
-//===============================================================================================================
+        // ===============================================================================================================
 
         std::string  Line_shader_v = 
-        "#version 330 core                                     \n\
-         layout(location = 0) in vec2 Position;                \n\
-         uniform mat4 ProjectionMatrix;                        \n\
-         uniform mat4 ViewMatrix;                              \n\
-         void main()                                           \n\
-         {                                                     \n\
-             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-             gl_Position = ModelViewProjectionMatrix * vec4(Position.x, Position.y, -1.0, 1.0); \n\
-         }";
+            "#version 330 core                                                                          \n\
+                 layout(location = 0) in vec2 Position;                                                 \n\
+                 uniform mat4 ProjectionMatrix;                                                         \n\
+                 uniform mat4 ViewMatrix;                                                               \n\
+                 void main()                                                                            \n\
+                 {                                                                                      \n\
+                     mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                   \n\
+                     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);             \n\
+                     gl_Position = ModelViewProjectionMatrix * vec4(Position.x, Position.y, -1.0, 1.0); \n\
+                 }";
 
 
         std::string  Line_shader_f = 
-         "#version 330 core                 \n\
-          out vec4 FragColor;               \n\
-          void main()                       \n\
-          {                                 \n\
-                      FragColor = vec4(0.0, 1.0, 1.0, 1.0);    \n\
-          }";
+            "#version 330 core                              \n\
+                 out vec4 FragColor;                        \n\
+                 void main()                                \n\
+                 {                                          \n\
+                     FragColor = vec4(0.0, 1.0, 1.0, 1.0);  \n\
+                 }";
+                 
 
 
-
+        // ================================================================================================================
 
 		std::string VinstanceRenderer =
             "#version 330 core                         \n\
@@ -353,36 +355,34 @@ namespace OpenGL
                     FragColor = Col;\n\
                 }";
 
+
+        // ================================================================================================================
         std::string VTextureRenderer =
-            "#version 330 core     \n\
-                layout(location = 0) in vec2 aPos; \n\
+            "#version 330 core                         \n\
+                layout(location = 0) in vec2 aPos;     \n\
                 layout(location = 1) in vec4 Position; \n\
-                uniform mat4 ProjectionMatrix;     \n\
-                uniform mat4 ViewMatrix;           \n\
-                out  vec2 TexCoords;               \n\
-                void main()                        \n\
-                {                                  \n\
-                    Col = Color; \n\
+                uniform mat4 ProjectionMatrix;         \n\
+                uniform mat4 ViewMatrix;               \n\
+                out  vec2 TexCoords;                   \n\
+                void main()                            \n\
+                {                                      \n\
+                    Col = Color;                       \n\
                     mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);  \n\
                     gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
                 }";
-
         std::string FTextureRenderer =
-            "#version 330 core \n\
-        uniform sampler2D DiffuseTexture; \n\
-        in  vec2 TexCoords;               \n\
-          out vec4 FragColor;            \n\
-          void main()                    \n\
-          {                              \n\
-                      FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);    \n\
-          }";
+            "#version 330 core                    \n\
+                uniform sampler2D DiffuseTexture; \n\
+                in  vec2 TexCoords;               \n\
+                out vec4 FragColor;               \n\
+                void main()                       \n\
+                {                                 \n\
+                    FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
+                }";
+        // ================================================================================================================
 
-
-
-        // vec4(Col.rgb,1.0f); 
-	};// Class Renderer2D
-
+    };// Class Renderer2D
 }// NS OpenGL  
 
 
@@ -505,3 +505,56 @@ extern Camera2D *debugCamera;
             }";
 
 */
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+foreach(render target)         // framebuffer
+    foreach(pass)              // depth, blending, etc... states
+
+    foreach(material)          // shaders
+    foreach(material instance) // textures, normals, diffuse,
+
+    foreach(vertex format)     // vertex buffers
+    foreach(object)            //
+{
+    WriteUniformData(object);
+    glDrawElementBaseVertex(
+        GL_TRIANGLES,
+        object->indexCount,
+        GL_UNSIGNED_SHORT,
+        object->indexDataOffset,
+        object->baseVertex);
+}
+*/
+///  struct Texture;
+///  struct Material
+///  {
+///      std::vector<Vec2> UV_list;
+///      std::vector<Texture*> Texture_list;
+///      std::vector<Texture*> Normal_list;
+///      std::vector<Texture*> Shine_list;
+///      std::vector<Texture*> Texture_list;
+///      std::vector<Texture*> Texture_list;
+///  };
+///  struct Program
+///  {   
+///      std::vector<Material> Material_list;
+///      std::vector<VertexArrayObject> VAOs;
+///      std::vector<VertexBufferObject<Vec2>> Geometry; 
+///  };
+///  struct Surface
+///  {
+///      std::vector<Program> Shader_Programs;
+///  };
