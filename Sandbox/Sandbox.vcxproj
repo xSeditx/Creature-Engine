@@ -70,7 +70,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\x64\Debug;$(Solution)..\Bin\Soil\Debug\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\Sedit\source\repos\Creature-Engine\x64\Debug;$(Solution)..\Bin\Soil\Debug\;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>C:\Users\Sedit\source\repos\Creature-Engine\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -120,6 +123,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -275,7 +275,7 @@ class App
         {
             Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
             TestTexture = new Graphics::Texture(*Bmp);
-            TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
+            TestTexture2 = new Graphics::Texture("../Resources/Sheep.bmp");
         }
 
         TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
