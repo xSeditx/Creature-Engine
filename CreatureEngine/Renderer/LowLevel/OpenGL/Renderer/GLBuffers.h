@@ -168,6 +168,8 @@ public:
 		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &results);
 		return results;
 	}
+
+
 	size_t size() const { return Data.size(); }
 
     pointer_type data_ptr()

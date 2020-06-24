@@ -122,8 +122,8 @@ struct MovementSystem
 
     virtual void UpdateComponents(float _delta, BaseComponent** _components)
     {
-        PositionComponent* Pos = (PositionComponent*)_components[0];
-        MovementComponent *Movement = (MovementComponent*)_components[1];
+        PositionComponent* Pos      = (PositionComponent*)_components[0];
+        MovementComponent* Movement = (MovementComponent*)_components[1];
 
         Movement->Velocity += Movement->Acceleration;
         Pos->Position += Movement->Velocity;
@@ -134,7 +134,145 @@ MovementSystem movementSys;
 PositionComponent PosComponent;
 MovementComponent TestMovementComponent;
 
- 
+#include"Renderer/LowLevel/OpenGL/Renderer/Renderer.h"
+
+
+struct MyScene
+{
+public:
+    using Vec_t = Vec2;
+    void Create()
+    {
+        TODO("6/24/2020- Ended with Rendering properly happening, the VertexBufferObject and VertexArrayObject however is not Rendering and should be fixed")
+        Vertices_VAO = new VertexArrayObject();
+        Vertices_VBO = new VertexBufferObject<Vec_t>();
+        Colors_VBO   = new VertexBufferObject<Vec4>();
+
+
+
+        VAO = OpenGL::new_VAO();  // new VertexArrayObject();
+        VBO = OpenGL::new_VBO();  // Vertices_VBO = new VertexBufferObject<Vec_t>();
+        COL = OpenGL::new_VBO();
+
+
+        float Max = 1000;
+        RENDERER = new Shader(VRenderer, FRenderer);
+
+        for_loop(i, 1000 * 3)
+        {
+            Vertices.push_back
+            (
+                {
+                    RANDOM(Max), RANDOM(Max)//, RANDOM(Max), RANDOM(Max)
+                }
+            );
+            for_loop(j, sizeof(Vec_t) / sizeof(float))
+            {// need to set it up to automatically adjust to the size of Vec_t
+            }
+
+            Colors.push_back
+            (
+                 OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), RANDOM(255))
+            );
+        }
+
+            DEBUG_CODE(CheckGLERROR());
+
+        RENDERER->Bind();
+        {
+            OpenGL::bind_VAO(VAO);
+            OpenGL::bind_VBO(VBO);
+            OpenGL::set_BufferData(Vertices);
+            OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
+
+            OpenGL::bind_VBO(COL);
+            OpenGL::set_BufferData(Colors);
+            OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "Color");
+
+           //  Vertices_VAO->Bind();
+           //  Vertices_VBO->Update(Vertices); 
+           //  OpenGL::set_Attribute(RENDERER->g_Handle(), 2, "Position");
+           //  
+           //  Colors_VBO->Update(Colors);
+           //  OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "Color");
+
+        }
+        RENDERER->Unbind();
+
+
+
+     //   Vertices_VBO->Update(Vertices);
+     //   VBO = OpenGL::new_VBO();
+     //   OpenGL::bind_VBO(VBO);
+     //   OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
+     //   OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
+
+    }
+    void Update()
+    {
+        float Amount = 10;
+
+        for_loop(i, 1000 * 3)
+        {
+            Vertices[i] = Vec2
+            (
+                Vertices[i].x + RANDOM_RANGE(Amount),
+                Vertices[i].y + RANDOM_RANGE(Amount)
+              //  Vertices[i].z + RANDOM_RANGE(Amount),
+              //  Vertices[i].w + RANDOM_RANGE(Amount)
+            );
+        }
+
+        OpenGL::bind_VBO(VBO);
+        OpenGL::set_BufferData(Vertices);
+       //Vertices_VBO->Update(Vertices);
+
+
+    }
+    void Render()
+    {
+        OpenGL::bind_VAO(VAO);
+
+        OpenGL::Renderer::drawArray( VBO, Vertices.size() );
+        //Vertices_VAO->Bind();
+        //OpenGL::Renderer::drawArray(Vertices_VBO->GL_Handle, Vertices.size());
+
+    }
+    GLuint VAO{ 0 }, VBO{ 0 }, COL{ 0 };
+    VertexArrayObject *Vertices_VAO;
+    VertexBufferObject<Vec_t> *Vertices_VBO;
+    VertexBufferObject<Vec4> *Colors_VBO;
+    std::vector<Vec_t> Vertices;
+    std::vector<Vec4> Colors;
+
+    Shader *RENDERER{ nullptr };
+    std::string VRenderer =
+        "#version 330 core                         \n\
+                layout(location = 0) in vec2 Position; \n\
+                layout(location = 1) in vec4 Color; \n\
+                uniform mat4 ProjectionMatrix;     \n\
+                uniform mat4 ViewMatrix;           \n\
+                out vec4 Col;                      \n\
+                void main()                        \n\
+                {                                  \n\
+                    Col = Color; \n\
+                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
+                }";
+
+    std::string FRenderer =
+        "#version 330 core            \n\
+                in vec4 Col;          \n\
+                out vec4 FragColor;   \n\
+                void main()           \n\
+                {                     \n\
+                    FragColor = Col;  \n\
+                }";
+
+
+};
+
 
 
 class App
@@ -167,42 +305,42 @@ class App
 
     /// This needs to go
     std::string VTextureRenderer =
-               "#version 330 core \n\
-                layout(location = 0) in vec2 aPos;                                                                                                       \n\
-                layout(location = 1) in vec4 Position;                                                                                                   \n\
-                uniform mat4 ProjectionMatrix;                                                                                                           \n\
-                uniform mat4 ViewMatrix;                                                                                                                 \n\
-                out  vec2 TexCoords;                                                                                                                     \n\
-                void main()                                                                                                                              \n\
-                {                                                                                                                                        \n\
-                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                                                                     \n\
-                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);                                                               \n\
-                    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
-                }";
+        "#version 330 core                                                                                                                        \n\
+         layout(location = 0) in vec2 aPos;                                                                                                       \n\
+         layout(location = 1) in vec4 Position;                                                                                                   \n\
+         uniform mat4 ProjectionMatrix;                                                                                                           \n\
+         uniform mat4 ViewMatrix;                                                                                                                 \n\
+         out  vec2 TexCoords;                                                                                                                     \n\
+         void main()                                                                                                                              \n\
+         {                                                                                                                                        \n\
+             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                                                                     \n\
+             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);                                                               \n\
+             gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+         }";
 
     std::string FTextureRenderer =
-              "#version 330 core                                                     \n\
-               uniform sampler2D DiffuseTexture;                                     \n\
-               in  vec2 TexCoords;                                                   \n\
-               out vec4 FragColor;                                                   \n\
-               void main()                                                           \n\
-               {                                                                     \n\
-                   FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
-               }";
+        "#version 330 core                                                     \n\
+         uniform sampler2D DiffuseTexture;                                     \n\
+         in  vec2 TexCoords;                                                   \n\
+         out vec4 FragColor;                                                   \n\
+         void main()                                                           \n\
+         {                                                                     \n\
+             FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
+         }";
 
     //=================================================================================================================================================================
-    //=================================================================================================================================================================
   
-	size_t PreviousTime;
     ImGuiIO io;
+    MyScene SCENE;
+	size_t  PreviousTime;
+
     virtual void OnCreate() override
 	{// Initialization
         
-        // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
-        // TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Complete ", " Springs Class Complete ");
-        // TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
-
-         int *A = new int[1000];
+     //  TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
+     //  TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Complete ", " Springs Class Complete ");
+     //  TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
+         
 
         /* Load up the Listeners for the Various Input Events */
         {
@@ -244,7 +382,7 @@ class App
             ProfilerTest->Update(1);
         }
 
-        /// What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. 
+        /// UPDATE-6/23/20: What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. 
         /// Idk how the fuck to fix that just yet it means my post processing efforts might be limited or that I need to not scale the texture but need to texture the Images
         TODO("Find out why instance count is being capped. It is likely being capped at 64,000 roughly if I had to guess. Check to see if unsigned integer is used");
         /* Create a Bunch of Quads to Test Render */
@@ -259,12 +397,15 @@ class App
                     if (R >= 255) { G += 5; R = 0; }
                     if (G >= 255) { B += 5; G = 0; }
 
-                   MainRenderer->renderQuad({ x * 8.0f, y * 8.0f }, { 7,7 }, OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
-                   MainRenderer->draw_Line(x * 8.0f, y * 8.0f ,x * 8.0f + 7 ,y * 8.0f + 7);
-
+                    MainRenderer->renderQuad
+                    (
+                        { x * 8.0f, y * 8.0f },
+                        { 7, 7 },
+                        OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255)
+                    );
+                    MainRenderer->draw_Line(x * 8.0f, y * 8.0f ,x * 8.0f + 7 ,y * 8.0f + 7);
                 }
             }
-  		    DEBUG_CODE(CheckGLERROR());
         }
  
         /* Create FBO to Test with */
@@ -301,56 +442,62 @@ class App
         }
 
         // Setup Dear ImGui binding
-       
+        SCENE.Create();
 
         DEBUG_CODE(CheckGLERROR());
 	}
+  //   OpenGL::bind_VAO(VAO);
+  //   OpenGL::Renderer::drawArray(VBO, 3);
+  //   OpenGL::bind_VAO(SCENE.VAO);
+  //   OpenGL::bind_VBO(SCENE.VBO);
+  //   OpenGL::Renderer::drawArray(SCENE.VBO, 3);
+
+
     virtual void OnRender() override
     {
         FBO->Bind();
         {// Bind the Framebuffer Object
 
             FBO->Clear();
-            OpenGL::bind_VAO(VAO);
 
-            getWindow().defaultShader().Bind();
+            SCENE.RENDERER->Bind();
             {// Bind the Shader and the Uniforms
-
                 ModelMatrix.Bind();
                 getCamera().Bind();
-                OpenGL::Renderer::drawArray(VBO, 3);
+                SCENE.Render();                
             }
-            getWindow().defaultShader().Unbind();
+            SCENE.RENDERER->Unbind();
 
-            MainRenderer->Render();
+        //  MainRenderer->Render();
             DEBUG_CODE(CheckGLERROR());
 
             ProfilerTest->Render();
-
             TestTexture->g_Handle();
-             
-           // MainRenderer->renderImage({ 100, 100 }, { 100, 300 }, TestTexture);
-          //  MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
+           
+        //  MainRenderer->renderImage({ 100, 100 }, { 100, 300 }, TestTexture);
+        //  MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
         }
+
         FBO->Unbind();
         // Renders the Frame Buffer Object we Rendered all the Images to
         MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
 
-
-        
         DEBUG_CODE(CheckGLERROR());
 	}
 	virtual void OnUpdate() override
 	{// User Genrated Per Frame Update
-
+        SCENE.Update();
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
 	 	ProfilerTest->Update((uint32_t)(Time));
 
-         //  MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
-        //  TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
+    //  MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
+    //  TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
 	}
+
+
+
     virtual void OnEnd() override
     {// Exit of the Application and Clean up
 
@@ -363,14 +510,24 @@ class App
 
     }
 
-
+    /* ==========================================================================================
+           GUI STUFF, POTENTIALLY MIGHT CHANGE THIS LATER
+    /* ========================================================================================== */
 
     virtual void OnUpdateGUI() override 
-    {
-    }
-    
+    {    }
     virtual void OnRenderGUI() override 
     {
+        //ImTextureID
+        //ImGui::Image(
+        //    TestTexture->g_Handle(),
+        //    ImVec2(200, 200),
+        //    ImVec2(0, 0),
+        //    ImVec2(1, 1), 
+        //    ImColor(255, 255, 255, 255),
+        //    ImColor(255, 255, 255, 128)
+        //);
+ 
         bool my_tool_active = true;
         ImGui::Begin("My First Tool", &my_tool_active, ImGuiWindowFlags_MenuBar);
         {

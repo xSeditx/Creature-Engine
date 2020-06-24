@@ -466,6 +466,18 @@ private:
 extern bool ConsoleMessages;
 extern bool TerminateOnError;
 
+
+
+
+/// FIX THIS LATER
+#define GetRandom( min, max )     ((rand() % (int)(((max) + 1) - (min))) + (min))  
+#define RANDOM(x)                 ((rand() * (1.0 / (1.0 + RAND_MAX))) * x)
+#define RANDOM_RANGE(x)           (RANDOM(x * 2) - (x))
+
+
+
+
+
 #endif// COMMON_H
 
 

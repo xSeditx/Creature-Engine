@@ -78,12 +78,12 @@
     <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);$(Solution)../Bin/;  $(Solution)../Bin/glad/include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64); $(NETFXKitsDir)Lib/um/x64; $(Solution)../Bin/Soil/Debug/</LibraryPath>
+    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(Solution)../Bin/glad/include/;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/;C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib\Debug</LibraryPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath);$(Solution)../Bin/glad/include; </IncludePath>
+    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath);$(Solution)../Bin/glad/include/; </IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Release/</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
