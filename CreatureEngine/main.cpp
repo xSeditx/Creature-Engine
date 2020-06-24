@@ -32,11 +32,12 @@ std::stack<std::string> CS;
 bool TEST_PROFILE_WINDOW();
 
 
+/* This Camera Situation is all wrong, figure a way to fix this */
+Camera2D* WorldCamera{ nullptr };
 #define CAMERA_SPEED 4.0f
 #define ZOOM_SPEED 1.0
-Camera2D* WorldCamera{ nullptr };
-Listener KeyListener(
-	[](Event _msg)
+
+Listener KeyListener([](Event _msg)
 {
 
 	DEBUG_CODE(Print("Key Entered: " << _msg.wParam));
@@ -78,8 +79,7 @@ Listener KeyListener(
 
 	}// End of Switch
 });
-Listener MouseWheel(
-    [](Event _msg)
+Listener MouseWheel( [](Event _msg)
 {
     Vec2 Mpos = SplitLParam((int)_msg.lParam);
 
@@ -130,84 +130,70 @@ struct MovementSystem
         Movement->Velocity *= .9;
     };
 };
-MovementSystem movementSys;
+
+MovementSystem    movementSys;
 PositionComponent PosComponent;
 MovementComponent TestMovementComponent;
 
+
+/* ============================================================================================
+           Rough Sketch of a Scene class to determine what I am going to need
+           For the Finalized Version of it. Also gives me a Template to rework the 
+           VertexArrayObject and VertexBufferObjects
+/* ============================================================================================ */
 #include"Renderer/LowLevel/OpenGL/Renderer/Renderer.h"
-
-
 struct MyScene
 {
 public:
     using Vec_t = Vec2;
+
+    /* Create the Object after OpenGL is Initialized */
     void Create()
     {
-        TODO("6/24/2020- Ended with Rendering properly happening, the VertexBufferObject and VertexArrayObject however is not Rendering and should be fixed")
-        Vertices_VAO = new VertexArrayObject();
-        Vertices_VBO = new VertexBufferObject<Vec_t>();
-        Colors_VBO   = new VertexBufferObject<Vec4>();
-
-
-
-        VAO = OpenGL::new_VAO();  // new VertexArrayObject();
-        VBO = OpenGL::new_VBO();  // Vertices_VBO = new VertexBufferObject<Vec_t>();
-        COL = OpenGL::new_VBO();
-
-
-        float Max = 1000;
-        RENDERER = new Shader(VRenderer, FRenderer);
-
-        for_loop(i, 1000 * 3)
+        /* Create all the Needed Buffers for this class */
         {
-            Vertices.push_back
-            (
-                {
-                    RANDOM(Max), RANDOM(Max)//, RANDOM(Max), RANDOM(Max)
-                }
-            );
-            for_loop(j, sizeof(Vec_t) / sizeof(float))
-            {// need to set it up to automatically adjust to the size of Vec_t
+            Vertices_VAO = new VertexArrayObject();
+            Vertices_VBO = new VertexBufferObject<Vec_t>();
+            Colors_VBO = new VertexBufferObject<Vec4>();
+            RENDERER = new Shader(VRenderer, FRenderer);
+        }
+
+        /* Create all the Data we are going to fill the Buffers with */
+        {
+            float Max = 1000;
+            for_loop(i, 1000 * 3)
+            {
+                Vertices.push_back
+                (
+                    {
+                        RANDOM(Max), RANDOM(Max)
+                    }
+                );
+                Colors.push_back
+                (
+                    OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), RANDOM(255))
+                );
             }
-
-            Colors.push_back
-            (
-                 OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), RANDOM(255))
-            );
-        }
-
             DEBUG_CODE(CheckGLERROR());
-
-        RENDERER->Bind();
-        {
-            OpenGL::bind_VAO(VAO);
-            OpenGL::bind_VBO(VBO);
-            OpenGL::set_BufferData(Vertices);
-            OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
-
-            OpenGL::bind_VBO(COL);
-            OpenGL::set_BufferData(Colors);
-            OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "Color");
-
-           //  Vertices_VAO->Bind();
-           //  Vertices_VBO->Update(Vertices); 
-           //  OpenGL::set_Attribute(RENDERER->g_Handle(), 2, "Position");
-           //  
-           //  Colors_VBO->Update(Colors);
-           //  OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "Color");
-
         }
-        RENDERER->Unbind();
 
-
-
-     //   Vertices_VBO->Update(Vertices);
-     //   VBO = OpenGL::new_VBO();
-     //   OpenGL::bind_VBO(VBO);
-     //   OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
-     //   OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
-
+        /* Setup the Shader so that our Locations are Linked */
+        {
+            RENDERER->Bind();
+            {
+                Vertices_VAO->Bind();
+                {
+                    Vertices_VBO->Update(Vertices);
+                    OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
+                    Colors_VBO->Update(Colors);
+                    OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "Color");
+                }
+            }
+            RENDERER->Unbind();
+        }
     }
+
+    /* Update the Positions of the Vertices Once Per Frame */
     void Update()
     {
         float Amount = 10;
@@ -218,34 +204,26 @@ public:
             (
                 Vertices[i].x + RANDOM_RANGE(Amount),
                 Vertices[i].y + RANDOM_RANGE(Amount)
-              //  Vertices[i].z + RANDOM_RANGE(Amount),
-              //  Vertices[i].w + RANDOM_RANGE(Amount)
             );
         }
-
-        OpenGL::bind_VBO(VBO);
-        OpenGL::set_BufferData(Vertices);
-       //Vertices_VBO->Update(Vertices);
-
-
+        Vertices_VAO->Bind();
+        Vertices_VBO->Update(Vertices);
     }
+
+    /* Render the Entire Scene */
     void Render()
     {
-        OpenGL::bind_VAO(VAO);
-
-        OpenGL::Renderer::drawArray( VBO, Vertices.size() );
-        //Vertices_VAO->Bind();
-        //OpenGL::Renderer::drawArray(Vertices_VBO->GL_Handle, Vertices.size());
-
+        Vertices_VAO->Bind();
+        OpenGL::Renderer::drawArray(Vertices_VBO->GL_Handle, Vertices.size());
     }
-    GLuint VAO{ 0 }, VBO{ 0 }, COL{ 0 };
-    VertexArrayObject *Vertices_VAO;
-    VertexBufferObject<Vec_t> *Vertices_VBO;
-    VertexBufferObject<Vec4> *Colors_VBO;
-    std::vector<Vec_t> Vertices;
-    std::vector<Vec4> Colors;
 
+    VertexArrayObject         *Vertices_VAO;
+    VertexBufferObject<Vec_t> *Vertices_VBO;
+    VertexBufferObject<Vec4>  *Colors_VBO;
+    std::vector<Vec_t> Vertices;
+    std::vector<Vec4>  Colors;
     Shader *RENDERER{ nullptr };
+
     std::string VRenderer =
         "#version 330 core                         \n\
                 layout(location = 0) in vec2 Position; \n\
@@ -269,12 +247,12 @@ public:
                 {                     \n\
                     FragColor = Col;  \n\
                 }";
-
-
 };
 
 
-
+/* ============================================================================================
+      Main Application class which holds all the functionality and Data for our program 
+/* ============================================================================================ */
 class App
 	: public Application
 {
@@ -555,25 +533,21 @@ class App
             ImGui::EndChild();
         }
         ImGui::ShowDemoWindow();
+
+        static bool Check{ false };
+        static float Slide[ 2];
+        ImGui::Begin("Test");
+        {
+            ImGui::Checkbox("Test Checkbox", &Check);
+            ImGui::SliderFloat3("Slider", Slide, -1000, 1000);
+            WorldCamera->Translate({ Slide[0], Slide[1] });
+        }
+        ImGui::End();
+
+        Print(Check);
     } 
 };
 
-
-
-
-
-struct Dummy
-{
-    Dummy(int _a, int _b) : A(_a), B(_b)
-    {}
-
-    int Add()
-    {
-        return A + B;
-    }
-    int B;
-    int A;
-};
 
 
 int main()
@@ -584,13 +558,6 @@ int main()
     TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. /n Each Module should have its very own Application class. ");
     TODO(" Serious Restructuring needs to take place to the Entire project, it is starting to grow rather large and I am not happy with some of the early design and structure decisions that have begun to slightly conflict. \n\
  It would be wise to reformat and refactor the project before these minor issues become big ones  ");
-
-    Dummy Dum(10, 10);
-
-
-
-  //FUKKKKKKKKKKKKFKFKFKFKFKFK      ThreadPool::get().Async(Core::Threading::ThreadPool::mem_fn<int,Dummy>(int(&Dum(10,10)), 40);
-
 
     App MyApp;
 	MyApp.Init();
@@ -610,6 +577,16 @@ int main()
 	return 0;
 }
   
+
+
+
+
+
+
+
+
+
+
 
 
 int LOOP_COUNT{ 1000000 };
@@ -794,7 +771,6 @@ bool THREAD_POOL_TEST()
 #endif // IF 0 to turn all this off for now.
 	return true;
 }
-
 bool TEST_PROFILE_WINDOW()
 {
 	{

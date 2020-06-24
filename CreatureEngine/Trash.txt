@@ -1,3 +1,32 @@
+    // GLuint VAO{ 0 }, VBO{ 0 }, COL{ 0 };
+        // VAO = OpenGL::new_VAO();  // new VertexArrayObject();
+// VBO = OpenGL::new_VBO();  // Vertices_VBO = new VertexBufferObject<Vec_t>();
+// COL = OpenGL::new_VBO();
+
+        //OpenGL::bind_VAO(VAO);
+        //{
+        //    OpenGL::bind_VBO(VBO);
+        //    OpenGL::set_BufferData(Vertices);
+        //    OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
+        //
+        //    OpenGL::bind_VBO(COL);
+        //    OpenGL::set_BufferData(Colors);
+        //    OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "Color");
+        //}
+
+     //   Vertices_VBO->Update(Vertices);
+     //   VBO = OpenGL::new_VBO();
+     //   OpenGL::bind_VBO(VBO);
+     //   OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
+     //   OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
+     //   Vertices[i].z + RANDOM_RANGE(Amount),
+     //   Vertices[i].w + RANDOM_RANGE(Amount)
+     //   OpenGL::bind_VBO(VBO);
+     //   OpenGL::set_BufferData(Vertices);
+     // OpenGL::bind_VAO(VAO);
+     // OpenGL::Renderer::drawArray( VBO, Vertices.size() );
+
+
 
 
 //_wassert(_CRT_WIDE(#_msg), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)) , 0));

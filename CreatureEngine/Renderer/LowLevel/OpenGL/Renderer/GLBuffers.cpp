@@ -141,7 +141,7 @@ void VertexArrayObject::Unbind() {}
 #else
 void VertexArrayObject::Bind()
 {
-    OpenGL::bind_VBO(GL_Handle);
+    OpenGL::bind_VAO(GL_Handle);
 }
 void VertexArrayObject::Unbind()
 {
