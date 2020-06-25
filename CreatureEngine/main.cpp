@@ -496,16 +496,6 @@ class App
     {    }
     virtual void OnRenderGUI() override 
     {
-        //ImTextureID
-        //ImGui::Image(
-        //    TestTexture->g_Handle(),
-        //    ImVec2(200, 200),
-        //    ImVec2(0, 0),
-        //    ImVec2(1, 1), 
-        //    ImColor(255, 255, 255, 255),
-        //    ImColor(255, 255, 255, 128)
-        //);
- 
         bool my_tool_active = true;
         ImGui::Begin("My First Tool", &my_tool_active, ImGuiWindowFlags_MenuBar);
         {
@@ -535,18 +525,87 @@ class App
         ImGui::ShowDemoWindow();
 
         static bool Check{ false };
-        static float Slide[ 2];
-        ImGui::Begin("Test");
+        static float Slide[3] = { 0,0,-300 };
+
+        /* Start the Camera Widget */
+        ImGui::Begin("Camera");
         {
-            ImGui::Checkbox("Test Checkbox", &Check);
-            ImGui::SliderFloat3("Slider", Slide, -1000, 1000);
-            WorldCamera->Translate({ Slide[0], Slide[1] });
+            Vec2 Camera_Position = WorldCamera->g_Position();
+
+            /* Position Slider for the Camera */
+            {
+                ImGui::SliderFloat3("Position", Slide, -1000, 1000);
+                WorldCamera->Translate({ Slide[0], Slide[1] });
+                WorldCamera->set_Zoom(Slide[2]);
+            }
+
+            /* Position Slider for the Camera */
+            {
+                ImGui::InputFloat("X", &Camera_Position.x, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("Y", &Camera_Position.y, 10.0f, 1.0f, "%.3f");
+                WorldCamera->s_Position(Camera_Position);
+            }
+
+            /* Clickable Position Slider for the Camera */
+            {
+                float H = WorldCamera->Height(), W = WorldCamera->Width();
+                ImGui::InputFloat("Width", &W, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("Height", &H, 10.0f, 1.0f, "%.3f");
+                WorldCamera->Size = { W,H };
+            }
+
+            /* Dragable Position Slider for the Camera */
+            {
+                int val = 0, val2 = 100;
+                ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
+                WorldCamera->s_Position(Camera_Position);
+            }
+
+            /* Color Picker Widget for the Background Color */
+            {
+                Vec4 c = getWindow().g_ClearColor();
+                float Col[3] = { c.x,c.y,c.z };
+                ImGui::ColorPicker3("Background Color", Col, 0);
+                glClearColor(Col[0], Col[1], Col[2], 1);
+                getWindow().s_ClearColor({ Col[0], Col[1], Col[2], 1 });
+            }
         }
         ImGui::End();
 
-        Print(Check);
+        /// TEST STUFF FOR LATER, Frames per second
+        //ImGui::PlotLines("FPS:",)
+        /// Texture Picker
+        //ImTextureID
+        //ImGui::Image(
+        //    TestTexture->g_Handle(),
+        //    ImVec2(200, 200),
+        //    ImVec2(0, 0),
+        //    ImVec2(1, 1), 
+        //    ImColor(255, 255, 255, 255),
+        //    ImColor(255, 255, 255, 128)
+        //);
     } 
 };
+
+
+static const char* fmt_table_int[3][4] =
+{
+    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
+    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
+    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
+};
+static const char* fmt_table_float[3][4] =
+{
+    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
+    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
+    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
+};
+
+
+
+
+
+
 
 
 

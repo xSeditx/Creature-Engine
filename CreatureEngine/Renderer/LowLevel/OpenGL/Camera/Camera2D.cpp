@@ -79,6 +79,14 @@ void Camera2D::Resize(Vec2 _size)
     Zoom(0.0f);
 }
 
+void Camera2D::set_Zoom(float _amount)
+{
+    ZoomLevel =  (_amount + 1000) / 1000;
+    ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
+    ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(Size.x * 0.5f, Size.y * 0.5f, 0));
+    ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
+    ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(Size.x * 0.5f), -(Size.y * 0.5f), 0));
+}
 void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
     TODO("Make a Zoom In To Function that Zooms to an XY location regardless of specifically where the cameras Center is at that moment");

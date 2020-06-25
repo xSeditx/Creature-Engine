@@ -194,12 +194,14 @@ private:
             defaultCamera = _camera;
         }
         
+        Vec4 g_ClearColor() { return ClearColor; }
+        void s_ClearColor(Vec4 _col) { ClearColor = _col; }
     protected:
         Shader* WindowShader{ nullptr };
         Camera2D* defaultCamera{ nullptr };
 
     private:
-
+        Vec4 ClearColor = { 0,0,.5,1 };
         Window* Parent = nullptr;
 
         HGLRC GL_Context{ nullptr };
