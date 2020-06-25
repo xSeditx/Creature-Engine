@@ -363,6 +363,10 @@ class App
         /// UPDATE-6/23/20: What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. 
         /// Idk how the fuck to fix that just yet it means my post processing efforts might be limited or that I need to not scale the texture but need to texture the Images
         TODO("Find out why instance count is being capped. It is likely being capped at 64,000 roughly if I had to guess. Check to see if unsigned integer is used");
+        VertexBufferObject<Vec2> *TestGeo = new VertexBufferObject<Vec2>();
+        VertexBufferObject<Vec4> *TestColor = new VertexBufferObject<Vec4>();
+        std::vector<Vec2> Verts;
+        std::vector<Vec4> Cols;
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
@@ -382,13 +386,23 @@ class App
                         OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255)
                     );
                     MainRenderer->draw_Line(x * 8.0f, y * 8.0f ,x * 8.0f + 7 ,y * 8.0f + 7);
+                    Verts.push_back({ x * 8.0f, y * 8.0f });
+                    Verts.push_back({ x * 8.0f + 7, y * 8.0f  + 7});
+
+                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
                 }
             }
         }
- 
+
+        TestGeo->Update(Verts);
+        TestColor->Update(Cols);
+
+
         /* Create FBO to Test with */
         {
-            FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
+            /// NOTE: I BELIEVE DEFAULT SHADER IS BROKE
+            OpenGL::RenderPass FrameBuffer = MainRenderer->new_RenderPass(SCREEN_X, SCREEN_Y, &getWindow().defaultShader());
+            FBO = FrameBuffer.FBO; 
             FBO->Bind();
         }
   
@@ -422,15 +436,13 @@ class App
         // Setup Dear ImGui binding
         SCENE.Create();
 
+        
+
+
+
         DEBUG_CODE(CheckGLERROR());
 	}
-  //   OpenGL::bind_VAO(VAO);
-  //   OpenGL::Renderer::drawArray(VBO, 3);
-  //   OpenGL::bind_VAO(SCENE.VAO);
-  //   OpenGL::bind_VBO(SCENE.VBO);
-  //   OpenGL::Renderer::drawArray(SCENE.VBO, 3);
-
-
+ 
     virtual void OnRender() override
     {
         FBO->Bind();

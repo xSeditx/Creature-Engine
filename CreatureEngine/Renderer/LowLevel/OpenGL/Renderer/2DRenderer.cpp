@@ -38,7 +38,6 @@ void main()                    \n\
 
 namespace OpenGL
 {
-    
     Renderer2D::Renderer2D(Vec2 _size)
     {
         WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
@@ -192,35 +191,6 @@ namespace OpenGL
         Buckets.emplace_back(Mat, Mesh_Index); //  RenderPair Bucket = { Mat, Mesh_Index };
 
     }
-    void Renderer2D::Render_Buckets()
-    {
-        std::vector<FrameBufferObject*> FrameBuffers;
-
-        for (auto& F : FrameBuffers)
-        {// This and the Following Loop are literally the same thing
-            for (auto& S : Shaders)
-            {
-                S->Bind();
-                {
-                    int TextureSlot{ 0 };
-                    for (auto& T : Textures)
-                    {// Binds all relavent Textures. Not needed in AZDO
-                        glActiveTexture(GL_TEXTURE0 + (TextureSlot++));
-                        glBindTexture(GL_TEXTURE_2D, T->g_Handle());
-                    }// PBR Material is now bound and Active in the Shader 
-                }
-                for (auto& B : Buckets)
-                {
-                    // B.first.first.
-                }
-                S->Unbind();
-            }
-        }
-
-
-
-    }
-
     void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image)
     {
         OpenGL::bind_VAO(DebugQuadVAO);   
@@ -250,7 +220,75 @@ namespace OpenGL
     }
 
     std::vector<Vec4> Line_Data;
+
+
+
+
+
+
+    void Renderer2D::Render_Buckets()
+    {
+
+        for (auto& F : RenderPasses)
+        {// This and the Following Loop are literally the same thing
+            F.FBO->Bind();
+
+            for (auto& S : Shaders)
+            {
+                S->Bind();
+                {
+                    int TextureSlot{ 0 };
+                    for (auto& T : Textures)
+                    {// Binds all relavent Textures. Not needed in AZDO
+
+                        OpenGL::bind_Texture(T->g_Handle(), ++TextureSlot);
+
+                    }// PBR Material is now bound and Active in the Shader 
+                }
+                for (auto& B : Buckets)
+                {
+                    // B.first.first.
+                }
+                S->Unbind();
+            }
+        }
+    }
+
+    RenderPass& Renderer2D::new_RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal , GLenum _format )
+    {
+        return  RenderPasses.emplace_back(RenderPass(_width, _height,_shader, _datatype, _internal, _format)); //RenderPasses.back();
+    }
+
 }//NS OpenGL
+
+
+
+//    using Texture_ID_t = uint32_t;
+//    using Mesh_ID_t    = uint32_t;
+//    using Shader_ID_t  = uint32_t;
+//    using Texture_ID_t = uint32_t;
+//    using Texture_ID_t = uint32_t;
+//    
+//    enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
+//    using SurfaceFragment = std::pair   < Surface_t, Texture_ID_t >;
+//    using Surface    = std::vector < SurfaceFragment         >;
+//    using Material   = std::pair   < Surface, Shader_ID_t    >;
+//    using RenderPair = std::pair   < Material, Mesh_ID_t     >;
+//    
+//    std::vector<Shader*> Shaders;
+//    std::vector<Graphics::Texture*> Textures;
+//    std::vector<Mesh*> Meshes;
+//    std::vector<RenderPair> Buckets;
+
+
+// 1:) Create Render Pass: new_RenderPass returns a Handle to the FrameBuffer Bucket and Rendering to that Pass will be done using that Handle
+// 2:) Add Shaders to that Render Pass so that Geometry can be rendered using that Shader
+
+
+
+
+
+
 
 
 
@@ -299,3 +337,14 @@ foreach( object )           //
 }
 
 */
+
+
+
+
+
+
+
+
+
+//  FrameBuffers.emplace_back(new FrameBufferObject(_width, _height, _datatype, _internal, _format));
+//  return FrameBuffers.size() - 1;

@@ -5,175 +5,68 @@
 #include "../../../Layer.h"
 #include"GLBuffers.h"
 
+    
+        //  uint32_t new_RenderPass(int _width, int _height, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
+         // uint32_t new_RenderPass(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format);
+          //std::vector<FrameBufferObject*> FrameBuffers;
+
 
 namespace OpenGL
 {
-    template<typename _Ty>
+
+
+    // ================================================================================================================
+    /// EXPERIMENTAL
+    // ================================================================================================================
+
+   // template<typename _Ty = Vec2>
     struct Geometry
     {
-        Geometry(_Ty *_data, size_t _sz)
-            :
-            GL_Handle(OpenGL::new_VBO()),
-            Vertices(_data),
-            ElementCount(_sz)
-        {}
-        Geometry(size_t _sz)
-            :
-            GL_Handle(OpenGL::new_VBO()),
-            Vertices(new _Ty[_sz]),
-            ElementCount(_sz)
-        {}
-        Geometry(std::vector<_Ty>& _data)
-            :
-            GL_Handle(OpenGL::new_VBO()),
-            Vertices(_data),
-            ElementCount(_data.size())
-        {}
-
-
-        void set_Data(std::vector<_Ty> _data) 
-        {
-            ElementCount = _data.size();
-            OpenGL::set_BufferData(_data);
-
-        }
-        void set_Data(_Ty* _data, size_t _sz)
-        {
-            ElementCount = _sz;
-            OpenGL::bind_VBO(GL_Handle);
-            OpenGL::set_BufferData( _data, _sz);
-        }
-
-        void Bind()
-        {
-            OpenGL::bind_VBO(GL_Handle);
-        }
-        void Unbind()
-        {
-            OpenGL::bind_VBO(0);
-        }
-
-
-        /* Number of Elements in the Vertex Array */
-        size_t count() { return ElementCount; }
-
-        /* Returns size in bytes of Vertex Data */
-        size_t size() { return ElementCount * sizeof(_Ty); }
-
-        /* Returns pointer to Start of Vertices */
-        _Ty* data_Ptr() { return Vertices; }
-    private:
-        uint32_t GL_Handle{ 0 };
-
-        _Ty *Vertices;
-        size_t ElementCount;
+        void Add(VertexBufferObject<Vec2>& _vertices) { Vertices  = &_vertices; }
+        void Add(VertexBufferObject<Vec4>& _colors)   { Colors    = &_colors;   }
+        VertexBufferObject<Vec2> *Vertices;
+        VertexBufferObject<Vec4> *Colors;
     };
-
-
-    struct GPU_MemoryPool
-    {
-        /* Create a pool of Memory on the GPU */
-        GPU_MemoryPool(uint32_t _size)
-        {
-            GL_Handle = OpenGL::new_VBO();
-            OpenGL::bind_VBO(GL_Handle);
-            OpenGL::set_BufferData(_size, nullptr);
-        }
-        /* Make memory buffer current in OpenGL state */
-        void Bind() 
-        { 
-            OpenGL::bind_VBO(GL_Handle); 
-        }
-        
-        void *Map()
-        {
-            return glMapBuffer(Target, GL_READ_BUFFER);
-        } 
-        void *MapRange(uint32_t _start, uint32_t _length)
-        {//target offset length access
-            return glMapBufferRange(Target, _start, _length, GL_READ_BUFFER);
-        }
-        uint32_t GL_Handle{ 0 };
-        uint32_t Target{ GL_ARRAY_BUFFER };
-    };
-    struct Object
-    {
-        uint32_t GL_Handle;
-        Object(Vec2 *_data, size_t _size)
-            : 
-            Size(_size), 
-            Data(_data),
-            VAO (OpenGL::new_VAO())
-        {}
-         
-
-        void Render()
-        {
-            OpenGL::Renderer::drawArray((uint32_t)Size);
-        }
-
-        size_t size() { return Size; }
-
-/*
-        uint32_t size() { return Length; }
-        char* get() { return Data; }
-
-    private:
-        uint32_t Start{ 0 };
-        uint32_t Length{ 0 };
-        char *Data;
-*/
-
-    private:
-        uint32_t Start{ 0 };
-        uint32_t Length{ 0 };
-
-
-        uint32_t VAO;
-        Vec2 *Data;
-        size_t Size{ 0 };
-    };
-    struct Surface
-    {
-        Surface(Shader* _shader, Graphics::Texture _textures[4]) 
-        {}
-
-        Shader *Progam;
-        std::vector<const char*> Names{"Diffuse", "Normals", "Emissive", "Specular", "Metallic", "Gloss", "Opacity"};
-        std::vector<Graphics::Texture*> Textures;
-    };
-
+    //template<typename _Ty = Vec2>
     struct RenderPass
     {
-        FrameBufferObject *FBO;
-        void Submit(Surface* _surface, Object* _mesh)
+        RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal, GLenum _format)
+            :
+            GPU_Program{_shader}
         {
-            RenderPairs.insert({ _surface, _mesh });
+            FBO = new FrameBufferObject(_width, _height, _datatype, _internal, _format);
         }
-        std::unordered_map<Surface*, Object*> RenderPairs;
-
         void Render()
         {
-            for (auto &P : RenderPairs)
-            {
-                uint32_t Slot{ 0 };
-                Shader *Temp = P.first->Progam;
-
-                Temp->Bind();
-                {// Activate the Shader
-                    for (auto &S : P.first->Textures)
-                    {// Bind the Material Maps
-                        Temp->SetTextureUniform(P.first->Names[Slot], S->g_Handle(), Slot++);
-                    }
-
-                    P.second->Render();
+            // Can likely do away with Unbind in the future but for now it is needed
+            GPU_Program->Bind();
+            {// Our Shader
+                VAO->Bind();
+                FBO->Bind();
+                {// Our FrameBuffer
+                    /// GEOMETRY NEEDS TO GO HERE
+                    my_Mesh->Vertices->Bind();
+                    my_Mesh->Colors->Bind();
                 }
-                Temp->Unbind();
+                FBO->Unbind();
             }
+            GPU_Program->Bind();
+
         }
-        //GPU_Program *Program;
-        //std::vector<GPU_Program> ShaderPasses;
+
+        void attach(Geometry *_mesh) { my_Mesh = _mesh; }
+
+        void attach_VAO(VertexArrayObject* _vao) { VAO = _vao; }
+        VertexArrayObject* VAO{ nullptr };
+
+        Shader *GPU_Program{ nullptr };
+        FrameBufferObject *FBO{ nullptr };
+        Geometry *my_Mesh;
     };
+
+
+    // ================================================================================================================
+
 
 
 
@@ -184,6 +77,18 @@ namespace OpenGL
 		Camera2D mainCamera;
         
 	public:
+
+        // ================================================================================================================
+        /// EXPERIMENTAL
+        // ================================================================================================================
+        // Maybe default the shader as well? That could make things easier and could eliminate need for other default shaders all over the code
+        RenderPass& new_RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
+        std::vector<RenderPass> RenderPasses;
+
+        // ================================================================================================================
+
+
+
 		NO_COPY_OR_ASSIGNMENT(Renderer2D);
 
         layerStack Layers;
@@ -252,15 +157,12 @@ namespace OpenGL
 
         /// ========= STATICS ========= May very well change where these are located as they are more of a Utility than a rendering option
 
-
     private:
         uint32_t LineVAO{ 0 };
         uint32_t LineVBO{ 0 };
         VertexBufferObject<Vec4> *VBO_Test;
 
         std::vector<Vec4> Line_Data;
-
-
 
 		uint32_t QuadVAO{ 0 };
 		uint32_t InstanceCount{ 0 };
@@ -362,7 +264,6 @@ namespace OpenGL
                 {                                 \n\
                     FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
                 }";
-        // ================================================================================================================
 
     };// Class Renderer2D
 }// NS OpenGL  
@@ -550,3 +451,181 @@ foreach(render target)         // framebuffer
 ///  {
 ///      std::vector<Program> Shader_Programs;
 ///  };
+
+
+
+
+
+
+
+
+
+/// 6/25/ 2020
+/// NEED TO CLEAN UP THE  2D RENDERER CLASS TO IMPLEMENT REAL SOLUTIONS
+
+    /*
+    template<typename _Ty>
+    struct Geometry
+    {
+        Geometry(_Ty *_data, size_t _sz)
+            :
+            GL_Handle(OpenGL::new_VBO()),
+            Vertices(_data),
+            ElementCount(_sz)
+        {}
+        Geometry(size_t _sz)
+            :
+            GL_Handle(OpenGL::new_VBO()),
+            Vertices(new _Ty[_sz]),
+            ElementCount(_sz)
+        {}
+        Geometry(std::vector<_Ty>& _data)
+            :
+            GL_Handle(OpenGL::new_VBO()),
+            Vertices(_data),
+            ElementCount(_data.size())
+        {}
+
+
+        void set_Data(std::vector<_Ty> _data)
+        {
+            ElementCount = _data.size();
+            OpenGL::set_BufferData(_data);
+
+        }
+        void set_Data(_Ty* _data, size_t _sz)
+        {
+            ElementCount = _sz;
+            OpenGL::bind_VBO(GL_Handle);
+            OpenGL::set_BufferData( _data, _sz);
+        }
+
+        void Bind()
+        {
+            OpenGL::bind_VBO(GL_Handle);
+        }
+        void Unbind()
+        {
+            OpenGL::bind_VBO(0);
+        }
+
+
+        // Number of Elements in the Vertex Array
+        size_t count() { return ElementCount; }
+
+        // Returns size in bytes of Vertex Data
+        size_t size() { return ElementCount * sizeof(_Ty); }
+
+        // Returns pointer to Start of Vertices
+        _Ty* data_Ptr() { return Vertices; }
+    private:
+        uint32_t GL_Handle{ 0 };
+
+        _Ty *Vertices;
+        size_t ElementCount;
+    };
+    struct GPU_MemoryPool
+    {
+        // Create a pool of Memory on the GPU
+        GPU_MemoryPool(uint32_t _size)
+        {
+            GL_Handle = OpenGL::new_VBO();
+            OpenGL::bind_VBO(GL_Handle);
+            OpenGL::set_BufferData(_size, nullptr);
+        }
+        // Make memory buffer current in OpenGL state
+        void Bind()
+        {
+            OpenGL::bind_VBO(GL_Handle);
+        }
+
+        void *Map()
+        {
+            return glMapBuffer(Target, GL_READ_BUFFER);
+        }
+        void *MapRange(uint32_t _start, uint32_t _length)
+        {//target offset length access
+            return glMapBufferRange(Target, _start, _length, GL_READ_BUFFER);
+        }
+        uint32_t GL_Handle{ 0 };
+        uint32_t Target{ GL_ARRAY_BUFFER };
+    };
+    struct Object
+    {
+        uint32_t GL_Handle;
+        Object(Vec2 *_data, size_t _size)
+            :
+            Size(_size),
+            Data(_data),
+            VAO (OpenGL::new_VAO())
+        {}
+
+
+        void Render()
+        {
+            OpenGL::Renderer::drawArray((uint32_t)Size);
+        }
+
+        size_t size() { return Size; }
+
+/*
+        uint32_t size() { return Length; }
+        char* get() { return Data; }
+
+    private:
+        uint32_t Start{ 0 };
+        uint32_t Length{ 0 };
+        char *Data;
+
+
+    private:
+        uint32_t Start{ 0 };
+        uint32_t Length{ 0 };
+
+
+        uint32_t VAO;
+        Vec2 *Data;
+        size_t Size{ 0 };
+    };
+    struct Surface
+    {
+        Surface(Shader* _shader, Graphics::Texture _textures[4])
+        {}
+
+        Shader *Progam;
+        std::vector<const char*> Names{"Diffuse", "Normals", "Emissive", "Specular", "Metallic", "Gloss", "Opacity"};
+        std::vector<Graphics::Texture*> Textures;
+    };
+    struct RenderPass
+    {
+        FrameBufferObject *FBO;
+        void Submit(Surface* _surface, Object* _mesh)
+        {
+            RenderPairs.insert({ _surface, _mesh });
+        }
+        std::unordered_map<Surface*, Object*> RenderPairs;
+
+        void Render()
+        {
+            for (auto &P : RenderPairs)
+            {
+                uint32_t Slot{ 0 };
+                Shader *Temp = P.first->Progam;
+
+                Temp->Bind();
+                {// Activate the Shader
+                    for (auto &S : P.first->Textures)
+                    {// Bind the Material Maps
+                        Temp->SetTextureUniform(P.first->Names[Slot], S->g_Handle(), Slot++);
+                    }
+
+                    P.second->Render();
+                }
+                Temp->Unbind();
+            }
+        }
+        //GPU_Program *Program;
+        //std::vector<GPU_Program> ShaderPasses;
+    };
+
+*/
