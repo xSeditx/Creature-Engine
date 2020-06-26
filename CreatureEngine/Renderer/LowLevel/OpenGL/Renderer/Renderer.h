@@ -42,35 +42,35 @@ namespace OpenGL
         /* Binds a Specific VBO and Renders it */
         static void drawArray(uint32_t _vbo, uint32_t _elementCount)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-			glDrawArrays(GL_TRIANGLES, 0, _elementCount);
-			DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+            OpenGL::bind_VBO(_vbo);
+            glDrawArrays(GL_TRIANGLES, 0, _elementCount);
+			DEBUG_CODE(OpenGL::unbind_VBO());
 		}	
         /* Renders _elementCount number of Vertices from the Currently bound Vertex Buffer Object */
         static void drawArray(uint32_t _elementCount)
         {
             glDrawArrays(GL_TRIANGLES, 0, _elementCount);
-            DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+            DEBUG_CODE(OpenGL::unbind_VBO());
         }
 
 
         static void drawArrayLines(uint32_t _vbo, uint32_t _elementCount)
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        { 
+            OpenGL::bind_VBO(_vbo);
             glDrawArrays(GL_LINES, 0, _elementCount);
-            DEBUG_CODE(glBindBuffer(GL_ARRAY_BUFFER, 0));
+            DEBUG_CODE(OpenGL::unbind_VBO());
             DEBUG_CODE(CheckGLERROR());
         }
 
-		static void drawArrayInstanced( uint32_t _indicesCount, uint32_t _instanceCount)
+        static void drawArrayInstanced(uint32_t _indicesCount, uint32_t _instanceCount)
 		{
 			glDrawArraysInstanced(GL_TRIANGLES, 0, _indicesCount, _instanceCount);//mode/first/count/instancecount
 		}
 		static void drawIndices(uint32_t _ibo, uint32_t _elementCount)
 		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-			glDrawElements (GL_TRIANGLES, _elementCount, GL_FLOAT, (char*)0);
-			DEBUG_CODE(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+            OpenGL::bind_IBO(_ibo);
+			glDrawElements(GL_TRIANGLES, _elementCount, GL_FLOAT, (char*)0);
+			DEBUG_CODE(OpenGL::unbind_IBO());
 		}
 
         /* Returns a vec4 of Normalized Colors for OpenGL Accepts 0-255*/

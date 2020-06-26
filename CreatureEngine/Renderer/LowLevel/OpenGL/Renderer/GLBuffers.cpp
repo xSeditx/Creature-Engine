@@ -22,8 +22,7 @@ void Attribute::Unbind()
 }
 void Attribute::Release()
 {// Should I just orphan this? Should I delete it? I wish to reclaim the name and free any allocation associate with it.
-	__debugbreak();
-    // Maybe I just need to delete it and forget it ever existed
+	__debugbreak();    // Maybe I just need to delete it and forget it ever existed
 	REFACTOR("Yeah, idk what the fuck to do with this. Release in VertexBufferObject class");
 }
 void Attribute::Destroy()
@@ -126,7 +125,8 @@ VertexArrayObject::VertexArrayObject()
 {
 	Buffers.reserve(5);
 }
-VertexArrayObject::VertexArrayObject(VertexBufferObject<Vec3>& vbo)
+template<typename _Ty>
+VertexArrayObject::VertexArrayObject(VertexBufferObject<_Ty>& vbo)
 	:
 	ElementCount(0),
 	GL_Handle(NULL)

@@ -85,11 +85,11 @@ public:
 
 	VertexBufferObject() 
     {
+        DEBUG_CODE(CheckGLERROR());
         ElementCount = 0;
         Data.resize(ElementCount);
 
         Stride = sizeof(value_type);
-        DEBUG_CODE(CheckGLERROR());
 
         GL_Handle = OpenGL::new_VBO();
         Bind();
@@ -103,7 +103,6 @@ public:
         Unbind();
         //BufferPtr = &Data[0];
     }
-
 
     /* Create a buffer object that stores data for OpenGL */
 	VertexBufferObject(pointer_type data, GLsizei count)
@@ -129,6 +128,7 @@ public:
         Unbind();
 		BufferPtr = &Data[0];
 	}
+
     /* Create a buffer object that stores data for OpenGL while allowing change of Default Access */
 	VertexBufferObject(GLenum _access, pointer_type _data, GLsizei _count)
 		: /// Specify default access
@@ -145,22 +145,35 @@ public:
 
         Unbind();
 	}
-	VertexBufferObject(std::vector<value_type> _vec)
-	{// Create from a Vector
+	
+    /* Create a VBO from an std::vector of Data */
+    VertexBufferObject(std::vector<value_type> _vec)
+	{
+        __debugbreak(); /// MAKE SURE THIS IS WORKING CORRECTLY
 		*this = &VertexBufferObject<value_type>(&_vec[0], _vec.size());
 	}
 	void Update(std::vector<value_type>& _data)
 	{
-        REFACTOR("This needs to have the Access changed from default Access and to the Access of this Buffer however I see no way to change the Acces type");
+        REFACTOR("DATA: Is simply debug shit, clean this up in the future. && This needs to have the Access changed from default Access and to the Access of this Buffer however I see no way to change the Acces type");
+        Data = _data;
 		Bind();
-        OpenGL::set_BufferData(_data);
+        {
+            OpenGL::set_BufferData(_data);
+        }
+        Unbind();
+
 	}
-	void Update(void* _data, size_t _sz)
-	{
-		Bind();
-        OpenGL::set_Subbuffer_Data(_sz * sizeof(value_type), _data, 0);
-		//glBufferSubData(GL_ARRAY_BUFFER, 0, _sz * sizeof(value_type), _data);
-	}
+    void Update(void* _data, size_t _sz)
+    {
+        __debugbreak();// This is currently working wrong if the buffer was not previously created so come back to this later
+        Bind();
+        {
+            OpenGL::set_Subbuffer_Data(_sz * sizeof(value_type), _data, 0);
+        }
+        Unbind();
+
+        //glBufferSubData(GL_ARRAY_BUFFER, 0, _sz * sizeof(value_type), _data);
+    }
 
 	GLuint get_BufferSize()
 	{
@@ -168,7 +181,6 @@ public:
 		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &results);
 		return results;
 	}
-
 
 	size_t size() const { return Data.size(); }
 
@@ -179,6 +191,7 @@ public:
 
     VertexBufferObject(VertexBufferObject&& _other)
     {
+        __debugbreak(); /// NEED TO MAKE SURE THIS IS WORKING PROPERLY
         *this = std::move(_other);
     }
     VertexBufferObject& operator = (VertexBufferObject&& _other)
@@ -199,7 +212,6 @@ public:
         }
         return *this;
     }
-
 	VertexBufferObject& operator = (std::vector<T>& data)
 	{// Map the whole buffer, resize if needed and make the data of the buffer equal to that of the Rvalue
         Data = data;
@@ -245,7 +257,8 @@ public:
 	NO_COPY_OR_ASSIGNMENT(VertexArrayObject);
 
 	VertexArrayObject();
-	VertexArrayObject(VertexBufferObject<Vec3>& vbo);
+    template<typename _Ty>
+	VertexArrayObject(VertexBufferObject<_Ty>& vbo);
 
 	GLuint GL_Handle;
 	int ElementCount;
@@ -261,7 +274,7 @@ public:
 		/// I HAD THIS BECAUSE COLOR WAS CAUSING ISSUES LIKELY BECAUSE ITS A VEC 3 and Not a Vec4		if (bufferT == COLOR) return;
 		if (GL_Handle == NULL)
 		{
-			_GL(glGenVertexArrays(1, &GL_Handle));
+            GL_Handle = OpenGL::new_VAO();
 		}
 
 		Bind(); // First Bind the buffer to make it Current in the OpenGL Context
@@ -272,12 +285,15 @@ public:
 
 		switch (bufferT)
 		{/// Case statement of Buffer types. Indices pushback then exit the function so that EnableVertexAttribArray and glVertexAttribPointer are never called.
-		case BufferTypes::INDICE:
-			ElementCount = buffer->ElementCount;
-			buffer->AttributeType = INDICE;
-			_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->GL_Handle));
-			return; //  If VBO is Indices then bind it to the VAO and return before attribute is set.
-			break;
+        case BufferTypes::INDICE:
+        {
+            ElementCount = buffer->ElementCount;
+            buffer->AttributeType = INDICE;
+            OpenGL::bind_IBO(buffer->GL_Handle);
+
+            return; //  If VBO is Indices then bind it to the VAO and return before attribute is set.
+        }
+        break;
 
 
 		case BufferTypes::VERTEX:
@@ -285,51 +301,100 @@ public:
 			buffer->Location = Shader::get().AttributeLocation("VertexPosition");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = VERTEX;
-			break;
 		}
+	    break;
+
 		case BufferTypes::COLOR:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexColor");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = COLOR;
-			break;
 		}
+		break;
+
 		case BufferTypes::NORMAL:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexNormal");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = NORMAL;
-			break;
 		}
+		break;
+
 		case BufferTypes::UVCOORD:
 		{
 			buffer->Location = Shader::get().AttributeLocation("TextureCoord");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = UVCOORD;
-			break;
 		}
+		break;
+
 		case BufferTypes::TANGENT:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexTangent");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = TANGENT;
-			break;
+
 		}
+		break;
+
 		case BufferTypes::BITANGENT:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexBitangent");
 			if (buffer->Location == -1) return;
 			buffer->AttributeType = BITANGENT;
-			break;
 		}
+		break;
+
 		}
-		_GL(glBindBuffer(GL_ARRAY_BUFFER, buffer->GL_Handle));
+        OpenGL::bind_VBO(buffer->GL_Handle);
 		_GL(glEnableVertexAttribArray(buffer->Location));
 		_GL(glVertexAttribPointer(buffer->Location, Amount, GL_FLOAT, GL_FALSE, 0, (char*)NULL));
 	}
 
 	void Render();
 };
+
+
+//uint32_t  set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
+//{
+//    uint32_t Location = glGetAttribLocation(_shaderID, _name);
+//    glEnableVertexAttribArray(Location);
+//    glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+//    CheckGLERROR();
+//    return Location;
+//}
+//uint32_t set_Attribute(uint8_t _elements, const char* _name)
+//{
+//    int H = Shader::getHandle();
+//    int32_t Location = glGetAttribLocation(H, _name);
+//
+//    DEBUG_CODE
+//    (
+//        if (Location == -1)
+//        {
+//            Print("ERROR: Attribute does not exist");
+//            __debugbreak();
+//        }
+//    );
+//    glEnableVertexAttribArray(Location);
+//    glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+//    CheckGLERROR();
+//    return Location;
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

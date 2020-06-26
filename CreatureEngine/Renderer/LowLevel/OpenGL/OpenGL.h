@@ -181,9 +181,12 @@ namespace OpenGL
 	CREATURE_API void  EnableProgramPointSize();
 
 
+
 	CREATURE_API uint32_t set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name);
     CREATURE_API uint32_t set_Attribute(uint8_t _elements, const char* _name);
-	CREATURE_API void set_Divisor(uint8_t _location, uint32_t _divisor);
+    CREATURE_API void enable_Attribute(uint32_t _location);
+    CREATURE_API void Attribute_Pointer(uint32_t _location, uint32_t _elements);
+    CREATURE_API void set_Divisor(uint8_t _location, uint32_t _divisor);
 
 
     CREATURE_API void set_Viewport(int _x, int _y, int _width, int _height);
@@ -192,14 +195,15 @@ namespace OpenGL
 	//============================================================================================
 	/* Creates a Unique ID for a Vertex Array Object*/
 	CREATURE_API uint32_t new_VAO();
+
     /* Creates a Unique ID for a Vertex Array Object*/
     CREATURE_API void delete_VAO(uint32_t _id);
 
-
-	/* Is an ID a Vertex Array Object */
+    /* Is an ID a Vertex Array Object */
 	CREATURE_API bool isVAO(int _array);
 	/* Sets Vertex Array Object as Current */
 	CREATURE_API void bind_VAO(int32_t _vaoID);
+
 	/* Clears any VAO Binding */
 	CREATURE_API void unbind_VAO();
 	//============================================================================================

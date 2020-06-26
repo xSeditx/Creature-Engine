@@ -268,13 +268,11 @@ namespace OpenGL
 //    using Shader_ID_t  = uint32_t;
 //    using Texture_ID_t = uint32_t;
 //    using Texture_ID_t = uint32_t;
-//    
 //    enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
 //    using SurfaceFragment = std::pair   < Surface_t, Texture_ID_t >;
 //    using Surface    = std::vector < SurfaceFragment         >;
 //    using Material   = std::pair   < Surface, Shader_ID_t    >;
 //    using RenderPair = std::pair   < Material, Mesh_ID_t     >;
-//    
 //    std::vector<Shader*> Shaders;
 //    std::vector<Graphics::Texture*> Textures;
 //    std::vector<Mesh*> Meshes;

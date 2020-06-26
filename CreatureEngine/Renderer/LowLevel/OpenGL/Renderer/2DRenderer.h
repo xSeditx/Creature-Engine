@@ -19,55 +19,144 @@ namespace OpenGL
     /// EXPERIMENTAL
     // ================================================================================================================
 
-   // template<typename _Ty = Vec2>
     struct Geometry
     {
-        void Add(VertexBufferObject<Vec2>& _vertices) { Vertices  = &_vertices; }
-        void Add(VertexBufferObject<Vec4>& _colors)   { Colors    = &_colors;   }
+        Geometry()
+        {
+            Vertices = new VertexBufferObject<Vec2> ();
+            Colors   = new VertexBufferObject<Vec4> ();
+        }
+        Geometry(VertexBufferObject<Vec2> _vertices, VertexBufferObject<Vec4> _colors)
+            :
+            Vertices(&_vertices),
+            Colors(&_colors)
+        {}
+
+        void Add(VertexBufferObject<Vec2>* _vertices)
+        {
+            Vertices = _vertices;
+        }
+        void Add(VertexBufferObject<Vec4>* _colors)
+        {
+            Colors = _colors;
+        }
+
         VertexBufferObject<Vec2> *Vertices;
         VertexBufferObject<Vec4> *Colors;
     };
-    //template<typename _Ty = Vec2>
+
     struct RenderPass
     {
+
+        /* Constructs the Render pass object */
         RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal, GLenum _format)
             :
             GPU_Program{_shader}
         {
             FBO = new FrameBufferObject(_width, _height, _datatype, _internal, _format);
+            VAO = new VertexArrayObject();
+            mainCamera = new Camera2D();
+            my_Mesh = new Geometry();
+
+            GPU_Program->Bind();
+            {
+               // my_Mesh->Vertices->Bind();
+               // OpenGL::set_Attribute(4, "VertexPosition"); 
+               //
+               // my_Mesh->Colors->Bind();
+               // OpenGL::set_Attribute(4, "VertexColor");
+            }
+            GPU_Program->Unbind();
         }
+
+
+        void set_Attributes(VertexBufferObject<Vec2>* _vertices, VertexBufferObject<Vec4>* _colors)
+        {
+            my_Mesh->Add(_vertices);
+            my_Mesh->Add(_colors);
+
+            GPU_Program->Bind();
+            {
+                VAO->Attach(BufferTypes::VERTEX, _vertices);
+                VAO->Attach(BufferTypes::COLOR, _colors);
+            }
+            GPU_Program->Unbind();
+        }
+
+
+        /* Updates all the buffers and Cameras if the User calls for it */
+        void Update()
+        {
+            if (needs_Updated)
+            {
+                /// UPDATE THE BUFFERS IF WE HAVE CHANGED ANYTHING IN THEM'
+            }
+        }
+
+        /* Executes the Render Pass. NOTE: Might Change the name to Execute*/
         void Render()
         {
             // Can likely do away with Unbind in the future but for now it is needed
-            GPU_Program->Bind();
-            {// Our Shader
-                VAO->Bind();
-                FBO->Bind();
-                {// Our FrameBuffer
-                    /// GEOMETRY NEEDS TO GO HERE
-                    my_Mesh->Vertices->Bind();
-                    my_Mesh->Colors->Bind();
+            FBO->Bind();
+            {// Our FrameBuffer
+                GPU_Program->Bind();
+                {// Our Shader
+                        /// GEOMETRY NEEDS TO GO HERE
+                    VAO->Bind();
+                    mainCamera->Bind();
+                    GPU_Program->SetUniform("ModelMatrix", Mat4(1.0f));
+
+                    Renderer::drawArray((uint32_t)my_Mesh->Vertices->size());
+
                 }
                 FBO->Unbind();
             }
             GPU_Program->Bind();
-
         }
 
-        void attach(Geometry *_mesh) { my_Mesh = _mesh; }
+        /* Adds a Camera to the Current RenderPass */
+        void attach(Camera2D *_camera)      
+        {
+            mainCamera = _camera;
+        }
 
-        void attach_VAO(VertexArrayObject* _vao) { VAO = _vao; }
-        VertexArrayObject* VAO{ nullptr };
+        /* Adds a Mesh to the Current RenderPass */
+        void attach(Geometry *_mesh)     
+        {
+            GPU_Program->Bind();
+            {
+                VAO->Bind();
+                {
+                    my_Mesh = _mesh;
+                    VAO->Attach(BufferTypes::VERTEX, _mesh->Vertices);
+                    VAO->Attach(BufferTypes::COLOR, _mesh->Colors);
+                }
+                VAO->Unbind();
+            }
+        }
 
-        Shader *GPU_Program{ nullptr };
-        FrameBufferObject *FBO{ nullptr };
+        /* Attaches an ArrayObject Format. Likely combine this with the Shader and pass it in differently */
+        void attach(VertexArrayObject* _vao) 
+        {  
+            VAO = _vao;   
+        }
+
+
+        /*================================
+                   NEEDED DATA 
+        ==================================*/
+        bool needs_Updated{ true };
+
         Geometry *my_Mesh;
+        Camera2D *mainCamera;
+        Shader   *GPU_Program { nullptr };
+        VertexArrayObject *VAO{ nullptr };
+        FrameBufferObject *FBO{ nullptr };
     };
 
 
     // ================================================================================================================
-
-
+    // ================================================================================================================
 
 
 	class Renderer2D
@@ -157,6 +246,9 @@ namespace OpenGL
 
         /// ========= STATICS ========= May very well change where these are located as they are more of a Utility than a rendering option
 
+        Shader* InstanceRenderer;
+        Shader* LineRenderer;
+
     private:
         uint32_t LineVAO{ 0 };
         uint32_t LineVBO{ 0 };
@@ -167,8 +259,6 @@ namespace OpenGL
 		uint32_t QuadVAO{ 0 };
 		uint32_t InstanceCount{ 0 };
 
-		Shader* InstanceRenderer;
-        Shader* LineRenderer;
 
 		uint32_t ColorVBO{ 0 };
 		std::vector<Vec4> ColorData;

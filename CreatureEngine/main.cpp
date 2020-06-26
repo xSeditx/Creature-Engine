@@ -154,8 +154,15 @@ public:
         {
             Vertices_VAO = new VertexArrayObject();
             Vertices_VBO = new VertexBufferObject<Vec_t>();
-            Colors_VBO = new VertexBufferObject<Vec4>();
-            RENDERER = new Shader(VRenderer, FRenderer);
+            Colors_VBO   = new VertexBufferObject<Vec4>();
+            RENDERER     = new Shader(VRenderer, FRenderer);
+            RENDERER->Bind();
+            {
+                Vertices_VAO->Attach(BufferTypes::VERTEX, Vertices_VBO);
+                Vertices_VAO->Attach(BufferTypes::COLOR, Colors_VBO);
+            }
+            RENDERER->Unbind();
+
         }
 
         /* Create all the Data we are going to fill the Buffers with */
@@ -171,12 +178,13 @@ public:
                 );
                 Colors.push_back
                 (
-                    OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), RANDOM(255))
+                    OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255))
                 );
             }
             DEBUG_CODE(CheckGLERROR());
         }
-
+        //glBindVertexArray(0);
+       // glBindBuffer(GL_ARRAY_BUFFER, 0);
         /* Setup the Shader so that our Locations are Linked */
         {
             RENDERER->Bind();
@@ -214,7 +222,7 @@ public:
     void Render()
     {
         Vertices_VAO->Bind();
-        OpenGL::Renderer::drawArray(Vertices_VBO->GL_Handle, Vertices.size());
+        OpenGL::Renderer::drawArray(Vertices.size()/2);
     }
 
     VertexArrayObject         *Vertices_VAO;
@@ -226,17 +234,17 @@ public:
 
     std::string VRenderer =
         "#version 330 core                         \n\
-                layout(location = 0) in vec2 Position; \n\
-                layout(location = 1) in vec4 Color; \n\
+                layout(location = 0) in vec2 VertexPosition; \n\
+                layout(location = 1) in vec4 VertexColor; \n\
                 uniform mat4 ProjectionMatrix;     \n\
                 uniform mat4 ViewMatrix;           \n\
                 out vec4 Col;                      \n\
                 void main()                        \n\
                 {                                  \n\
-                    Col = Color; \n\
+                    Col = VertexColor; \n\
                     mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
                     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-                    gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( VertexPosition.x, VertexPosition.y, -1.0, 1.0); \n\
                 }";
 
     std::string FRenderer =
@@ -311,6 +319,16 @@ class App
     ImGuiIO io;
     MyScene SCENE;
 	size_t  PreviousTime;
+    
+
+    VertexBufferObject<Vec2> *TestGeo;
+    VertexBufferObject<Vec4> *TestColor;
+    OpenGL::Geometry *GEOMETRY; 
+    OpenGL::RenderPass *test_RenderPass;
+
+    std::vector<Vec2> Verts;
+    std::vector<Vec4> Cols;
+
 
     virtual void OnCreate() override
 	{// Initialization
@@ -348,7 +366,7 @@ class App
         }
 
  		/*   Make a Profiler Window which Displays the FPS as a graph */
-        {
+        {/// THIS IS ALL FUCKED UP, Implement ImGUI with the Profiler ~EXTREMELY IMPORTANT~!
             float Aspect = getCamera().AspectRatio;
             float Size = 100;
             ProfilerTest = new Profiling::DisplayWindow
@@ -360,13 +378,7 @@ class App
             ProfilerTest->Update(1);
         }
 
-        /// UPDATE-6/23/20: What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. 
-        /// Idk how the fuck to fix that just yet it means my post processing efforts might be limited or that I need to not scale the texture but need to texture the Images
-        TODO("Find out why instance count is being capped. It is likely being capped at 64,000 roughly if I had to guess. Check to see if unsigned integer is used");
-        VertexBufferObject<Vec2> *TestGeo = new VertexBufferObject<Vec2>();
-        VertexBufferObject<Vec4> *TestColor = new VertexBufferObject<Vec4>();
-        std::vector<Vec2> Verts;
-        std::vector<Vec4> Cols;
+
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
@@ -388,21 +400,29 @@ class App
                     MainRenderer->draw_Line(x * 8.0f, y * 8.0f ,x * 8.0f + 7 ,y * 8.0f + 7);
                     Verts.push_back({ x * 8.0f, y * 8.0f });
                     Verts.push_back({ x * 8.0f + 7, y * 8.0f  + 7});
-
                     Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
                 }
             }
         }
+        GEOMETRY = new OpenGL::Geometry();
+
+        TestColor = new VertexBufferObject<Vec4>();
+        TestGeo = new VertexBufferObject<Vec2>();
+
+        SCENE.Create();
 
         TestGeo->Update(Verts);
         TestColor->Update(Cols);
-
-
+        GEOMETRY->Add(TestGeo);
+        GEOMETRY->Add(TestColor);
+         
         /* Create FBO to Test with */
         {
             /// NOTE: I BELIEVE DEFAULT SHADER IS BROKE
-            OpenGL::RenderPass FrameBuffer = MainRenderer->new_RenderPass(SCREEN_X, SCREEN_Y, &getWindow().defaultShader());
-            FBO = FrameBuffer.FBO; 
+            test_RenderPass = &MainRenderer->new_RenderPass(SCREEN_X, SCREEN_Y, MainRenderer->InstanceRenderer);
+            test_RenderPass->attach(GEOMETRY);
+
+            FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
             FBO->Bind();
         }
   
@@ -434,17 +454,12 @@ class App
         }
 
         // Setup Dear ImGui binding
-        SCENE.Create();
-
-        
-
-
-
         DEBUG_CODE(CheckGLERROR());
 	}
  
     virtual void OnRender() override
     {
+        TODO("OK EVERYTHING WITH THE VERTEX ARRAY OBJECTS IS WORKING HOWEVER I NEED TO ADD A PROPER SHADER AND GEOMETRY TO FULLY ADD PROOFS 6/26");
         FBO->Bind();
         {// Bind the Framebuffer Object
 
@@ -454,25 +469,23 @@ class App
             {// Bind the Shader and the Uniforms
                 ModelMatrix.Bind();
                 getCamera().Bind();
-                SCENE.Render();                
+                SCENE.Render();
             }
             SCENE.RENDERER->Unbind();
 
-        //  MainRenderer->Render();
+            MainRenderer->Render();
             DEBUG_CODE(CheckGLERROR());
-
-            ProfilerTest->Render();
-            TestTexture->g_Handle();
-           
-        //  MainRenderer->renderImage({ 100, 100 }, { 100, 300 }, TestTexture);
-        //  MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
         }
-
         FBO->Unbind();
-        // Renders the Frame Buffer Object we Rendered all the Images to
-        MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
 
-        DEBUG_CODE(CheckGLERROR());
+        test_RenderPass->Render();
+
+        
+     //  Renders the Frame Buffer Object we Rendered all the Images to
+     //  MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
+         MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, test_RenderPass->FBO->RenderTarget);
+
+        DEBUG_CODE(CheckGLERROR()); 
 	}
 	virtual void OnUpdate() override
 	{// User Genrated Per Frame Update
@@ -560,7 +573,9 @@ class App
 
             /* Clickable Position Slider for the Camera */
             {
-                float H = WorldCamera->Height(), W = WorldCamera->Width();
+                float
+                    H = (float)WorldCamera->Height(), 
+                    W = (float) WorldCamera->Width();
                 ImGui::InputFloat("Width", &W, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Height", &H, 10.0f, 1.0f, "%.3f");
                 WorldCamera->Size = { W,H };

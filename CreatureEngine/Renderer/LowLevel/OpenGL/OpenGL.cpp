@@ -592,7 +592,8 @@ namespace OpenGL
 
 
 
-    uint32_t  set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
+
+    uint32_t set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
     {
         CheckGLERROR();
 
@@ -617,11 +618,21 @@ namespace OpenGL
             }
         );
 
-        glEnableVertexAttribArray(Location);
-        glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+        enable_Attribute(Location);
+        Attribute_Pointer(Location, _elements);
+
         CheckGLERROR();
         return Location;
     }
+    void enable_Attribute(uint32_t _location)
+    {
+        glEnableVertexAttribArray(_location);
+    }
+    void Attribute_Pointer(uint32_t _location, uint32_t _elements)
+    {
+        glVertexAttribPointer(_location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+    }
+
 
     void set_Divisor(uint8_t _location, uint32_t _divisor)
     {
