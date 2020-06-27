@@ -77,7 +77,7 @@ namespace OpenGL
 
         LineRenderer = new Shader(Line_shader_v, Line_shader_f);
         VBO_Test = new VertexBufferObject<Vec4>();
-        DEBUG_CODE(CheckGLERROR());
+
         LineRenderer->Bind();
         {
             OpenGL::bind_VAO(LineVAO);
@@ -107,7 +107,6 @@ namespace OpenGL
     }
     void Renderer2D::Render()
     {
-        DEBUG_CODE(CheckGLERROR());
 
         OpenGL::bind_VAO(QuadVAO);
         Update();
@@ -120,7 +119,6 @@ namespace OpenGL
         InstanceRenderer->Unbind();
 
         OpenGL::bind_VAO(LineVAO);
-        DEBUG_CODE(CheckGLERROR());
 
         LineRenderer->Bind();
         {
@@ -129,7 +127,6 @@ namespace OpenGL
             Renderer::drawArrayLines(VBO_Test->GL_Handle, (uint32_t)Line_Data.size() * 2);
         }
         LineRenderer->Unbind();
-        DEBUG_CODE(CheckGLERROR());
     }
     void Renderer2D::Flush()
     {// Clears buffer, perhaps change this idk

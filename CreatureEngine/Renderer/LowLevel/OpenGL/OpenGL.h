@@ -13,8 +13,7 @@
 #define DEFAULT_BUFFER_ACCESS  GL_STATIC_DRAW
 
 
-
-
+extern std::string OpenGL_ErrorList;
 
 
 namespace OpenGL

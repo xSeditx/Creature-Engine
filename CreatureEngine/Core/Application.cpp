@@ -90,6 +90,9 @@ std::mutex DEBUGMutex;
 	 MSG msg;
 	 size_t PreviousTime{ 0 };
      std::string Name = getWindow().g_Title()  + " FPS: ";
+     FrameTimes.emplace_back(1);
+ 
+
 	 while (isRunning())
 	 {
 		 size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
@@ -98,6 +101,7 @@ std::mutex DEBUGMutex;
 		 if (Time > 1000)
 		 {
              getWindow().s_Title(Name + std::to_string((int)FPS));
+             FrameTimes.emplace_back((float)FPS);
 			 FPS = 0;
 			 PreviousTime = NewTime;
 		 }
@@ -131,10 +135,8 @@ std::mutex DEBUGMutex;
      {
          OnRenderGUI();
      }
-     ImGui::End();
      ImGui::Render();
      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 
 	 mainWindow.Sync();
  }
@@ -296,7 +298,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	{
 		SetForegroundWindow(Handle);                           // Slightly Higher Priority
 		SetFocus(Handle);
-		ShowWindow(Handle, SW_SHOW);
+        ShowWindow(Handle, SW_MAXIMIZE);// SW_SHOW);
 		UpdateWindow(Handle);
 	}
     s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));

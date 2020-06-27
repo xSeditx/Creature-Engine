@@ -49,7 +49,7 @@ namespace OpenGL
     {
 
         /* Constructs the Render pass object */
-        RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal, GLenum _format)
+        RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA)
             :
             GPU_Program{_shader}
         {
@@ -84,6 +84,13 @@ namespace OpenGL
         }
 
 
+        void update_Geometry(std::vector<Vec2> _vertices)
+        {
+            my_Mesh->Vertices->Update(_vertices);
+        }
+
+
+
         /* Updates all the buffers and Cameras if the User calls for it */
         void Update()
         {
@@ -99,15 +106,15 @@ namespace OpenGL
             // Can likely do away with Unbind in the future but for now it is needed
             FBO->Bind();
             {// Our FrameBuffer
+                FBO->Clear();
                 GPU_Program->Bind();
                 {// Our Shader
-                        /// GEOMETRY NEEDS TO GO HERE
+                    /// GEOMETRY NEEDS TO GO HERE
                     VAO->Bind();
                     mainCamera->Bind();
                     GPU_Program->SetUniform("ModelMatrix", Mat4(1.0f));
 
                     Renderer::drawArray((uint32_t)my_Mesh->Vertices->size());
-
                 }
                 FBO->Unbind();
             }

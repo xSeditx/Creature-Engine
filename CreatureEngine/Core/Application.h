@@ -88,6 +88,7 @@ private:
         }Input;
 
     public:
+
         InputDevices& getInput()
         {
             return Input;
@@ -233,6 +234,7 @@ private:
 
  public:
      size_t FPS{ 0 };
+     std::vector<float> FrameTimes;
     Application();
     //Application(int _width, int _height, std::string _name) noexcept;
 

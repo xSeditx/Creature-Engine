@@ -119,14 +119,14 @@ public:
 
 		/// ------------------------Bindless Address stuff---------------------------------
  
-        Address = OpenGL::get_Bindless_Address();
+//        Address = OpenGL::get_Bindless_Address();
         OpenGL::make_Buffer_Resident();
  
 		Size = ElementCount * Stride;
 		///--------------------------------------------------------------------------------
 
         Unbind();
-		BufferPtr = &Data[0];
+		//BufferPtr = &Data[0];
 	}
 
     /* Create a buffer object that stores data for OpenGL while allowing change of Default Access */
@@ -148,10 +148,9 @@ public:
 	
     /* Create a VBO from an std::vector of Data */
     VertexBufferObject(std::vector<value_type> _vec)
-	{
-        __debugbreak(); /// MAKE SURE THIS IS WORKING CORRECTLY
-		*this = &VertexBufferObject<value_type>(&_vec[0], _vec.size());
-	}
+        :
+        VertexBufferObject<value_type>(_vec.data(), _vec.size())
+	{}
 	void Update(std::vector<value_type>& _data)
 	{
         REFACTOR("DATA: Is simply debug shit, clean this up in the future. && This needs to have the Access changed from default Access and to the Access of this Buffer however I see no way to change the Acces type");
@@ -257,6 +256,7 @@ public:
 	NO_COPY_OR_ASSIGNMENT(VertexArrayObject);
 
 	VertexArrayObject();
+
     template<typename _Ty>
 	VertexArrayObject(VertexBufferObject<_Ty>& vbo);
 
@@ -270,14 +270,13 @@ public:
 
 	template<typename T>
 	void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
-	{
-		/// I HAD THIS BECAUSE COLOR WAS CAUSING ISSUES LIKELY BECAUSE ITS A VEC 3 and Not a Vec4		if (bufferT == COLOR) return;
+	{/// Might make this return the Location of the Attribute for the user although it is already stored in the BufferObject
 		if (GL_Handle == NULL)
 		{
             GL_Handle = OpenGL::new_VAO();
 		}
 
-		Bind(); // First Bind the buffer to make it Current in the OpenGL Context
+ 		Bind(); // First Bind the buffer to make it Current in the OpenGL Context
 
 		GLint Amount = sizeof(T) / sizeof(float);
 
@@ -290,7 +289,6 @@ public:
             ElementCount = buffer->ElementCount;
             buffer->AttributeType = INDICE;
             OpenGL::bind_IBO(buffer->GL_Handle);
-
             return; //  If VBO is Indices then bind it to the VAO and return before attribute is set.
         }
         break;
@@ -299,7 +297,7 @@ public:
 		case BufferTypes::VERTEX:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexPosition");
-			if (buffer->Location == -1) return;
+            if (buffer->Location == -1) { __debugbreak();  return; }
 			buffer->AttributeType = VERTEX;
 		}
 	    break;
@@ -307,15 +305,21 @@ public:
 		case BufferTypes::COLOR:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexColor");
-			if (buffer->Location == -1) return;
+            if (buffer->Location == -1) 
+            {
+                __debugbreak();  return; 
+            }
 			buffer->AttributeType = COLOR;
 		}
 		break;
 
 		case BufferTypes::NORMAL:
-		{
-			buffer->Location = Shader::get().AttributeLocation("VertexNormal");
-			if (buffer->Location == -1) return;
+        {
+            buffer->Location = Shader::get().AttributeLocation("VertexNormal");
+            if (buffer->Location == -1)
+            {
+                __debugbreak();  return;
+            }
 			buffer->AttributeType = NORMAL;
 		}
 		break;
@@ -323,7 +327,10 @@ public:
 		case BufferTypes::UVCOORD:
 		{
 			buffer->Location = Shader::get().AttributeLocation("TextureCoord");
-			if (buffer->Location == -1) return;
+            if (buffer->Location == -1) 
+            {
+                __debugbreak();  return; 
+            }
 			buffer->AttributeType = UVCOORD;
 		}
 		break;
@@ -331,7 +338,11 @@ public:
 		case BufferTypes::TANGENT:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexTangent");
-			if (buffer->Location == -1) return;
+            if (buffer->Location == -1) 
+            { 
+                __debugbreak();  
+                return; 
+            }
 			buffer->AttributeType = TANGENT;
 
 		}
@@ -340,7 +351,11 @@ public:
 		case BufferTypes::BITANGENT:
 		{
 			buffer->Location = Shader::get().AttributeLocation("VertexBitangent");
-			if (buffer->Location == -1) return;
+            if (buffer->Location == -1)
+            {
+                __debugbreak();
+                return;
+            }
 			buffer->AttributeType = BITANGENT;
 		}
 		break;
@@ -350,47 +365,7 @@ public:
 		_GL(glEnableVertexAttribArray(buffer->Location));
 		_GL(glVertexAttribPointer(buffer->Location, Amount, GL_FLOAT, GL_FALSE, 0, (char*)NULL));
 	}
-
-	void Render();
 };
-
-
-//uint32_t  set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
-//{
-//    uint32_t Location = glGetAttribLocation(_shaderID, _name);
-//    glEnableVertexAttribArray(Location);
-//    glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
-//    CheckGLERROR();
-//    return Location;
-//}
-//uint32_t set_Attribute(uint8_t _elements, const char* _name)
-//{
-//    int H = Shader::getHandle();
-//    int32_t Location = glGetAttribLocation(H, _name);
-//
-//    DEBUG_CODE
-//    (
-//        if (Location == -1)
-//        {
-//            Print("ERROR: Attribute does not exist");
-//            __debugbreak();
-//        }
-//    );
-//    glEnableVertexAttribArray(Location);
-//    glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
-//    CheckGLERROR();
-//    return Location;
-//}
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -534,15 +509,16 @@ public:
     /* Render to the Default FBO, Will likely change name of this to SwapBuffer */
     void Render();
 
-    static Shader* ScreenShader;
+    static Shader*  ScreenShader;
     static uint32_t ScreenVAO;
     static uint32_t ScreenVBO;
     static uint32_t ScreenIBO;
 
     static std::string Frenderer;
 	static std::string Vrenderer;
-	static Vec2 ScreenQuad[6];
+	static Vec2  ScreenQuad[6];
     static uint32_t Indices[6];
+
 	/* Checks an ID to see if it is a Frame Buffer Object already */
 	static bool isFBO(uint32_t _fbo)
 	{

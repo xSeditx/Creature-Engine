@@ -1,3 +1,82 @@
+
+              /// This needs to go
+            std::string VRenderer =
+                "#version 330 core                                       \n\
+                layout(location = 0) in vec2 VertexPosition;             \n\
+                layout(location = 1) in vec4 VertexColor;                \n\
+                uniform mat4 ProjectionMatrix;                           \n\
+                uniform mat4 ViewMatrix;                                 \n\
+                out vec4 Col;                                            \n\
+                void main()                                              \n\
+                {                                                        \n\
+                    Col = VertexColor;                                   \n\
+                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));     \n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( VertexPosition.x, VertexPosition.y, -1.0, 1.0); \n\
+                }";
+          
+            std::string FRenderer =
+                "#version 330 core    \n\
+                in vec4 Col;          \n\
+                out vec4 FragColor;   \n\
+                void main()           \n\
+                {                     \n\
+                    FragColor = Col;  \n\
+                }";
+          
+            /// NOTE: I BELIEVE DEFAULT SHADER IS BROKE
+           // test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, new Shader(VRenderer, FRenderer)); //&MainRenderer->new_RenderPass(SCREEN_X, SCREEN_Y, MainRenderer->InstanceRenderer);
+           // test_RenderPass->attach(GEOMETRY);
+
+
+float Plot_Getter(void* data, int idx)
+{
+//    ImGui::ImGuiPlotArrayGetterData* plot_data = (ImGuiPlotArrayGetterData*)data;
+    const float v = 0;// (float)data[idx]; //*(const float*)(const void*)((const unsigned char*)plot_data->Values + (size_t)idx * plot_data->Stride);
+    return v;
+}
+
+
+        //Vertices_VBO->Bind();
+        //OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec2) / sizeof(float), "VertexPosition");
+        //Colors_VBO->Bind();
+        //OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VertexColor");
+       //
+        //glBindVertexArray(0);
+        // glBindBuffer(GL_ARRAY_BUFFER, 0);
+        /* Setup the Shader so that our Locations are Linked */
+        // {
+         // RENDERER->Bind();
+         // { 
+         //     Vertices_VAO->Bind();
+         // 
+         //     Vertices_VBO->Update(Vertices);
+         //     OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "VertexPosition");
+         //     Colors_VBO->Update(Colors);
+         //     OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VertexColor");
+         // 
+         // 
+         //     //Vertices_VAO->Attach(BufferTypes::VERTEX, Vertices_VBO);
+         //     //Vertices_VAO->Attach(BufferTypes::COLOR,  Colors_VBO);
+         // } 
+         // RENDERER->Unbind();
+//m_program->bind();
+//{
+//    m_object.bind();
+//    glDrawArrays(GL_TRIANGLES, 0, sizeof(sg_vertexes) / sizeof(sg_vertexes[0]));
+//    m_object.release();
+//}
+//m_program->release();
+//
+//
+//Vertices_VBO->Update(Vertices);
+//OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "VertexPosition");
+//Colors_VBO->Update(Colors);
+//OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VertexColor");
+       // }
+
+
+
     // GLuint VAO{ 0 }, VBO{ 0 }, COL{ 0 };
         // VAO = OpenGL::new_VAO();  // new VertexArrayObject();
 // VBO = OpenGL::new_VBO();  // Vertices_VBO = new VertexBufferObject<Vec_t>();

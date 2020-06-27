@@ -117,6 +117,10 @@ void ElementArrayBuffer::Unbind()
 ///=================================================================================================================
 
 
+GLuint GL_Handle;
+int ElementCount;
+std::vector<Attribute*> Buffers;
+
 
 VertexArrayObject::VertexArrayObject()
 	:
@@ -125,36 +129,31 @@ VertexArrayObject::VertexArrayObject()
 {
 	Buffers.reserve(5);
 }
+
 template<typename _Ty>
 VertexArrayObject::VertexArrayObject(VertexBufferObject<_Ty>& vbo)
 	:
 	ElementCount(0),
-	GL_Handle(NULL)
+	GL_Handle(OpenGL::new_VAO())
 {
-	_GL(glGenVertexArrays(1, &GL_Handle));
 	Buffers.reserve(5);
 }
+
 #ifdef BINDLESS_ATTRIBUTES
-void VertexArrayObject::Bind() {}
-void VertexArrayObject::Unbind() {}
-
+    void VertexArrayObject::Bind()   {}
+    void VertexArrayObject::Unbind() {}
 #else
-void VertexArrayObject::Bind()
-{
-    OpenGL::bind_VAO(GL_Handle);
-}
-void VertexArrayObject::Unbind()
-{
-    OpenGL::bind_VBO(0);
-}
-
+    void VertexArrayObject::Bind()
+    {
+        OpenGL::bind_VAO(GL_Handle);
+    }
+    void VertexArrayObject::Unbind()
+    {
+        OpenGL::unbind_VAO();
+        REFACTOR("Get Rid of all this rendering shit below and remove it from the Buffers in order to remove dependencies on Texture and Image classes. It is fucking useless. ")
+    }
 #endif
-void VertexArrayObject::Render()
-{
-    REFACTOR("While I almost like this it will likely lead to confusion and should be reconsidered and potentially changed ");
-	Bind();
-	_GL(glDrawElements(GL_TRIANGLES, ElementCount, GL_UNSIGNED_INT, nullptr));
-}
+ 
 
 _static Shader* FrameBufferObject::ScreenShader{ nullptr };
 _static uint32_t FrameBufferObject::ScreenVAO{ 0 };

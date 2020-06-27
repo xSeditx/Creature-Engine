@@ -63,8 +63,11 @@ void Camera2D::Translate(Vec2 _pos)
 
 void Camera2D::Bind()
 {// Binds our Camera to OpenGL context and Sets Uniforms
+    DEBUG_CODE(CheckGLERROR());
+    Shader *Current = &Shader::get();
 	Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
 	Shader::get().SetUniform("ViewMatrix", ViewMatrix);
+    DEBUG_CODE(CheckGLERROR());
 }
 void Camera2D::Update()
 {// Updates the interpolation of the Camera

@@ -9,6 +9,8 @@
 
 using namespace Graphics;
 
+std::string OpenGL_ErrorList;
+
 namespace OpenGL
 {
 
@@ -209,7 +211,7 @@ namespace OpenGL
     void bind_VAO(int32_t _vaoID)
     {
         glBindVertexArray(_vaoID);
-        DEBUG_CODE(CheckGLERROR());
+        DEBUG_CODE(CheckGLERROR());  
     }
     void unbind_VAO()
     {
@@ -256,6 +258,8 @@ namespace OpenGL
 
     void bind_VBO(uint32_t _vboID)
     { // Sets Vertex Buffer Object as Current 
+        DEBUG_CODE(CheckGLERROR());
+
         glBindBuffer(GL_ARRAY_BUFFER, _vboID);
         DEBUG_CODE(CheckGLERROR());
     }
@@ -673,7 +677,10 @@ namespace OpenGL
             case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
             case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
             }
-            std::cout << "OpenGL Error: " << error.c_str() << " \n File: " << file << "\n Line: [" << line << "]" << std::endl;
+            std::string output = "OpenGL Error: " + error + " \n File: " + file + "\n Line: [" + std::to_string(line) + "]" + "\n \n";
+            OpenGL_ErrorList += output;
+            std::cout << output << std::endl; 
+
         }
         return errorCode;
     }
