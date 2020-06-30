@@ -12,9 +12,6 @@
     <Filter Include="Source Files\ECS">
       <UniqueIdentifier>{4c60fc77-fd15-4ff6-a24a-2130f63734cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Input">
-      <UniqueIdentifier>{83dd8a70-30fe-46f3-bde5-a64bca91a950}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Profiling">
       <UniqueIdentifier>{e37b9d64-d99d-4541-8a3b-872e7723478f}</UniqueIdentifier>
     </Filter>
@@ -77,6 +74,9 @@
     </Filter>
     <Filter Include="Source Files\SDKs">
       <UniqueIdentifier>{22199540-c9fc-45ac-afb4-bf1f68e9bb68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\System\Input">
+      <UniqueIdentifier>{83dd8a70-30fe-46f3-bde5-a64bca91a950}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -143,11 +143,8 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp">
       <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\Layer.cpp">
-      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel</Filter>
-    </ClCompile>
     <ClCompile Include="Core\EventSystem.cpp">
-      <Filter>Source Files\Input</Filter>
+      <Filter>Source Files\System\Input</Filter>
     </ClCompile>
     <ClCompile Include="Core\Observer.cpp">
       <Filter>Source Files\System</Filter>
@@ -217,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="SDKs\ImGUI\imgui_impl_opengl3.cpp">
       <Filter>Source Files\SDKs</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Layer.cpp">
+      <Filter>Source Files\System\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -307,11 +307,8 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.h">
       <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Layer.h">
-      <Filter>Source Files\Graphics\OpenGL\Renderer\LowLevel</Filter>
-    </ClInclude>
     <ClInclude Include="Core\EventSystem.h">
-      <Filter>Source Files\Input</Filter>
+      <Filter>Source Files\System\Input</Filter>
     </ClInclude>
     <ClInclude Include="Core\Observer.h">
       <Filter>Source Files\System</Filter>
@@ -381,6 +378,9 @@
     </ClInclude>
     <ClInclude Include="SDKs\ImGUI\imgui_impl_opengl3.h">
       <Filter>Source Files\SDKs</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Layer.h">
+      <Filter>Source Files\System\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

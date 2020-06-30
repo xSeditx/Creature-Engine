@@ -19,6 +19,7 @@ namespace Graphics
 	{
 		WARN_ME("SOIL Load on the Texture constructor is Deactivated right now");
         Picture = new Bitmap(_file);
+        GL_Handle = OpenGL::new_TextureHandle();
 
         Bind();
 

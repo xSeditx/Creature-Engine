@@ -10,15 +10,15 @@ Camera2D *debugCamera{ nullptr };
 //===============================================================================================================
 
 std::string VQuadRenderer =
-"#version 330 core     \n\
+"#version 330 core                 \n\
 layout(location = 0) in vec2 aPos; \n\
-uniform vec4 Position; \n\
+uniform vec4 Position;             \n\
 uniform mat4 ProjectionMatrix;     \n\
 uniform mat4 ViewMatrix;           \n\
-out vec2 TexCoords; \n\
+out vec2 TexCoords;                \n\
 void main()                        \n\
 {                                  \n\
-    TexCoords = aPos; \n\
+    TexCoords = aPos;              \n\
     mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
     gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
@@ -38,6 +38,167 @@ void main()                    \n\
 
 namespace OpenGL
 {
+
+
+
+    /* Constructs the Render pass object */
+    RenderPass::RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype , GLenum _internal , GLenum _format )
+        :
+        GPU_Program{ _shader }
+    {
+        std::vector<Vec2> VertData;
+        std::vector<Vec4> ColorData;
+        float MaxX{ 100 }, MaxY{ 100 };
+        float grid = 1;
+        float size = 100;
+        for_loop(y, MaxY)
+        {
+            for_loop(x, MaxX)
+            {
+                Vec2 TL = { x* grid,y * grid };
+                Vec2 BR = { x * grid + size, y * grid + size };
+
+                VertData.push_back({ TL.x, TL.y });
+                VertData.push_back({ BR.x, TL.y });
+                VertData.push_back({ TL.y, BR.x });
+                VertData.push_back({ BR.x ,BR.y });
+                VertData.push_back({ TL.x, BR.y });
+                VertData.push_back({ BR.x, TL.y });
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
+
+            }
+        }
+
+        FBO = new FrameBufferObject(_width, _height, _datatype, _internal, _format);
+        VAO = new VertexArrayObject();
+        mainCamera = new Camera2D();
+        my_Mesh = new Geometry();
+
+        GPU_Program->Bind();
+        {
+            VAO->Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec2>(VertData));
+            VAO->Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec4>(ColorData));
+        }
+        GPU_Program->Unbind();
+    }
+
+    void RenderPass::Render()
+    {
+        Vec4 Stored_Color = OpenGL::get_ClearColor();
+        // Can likely do away with Unbind in the future but for now it is needed
+        FBO->Bind();
+        {// Our FrameBuffer
+            OpenGL::set_ClearColor(Stored_Color);
+            FBO->Clear();
+            GPU_Program->Bind();
+            {// Our Shader
+                /// GEOMETRY NEEDS TO GO HERE
+                VAO->Bind();
+                {
+                    mainCamera->Bind();
+                    //GPU_Program->SetUniform("ModelMatrix", Mat4(1.0f));
+
+                    Renderer::drawArray(10000);
+                }
+                VAO->Unbind();
+            }
+            GPU_Program->Bind();
+        }
+        FBO->Unbind();
+        OpenGL::set_ClearColor(Stored_Color);
+    }
+    void RenderPass::attach(Camera2D *_camera)
+    {
+        mainCamera = _camera;
+    }
+    void RenderPass::attach(Geometry *_mesh)
+    {
+        GPU_Program->Bind();
+        {
+            VAO->Bind();
+            {
+                my_Mesh = _mesh;
+                VAO->Attach(BufferTypes::VERTEX, _mesh->Vertices);
+                VAO->Attach(BufferTypes::COLOR, _mesh->Colors);
+            }
+            VAO->Unbind();
+        }
+    }
+    void RenderPass::attach(VertexArrayObject* _vao)
+    {
+        VAO = _vao;
+    }
+
+
+
+    
+
+
+
+    void RenderPass::set_Attributes(VertexBufferObject<Vec2>* _vertices, VertexBufferObject<Vec4>* _colors)
+    {
+        __debugbreak();
+        my_Mesh->Add(_vertices);
+        my_Mesh->Add(_colors);
+
+        GPU_Program->Bind();
+        {
+            VAO->Attach(BufferTypes::VERTEX, _vertices);
+            VAO->Attach(BufferTypes::COLOR, _colors);
+        }
+        GPU_Program->Unbind();
+    }
+    void RenderPass::update_Geometry(std::vector<Vec2> _vertices)
+    {
+        __debugbreak();
+        my_Mesh->Vertices->Update(_vertices);
+    }
+    void RenderPass::Update()
+    {
+        __debugbreak();
+        if (needs_Updated)
+        {
+            /// UPDATE THE BUFFERS IF WE HAVE CHANGED ANYTHING IN THEM'
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     Renderer2D::Renderer2D(Vec2 _size)
     {
         WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
@@ -51,8 +212,8 @@ namespace OpenGL
 
         InstanceRenderer->Bind();
         {// Sets up the VAO for the Quads
-            OpenGL::bind_VAO(QuadVAO);
 
+            OpenGL::bind_VAO(QuadVAO);
             OpenGL::bind_VBO(QuadVBO);
             OpenGL::set_Attribute(2, "aPos");
 
@@ -70,7 +231,7 @@ namespace OpenGL
         OpenGL::set_BufferData(sizeof(QuadData), QuadData);
 
 
-        Layers.push(new Layer("Root Layer"));
+///        Layers.push(new Layer("Root Layer"));
 
         LineVAO = OpenGL::new_VAO();
         LineVBO = OpenGL::new_VBO();

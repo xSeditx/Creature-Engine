@@ -4,6 +4,15 @@
 #include<cmath>
 #include<string>
 
+
+/* 
+
+IMGUI ISSUE:   Docking Branch:
+    SetWindowPos does not function properly when we have windows docked in one another. The Size nor the Position is properly set.
+*/
+
+
+
 // CMAKE Pluggin
 // https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
 
@@ -93,49 +102,6 @@ Listener MouseWheel( [](Event _msg)
     }
 });
 
-
-EntityComponentSystem *TestECS;
-SystemList MainSystems;
-
-COMPONENT(MovementComponent)
-{
-    Vec3 Velocity;
-    Vec3 Acceleration;
-};
-COMPONENT(PositionComponent)
-{
-    Vec3 Position;
-};
-struct MovementSystem
-    :
-    public BaseSystem
-{
-    MovementSystem()
-        :
-        BaseSystem()
-    {
-        AddComponentType(PositionComponent::ID);
-        AddComponentType(MovementComponent::ID);
-
-        DEBUG_CODE(SystemName = (typeid(this).name()));
-    }
-
-    virtual void UpdateComponents(float _delta, BaseComponent** _components)
-    {
-        PositionComponent* Pos      = (PositionComponent*)_components[0];
-        MovementComponent* Movement = (MovementComponent*)_components[1];
-
-        Movement->Velocity += Movement->Acceleration;
-        Pos->Position += Movement->Velocity;
-        Movement->Velocity *= .9;
-    };
-};
-
-MovementSystem    movementSys;
-PositionComponent PosComponent;
-MovementComponent TestMovementComponent;
-
-
 /* ============================================================================================
            Rough Sketch of a Scene class to determine what I am going to need
            For the Finalized Version of it. Also gives me a Template to rework the 
@@ -152,7 +118,7 @@ public:
     {
         /* Create all the Data we are going to fill the Buffers with */
         {
-            float Max = 1000;
+            float Max = 10;
             for_loop(i, 1000 * 3)
             {
                 Vertices.push_back
@@ -167,7 +133,15 @@ public:
                 );
             }
         } 
-        
+        /* Create the FrameBuffer we will be Rendering to */
+        {
+            FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
+            FBO->Bind();
+            {
+                OpenGL::set_ClearColor(.2, .5, .7, 1);
+            }
+            FBO->Unbind();
+        }
         /* Create all the Needed Buffers for this class */
         {
 
@@ -175,9 +149,6 @@ public:
             Vertices_VAO = new VertexArrayObject();
             Vertices_VBO = new VertexBufferObject<Vec_t>(Vertices);
             Colors_VBO   = new VertexBufferObject<Vec4>(Colors);
-
-
-
         }
 
         /* Link all the Buffers into a Single VertexArrayObject */
@@ -191,11 +162,10 @@ public:
         }
     }
 
-
     /* Update the Positions of the Vertices Once Per Frame */
     void Update()
     {
-        float Amount = 10;
+        float Amount = 1;
 
         for_loop(i, 1000 * 3)
         {
@@ -209,7 +179,12 @@ public:
         /* Update my Buffer Object */
         Vertices_VAO->Bind();
         {
-            Vertices_VBO->Update(Vertices);
+            Vertices_VBO->Bind();
+            {
+                OpenGL::set_Subbuffer_Data(Vertices.size() * sizeof(Vec2), Vertices.data(), 0);
+            }
+            Vertices_VBO->Unbind();
+
         }
         Vertices_VAO->Unbind();
     }
@@ -217,24 +192,31 @@ public:
     /* Render the Entire Scene */
     void Render()
     {
-        RENDERER->Bind();
+        FBO->Bind();
         {
-            Vertices_VAO->Bind();
+            FBO->Clear();
+            RENDERER->Bind();
             {
-                Application::getCamera().Bind();
-                OpenGL::Renderer::drawArray(Vertices.size());
+                Vertices_VAO->Bind();
+                {
+                    Application::getCamera().Bind();
+                    OpenGL::Renderer::drawArray(Vertices.size());
+                }
+                Vertices_VAO->Unbind();
             }
-            Vertices_VAO->Unbind();
+            RENDERER->Unbind();
         }
-        RENDERER->Unbind();
+        FBO->Unbind();
     }
 
-    VertexArrayObject         *Vertices_VAO;
-    VertexBufferObject<Vec_t> *Vertices_VBO;
-    VertexBufferObject<Vec4>  *Colors_VBO;
-    std::vector<Vec_t> Vertices;
+    Shader                        *RENDERER{ nullptr };
+    FrameBufferObject                  *FBO{ nullptr };
+    VertexArrayObject         *Vertices_VAO{ nullptr };
+    VertexBufferObject<Vec_t> *Vertices_VBO{ nullptr };
+    VertexBufferObject<Vec4>    *Colors_VBO{ nullptr };
+
+    std::vector<Vec_t> Vertices;          
     std::vector<Vec4>  Colors;
-    Shader *RENDERER{ nullptr };
 
     std::string VRenderer =
         "#version 330 core                         \n\
@@ -272,80 +254,19 @@ class App
     //                                                USER VARIABLES
     //=================================================================================================================================================================
 
-    EntityComponentSystem *ECS{ nullptr };
-
-	Vec2 Vertices[3] = { {200.0, 200.0 },  { 400.0, 200.0 },  { 0.0, 400.0 } };
-	Vec2 UVcoords[3] = { {  0.0,   0.0 },  {   1.0,   0.0 },  { 1.0,   1.0 } };
-
-	GLuint Indices[3] = { 0, 1, 2 };
-    GLuint VAO{ 0 }, VBO{ 0 };
-
-
-    Mesh *TestMesh{ nullptr };
-    Shader *TextureShader{ nullptr };
-
-    FrameBufferObject *FBO{ nullptr };
-    Graphics::Texture *TestTexture{ nullptr };
-    Graphics::Texture *TestTexture2{ nullptr };
-
-	OpenGL::Renderer2D *MainRenderer{ nullptr };
-	Profiling::DisplayWindow *ProfilerTest{ nullptr };
-
-	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
-
-    /// This needs to go
-    std::string VTextureRenderer =
-        "#version 330 core                                                                                                                        \n\
-         layout(location = 0) in vec2 aPos;                                                                                                       \n\
-         layout(location = 1) in vec4 Position;                                                                                                   \n\
-         uniform mat4 ProjectionMatrix;                                                                                                           \n\
-         uniform mat4 ViewMatrix;                                                                                                                 \n\
-         out  vec2 TexCoords;                                                                                                                     \n\
-         void main()                                                                                                                              \n\
-         {                                                                                                                                        \n\
-             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                                                                     \n\
-             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);                                                               \n\
-             gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
-         }";
-
-    std::string FTextureRenderer =
-        "#version 330 core                                                     \n\
-         uniform sampler2D DiffuseTexture;                                     \n\
-         in  vec2 TexCoords;                                                   \n\
-         out vec4 FragColor;                                                   \n\
-         void main()                                                           \n\
-         {                                                                     \n\
-             FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
-         }";
-
-    //=================================================================================================================================================================
-    std::vector<Vec2> Triangle_list =
-    {
-        Vec2(-1),Vec2(-1),
-        Vec2(1),Vec2(-1),
-        Vec2(-1),Vec2(1),
-    };
-
-    ImGuiIO io;
-    MyScene SCENE;
-	size_t  PreviousTime;
-    
-    VertexBufferObject<Vec2> *TestGeo;
-    VertexBufferObject<Vec4> *TestColor;
-    OpenGL::Geometry *GEOMETRY; 
+    OpenGL::Renderer2D *MainRenderer{ nullptr };
     OpenGL::RenderPass *test_RenderPass;
+    MyScene SCENE;
 
-    std::vector<Vec2> Verts;
-    std::vector<Vec4> Cols;
+	size_t  PreviousTime;
 
-
-
+    /* Initializes User Variables */
     virtual void OnCreate() override
 	{// Initialization
         
-     //  TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
-     //  TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Complete ", " Springs Class Complete ");
-     //  TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
+        // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Incomplete contains Errors " , " Memory Pool Class Complete ");
+        // TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Incomplete  contains Errors ", " Springs Class Complete ");
+        // TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Incomplete  contains Errors " , " Ring Buffer Class Complete ");
          
 
         /* Load up the Listeners for the Various Input Events */
@@ -356,43 +277,6 @@ class App
 
         /* Creates a Renderer for our Application */
 		MainRenderer = new OpenGL::Renderer2D({SCREEN_X, SCREEN_Y});
-
-        /* Set the Application window Camera and World Camera to the Renderer */
-        {
-            getWindow().s_Camera(&MainRenderer->g_Camera());
-            WorldCamera = &getCamera();
-        }
-
-        /* Create a Triangle to Test with */
-		//getWindow().defaultShader().Bind();
-        //{
-        //    VAO = OpenGL::new_VAO();
-        //    OpenGL::bind_VAO(VAO);
-        //
-        //    VBO = OpenGL::new_VBO();
-        //    OpenGL::bind_VBO(VBO);
-        //    OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
-        //    OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
-        //}
-
-
-        Init_DefaultShaders();
-
- 		/*   Make a Profiler Window which Displays the FPS as a graph */
-        {/// THIS IS ALL FUCKED UP, Implement ImGUI with the Profiler ~EXTREMELY IMPORTANT~!
-           /// 6/27 TRASH TRASH TRASH WHY ARE YOU STILL HERE? 
-            float Aspect = getCamera().AspectRatio;
-            float Size = 100;
-            ProfilerTest = new Profiling::DisplayWindow
-            (
-                { SCREEN_X / 2  , SCREEN_Y / 2 },
-                { std::floor((Size)* Aspect), std::floor((Size * 2)) },
-                { std::floor(Size*.35 * Aspect), std::floor((Size)) }
-            );
-            ProfilerTest->Update(1);
-        }
-
-
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
@@ -411,80 +295,32 @@ class App
                         { 7, 7 },
                         OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255)
                     );
-                    MainRenderer->draw_Line(x * 8.0f, y * 8.0f ,x * 8.0f + 7 ,y * 8.0f + 7);
-                    Verts.push_back({ x * 8.0f, y * 8.0f });
-                    Verts.push_back({ x * 8.0f + 7, y * 8.0f  + 7});
-                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
+                    MainRenderer->draw_Line(x * 8.0f, y * 8.0f, x * 8.0f + 7, y * 8.0f + 7);
                 }
             }
         }
-        GEOMETRY = new OpenGL::Geometry();
 
-        TestColor = new VertexBufferObject<Vec4>();
-        TestGeo   = new VertexBufferObject<Vec2>();
+        /* Set the Application window Camera and World Camera to the Renderer */
+        {
+            getWindow().s_Camera(&MainRenderer->g_Camera());
+            WorldCamera = &getCamera();
+        }
 
         SCENE.Create();
 
-        TestGeo->Update(Verts);
-        TestColor->Update(Cols);
-        GEOMETRY->Add(TestGeo);
-        GEOMETRY->Add(TestColor);
-         
-        /* Create FBO to Test with */
-        {
-            FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
-            FBO->Bind();
-        }
-  
-
-        /* Load Test Textures to Test With using two different Texture Constructors */
-        {
-            Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
-            TestTexture = new Graphics::Texture(*Bmp);
-            TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
-        }
-
-        TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
-
-        ///Entity Component System
-        {
-            //    ECS = new EntityComponentSystem();
-            //    SystemList mainSystems;
-            //    ECStest::TransformComponent transformComp;
-            //    ECS->AddComponent(transformComp);
-            //    ECStest::InitECS();
-            //    TestECS = new EntityComponentSystem();
-            /// Create Entities
-            //    EntityPTR Entity = TestECS->MakeEntity(PosComponent, TestMovementComponent);
-            /// Create Systems
-            //    MainSystems.AddSystem(movementSys);
-            //    TestECS->AddComponent(Entity, &PosComponent);
-            //    TestECS->AddComponent(Entity, &TestMovementComponent);
-        }
+        test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, SCENE.RENDERER);
+        test_RenderPass->attach(WorldCamera);
+        test_RenderPass->attach(SCENE.Vertices_VAO);
 
         DEBUG_CODE(CheckGLERROR());
 	}
- 
 
-
-
+    /* Renders User Defined Geometry */
     virtual void OnRender() override
     {
-        FBO->Bind();
-        {// Bind the Framebuffer Object
-  
-            FBO->Clear();
-            SCENE.Render(); 
-            MainRenderer->Render();
-        }
-        FBO->Unbind();
-
-      // test_RenderPass->Render();
-
-     //==> Renders the Frame Buffer Object we Rendered all the Images to
-         MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
-     //  MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, test_RenderPass->FBO->RenderTarget);
-
+        SCENE.Render(); 
+        MainRenderer->Render();
+        test_RenderPass->Render();
         DEBUG_CODE(CheckGLERROR()); 
 	}
 
@@ -495,50 +331,41 @@ class App
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
-	 	ProfilerTest->Update((uint32_t)(Time));
-
-    //  MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
-    //  TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
 	}
 
     /* Cleans up the Memory of stuff we still have Active */
     virtual void OnEnd() override
     {// Exit of the Application and Clean up
-
-        delete(TestTexture);
-        delete(TestTexture2);
-        delete(FBO);
         delete(MainRenderer);
-        delete(ProfilerTest);
-        delete(ECS);
-
     }
-
 
     /* ==========================================================================================
            GUI STUFF, POTENTIALLY MIGHT CHANGE THIS LATER
     /* ========================================================================================== */
-
-    virtual void OnUpdateGUI() override 
+    /* Updates the GUI Data: NOTE: Incomplete */
+    virtual void OnUpdateGUI() override
     {    }
+
+    /* Renders our ImGui Data */
     virtual void OnRenderGUI() override 
     {
- 
-        ImGui::ShowDemoWindow();
 
-        static float Slide[3] = { 0,0,-300 };
+        static float Slide[3] = {-650,-400,-300 };
+        Vec2 MainWindowSize = getWindow().g_Size();
+        int Boarder = 10;
 
         /* Start the Camera Widget */
         ImGui::Begin("Camera");
         {
             Vec2 Camera_Position = WorldCamera->g_Position();
-
             /* Position Slider for the Camera */
             {
                 ImGui::SliderFloat3("Position", Slide, -1000, 1000);
                 WorldCamera->Translate({ Slide[0], Slide[1] });
                 WorldCamera->set_Zoom(Slide[2]);
             }
+            ImGui::SetWindowPos(ImVec2(MainWindowSize.x - (MainWindowSize.x * 0.15f), 0), true);
+            ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) - Boarder) });
 
             /* Position Slider for the Camera */
             {
@@ -546,7 +373,7 @@ class App
                 ImGui::InputFloat("Y", &Camera_Position.y, 10.0f, 1.0f, "%.3f");
                 WorldCamera->s_Position(Camera_Position);
             }
-
+        
             /* Clickable Position Slider for the Camera */
             {
                 float
@@ -562,7 +389,7 @@ class App
                 ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
                 WorldCamera->s_Position(Camera_Position);
             }
-
+        
             /* Color Picker Widget for the Background Color */
             {
                 Vec4 c = getWindow().g_ClearColor();
@@ -571,51 +398,51 @@ class App
                 glClearColor(Col[0], Col[1], Col[2], 1);
                 getWindow().s_ClearColor({ Col[0], Col[1], Col[2], 1 });
             }
-
-            ImGui::PlotLines("Frame Times", (float*)&FrameTimes.front(), FrameTimes.size(), 0, std::string("FPS:" + std::to_string((uint32_t)FrameTimes.back())).c_str(), 0, 150, ImVec2(ImGui::GetWindowWidth(), 50));
-
+        
+            static float Top_Time = 0;
+            if (FrameTimes.back() > Top_Time)
+            {
+                Top_Time = FrameTimes.back();
+            }
+            ImGui::PlotLines("Frame Times", (float*)&FrameTimes.front(), FrameTimes.size(), 0, std::string("FPS:" + std::to_string((uint32_t)FrameTimes.back())).c_str(), 0, Top_Time, ImVec2(ImGui::GetWindowWidth(), 50));
+        
         }
         ImGui::End();
- 
+
         /* Displays the FrameBuffers */
         ImGui::Begin("FrameBuffers");
         {
+            
             /* Displays the FrameBuffer */
-            float WinSize = ImGui::GetWindowHeight() - (ImGui::GetWindowHeight() * 0.15);
-            ImGui::Image(reinterpret_cast<ImTextureID*>(FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            float WinSize = (float)(ImGui::GetWindowHeight() - (ImGui::GetWindowHeight() * 0.15));
+            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)SCENE.FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
-            ImGui::Image(reinterpret_cast<ImTextureID*>(FBO->DepthTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)SCENE.FBO->DepthTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
-
-        //  ImGui::Image(reinterpret_cast<ImTextureID*>(test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+        
+            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
-        //  ImGui::Image(reinterpret_cast<ImTextureID*>(test_RenderPass->FBO->DepthTarget->g_Handle()) , ImVec2(WinSize, WinSize));
+            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)test_RenderPass->FBO->DepthTarget->g_Handle()) , ImVec2(WinSize, WinSize));
             ImGui::SameLine();
-
-
+        
+        
             char *Buff = const_cast<char*>(OpenGL_ErrorList.c_str());
             ImGui::InputTextMultiline("OpenGL Errors",Buff, OpenGL_ErrorList.size());
+
+            ImGui::SetWindowPos(ImVec2(0, MainWindowSize.y - (MainWindowSize.y  * 0.2f)), true); 
+            ImGui::SetWindowSize({ MainWindowSize.x, (MainWindowSize.y  * 0.2f)  - Boarder});
         }
         ImGui::End();
+        ImGui::Begin("Dummy");
+
+        ImGui::ShowDemoWindow();
+        ImGui::SetWindowPos(ImVec2(0, 0), true); // 768 - ImGui::GetWindowHeight() - 40
+        ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - (MainWindowSize.y  * 0.2f) });
+        ImGui::End();
+
     } 
+
 };
-
-
-static const char* fmt_table_int[3][4] =
-{
-    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
-    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
-    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
-};
-static const char* fmt_table_float[3][4] =
-{
-    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
-    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
-    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
-};
-
-
-
 
 
 
@@ -661,9 +488,10 @@ int main()
 
 
 
+
+
 int LOOP_COUNT{ 1000000 };
 
-#define MY_WRAPPER
 #define NUMBER_OF_THREADS 200
 #define _TEST_THREADPOOL_SPEED    1
 
@@ -879,6 +707,39 @@ bool TEST_PROFILE_WINDOW()
 
 	return true;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1192,3 +1053,18 @@ target_link_libraries(main A)
  
  
  */
+
+static const char* fmt_table_int[3][4] =
+{
+    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
+    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
+    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
+};
+static const char* fmt_table_float[3][4] =
+{
+    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
+    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
+    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
+};
+
+

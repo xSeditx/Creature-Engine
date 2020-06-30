@@ -2,9 +2,11 @@
 
 #include "Renderer.h"
 #include "Core/Common.h"
-#include "../../../Layer.h"
 #include"GLBuffers.h"
 
+/// Think I should add my Layers here and make the Renderer handle the Layer. The Application can have a Renderer
+/// And that Renderer handles the layers and the reponse to Messages passed to it. I might even use my Pub/Sub setup
+/// On a Modified variation of my Layers Module.
     
         //  uint32_t new_RenderPass(int _width, int _height, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
          // uint32_t new_RenderPass(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format);
@@ -49,104 +51,25 @@ namespace OpenGL
     {
 
         /* Constructs the Render pass object */
-        RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA)
-            :
-            GPU_Program{_shader}
-        {
-            FBO = new FrameBufferObject(_width, _height, _datatype, _internal, _format);
-            VAO = new VertexArrayObject();
-            mainCamera = new Camera2D();
-            my_Mesh = new Geometry();
+        RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
 
-            GPU_Program->Bind();
-            {
-               // my_Mesh->Vertices->Bind();
-               // OpenGL::set_Attribute(4, "VertexPosition"); 
-               //
-               // my_Mesh->Colors->Bind();
-               // OpenGL::set_Attribute(4, "VertexColor");
-            }
-            GPU_Program->Unbind();
-        }
-
-
-        void set_Attributes(VertexBufferObject<Vec2>* _vertices, VertexBufferObject<Vec4>* _colors)
-        {
-            my_Mesh->Add(_vertices);
-            my_Mesh->Add(_colors);
-
-            GPU_Program->Bind();
-            {
-                VAO->Attach(BufferTypes::VERTEX, _vertices);
-                VAO->Attach(BufferTypes::COLOR, _colors);
-            }
-            GPU_Program->Unbind();
-        }
-
-
-        void update_Geometry(std::vector<Vec2> _vertices)
-        {
-            my_Mesh->Vertices->Update(_vertices);
-        }
-
-
+        void set_Attributes(VertexBufferObject<Vec2>* _vertices, VertexBufferObject<Vec4>* _colors);
+        /* Updates the Vertices for the Render Scene */
+        void update_Geometry(std::vector<Vec2> _vertices);
 
         /* Updates all the buffers and Cameras if the User calls for it */
-        void Update()
-        {
-            if (needs_Updated)
-            {
-                /// UPDATE THE BUFFERS IF WE HAVE CHANGED ANYTHING IN THEM'
-            }
-        }
-
-        /* Executes the Render Pass. NOTE: Might Change the name to Execute*/
-        void Render()
-        {
-            // Can likely do away with Unbind in the future but for now it is needed
-            FBO->Bind();
-            {// Our FrameBuffer
-                FBO->Clear();
-                GPU_Program->Bind();
-                {// Our Shader
-                    /// GEOMETRY NEEDS TO GO HERE
-                    VAO->Bind();
-                    mainCamera->Bind();
-                    GPU_Program->SetUniform("ModelMatrix", Mat4(1.0f));
-
-                    Renderer::drawArray((uint32_t)my_Mesh->Vertices->size());
-                }
-                FBO->Unbind();
-            }
-            GPU_Program->Bind();
-        }
+        void Update();
+        /* Executes the Render Pass. NOTE: Might Change the name to Execute */
+        void Render();
 
         /* Adds a Camera to the Current RenderPass */
-        void attach(Camera2D *_camera)      
-        {
-            mainCamera = _camera;
-        }
+        void attach(Camera2D *_camera);
 
         /* Adds a Mesh to the Current RenderPass */
-        void attach(Geometry *_mesh)     
-        {
-            GPU_Program->Bind();
-            {
-                VAO->Bind();
-                {
-                    my_Mesh = _mesh;
-                    VAO->Attach(BufferTypes::VERTEX, _mesh->Vertices);
-                    VAO->Attach(BufferTypes::COLOR, _mesh->Colors);
-                }
-                VAO->Unbind();
-            }
-        }
+        void attach(Geometry *_mesh);
 
         /* Attaches an ArrayObject Format. Likely combine this with the Shader and pass it in differently */
-        void attach(VertexArrayObject* _vao) 
-        {  
-            VAO = _vao;   
-        }
+        void attach(VertexArrayObject* _vao);
 
 
         /*================================
@@ -187,7 +110,7 @@ namespace OpenGL
 
 		NO_COPY_OR_ASSIGNMENT(Renderer2D);
 
-        layerStack Layers;
+       // layerStack Layers;
 
         using Texture_ID_t = uint32_t;
         using Mesh_ID_t    = uint32_t;

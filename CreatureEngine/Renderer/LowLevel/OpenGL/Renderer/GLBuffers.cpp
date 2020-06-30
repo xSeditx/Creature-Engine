@@ -11,6 +11,19 @@ Attribute::Attribute(BufferTypes t)
 	:
 	AttributeType(t)
 {}
+template<typename _Ty>
+Attribute::Attribute(uint32_t _handle, _Ty *_data, uint32_t _count)
+    :
+    AttributeType(BufferTypes::NONE),
+    ElementCount(_count),
+    Stride(sizeof(_Ty)),
+    Size(ElementCount + sizeof(_Ty)),
+    GL_Handle(OpenGL::new_VBO)
+{
+    OpenGL::bind_VBO(GL_Handle);
+    OpenGL::set_BufferData(ElementCount*Stride, NULL);
+    OpenGL::unbind_VBO();
+}
 
 void Attribute::Bind()
 {
@@ -18,7 +31,7 @@ void Attribute::Bind()
 }
 void Attribute::Unbind()
 {
-    OpenGL::bind_VBO(0);
+    OpenGL::unbind_VBO();
 }
 void Attribute::Release()
 {// Should I just orphan this? Should I delete it? I wish to reclaim the name and free any allocation associate with it.
@@ -263,6 +276,7 @@ void FrameBufferObject::Destroy()
 void FrameBufferObject::Bind()
 {
 	OpenGL::bind_FBO(GL_Handle);
+    DEBUG_CODE(isActive = true);
 }
 void FrameBufferObject::BindWrite()
 {// Bind for Reading 
@@ -291,7 +305,8 @@ void FrameBufferObject::ClearDepthBuffer()
 
 void FrameBufferObject::Unbind()
 {
-    OpenGL::bind_FBO(0);
+    OpenGL::unbind_FBO();
+    DEBUG_CODE(isActive = false);
 }
 bool FrameBufferObject::ValidateFrameBuffer()
 {

@@ -47,25 +47,30 @@ public:
 	Attribute();
 	Attribute(BufferTypes t);
 
+    template<typename _Ty>
+    Attribute(uint32_t _handle, _Ty *_data, uint32_t count);
+
 	void Bind();
 	void Unbind();
 
 	void* Map(GLenum accessflags);
 	void* MapRange(int offset, int count, GLenum accessflags);
 
-	size_t MappedSize();
 	bool isMapped();
 	void Release();
 	void Destroy();
+	size_t MappedSize();
 
+	GLint  Location{ 0 };
 	GLuint GL_Handle{ 0 };
-	BufferTypes AttributeType{NONE};
-	GLint Location{ 0 };
 	GLuint ElementCount{ 0 };
+	BufferTypes AttributeType{NONE};
 
-	GLuint64EXT Address{ 0 };
 	GLuint      Size{ 0 };
 	GLuint      Stride{ 0 };
+	GLuint64EXT Address{ 0 };
+    DEBUG_CODE(bool isActive{ false });
+
 	void* BufferPtr{ nullptr };
 };
 
@@ -82,26 +87,25 @@ public:
 
 	using value_type = T;
 	using pointer_type = T*;
-
 	VertexBufferObject() 
-    {
-        DEBUG_CODE(CheckGLERROR());
-        ElementCount = 0;
-        Data.resize(ElementCount);
+    {/// NEED TO MAKE ADJUSTMENTS TO AVOID UNNEEDED VBOS. 
+        /// Attribute constructor should Initialize the values it is responsible for
+        //  ElementCount = 0;
+        Data.reserve(100);// Should we reserve more? Reserve any at all?
 
-        Stride = sizeof(value_type);
+        //  Stride = sizeof(value_type);
 
         GL_Handle = OpenGL::new_VBO();
-        Bind();
-        OpenGL::set_BufferData(ElementCount*Stride, NULL);
+        //  Bind();
+        //  OpenGL::set_BufferData(ElementCount*Stride, NULL);
 
         /// ------------------------Bindless Address stuff---------------------------------
         /// glGetBufferParameterui64vNV(GL_ARRAY_BUFFER, GL_BUFFER_GPU_ADDRESS_NV, &Address);
         /// glMakeBufferResidentNV(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        Size = ElementCount * Stride;
+        //  Size = ElementCount * Stride;
         ///--------------------------------------------------------------------------------
-        Unbind();
-        //BufferPtr = &Data[0];
+        //  Unbind();
+        //  BufferPtr = &Data[0];
     }
 
     /* Create a buffer object that stores data for OpenGL */
@@ -227,6 +231,7 @@ public:
  	}
 
 protected:
+
 	std::vector<value_type> Data;
 };
 
@@ -468,14 +473,15 @@ public:
 
     /* Creates a Frame Buffer Object for the user to Render to */
 	FrameBufferObject(int _width, int _height, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
+    
+    GLuint GL_Handle{ NULL };
 
-	GLuint GL_Handle;
+    Graphics::Texture *RenderTarget{ nullptr };
+    Graphics::Texture *DepthTarget{ nullptr };
 
-    Graphics::Texture *RenderTarget;
-    Graphics::Texture *DepthTarget;
+    Vec2 Size{ 0,0 };
 
-	Vec2 Size;
-
+    DEBUG_CODE(bool isActive{ false });
 
     /* Returns the Width of our Frame Buffer Object */
     uint32_t Width()  { return static_cast<uint32_t>(Size.x); }
