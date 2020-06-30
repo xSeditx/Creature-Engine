@@ -28,6 +28,11 @@ namespace Graphics
         int BPP{ 0 };
 
         rawData = SOIL_load_image(_file.c_str(), &Sx, &Sy, &BPP, SOIL_LOAD_AUTO);
+        if (!rawData)
+        {
+            DEBUGPrint(CON_Red, "Failed to load texture: " << _file);
+            return;
+        }
 
         Size = Vec2(Sx, Sy);
         BytesPerPixel = BPP;

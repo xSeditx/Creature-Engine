@@ -148,7 +148,7 @@ public:
         /* Create all the Needed Buffers for this class */
         {
 
-            RENDERER     = new Shader(VRenderer, FRenderer);
+            RENDERER = shader_BasicRenderer;
             Vertices_VAO = new VertexArrayObject();
             Vertices_VBO = new VertexBufferObject<Vec_t>(Vertices);
             Colors_VBO   = new VertexBufferObject<Vec4>(Colors);
@@ -221,29 +221,6 @@ public:
     std::vector<Vec_t> Vertices;          
     std::vector<Vec4>  Colors;
 
-    std::string VRenderer =
-        "#version 330 core                         \n\
-                layout(location = 0) in vec2 VertexPosition; \n\
-                layout(location = 1) in vec4 VertexColor; \n\
-                uniform mat4 ProjectionMatrix;     \n\
-                uniform mat4 ViewMatrix;           \n\
-                out vec4 Col;                      \n\
-                void main()                        \n\
-                {                                  \n\
-                    Col = VertexColor; \n\
-                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-                    gl_Position = ModelViewProjectionMatrix * vec4( VertexPosition.x, VertexPosition.y, -1.0, 1.0); \n\
-                }";
-
-    std::string FRenderer =
-        "#version 330 core            \n\
-                in vec4 Col;          \n\
-                out vec4 FragColor;   \n\
-                void main()           \n\
-                {                     \n\
-                    FragColor = vec4(Col.x, Col.y, Col.z,1);  \n\
-                }";
 };
 
 
@@ -260,8 +237,8 @@ class App
     OpenGL::Renderer2D *MainRenderer{ nullptr };
     OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
-
-	size_t  PreviousTime;
+    Graphics::Texture *test_Texture;
+    size_t  PreviousTime;
 
     /* Initializes User Variables */
     virtual void OnCreate() override
@@ -270,7 +247,10 @@ class App
         // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Incomplete contains Errors " , " Memory Pool Class Complete ");
         // TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Incomplete  contains Errors ", " Springs Class Complete ");
         // TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Incomplete  contains Errors " , " Ring Buffer Class Complete ");
-         
+
+        /// Likely add this to the Base Application class to relieve the user of this. Create a setup that only Initializes the desired shaders
+        init_DefaultShaders();
+
 
         /* Load up the Listeners for the Various Input Events */
         {
@@ -311,10 +291,11 @@ class App
 
         SCENE.Create();
 
-        test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, SCENE.RENDERER);
+        test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, shader_BasicRenderer);
         test_RenderPass->attach(WorldCamera);
         test_RenderPass->attach(SCENE.Vertices_VAO);
 
+        test_Texture = new Graphics::Texture("../Test2.bmp");
         DEBUG_CODE(CheckGLERROR());
 	}
 
@@ -324,7 +305,17 @@ class App
         SCENE.Render(); 
         MainRenderer->Render();
         test_RenderPass->Render();
-        DEBUG_CODE(CheckGLERROR()); 
+
+        shader_TextureRenderer->Bind();
+        {
+            OpenGL::bind_VAO(DebugQuadVAO);
+            shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
+            test_Texture->Bind(0);
+            OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
+        }
+        shader_TextureRenderer->Unbind();
+
+        DEBUG_CODE(CheckGLERROR());
 	}
 
     /* Runs on Applications Frame Update */
@@ -418,14 +409,14 @@ class App
             
             /* Displays the FrameBuffer */
             float WinSize = (float)(ImGui::GetWindowHeight() - (ImGui::GetWindowHeight() * 0.15));
-            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)SCENE.FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            ImGui::Image((ImTextureID*)((size_t)SCENE.FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
-            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)SCENE.FBO->DepthTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            ImGui::Image((ImTextureID*)((size_t)SCENE.FBO->DepthTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
         
-            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            ImGui::Image((ImTextureID*)((size_t)test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
-            ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)test_RenderPass->FBO->DepthTarget->g_Handle()) , ImVec2(WinSize, WinSize));
+            ImGui::Image((ImTextureID*)((size_t)test_Texture->g_Handle()) , ImVec2(WinSize, WinSize));
             ImGui::SameLine();
         
         

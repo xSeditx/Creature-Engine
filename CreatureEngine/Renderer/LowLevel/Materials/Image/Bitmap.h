@@ -49,7 +49,7 @@ namespace Graphics
 
         iVec2 Dimensions() { return Size; }
 	private:
-		uint8_t* rawData;// Raw Mapped Data 
+        uint8_t* rawData{ nullptr };// Raw Mapped Data 
 		iVec2     Size{0,0}; // A int[2] containing the Width and Height of our Image
 		char BytesPerPixel{4}; // How many bytes each of our pixels contain. 
 		/// Likely later incorperate a RedBitsCount, BlueBitCount, GreenBitCount etc... for nonstandard bitstructures in the image

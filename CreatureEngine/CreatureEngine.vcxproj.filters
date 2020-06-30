@@ -179,9 +179,6 @@
     <ClCompile Include="Core\Math\Math.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp">
-      <Filter>Source Files\Graphics\OpenGL\Renderer\Shader</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Sprite.cpp">
       <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>

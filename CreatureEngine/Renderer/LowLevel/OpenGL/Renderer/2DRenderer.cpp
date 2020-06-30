@@ -1,38 +1,11 @@
 #include "2DRenderer.h"
 
 
-GLuint DebugQuadVAO{ 0 };
-GLuint DebugQuadVBO{ 0 };
-Shader *QuadRenderer{ nullptr };
-Camera2D *debugCamera{ nullptr };
+//GLuint DebugQuadVAO{ 0 };
+//GLuint DebugQuadVBO{ 0 };
+//Shader *QuadRenderer{ nullptr };
+//Camera2D *debugCamera{ nullptr };
 
-
-//===============================================================================================================
-
-std::string VQuadRenderer =
-"#version 330 core                 \n\
-layout(location = 0) in vec2 aPos; \n\
-uniform vec4 Position;             \n\
-uniform mat4 ProjectionMatrix;     \n\
-uniform mat4 ViewMatrix;           \n\
-out vec2 TexCoords;                \n\
-void main()                        \n\
-{                                  \n\
-    TexCoords = aPos;              \n\
-    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
-}";
-
-std::string FQuadRenderer =
-"#version 330 core \n\
-uniform sampler2D DiffuseTexture;\n\
-in vec2 TexCoords; \n\
-out vec4 FragColor;            \n\
-void main()                    \n\
-{                              \n\
-    FragColor = texture(DiffuseTexture, TexCoords);\n\
-}";
 
 
 
@@ -64,12 +37,12 @@ namespace OpenGL
                 VertData.push_back({ BR.x ,BR.y });
                 VertData.push_back({ TL.x, BR.y });
                 VertData.push_back({ BR.x, TL.y });
-                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
-                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
-                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
-                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
-                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
-                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
 
             }
         }
@@ -354,14 +327,14 @@ namespace OpenGL
         OpenGL::bind_VAO(DebugQuadVAO);   
         mainCamera.Update();
 
-        QuadRenderer->Bind();
+        shader_QuadRenderer->Bind();
         {
             mainCamera.Bind();
-            QuadRenderer->SetUniform("Position", _pos.x, _pos.y, _size.x, _size.y);
-            QuadRenderer->SetTextureUniform("DiffuseTexture", _image->g_Handle(), 1);
+            shader_QuadRenderer->SetUniform("Position", _pos.x, _pos.y, _size.x, _size.y);
+            shader_QuadRenderer->SetTextureUniform("DiffuseTexture", _image->g_Handle(), 1);
             Renderer::drawArray(DebugQuadVBO,  6 );
         }
-        QuadRenderer->Unbind();
+        shader_QuadRenderer->Unbind();
     }
 
     void Renderer2D::draw_Line(float x1, float y1, float x2, float y2)
@@ -444,34 +417,6 @@ namespace OpenGL
 
 
 
-
-
-
-
-bool Init_DefaultShaders()
-{
-    QuadRenderer = new Shader(VQuadRenderer, FQuadRenderer);
-    DebugQuadVAO = OpenGL::new_VAO();
-    DebugQuadVBO = OpenGL::new_VBO();
-    debugCamera = new Camera2D(SCREEN_X, SCREEN_Y);
-    Vec2 QuadData[6] =
-    {
-        Vec2(0, 0),  Vec2(1, 0),  Vec2(0, 1),
-        Vec2(1, 1),  Vec2(0, 1),  Vec2(1, 0)
-    };
-    QuadRenderer->Bind();
-    {
-        OpenGL::bind_VAO(DebugQuadVAO);
-
-        OpenGL::bind_VBO(DebugQuadVBO);
-        OpenGL::set_Attribute(2, "aPos");
-        OpenGL::set_BufferData(sizeof(QuadData), QuadData);
-    }
-    QuadRenderer->Unbind();
-
-
-    return true;
-}
 
 
 /*

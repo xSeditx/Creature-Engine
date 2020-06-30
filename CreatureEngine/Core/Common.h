@@ -312,7 +312,7 @@ extern HANDLE hConsole;
 #    define DEBUGPrint(col, x) {DEBUGMutex.lock();\
                                 SetColor(col);\
                                 std::thread::id CurrentThread = std::this_thread::get_id();\
-                                std::cout <<  x << " : " << CurrentThread<< std::endl;\
+                                std::cout <<  x << " : Thread[" << CurrentThread << "]" << std::endl;\
                                 SetColor(7);\
                                 DEBUGMutex.unlock();}
 #else

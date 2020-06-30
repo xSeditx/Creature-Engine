@@ -114,38 +114,6 @@ protected:
 };
 
 
-extern Shader* TextureRenderer;
-
-
-
-
-extern Shader *shader_Basic; 
-extern Shader *shader_Blur;
-extern Shader *shader_Collider;
-extern Shader *shader_Debug;
-extern Shader *shader_DebugQuad;
-extern Shader *shader_Light;
-extern Shader *shader_Shadow;
-extern Shader *shader_Skybox;
-extern Shader *shader_Sprite;
-
-
-/* Built in Shaders for Rapid usecases
-NOTE: Might Enumerate these in the future to make loading and unloading of specific ones
-      simpler                                                                            */
-bool load_Builtin_Shaders();
-
-/* Frees the memory held by the built in Shaders*/
-bool cleanup_Builting_Shaders();
-
-
-
-void init_DefaultShaders();
-
-
-
-
-
 //class GPU_program
 //    : public Shader
 //{
@@ -162,11 +130,6 @@ void init_DefaultShaders();
 //class Camera2D;
 //extern Camera2D *debugCamera;
 //
-
-
-
-
-
 
 
 /*
@@ -190,3 +153,42 @@ const Shader& operator =(Shader&& _other)
 {
     return std::move(_other);
 } */
+
+/* Forward Declaration of Camera class : Note: I don't like this, I do not like having my Camera defined when I don't need to use it */
+class Camera2D;
+extern Camera2D *debug_Camera;
+
+extern Shader *shader_Basic;
+extern Shader *shader_Blur;
+extern Shader *shader_Collider;
+extern Shader *shader_Debug;
+extern Shader *shader_DebugQuad;
+extern Shader *shader_Light;
+extern Shader *shader_Shadow;
+extern Shader *shader_Skybox;
+extern Shader *shader_Sprite;
+extern Shader *shader_TextureRenderer;
+extern Shader *shader_QuadRenderer;
+extern Shader *shader_BasicRenderer;
+
+extern GLuint ImageQuadVAO;
+extern GLuint ImageQuadVBO;
+
+extern GLuint DebugQuadVAO;
+extern GLuint DebugQuadVBO;
+
+
+/* Built in Shaders for Rapid usecases
+NOTE: Might Enumerate these in the future to make loading and unloading of specific ones
+      simpler                                                                            */
+
+/* Loads Shaders built in mainly for Debugging purposes*/
+bool init_DefaultShaders();
+
+/* Loads Shader Files for Default Rendering Effects: NOTE: Subject to moving into the above so that loading external files is not needed */
+bool load_Builtin_Shaders();
+
+/* Frees the memory held by the built in Shaders*/
+bool cleanup_Builting_Shaders();
+
+

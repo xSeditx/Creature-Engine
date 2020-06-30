@@ -289,15 +289,6 @@ namespace OpenGL
 }// NS OpenGL  
 
 
-bool Init_DefaultShaders();
-extern Shader *QuadRenderer;
-extern GLuint DebugQuadVAO;
-extern GLuint DebugQuadVBO;
-extern Camera2D *debugCamera;
-
-
-
-
 
 
 
