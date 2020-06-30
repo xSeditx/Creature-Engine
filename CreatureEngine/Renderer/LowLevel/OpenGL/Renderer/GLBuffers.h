@@ -153,7 +153,7 @@ public:
     /* Create a VBO from an std::vector of Data */
     VertexBufferObject(std::vector<value_type> _vec)
         :
-        VertexBufferObject<value_type>(_vec.data(), _vec.size())
+        VertexBufferObject<value_type>(_vec.data(),(GLsizei)_vec.size())
 	{}
 	void Update(std::vector<value_type>& _data)
 	{

@@ -9,7 +9,10 @@
 
 IMGUI ISSUE:   Docking Branch:
     SetWindowPos does not function properly when we have windows docked in one another. The Size nor the Position is properly set.
-*/
+
+    Color Picker does not move with Window which has been Docked and can only be seen when Hovering the Window above the Area meaning that the World Vertex Positions do not update when the Window Updates if it is docked in another.
+
+    */
 
 
 
@@ -138,7 +141,7 @@ public:
             FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
             FBO->Bind();
             {
-                OpenGL::set_ClearColor(.2, .5, .7, 1);
+                OpenGL::set_ClearColor(.2f, .5f, .7f, 1.0f);
             }
             FBO->Unbind();
         }
