@@ -14,7 +14,7 @@ namespace ECStest
     }
 
     SurfaceComponent::SurfaceComponent
-    (Graphics::Texture* _diffuse, Graphics::Texture* _normals, Graphics::Texture* _roughness, Graphics::Texture* _specular) noexcept
+    (Texture* _diffuse, Texture* _normals, Texture* _roughness, Texture* _specular) noexcept
         :
         Diffuse(_diffuse),
         Normals(_normals),

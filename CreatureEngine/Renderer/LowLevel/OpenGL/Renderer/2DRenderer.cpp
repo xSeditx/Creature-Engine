@@ -15,7 +15,7 @@ namespace OpenGL
 
 
     /* Constructs the Render pass object */
-    RenderPass::RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype , GLenum _internal , GLenum _format )
+    RenderPass::RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal, GLenum _format)
         :
         GPU_Program{ _shader }
     {
@@ -48,6 +48,12 @@ namespace OpenGL
         }
 
         FBO = new FrameBufferObject(_width, _height, _datatype, _internal, _format);
+        FBO->Bind();
+        {
+            OpenGL::set_Viewport(0, 0, _width, _height);
+        }
+        FBO->Unbind();
+
         VAO = new VertexArrayObject();
         mainCamera = new Camera2D();
         my_Mesh = new Geometry();
@@ -204,7 +210,7 @@ namespace OpenGL
         OpenGL::set_BufferData(sizeof(QuadData), QuadData);
 
 
-///        Layers.push(new Layer("Root Layer"));
+///     Layers.push(new Layer("Root Layer"));
 
         LineVAO = OpenGL::new_VAO();
         LineVBO = OpenGL::new_VBO();
@@ -304,7 +310,7 @@ namespace OpenGL
         CurrentRenderColor.a = _a * coef;
     }
 
-    void Renderer2D::Submit(Shader& _shader, Graphics::Texture& _texture, Mesh& _mesh)
+    void Renderer2D::Submit(Shader& _shader, Texture& _texture, Mesh& _mesh)
     {
         uint32_t Shader_Index = static_cast<uint32_t>(Shaders.size());
         Texture_ID_t Texture_Index = static_cast<uint32_t>(Textures.size());
@@ -322,7 +328,7 @@ namespace OpenGL
         Buckets.emplace_back(Mat, Mesh_Index); //  RenderPair Bucket = { Mat, Mesh_Index };
 
     }
-    void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image)
+    void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Texture *_image)
     {
         OpenGL::bind_VAO(DebugQuadVAO);   
         mainCamera.Update();
@@ -405,7 +411,7 @@ namespace OpenGL
 //    using Material   = std::pair   < Surface, Shader_ID_t    >;
 //    using RenderPair = std::pair   < Material, Mesh_ID_t     >;
 //    std::vector<Shader*> Shaders;
-//    std::vector<Graphics::Texture*> Textures;
+//    std::vector<Texture*> Textures;
 //    std::vector<Mesh*> Meshes;
 //    std::vector<RenderPair> Buckets;
 

@@ -9,8 +9,8 @@
 //#    pragma comment(lib, "SOIL.lib")
 #endif
 
-namespace Graphics
-{
+//namespace Graphics
+//{
 	class CREATURE_API Bitmap
 	{
 	public:
@@ -54,4 +54,4 @@ namespace Graphics
 		char BytesPerPixel{4}; // How many bytes each of our pixels contain. 
 		/// Likely later incorperate a RedBitsCount, BlueBitCount, GreenBitCount etc... for nonstandard bitstructures in the image
 	};
-}
+//}

@@ -237,7 +237,7 @@ class App
     OpenGL::Renderer2D *MainRenderer{ nullptr };
     OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
-    Graphics::Texture *test_Texture;
+    Texture *test_Texture;
     size_t  PreviousTime;
 
     /* Initializes User Variables */
@@ -288,14 +288,14 @@ class App
             getWindow().s_Camera(&MainRenderer->g_Camera());
             WorldCamera = &getCamera();
         }
-
+        Application::setCamera(MainRenderer->g_Camera());
         SCENE.Create();
-
+         
         test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, shader_BasicRenderer);
-        test_RenderPass->attach(WorldCamera);
+        test_RenderPass->attach(  WorldCamera);;//MainRenderer->g_Camera())&Application::getCamera());//
         test_RenderPass->attach(SCENE.Vertices_VAO);
-
-        test_Texture = new Graphics::Texture("../Test2.bmp");
+      
+        test_Texture = new Texture("../Test2.bmp");
         DEBUG_CODE(CheckGLERROR());
 	}
 
@@ -359,7 +359,7 @@ class App
                 WorldCamera->set_Zoom(Slide[2]);
             }
             ImGui::SetWindowPos(ImVec2(MainWindowSize.x - (MainWindowSize.x * 0.15f), 0), true);
-            ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) - Boarder) });
+            ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) ) });
 
             /* Position Slider for the Camera */
             {

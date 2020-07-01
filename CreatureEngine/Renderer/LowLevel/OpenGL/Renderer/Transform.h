@@ -72,16 +72,14 @@
 		void set_Name(std::string _name)     noexcept { Name = _name;         }
 
 
-
 		void Bind() noexcept
 		{
 			Shader::get().SetUniform(Name.c_str(), Matrix);
 		}
 		void Update() noexcept
 		{
-			
-			Matrix = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
-			Matrix = glm::translate(Matrix, Position);
+			//  Set Identity and Rotate all axis followed with the Translation.
+			Matrix = glm::translate(glm::mat4(1.0f), Position);
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
 			Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));

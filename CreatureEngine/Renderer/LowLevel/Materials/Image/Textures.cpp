@@ -1,8 +1,8 @@
 
 #include"Texture.h"
 
-namespace Graphics
-{
+//namespace Graphics
+//{
     Texture::~Texture()
     {
         if (imageOwned)
@@ -114,7 +114,7 @@ namespace Graphics
         OpenGL::set_Texture_Minification(Target, _param);
 	}
 	
-}//End NS Graphics
+//}//End NS Graphics
 
 
 //  ALTERNATIVE.... Figure out what to do here

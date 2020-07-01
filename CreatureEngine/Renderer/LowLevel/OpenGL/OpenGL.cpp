@@ -7,7 +7,7 @@
 #include<utility>//std::pair
 #include<vector>//std::vector
 
-using namespace Graphics;
+//using namespace Graphics;
 
 std::string OpenGL_ErrorList;
 
@@ -549,6 +549,11 @@ namespace OpenGL
 
 
     //GL_CLIP_DISTANCEi
+    void set_DepthFunction(uint32_t _func)
+    {
+        glDepthFunc(_func);
+        CheckGLERROR();
+    }
 
 
     /* Enable State Functions */

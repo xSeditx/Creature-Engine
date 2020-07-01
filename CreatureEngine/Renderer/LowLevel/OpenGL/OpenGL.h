@@ -187,6 +187,10 @@ namespace OpenGL
 	CREATURE_API bool isStencilTestEnabled();
 	CREATURE_API bool isSeemlessTextureCubemapEnabled();
 
+    CREATURE_API void set_DepthFunction(uint32_t _func);
+
+
+
 	/* Disables states for OpenGL */
 	CREATURE_API void  EnableBlending();
 	CREATURE_API void  EnableColorLogicOperation();

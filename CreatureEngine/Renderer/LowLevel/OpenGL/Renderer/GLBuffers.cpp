@@ -247,15 +247,14 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
 
     Bind();
 
-    RenderTarget = new Graphics::Texture(Size, GL_RGBA);
-    DepthTarget = new  Graphics::Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
+    RenderTarget = new Texture(Size, GL_RGBA);
+    DepthTarget = new  Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTarget->g_Handle(), 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTarget->g_Handle(), 0);
 	ValidateFrameBuffer();
     OpenGL::EnableDepthTest();
-  
-	glDepthFunc(GL_LEQUAL);
+  	OpenGL::set_DepthFunction(GL_LEQUAL);
     OpenGL::set_Viewport(0, 0, _width, _height);
     Unbind();
 

@@ -9,8 +9,8 @@ uniform mat4 ViewMatrix;
 uniform mat4 ModelMatrix;
 uniform mat4 DepthMatrix;
 
-layout(location = 0) in vec3 VertexPosition;
-layout(location = 1) in vec3 VertexColor;
+layout(location = 0) in vec3 Position;
+layout(location = 1) in vec3 VColor;
 layout(location = 2) in vec3 VertexNormal;
 layout(location = 3) in vec2 TextureCoord;
 layout(location = 4) in vec3 VertexTangent;
@@ -39,18 +39,18 @@ out VS_OUT
 void main()
 {
 	OUT.TCoord = TextureCoord;
-    OUT.FPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
-    OUT.FColor = vec4(VertexColor, 1.0f);
+    OUT.FPosition = (ModelMatrix * vec4(Position, 1.0f)).xyz;
+    OUT.FColor = vec4(VColor, 1.0f);
     OUT.FNormal = normalize((ModelMatrix * vec4(VertexNormal, 0.0f)).xyz);
-	OUT.WorldPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+	OUT.WorldPosition = (ModelMatrix * vec4(Position, 1.0f)).xyz;
 
     mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix); 
     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);
-	vec4 WorldPosition = ModelMatrix * vec4(VertexPosition, 1.0f);
+	vec4 WorldPosition = ModelMatrix * vec4(Position, 1.0f);
 
-    OUT.ShadowCoord = DepthMatrix * vec4(VertexPosition, 1.0f);
+    OUT.ShadowCoord = DepthMatrix * vec4(Position, 1.0f);
 
-    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+    gl_Position = ModelViewProjectionMatrix * vec4(Position.xyz, 1.0f);
 }
 
 

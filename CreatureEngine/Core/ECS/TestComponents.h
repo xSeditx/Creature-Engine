@@ -23,12 +23,12 @@ namespace ECStest {
     COMPONENT(SurfaceComponent)
     {
         SurfaceComponent() = default;
-        SurfaceComponent(Graphics::Texture* _diffuse, Graphics::Texture* _normals, Graphics::Texture* _roughness, Graphics::Texture* _specular) noexcept;
+        SurfaceComponent(Texture* _diffuse, Texture* _normals, Texture* _roughness, Texture* _specular) noexcept;
 
-        Graphics::Texture* Diffuse{ nullptr };
-        Graphics::Texture* Normals{ nullptr };
-        Graphics::Texture* Roughness{ nullptr };
-        Graphics::Texture* Specular{ nullptr };
+        Texture* Diffuse{ nullptr };
+        Texture* Normals{ nullptr };
+        Texture* Roughness{ nullptr };
+        Texture* Specular{ nullptr };
     };
 
     SYSTEM(MovementSystem)

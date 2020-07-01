@@ -27,7 +27,7 @@ class Sprite
         Sprite_Renderer = new Shader(V_Renderer, F_Renderer);
         Sprite_Renderer->Bind();
         {
-            OpenGL::set_Attribute(2, "VertexPosition");
+            OpenGL::set_Attribute(2, "Position");
             OpenGL::set_Attribute(2, "TextureCoord");
         }
         Sprite_Renderer->Unbind();
@@ -96,9 +96,9 @@ class Sprite
     ///========================================================================
 
     /* Returns a pointer to the Texture Object in use by the Sprite */
-    Graphics::Texture& get_Texture() { return *Image_Texture; }
+    Texture& get_Texture() { return *Image_Texture; }
     /// This will return the Subimage of the Texture that this sprite uses for when single Texture pages contain multiple Image Objects 
-    Graphics::Texture& get_Texture(uint32_t _subimage) { TODO("Single Texture Pages will contain multiple Sprites and will be Indexed. This will return the specific image from the Input Subimage."); return *Image_Texture; }
+    Texture& get_Texture(uint32_t _subimage) { TODO("Single Texture Pages will contain multiple Sprites and will be Indexed. This will return the specific image from the Input Subimage."); return *Image_Texture; }
 
     /// For when proper Animation handling is created 
     void sprite_get_uvs()
@@ -113,7 +113,7 @@ class Sprite
         //  [7] = normalised percentage of pixel data from the original sprites height that has been saved to the texture page
     }
 private:
-    Graphics::Texture *Image_Texture{ nullptr };
+    Texture *Image_Texture{ nullptr };
     uint32_t Image_Width{ 0 };
     uint32_t Image_Height{ 0 };
 
@@ -151,7 +151,7 @@ private:
     Shader *Sprite_Renderer{ nullptr };
     std::string V_Renderer = "                    \n\
     #version 430                                  \n\
-    layout(location = 0) in vec2 VertexPosition;  \n\
+    layout(location = 0) in vec2 Position;  \n\
     layout(location = 1) in vec2 TextureCoord;    \n\
     uniform mat4 ProjectionMatrix;                \n\
     uniform mat4 ViewMatrix;                      \n\
@@ -162,7 +162,7 @@ private:
     void main()                                   \n\
     {                                             \n\
         TCoords = TextureCoord;                   \n\
-        vec2 Pos = vec2(VertexPosition.x + cos(Image_Angle) * Origin.x, VertexPosition.y + sin(Image_Angle) * Origin.y); \n\
+        vec2 Pos = vec2(Position.x + cos(Image_Angle) * Origin.x, Position.y + sin(Image_Angle) * Origin.y); \n\
         gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(Pos.xy, 0.0, 1.0); \n\
     }";
 

@@ -301,7 +301,7 @@ public:
 
 		case BufferTypes::VERTEX:
 		{
-			buffer->Location = Shader::get().AttributeLocation("VertexPosition");
+			buffer->Location = Shader::get().AttributeLocation("Position");
             if (buffer->Location == -1) { __debugbreak();  return; }
 			buffer->AttributeType = VERTEX;
 		}
@@ -309,7 +309,7 @@ public:
 
 		case BufferTypes::COLOR:
 		{
-			buffer->Location = Shader::get().AttributeLocation("VertexColor");
+			buffer->Location = Shader::get().AttributeLocation("VColor");
             if (buffer->Location == -1) 
             {
                 __debugbreak();  return; 
@@ -476,8 +476,8 @@ public:
     
     GLuint GL_Handle{ NULL };
 
-    Graphics::Texture *RenderTarget{ nullptr };
-    Graphics::Texture *DepthTarget{ nullptr };
+    Texture *RenderTarget{ nullptr };
+    Texture *DepthTarget{ nullptr };
 
     Vec2 Size{ 0,0 };
 

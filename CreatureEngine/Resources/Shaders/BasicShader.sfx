@@ -13,8 +13,8 @@ layout (std140) uniform Matrices
 uniform mat4 DepthMatrix;
 uniform mat4 ModelMatrix;
 
-layout(location = 0) in vec3 VertexPosition;
-layout(location = 1) in vec3 VertexColor;
+layout(location = 0) in vec3 Position;
+layout(location = 1) in vec3 VColor;
 layout(location = 2) in vec3 VertexNormal;
 layout(location = 3) in vec2 TextureCoord;
 layout(location = 4) in vec3 VertexTangent;
@@ -54,11 +54,11 @@ void main()
 {
     mat4 ModelViewMatrix = (Matrix.view * ModelMatrix); 
     mat4 ModelViewProjectionMatrix = (Matrix.projection * ModelViewMatrix);
-	vec4 WorldPosition = vec4(VertexPosition, 1.0f);
+	vec4 WorldPosition = vec4(Position, 1.0f);
 
 
-	OUT.FColor = vec4(VertexColor, 1.0f);
-    OUT.FPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+	OUT.FColor = vec4(VColor, 1.0f);
+    OUT.FPosition = (ModelMatrix * vec4(Position, 1.0f)).xyz;
     OUT.FNormal = normalize((ModelMatrix * vec4(VertexNormal, 0.0f)).xyz);
 	OUT.TCoord = TextureCoord;
 	OUT.LightDirection = normalize(LightPosition - OUT.FPosition);
@@ -70,12 +70,12 @@ void main()
     //-------------------------------------------------------------------
 
 	OUT.tbnMatrix = mat3(T,  cross(T, OUT.FNormal), OUT.FNormal);
-	OUT.WorldPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
-    OUT.ShadowCoord = DepthMatrix * vec4(VertexPosition, 1.0f);
+	OUT.WorldPosition = (ModelMatrix * vec4(Position, 1.0f)).xyz;
+    OUT.ShadowCoord = DepthMatrix * vec4(Position, 1.0f);
 	OUT.EyePosition = Matrix.eyePosition.xyz;
 	OUT.ViewDirection = OUT.EyePosition - OUT.FPosition; 
 
-    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+    gl_Position = ModelViewProjectionMatrix * vec4(Position.xyz, 1.0f);
 }
 //http://hacksoflife.blogspot.com/2015/06/glmapbuffer-no-longer-cool.html
 

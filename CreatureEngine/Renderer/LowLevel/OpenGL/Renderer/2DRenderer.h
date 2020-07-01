@@ -7,7 +7,7 @@
 /// Think I should add my Layers here and make the Renderer handle the Layer. The Application can have a Renderer
 /// And that Renderer handles the layers and the reponse to Messages passed to it. I might even use my Pub/Sub setup
 /// On a Modified variation of my Layers Module.
-    
+
         //  uint32_t new_RenderPass(int _width, int _height, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
          // uint32_t new_RenderPass(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format);
           //std::vector<FrameBufferObject*> FrameBuffers;
@@ -25,8 +25,8 @@ namespace OpenGL
     {
         Geometry()
         {
-            Vertices = new VertexBufferObject<Vec2> ();
-            Colors   = new VertexBufferObject<Vec4> ();
+            Vertices = new VertexBufferObject<Vec2>();
+            Colors = new VertexBufferObject<Vec4>();
         }
         Geometry(VertexBufferObject<Vec2> _vertices, VertexBufferObject<Vec4> _colors)
             :
@@ -46,6 +46,53 @@ namespace OpenGL
         VertexBufferObject<Vec2> *Vertices;
         VertexBufferObject<Vec4> *Colors;
     };
+
+
+    struct Surface
+    {
+        Surface(iVec2 _size){}
+        uint32_t Flags;
+
+        struct Pixel_Format
+        {
+            uint32_t format;
+            struct SDL_Palette {}*palette;
+            uint8_t BitsPerPixel{ 32 };// 8, 15, 16, 24, 32
+            uint8_t BytesPerPixel{ 4 };// the number of bytes required to hold a pixel value, eg: 1, 2, 3, 4; see Remarks for related data type
+
+            iVec4 Mask{ // Default 32bit Mask. 
+                BITS_32_25, BITS_24_17, BITS_16_9, BITS_8_1
+            };
+
+        private:
+            uint8_t  Red_Shift;
+            uint8_t  Green_Shift;
+            uint8_t  Blue_Shift;
+            uint8_t  Alpha_Shift;
+        }Format;
+
+        int Width() { return Size.x; }
+        int Height() { return Size.y; }
+        int Pitch() { return RowSize; }
+
+        void *data() { return Pixels; }
+
+        void *User_Data;//an arbitrary pointer you can set(read - write)
+
+        bool Locked{ false };// For locking and Unlocking the FrameBuffer;
+        iVec4 Clip_Rect{ 0,0,0,0 };
+
+        int Reference_count{ 0 };/// Implement count everytime it is referenced
+
+        void Lock() { Locked = true; }
+        void Unlock() { Locked = false; }
+
+    private:
+        iVec2 Size{ 0,0 };
+        int RowSize{ 0 };
+        void *Pixels;
+    };
+
 
     struct RenderPass
     {
@@ -71,15 +118,18 @@ namespace OpenGL
         /* Attaches an ArrayObject Format. Likely combine this with the Shader and pass it in differently */
         void attach(VertexArrayObject* _vao);
 
-
+        Surface *new_Surface(iVec2 _size)
+        {
+            return new Surface(_size);
+        }
         /*================================
-                   NEEDED DATA 
+                   NEEDED DATA
         ==================================*/
         bool needs_Updated{ true };
 
         Geometry *my_Mesh;
         Camera2D *mainCamera;
-        Shader   *GPU_Program { nullptr };
+        Shader   *GPU_Program{ nullptr };
         VertexArrayObject *VAO{ nullptr };
         FrameBufferObject *FBO{ nullptr };
     };
@@ -89,13 +139,13 @@ namespace OpenGL
     // ================================================================================================================
 
 
-	class Renderer2D
-		:
-		public Renderer
-	{
-		Camera2D mainCamera;
-        
-	public:
+    class Renderer2D
+        :
+        public Renderer
+    {
+        Camera2D mainCamera;
+
+    public:
 
         // ================================================================================================================
         /// EXPERIMENTAL
@@ -108,61 +158,61 @@ namespace OpenGL
 
 
 
-		NO_COPY_OR_ASSIGNMENT(Renderer2D);
+        NO_COPY_OR_ASSIGNMENT(Renderer2D);
 
-       // layerStack Layers;
+        // layerStack Layers;
 
         using Texture_ID_t = uint32_t;
-        using Mesh_ID_t    = uint32_t;
-        using Shader_ID_t  = uint32_t;
+        using Mesh_ID_t = uint32_t;
+        using Shader_ID_t = uint32_t;
         using Texture_ID_t = uint32_t;
         using Texture_ID_t = uint32_t;
 
-		enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
+        enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
         using SurfaceFragment = std::pair   < Surface_t, Texture_ID_t >;
-        using Surface         = std::vector < SurfaceFragment         >;
-        using Material        = std::pair   < Surface, Shader_ID_t    >;
-        using RenderPair      = std::pair   < Material, Mesh_ID_t     >;
+        using Surface = std::vector < SurfaceFragment         >;
+        using Material = std::pair   < Surface, Shader_ID_t    >;
+        using RenderPair = std::pair   < Material, Mesh_ID_t     >;
 
         std::vector<Shader*> Shaders;
-        std::vector<Graphics::Texture*> Textures;
+        std::vector<Texture*> Textures;
         std::vector<Mesh*> Meshes;
         std::vector<RenderPair> Buckets;
-        void Submit(Shader& _shader, Graphics::Texture& _texture, Mesh& _mesh);
+        void Submit(Shader& _shader, Texture& _texture, Mesh& _mesh);
 
-		Renderer2D() = default;
-		Renderer2D(Vec2 _size);
+        Renderer2D() = default;
+        Renderer2D(Vec2 _size);
 
-		/* Submits a Quad using the Current Draw Color */
-		void renderQuad(Vec2 _topleft, Vec2 _bottomright);
+        /* Submits a Quad using the Current Draw Color */
+        void renderQuad(Vec2 _topleft, Vec2 _bottomright);
 
-		/* Submits a Quad using the provided Draw Color */
-		void renderQuad(Vec2 _topleft, Vec2 _bottomright, Vec4 _color);
+        /* Submits a Quad using the provided Draw Color */
+        void renderQuad(Vec2 _topleft, Vec2 _bottomright, Vec4 _color);
 
-		/* Accepts a precreated Batch into the Renderer
-		 ~WARNING~ Possibly Deprecation soon */
-		void renderQuadBatch(const std::vector<Vec2> _batch);
+        /* Accepts a precreated Batch into the Renderer
+         ~WARNING~ Possibly Deprecation soon */
+        void renderQuadBatch(const std::vector<Vec2> _batch);
 
         /* Render every bucket to the screen Mesh + Material = Bucket */
         void Render_Buckets();
 
-		/* Renderers the Current batch */
-		void Render();
-		/* Updates the data in the Camera and the Batchs */
-		void Update();
+        /* Renderers the Current batch */
+        void Render();
+        /* Updates the data in the Camera and the Batchs */
+        void Update();
 
-		/* Clears the Buffers */
-		void Flush();
+        /* Clears the Buffers */
+        void Flush();
 
-		/* Might eliminate these in near future idk yet*/
+        /* Might eliminate these in near future idk yet*/
         void SetRenderColor(int _r, int _g, int _b, int _a);
 
-		/* Changes the size of the Renderer */
+        /* Changes the size of the Renderer */
         void Resize(Vec2 _size);
 
-		/* Gets the Camera the Renderer uses */
-		Camera2D& g_Camera() { return mainCamera; }
-        void renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image);
+        /* Gets the Camera the Renderer uses */
+        Camera2D& g_Camera() { return mainCamera; }
+        void renderImage(Vec2 _pos, Vec2 _size, Texture *_image);
 
         /* Render a Line in the Current Render color as floats */
         void draw_Line(float _x1, float _y1, float _x2, float _y2);
@@ -186,30 +236,30 @@ namespace OpenGL
 
         std::vector<Vec4> Line_Data;
 
-		uint32_t QuadVAO{ 0 };
-		uint32_t InstanceCount{ 0 };
+        uint32_t QuadVAO{ 0 };
+        uint32_t InstanceCount{ 0 };
 
 
-		uint32_t ColorVBO{ 0 };
-		std::vector<Vec4> ColorData;
+        uint32_t ColorVBO{ 0 };
+        std::vector<Vec4> ColorData;
 
-		uint32_t TransformVBO{ 0 };
-		std::vector<Vec4> Positions;
-
-
-		uint32_t QuadVBO{ 0 };
-		Vec2 QuadData[6] =
-		{
-			Vec2(0, 0),  Vec2(1, 0),  Vec2(0, 1),
-			Vec2(1, 1),  Vec2(0, 1),  Vec2(1, 0)
-		};
+        uint32_t TransformVBO{ 0 };
+        std::vector<Vec4> Positions;
 
 
-		Vec4 CurrentRenderColor{ 1, 0, 0, 1 };
+        uint32_t QuadVBO{ 0 };
+        Vec2 QuadData[6] =
+        {
+            Vec2(0, 0),  Vec2(1, 0),  Vec2(0, 1),
+            Vec2(1, 1),  Vec2(0, 1),  Vec2(1, 0)
+        };
+
+
+        Vec4 CurrentRenderColor{ 1, 0, 0, 1 };
 
         // ===============================================================================================================
 
-        std::string  Line_shader_v = 
+        std::string  Line_shader_v =
             "#version 330 core                                                                          \n\
                  layout(location = 0) in vec2 Position;                                                 \n\
                  uniform mat4 ProjectionMatrix;                                                         \n\
@@ -222,19 +272,19 @@ namespace OpenGL
                  }";
 
 
-        std::string Line_shader_f = 
+        std::string Line_shader_f =
             "#version 330 core                              \n\
                  out vec4 FragColor;                        \n\
                  void main()                                \n\
                  {                                          \n\
                      FragColor = vec4(0.0, 1.0, 1.0, 1.0);  \n\
                  }";
-                 
+
 
 
         // ================================================================================================================
 
-		std::string VinstanceRenderer =
+        std::string VinstanceRenderer =
             "#version 330 core                         \n\
                 layout(location = 0) in vec2 aPos;     \n\
                 layout(location = 1) in vec4 Position; \n\
@@ -250,8 +300,8 @@ namespace OpenGL
                     gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
                 }";
 
-		std::string FinstanceRenderer =
-		    "#version 330 core \n\
+        std::string FinstanceRenderer =
+            "#version 330 core \n\
                 in vec4 Col;                   \n\
                 out vec4 FragColor;            \n\
                 void main()                    \n\
@@ -286,6 +336,7 @@ namespace OpenGL
                 }";
 
     };// Class Renderer2D
+
 }// NS OpenGL  
 
 
@@ -302,6 +353,15 @@ namespace OpenGL
 /*=======================================================================================================================================================
 /*                                               TRASH
 /*=======================================================================================================================================================
+
+
+    //The mask​ parameter is a bitfield that specifies which kinds of buffers you want copied
+    //Filter = GL_NEAREST or GL_LINEAR.
+    //mask =    The bitwise OR of the flags indicating which buffers are to be copied.The allowed flags are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT and GL_STENCIL_BUFFER_BIT.
+    //uint32_t Red_Mask{ BIT_32 | BIT_31 | BIT_30 | BIT_29 | BIT_28 | BIT_27 | BIT_26 | BIT_25 };
+    //uint32_t Green_Mask{ BIT_24 | BIT_23 | BIT_22 | BIT_21 | BIT_20 | BIT_19 | BIT_18 | BIT_17 };
+    //uint32_t Blue_Mask{ BIT_16 | BIT_15 | BIT_14 | BIT_13 | BIT_12 | BIT_11 | BIT_10 | BIT_9 };
+    //uint32_t Alpha_Mask{ BIT_8 | BIT_7 | BIT_6 | BIT_5 | BIT_4 | BIT_3 | BIT_2 | BIT_1 };
 
 
 
@@ -331,21 +391,13 @@ namespace OpenGL
 // {                                 \n\
 //     FragColor = vec4(texture(FrameBufferTexture,TexCoords.xy).xyz, 1.0);    \n\
 // }";
-        //using SurfaceFragment = std::pair<Surface_t, Graphics::Texture>;
-        //using Surface = std::vector<SurfaceFragment>;
-        //using Material = std::pair<Surface, Shader>;
-        //using RenderPair = std::pair<Material, Mesh>;
 
-
-
-
-
-
-
-
-        //Instancer::get().Bind();
-        //Instancer::get().Unbind();
-
+//using SurfaceFragment = std::pair<Surface_t, Texture>;
+//using Surface = std::vector<SurfaceFragment>;
+//using Material = std::pair<Surface, Shader>;
+//using RenderPair = std::pair<Material, Mesh>;
+//Instancer::get().Bind();
+//Instancer::get().Unbind();
 
             struct GPU_Program
     {
@@ -409,17 +461,6 @@ namespace OpenGL
             }";
 
 */
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 
@@ -600,12 +641,12 @@ foreach(render target)         // framebuffer
     };
     struct Surface
     {
-        Surface(Shader* _shader, Graphics::Texture _textures[4])
+        Surface(Shader* _shader, Texture _textures[4])
         {}
 
         Shader *Progam;
         std::vector<const char*> Names{"Diffuse", "Normals", "Emissive", "Specular", "Metallic", "Gloss", "Opacity"};
-        std::vector<Graphics::Texture*> Textures;
+        std::vector<Texture*> Textures;
     };
     struct RenderPass
     {
@@ -640,3 +681,4 @@ foreach(render target)         // framebuffer
     };
 
 */
+

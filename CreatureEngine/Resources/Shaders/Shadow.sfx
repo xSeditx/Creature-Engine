@@ -3,14 +3,14 @@
 //==============================================================================================================================================================
 #version 400 
 
-layout(location = 0) in vec3 VertexPosition;
+layout(location = 0) in vec3 Position;
 
 uniform mat4 LightMatrix;
 uniform mat4 ModelMatrix;
 
 void main()
 {
-  gl_Position = LightMatrix * ModelMatrix * vec4(VertexPosition, 1.0f);
+  gl_Position = LightMatrix * ModelMatrix * vec4(Position, 1.0f);
 }
 
 //==============================================================================================================================================================

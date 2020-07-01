@@ -519,7 +519,7 @@ bool cleanup_Builting_Shaders()
 std::string VInstance_TextureRenderer =
 "#version 330 core                                                                                                                                \n\
          layout(location = 0) in vec2 aPos;                                                                                                       \n\
-         layout(location = 1) in vec4 VertexPosition;                                                                                                   \n\
+         layout(location = 1) in vec4 Position;                                                                                                   \n\
          uniform mat4 ProjectionMatrix;                                                                                                           \n\
          uniform mat4 ViewMatrix;                                                                                                                 \n\
          out  vec2 TexCoords;                                                                                                                     \n\
@@ -527,7 +527,7 @@ std::string VInstance_TextureRenderer =
          {                                                                                                                                        \n\
              mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                                                                     \n\
              mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);                                                               \n\
-             gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * VertexPosition.z) + VertexPosition.x, (aPos.y * VertexPosition.w) +  VertexPosition.y, -1.0, 1.0); \n\
+             gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
          }";
 
 
@@ -573,7 +573,7 @@ std::string FTextureRenderer =
 std::string VQuadRenderer =
 "#version 330 core                           \n\
           layout(location = 0) in vec2 aPos; \n\
-          uniform vec4 VertexPosition;             \n\
+          uniform vec4 Position;             \n\
           uniform mat4 ProjectionMatrix;     \n\
           uniform mat4 ViewMatrix;           \n\
           out vec2 TexCoords;                \n\
@@ -582,7 +582,7 @@ std::string VQuadRenderer =
               TexCoords = aPos;              \n\
               mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
               mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-              gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * VertexPosition.z) + VertexPosition.x, (aPos.y * VertexPosition.w) +  VertexPosition.y, -1.0, 1.0); \n\
+              gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
           }";
 
 std::string FQuadRenderer =
@@ -601,17 +601,17 @@ std::string FQuadRenderer =
 
 std::string VBasicRenderer =
     "#version 330 core                         \n\
-        layout(location = 0) in vec2 VertexPosition; \n\
-        layout(location = 1) in vec4 VertexColor; \n\
+        layout(location = 0) in vec2 Position; \n\
+        layout(location = 1) in vec4 VColor; \n\
         uniform mat4 ProjectionMatrix;     \n\
         uniform mat4 ViewMatrix;           \n\
         out vec4 Col;                      \n\
         void main()                        \n\
         {                                  \n\
-            Col = VertexColor; \n\
+            Col = VColor; \n\
             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-            gl_Position = ModelViewProjectionMatrix * vec4( VertexPosition.x, VertexPosition.y, -1.0, 1.0); \n\
+            gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
         }";
 
 std::string FBasicRenderer =
@@ -670,10 +670,60 @@ bool init_DefaultShaders()
     return true;
 }
 
-
-
-
-   // shader_TextureRenderer = new Shader(VTextureRenderer, FTextureRenderer);
-
-
-
+// In Header
+//enum default_Shader
+//{
+//    Basic,
+//    Blur,
+//    Collider,
+//    Debug,
+//    DebugQuad,
+//    Light,
+//    Shadow,
+//    Skybox,
+//    Sprite,
+//    TextureRenderer,
+//    QuadRenderer,
+//    BasicRenderer
+//};
+//Shader& DefaultShader(default_Shader _type);
+// In CPP
+//Shader& DefaultShader(default_Shader _type)
+//{
+//    switch (_type)
+//    {
+//    case Basic:
+//    {
+//        static Shader *Basic = new Shader(VBasicRenderer, FBasicRenderer);
+//        return *Basic;
+//    }break;
+//    case Blur:
+//    {}break;
+//    case Collider:
+//    {}break;
+//    case Debug:
+//    {}break;
+//    case DebugQuad:
+//    {
+//        Shader *Quad = new Shader(VQuadRenderer, FQuadRenderer);
+//        return *Quad;
+//    }break;
+//    case Light:
+//    {}break;
+//    case Shadow:
+//    {}break;
+//    case Skybox:
+//    {}break;
+//    case Sprite:
+//    {}break;
+//    case TextureRenderer:
+//    {
+//        static Shader *Tex = new Shader(VTextureRenderer, FTextureRenderer);
+//        return *Tex;
+//    }break;
+//    case QuadRenderer:
+//    {}break;
+//    case BasicRenderer:
+//    {}break;
+//    };
+//}

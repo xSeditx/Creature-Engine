@@ -18,8 +18,8 @@ an Object of static Asset<T> type should be created in its place instead.
 
 
 
-namespace Graphics
-{
+//namespace Graphics
+//{
     /* ==============================================================
     /* TEXTURE CLASS
     /* Image Uploaded to the GPU for Reading/Writing
@@ -201,7 +201,7 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 		glUniform1i(UniformLocation, _slot);
 		glBindTexture(GL_TEXTURE_BUFFER, GL_Handle);
 	}
-}// NS Graphics
+//}// NS Graphics
 
 
 //http://ogldev.atspace.co.uk/www/tutorial25/tutorial25.html

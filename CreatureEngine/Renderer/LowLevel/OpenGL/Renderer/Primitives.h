@@ -219,7 +219,7 @@ public:
 		}
 		Program->Unbind();
 	}
-	Graphics::Texture* Picture{ nullptr };
+	Texture* Picture{ nullptr };
 	Shader* Program{ nullptr };
 
 	Vec2 Vertices[6] = {};
@@ -270,7 +270,7 @@ public:
 		VAO->Unbind();
 		Program->Unbind();
 	}
-	Graphics::Texture* Picture{ nullptr };
+	Texture* Picture{ nullptr };
 	Shader* Program{ nullptr };
 	Vec4 Vertices[6] =
 	{ // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -303,7 +303,7 @@ public:
 		VAO->Unbind();
 	}
 
-	Graphics::Texture* Picture{ nullptr };
+	Texture* Picture{ nullptr };
 
 	Vec4 Vertices[6] =
 	{ // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.

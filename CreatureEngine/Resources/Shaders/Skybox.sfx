@@ -1,6 +1,6 @@
 [#SHADER: VERTEX]
 #version 330 core
-layout (location = 0) in vec3 VertexPosition;
+layout (location = 0) in vec3 Position;
 
 out vec3 TexCoords;
 
@@ -8,8 +8,8 @@ uniform mat4 PV;
 
 void main()
 {
-    TexCoords = VertexPosition;
-    gl_Position = PV * vec4(VertexPosition, 1.0);
+    TexCoords = Position;
+    gl_Position = PV * vec4(Position, 1.0);
 } 
 
 

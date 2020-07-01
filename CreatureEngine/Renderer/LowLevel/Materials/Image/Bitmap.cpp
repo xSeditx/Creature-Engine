@@ -2,8 +2,8 @@
 
 #include"../Bin/SOIL/src/SOIL.h"
 
-namespace Graphics
-{
+//namespace Graphics
+//{
 	Bitmap::Bitmap(void * _memory, Vec2 _dimensions) noexcept
 		:
 		rawData(static_cast<uint8_t*>(_memory)),// Raw Mapped Data 
@@ -81,5 +81,5 @@ namespace Graphics
          memcpy(rawData, TempImage, ImageSize);
          delete[](TempImage);
     }
-}// NS Graphics
+//}// NS Graphics
  

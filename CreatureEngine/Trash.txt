@@ -31,15 +31,15 @@
 
 //    Mesh   *TestMesh{ nullptr };
 //    Shader *TextureShader{ nullptr };
-//    Graphics::Texture *TestTexture{ nullptr };
-//    Graphics::Texture *TestTexture2{ nullptr };
+//    Texture *TestTexture{ nullptr };
+//    Texture *TestTexture2{ nullptr };
 
  
    /* Load Test Textures to Test With using two different Texture Constructors */
        //{
        //    Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
-       //    TestTexture = new Graphics::Texture(*Bmp);
-       //    TestTexture2 = new Graphics::Texture("../Resources/Test2.bmp");
+       //    TestTexture = new Texture(*Bmp);
+       //    TestTexture2 = new Texture("../Resources/Test2.bmp");
        //}
        //
        // TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
@@ -359,17 +359,17 @@ void Application::OnRenderGUI()
               /// This needs to go
             std::string VRenderer =
                 "#version 330 core                                       \n\
-                layout(location = 0) in vec2 VertexPosition;             \n\
-                layout(location = 1) in vec4 VertexColor;                \n\
+                layout(location = 0) in vec2 Position;             \n\
+                layout(location = 1) in vec4 VColor;                \n\
                 uniform mat4 ProjectionMatrix;                           \n\
                 uniform mat4 ViewMatrix;                                 \n\
                 out vec4 Col;                                            \n\
                 void main()                                              \n\
                 {                                                        \n\
-                    Col = VertexColor;                                   \n\
+                    Col = VColor;                                   \n\
                     mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));     \n\
                     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-                    gl_Position = ModelViewProjectionMatrix * vec4( VertexPosition.x, VertexPosition.y, -1.0, 1.0); \n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
                 }";
           
             std::string FRenderer =
@@ -395,9 +395,9 @@ float Plot_Getter(void* data, int idx)
 
 
         //Vertices_VBO->Bind();
-        //OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec2) / sizeof(float), "VertexPosition");
+        //OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec2) / sizeof(float), "Position");
         //Colors_VBO->Bind();
-        //OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VertexColor");
+        //OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VColor");
        //
         //glBindVertexArray(0);
         // glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -408,9 +408,9 @@ float Plot_Getter(void* data, int idx)
          //     Vertices_VAO->Bind();
          // 
          //     Vertices_VBO->Update(Vertices);
-         //     OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "VertexPosition");
+         //     OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
          //     Colors_VBO->Update(Colors);
-         //     OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VertexColor");
+         //     OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VColor");
          // 
          // 
          //     //Vertices_VAO->Attach(BufferTypes::VERTEX, Vertices_VBO);
@@ -427,9 +427,9 @@ float Plot_Getter(void* data, int idx)
 //
 //
 //Vertices_VBO->Update(Vertices);
-//OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "VertexPosition");
+//OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
 //Colors_VBO->Update(Colors);
-//OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VertexColor");
+//OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VColor");
        // }
 
 
@@ -706,7 +706,7 @@ for(auto& S: Shaders)
     using RenderPair = std::pair<Material, Mesh_ID_t>;
 
     std::vector<Shader*> Shaders;
-    std::vector<Graphics::Texture*> Textures;
+    std::vector<Texture*> Textures;
     std::vector<Mesh*> Meshes;
 */
 
@@ -1116,7 +1116,7 @@ void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
 //}
 ///     struct RenderPass
 ///     {
-///     	void Submit(Mesh& _mesh, Graphics::Texture& _tex)
+///     	void Submit(Mesh& _mesh, Texture& _tex)
 ///     	{
 ///           //  SurfaceMap[_tex.g_Handle()].push_back( _mesh );
 ///     	}
@@ -1139,7 +1139,7 @@ void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
 ///     	}
 ///     	//std::unordered_map<std::vector<uint32_t>, std::vector<Mesh>> SurfaceMap;
 ///     	std::vector<std::vector<int>> Pairs;
-///     	std::vector<Graphics::Texture*> Texts;
+///     	std::vector<Texture*> Texts;
 ///     	std::vector<Mesh*> Meshes;
 ///     	Shader* GPUrenderer;
 ///     	FrameBufferObject FBO;
@@ -1148,7 +1148,7 @@ void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
 /// 	struct Surface_s
 /// 	{
 /// 		struct Material {
-/// 			Graphics::Texture Tex;
+/// 			Texture Tex;
 /// 		};
 /// 		Shader* MaterialShader;
 /// 	};
@@ -1750,18 +1750,18 @@ Application::Window::Event::Event(MsgType msg)
 ///	stream << "X:[" << vector.x << "] - Y:[" << vector.y << "]";
 ///	return stream;
 ///std::string BasicVertexShader = "#version 330 \n\
-///layout(location = 0) in vec3 VertexPosition;\n\
-///out vec3 VertexColor;\n\
+///layout(location = 0) in vec3 Position;\n\
+///out vec3 VColor;\n\
 ///out vec4 FragPosition;\n\
 ///void main()\n\
 ///{\n\
-///FragPosition = vec4(VertexPosition.xyz, 1.0f);\n\
-///VertexColor = vec3(1.0,1.0,1.0);\n\
+///FragPosition = vec4(Position.xyz, 1.0f);\n\
+///VColor = vec3(1.0,1.0,1.0);\n\
 ///}";
 ///
 ///std::string BasicFragmentShader = "#version 330 \n\
 ///out vec4 color;         \n\
-///in vec3 VertexColor;    \n\
+///in vec3 VColor;    \n\
 ///in vec4 FragPosition;   \n\
 ///void main(){            \n\
 ///color = vec3(1, 1, 0, 1);  \n\
@@ -1771,19 +1771,19 @@ Application::Window::Event::Event(MsgType msg)
 ///uniform mat4 ProjectionMatrix;              \n\
 ///uniform mat4 ViewMatrix;                    \n\
 ///uniform mat4 ModelMatrix;                   \n\
-///out vec4 vertexColor; 						\n\
+///out vec4 VColor; 						\n\
 ///void main()									\n\
 ///{											\n\
 ///	gl_Position = vec4(aPos, 1.0);			\n\
-///	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
+///	VColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
 ///}";
 ///vec4(texture(texture1,TexCoords.xy).xyzw); 
 ///std::string FragmentShader = "#version 330 core \n\
 ///out vec4 FragColor;                             \n\
-///in vec4 vertexColor;                            \n\
+///in vec4 VColor;                            \n\
 ///void main()                                     \n\
 ///{                                               \n\
-///	FragColor = vertexColor;                    \n\
+///	FragColor = VColor;                    \n\
 ///}";
 ///
 ///    std::string vRenderer =
@@ -1792,7 +1792,7 @@ Application::Window::Event::Event(MsgType msg)
 ///    uniform mat4 ProjectionMatrix;                    \n\
 ///    uniform mat4 ViewMatrix;                         \n\
 ///    uniform mat4 Model;                         \n\
-///    out vec3 vertexColor;                       \n\
+///    out vec3 VColor;                       \n\
 ///    out vec2 TexCoords;                         \n\
 ///    void main()                                 \n\
 ///    {                                           \n\
@@ -1803,7 +1803,7 @@ Application::Window::Event::Event(MsgType msg)
 ///    }";
 ///    std::string fRenderer =
 ///    "#version 330 core \n\
-///    in vec3 vertexColor;                              \n\
+///    in vec3 VColor;                              \n\
 ///    uniform sampler2D texture1;                       \n\
 ///    out vec4 FragColor;                               \n\
 ///    in  vec2 TexCoords;                               \n\
@@ -2236,25 +2236,25 @@ hello_world_asm ENDP
 //	setPixel(x, y, Pixel(0, 0, 0, 255));//rabg
 //}
 
-//vec4(vertexColor.xyz, 1.0); 
+//vec4(VColor.xyz, 1.0); 
 
-/*	vertexColor = texture(texture1, aPos.zw).xyz; \n\
+/*	VColor = texture(texture1, aPos.zw).xyz; \n\
 
 "#version 330\
 uniform mat4 ProjectionMatrix;\
 uniform mat4 ViewMatrix;\
 uniform mat4 ModelMatrix;\
-layout(location = 0) in vec3 VertexPosition;\
+layout(location = 0) in vec3 Position;\
 layout(location = 1) in vec2 TextureCoord;\
 out vec2 FPosition;\
 out vec2 TCoord;\
 void main(){\
 	mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix);\
 	mat4 ModelViewProjectionMatrix = (Matrix.projection * ModelViewMatrix);\
-	vec4 WorldPosition = vec4(VertexPosition, 1.0f);\
-	FPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;\
+	vec4 WorldPosition = vec4(Position, 1.0f);\
+	FPosition = (ModelMatrix * vec4(Position, 1.0f)).xyz;\
 	TCoord = TextureCoord;\
-	gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);\
+	gl_Position = ModelViewProjectionMatrix * vec4(Position.xyz, 1.0f);\
 }\
 
 "#version 330\
