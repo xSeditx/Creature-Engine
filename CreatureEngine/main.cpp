@@ -239,6 +239,9 @@ class App
     MyScene SCENE;
     Texture *test_Texture;
     size_t  PreviousTime;
+    uint32_t *Pixels;
+
+    OpenGL::Surface *testSurface{ nullptr };
 
     /* Initializes User Variables */
     virtual void OnCreate() override
@@ -296,6 +299,11 @@ class App
         test_RenderPass->attach(SCENE.Vertices_VAO);
       
         test_Texture = new Texture("../Test2.bmp");
+        //OpenGL::Surface *test2;
+        testSurface = test_RenderPass->new_Surface({ SCREEN_X, SCREEN_Y });
+        //testSurface->blit_Surface(test2, {1,1,100, 100}, {1,1,100,100});
+
+       // Pixels = new int[SCREEN_X * SCREEN_Y * sizeof(int)];
         DEBUG_CODE(CheckGLERROR());
 	}
 
@@ -306,6 +314,8 @@ class App
         MainRenderer->Render();
         test_RenderPass->Render();
 
+        testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y  * 2});
+        Pixels = (uint32_t*)testSurface->read_Pixels({ 1,1,100, 100 });
         shader_TextureRenderer->Bind();
         {
             OpenGL::bind_VAO(DebugQuadVAO);
@@ -416,7 +426,7 @@ class App
         
             ImGui::Image((ImTextureID*)((size_t)test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
-            ImGui::Image((ImTextureID*)((size_t)test_Texture->g_Handle()) , ImVec2(WinSize, WinSize));
+            ImGui::Image((ImTextureID*)((size_t)testSurface->FBO->RenderTarget->g_Handle()) , ImVec2(WinSize, WinSize));
             ImGui::SameLine();
         
         
@@ -1060,5 +1070,43 @@ static const char* fmt_table_float[3][4] =
     { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
     { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
 };
-
-
+//
+//
+///* Blits the contents of the FrameBuffer with area of _srcRect onto the _destRect of this Surface */
+//void blit_FrameBuffer(FrameBufferObject *_fbo, iVec4 _source, iVec4 _dest)
+//{
+//    CheckGLERROR();
+//
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo->GL_Handle);
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Handle());
+//
+//    glBlitFramebuffer
+//    (
+//        _source.x, _source.y, _source.z, _source.w,
+//        _dest.x, _dest.y, _dest.z, _dest.w,
+//        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR
+//    );
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//    CheckGLERROR();
+//
+//}
+//
+///* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
+//int blit_Surface(Surface *_source, iVec4 _srcRect, iVec4 _destRect)
+//{
+//    blit_FrameBuffer(_source->FBO, _srcRect, _destRect);
+//}
+//
+///* Read a Rectangle of pixels from the Surface */
+//void *read_Pixels(iVec4 _sourceRect, uint32_t _format = GL_RGBA, uint32_t _type = GL_UNSIGNED_SHORT_4_4_4_4) //format = GL_ALPHA, GL_RGB, and GL_RGBA. type = GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1.
+//{/// NOTE: Should I lock this first
+//    void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
+//    CheckGLERROR();
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
+//    glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//    CheckGLERROR();
+//    return results;
+//}
+//

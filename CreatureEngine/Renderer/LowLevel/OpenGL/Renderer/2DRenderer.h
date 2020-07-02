@@ -48,9 +48,17 @@ namespace OpenGL
     };
 
 
+
+// int Width() { return Size.x; }
+// int Height() { return Size.y; }
+// iVec2 Size{ 0,0 };
+
     struct Surface
     {
-        Surface(iVec2 _size){}
+        Surface(iVec2 _size)
+            :
+            FBO(new FrameBufferObject(_size.x, _size.y))
+        {}
         uint32_t Flags;
 
         struct Pixel_Format
@@ -71,8 +79,6 @@ namespace OpenGL
             uint8_t  Alpha_Shift;
         }Format;
 
-        int Width() { return Size.x; }
-        int Height() { return Size.y; }
         int Pitch() { return RowSize; }
 
         void *data() { return Pixels; }
@@ -87,13 +93,62 @@ namespace OpenGL
         void Lock() { Locked = true; }
         void Unlock() { Locked = false; }
 
+        uint32_t Width() { return FBO->Width(); }
+        uint32_t Height() { return FBO->Height(); }
+        uint32_t Handle() { return FBO->GL_Handle; }
+
+        /* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
+        int blit_Surface(Surface *_source, iVec4 _srcRect, iVec4 _destRect)
+        {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, _source->Handle());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Handle());
+
+            glBlitFramebuffer
+            (
+                _srcRect.x, _srcRect.y, _srcRect.z, _srcRect.w,
+                _destRect.x, _destRect.y, _destRect.z, _destRect.w,
+                GL_COLOR_BUFFER_BIT , GL_LINEAR
+            );
+        }
+
+
+        /* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
+        void blit_FrameBuffer(FrameBufferObject *_fbo, iVec4 _source, iVec4 _dest)
+        {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo->GL_Handle);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Handle());
+
+            glBlitFramebuffer
+            (
+                _source.x, _source.y, _source.z, _source.w,
+                _dest.x, _dest.y, _dest.z, _dest.w,
+                GL_COLOR_BUFFER_BIT , GL_LINEAR
+            );
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        }
+
+        /* Read a Rectangle of pixels from the Surface */
+        void *read_Pixels(iVec4 _sourceRect, uint32_t _format = GL_RGBA, uint32_t _type = GL_UNSIGNED_SHORT_4_4_4_4) //format = GL_ALPHA, GL_RGB, and GL_RGBA. type = GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1.
+        {/// NOTE: Should I lock this first
+            void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
+            glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            CheckGLERROR();
+            return results;
+        }
+
+
+        FrameBufferObject *FBO{ nullptr };
     private:
-        iVec2 Size{ 0,0 };
         int RowSize{ 0 };
         void *Pixels;
     };
 
 
+
+    // GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT and GL_STENCIL_BUFFER_BIT.
     struct RenderPass
     {
 
@@ -155,7 +210,6 @@ namespace OpenGL
         std::vector<RenderPass> RenderPasses;
 
         // ================================================================================================================
-
 
 
         NO_COPY_OR_ASSIGNMENT(Renderer2D);
@@ -239,13 +293,11 @@ namespace OpenGL
         uint32_t QuadVAO{ 0 };
         uint32_t InstanceCount{ 0 };
 
-
         uint32_t ColorVBO{ 0 };
         std::vector<Vec4> ColorData;
 
         uint32_t TransformVBO{ 0 };
         std::vector<Vec4> Positions;
-
 
         uint32_t QuadVBO{ 0 };
         Vec2 QuadData[6] =
