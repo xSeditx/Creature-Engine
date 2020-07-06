@@ -124,7 +124,7 @@ public:
 		/// ------------------------Bindless Address stuff---------------------------------
  
 //        Address = OpenGL::get_Bindless_Address();
-        OpenGL::make_Buffer_Resident();
+//        OpenGL::make_Buffer_Resident();
  
 		Size = ElementCount * Stride;
 		///--------------------------------------------------------------------------------
