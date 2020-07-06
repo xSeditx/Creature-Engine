@@ -1,6 +1,5 @@
 #include"Application.h"
 #include"../Profiling/Timing/Timer.h"
-
 #include<iostream>
 #include<cassert>
 #include<string>
@@ -40,6 +39,7 @@ std::mutex DEBUGMutex;
 
  void Application::Init()
  {
+
 	 set(*this);
 	 CreateApplicationWindow();
 	 DEBUG_CODE(CheckGLERROR());
@@ -62,27 +62,84 @@ std::mutex DEBUGMutex;
 	 Print("GLSL Version: " << OpenGL::get_GLSL_version());
 
 	// Print("Current Context: "; Print(glGetCurrentContext()));
+     //-------------------------------------------------------------------------------------------------------------
+     //-------------------------------------------------------------------------------------------------------------
+     //-------------------------------------------------------------------------------------------------------------
 
-	 //-------------------------------------------------------------------------------------------------------------
+     //ImGui::CreateContext();
+  // GUI_io.ConfigDockingWithShift = true;
+   //GUI_io.ConfigResizeWindowsFromEdges = true;
+   //GUI_io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
+   //GUI_io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+
+ //1    
+
+//2  Init OpenGL Imgui Implementation
+//   GL 3.0 + GLSL 130
+//   const char* glsl_version = "#version 130";
+//3  ImGui::ImGui_ImplWin32_InitPlatformInterface(); 
+// ImGui_ImplWin32_InitPlatformInterface();     //-------------------------------------------------------------------------------------------------------------
+     //-------------------------------------------------------------------------------------------------------------
+     ImGui_ImplWin32_EnableDpiAwareness();
+
+
+     // Setup Dear ImGui context
      IMGUI_CHECKVERSION();
-     ImGui::CreateContext();
-     io = &ImGui::GetIO(); (void)io;
-     ::SetCapture(Application::getWindow().g_Handle());
-   
-     ImGui_ImplWin32_Init(Application::getWindow().g_Handle());
+     ImGUI_Context =  ImGui::CreateContext();::SetCapture(Application::getWindow().g_Handle()); /// Dont believe this is needed as I do this in the Window Creation Function I think
+     ImGuiIO&  GUI_io = ImGui::GetIO(); (void)GUI_io;
 
-     //Init OpenGL Imgui Implementation
-     // GL 3.0 + GLSL 130
-     const char* glsl_version = "#version 130";
-     ImGui_ImplOpenGL3_Init(glsl_version);
-     
-     
+     GUI_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+     GUI_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+     GUI_io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;         // We can honor GetMouseCursor() values (optional)
+     GUI_io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;          // We can honor io.WantSetMousePos requests (optional, rarely used)
+     GUI_io.BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can set io.MouseHoveredViewport correctly (optional, not easy)
+     GUI_io.BackendPlatformName = "imgui_impl_win32";
+   // GUI_io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;    // We can create multi-viewports on the Platform side (optional)
+   // GUI_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+
+     //GUI_io.Platform_RenderWindow = ImGui_ImplWin32_RenderWindow;
+     //GUI_io.Platform_SwapBuffers = ImGui_ImplWin32_SwapBuffers;
+ 
+     ImGui::StyleColorsDark();
+
+     //ImGuiViewportP* viewport = g.Viewports[i];
+     ImGuiStyle& style = ImGui::GetStyle();
+     if (GUI_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+     {
+       //  style.WindowRounding = 0.0;
+        // style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+     }
+
+
+     GUI_io.WantCaptureMouse = true;
+     GUI_io.WantCaptureKeyboard = true;
+     Port = ImGui::GetMainViewport();
+ 
      OnCreate();
-     
+
+     ImGui_ImplWin32_Init(getWindow().g_Handle());// ImGui_ImplWin32_InitPlatformInterface();//
+     ImGui_ImplOpenGL3_Init("#version 130");
  }
+
+ // Helper structure we store in the void* RenderUserData field of each ImGuiViewport to easily retrieve our backend data.
+ struct ImGuiViewportDataOGL
+ {
+     HWND Window;
+     HDC hDC;
+     HGLRC hGL_DC;
+     bool        WindowOwned;
+     int         IgnoreWindowPosEventFrame;
+     int         IgnoreWindowSizeEventFrame;
+
+     ImGuiViewportDataOGL() { Window = NULL; WindowOwned = false; IgnoreWindowSizeEventFrame = IgnoreWindowPosEventFrame = -1; }
+     ~ImGuiViewportDataOGL() { IM_ASSERT(Window == NULL); }
+ };
+
+
  void Application::Pause() {}
  void Application::End()
  {
+     ImGui_ImplWin32_Shutdown();
 	 OnEnd();
  }
  void Application::Run()
@@ -90,30 +147,42 @@ std::mutex DEBUGMutex;
 	 MSG msg;
 	 size_t PreviousTime{ 0 };
      std::string Name = getWindow().g_Title()  + " FPS: ";
+     FrameTimes.emplace_back(120.0f);
+ 
+
 	 while (isRunning())
 	 {
 		 size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
-		 size_t Time = NewTime - PreviousTime;
 		 ++FPS;
-		 if (Time > 1000)
+		 Update();
+		 Render();
+         for (auto &L : Layers)
+         {
+             REFACTOR("This is pointless and should be in the Renderer class not in the Messaging system. It should be adjunt to the MSG system for the Renderer to receive Messages ");
+             L->OnUpdate();
+         }
+
+         if ((NewTime - PreviousTime) > 1000)
 		 {
              getWindow().s_Title(Name + std::to_string((int)FPS));
+             FrameTimes.emplace_back((float)FPS);
 			 FPS = 0;
 			 PreviousTime = NewTime;
 		 }
+
 		 Application::PollEvents();
 		 while (Application::PeekMSG(msg))
 		 {
 			 TranslateMessage(&msg);
 			 Application::Dispatch(msg);
-			 if (msg.message _EQUALS_ WM_DESTROY) Print("Exit");
+             if (msg.message _EQUALS_ WM_DESTROY)
+             {// We check this in far to many places. this is Indicative of poor structure for the program or Shitty API to start with
+                 Print("Exit");
+             }
 		 }
-		 Update();
-		 Render();
 	 }
 	 End();
  }
-
 
 
  void Application::Update()
@@ -124,20 +193,31 @@ std::mutex DEBUGMutex;
  void Application::Render()
  { // Calls User define Application Render function
 	 OnRender();
-
+     ImGuiIO&  GUI_io = ImGui::GetIO();
+      
      ImGui_ImplOpenGL3_NewFrame();
-     ImGui_ImplWin32_NewFrame();
-     ImGui::NewFrame();
      {
-         OnRenderGUI();
+         ImGui_ImplWin32_NewFrame();
+         {
+             ImGui::NewFrame();
+             {
+                 OnRenderGUI();
+             }
+             ImGui::EndFrame();
+         }
+         ImGui::Render();
      }
-     ImGui::End();
-     ImGui::Render();
      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-
-	 mainWindow.Sync();
+     if (GUI_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+     {
+         //ImGui::UpdatePlatformWindows();
+         //ImGui::RenderPlatformWindowsDefault();
+     }// ImGuiViewportFlags_NoInputs
+	 mainWindow.Sync(); //	SwapBuffers(DeviceContext); CLS();
  }
+
+
  void Application::OnStart()
  {
 	 CreateApplicationWindow();
@@ -153,7 +233,8 @@ std::mutex DEBUGMutex;
  void Application::OnUpdateGUI() { }
  void Application::OnRenderGUI() { }
 
-
+ //   HGLRC  backup = wglGetCurrentContext();
+//     wglMakeCurrent(getWindow().g_DeviceContext(), backup);
 
 
  // WGL_EXT_swap_control
@@ -189,6 +270,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 Application* Application::AppInstance{ nullptr };
 
+
+
+
+
+
 Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name, DWORD _flags) noexcept
 	:
 	Parent(nullptr),
@@ -214,8 +300,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 			MessageBox(NULL, "RegisterClass() failed:  "
 				"Cannot register window class.", "Error", MB_OK);
 			__debugbreak();
-		}
-
+		} 
 		if (!(Handle = CreateWindow
 		(
 			"OpenGL",
@@ -234,6 +319,9 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		}
 		DeviceContext = GetDC(Handle);
 	}
+
+
+
 
 	/// Set Pixel Format
 	{// Creating and Setting Pixel Format Scope
@@ -287,8 +375,10 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		);
 	}
 
+
 	/// Create OpenGL Rendering Context
-	GL_Context = OpenGL::create_OpenGLContext(DeviceContext);
+    GL_Context = OpenGL::create_OpenGLContext(DeviceContext);
+
 	s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));
 	s_Camera(new Camera2D());
 	Application::setWindow(*this);
@@ -296,9 +386,18 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	{
 		SetForegroundWindow(Handle);                           // Slightly Higher Priority
 		SetFocus(Handle);
-		ShowWindow(Handle, SW_SHOW);
+        ShowWindow(Handle, SW_MAXIMIZE);// SW_SHOW);
 		UpdateWindow(Handle);
 	}
+    RECT rect;
+    GetWindowRect(Handle, &rect);
+    
+    int width = rect.right - rect.left;
+    int height = rect.bottom - rect.top;
+    
+
+    ResizeWindow(width, height);
+
     s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));
 
 	/// Set OpenGL State
@@ -423,15 +522,25 @@ void Application::PostMSG ( Event _msg)
 void Application::Dispatch( Event _msg) 
 {
 	getWindow().Messenger().Dispatch(_msg);
-} ///This is a test of my Trace macro
+    for (auto it = Layers.end(); it != Layers.begin();)
+    {
+       REFACTOR("I do not want this for the Application, I wantLayers for the Renderer, I already have Event System and this is redundent")
+        if ((*--it)->OnEvent(_msg))
+        {
+            break;
+        }
+    }
+}
 bool Application::PeekMSG ( Event& _msg) trace(1)
-{
+{ ///This is a test of my Trace macro
 	Return( getWindow().Messenger().PeekMSG(_msg));
 }
 bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _rangemax, int _handlingflags)
 {
 	return getWindow().Messenger().PeekMSG(  _msg, _rangemin,  _rangemax,   _handlingflags);
 }
+
+
 /* 
 Listener ResizeListener(
 	[](Event _msg)
@@ -455,6 +564,7 @@ Vec2 getMouseCursor()
 
 void Application::Resize(Vec2 _size)
 {
+    mainWindow.s_Size(_size);
 	mainWindow.g_Camera().Resize(_size);
 }
 
@@ -462,7 +572,9 @@ void Application::Resize(Vec2 _size)
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam);
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+        return true;
+
     switch (uMsg)
 	{
     case WM_MOUSEWHEEL:
@@ -487,6 +599,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_DESTROY:
 	{
+        ImGui::Shutdown(Application::get().ImGUI_Context);
 		Application::get().Terminate();
 	}break;
 

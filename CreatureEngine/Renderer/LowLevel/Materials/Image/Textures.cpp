@@ -1,8 +1,8 @@
 
 #include"Texture.h"
 
-namespace Graphics
-{
+//namespace Graphics
+//{
     Texture::~Texture()
     {
         if (imageOwned)
@@ -10,15 +10,23 @@ namespace Graphics
             delete(Picture);
         }
     }
+
     Texture::Texture(std::string _file) noexcept 
 		:
 		Type(0),
 		Picture(nullptr),
-		ImageFormatComplete(false) ,
+		ImageFormatComplete(false),
         imageOwned{ false }
 	{
 		WARN_ME("SOIL Load on the Texture constructor is Deactivated right now");
         Picture = new Bitmap(_file);
+        if (!Picture->Data())
+        {
+            static Bitmap *default_Texture = new Bitmap("../Resources/Background.bmp");
+            DEBUGPrint(CON_Yellow, "Using Default Texture");
+            Picture = default_Texture;
+        }
+        GL_Handle = OpenGL::new_TextureHandle();
 
         Bind();
 
@@ -106,7 +114,7 @@ namespace Graphics
         OpenGL::set_Texture_Minification(Target, _param);
 	}
 	
-}//End NS Graphics
+//}//End NS Graphics
 
 
 //  ALTERNATIVE.... Figure out what to do here

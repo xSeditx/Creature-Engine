@@ -5,14 +5,14 @@
 #extension GL_NV_bindless_texture : enable
 #extension GL_NV_gpu_shader5 : enable
 
-layout (location = 0) in vec4 VertexPosition; // <vec2 position, vec2 texCoords>
+layout (location = 0) in vec4 Position; // <vec2 position, vec2 texCoords>
 
 out vec2 TexCoords;
 
 void main()
 {
-    gl_Position = vec4(VertexPosition.xy, 0.0f, 1.0f); 
-    TexCoords = VertexPosition.zw;
+    gl_Position = vec4(Position.xy, 0.0f, 1.0f); 
+    TexCoords = Position.zw;
 } 
 
 

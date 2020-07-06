@@ -14,8 +14,12 @@ This has already caused a good amount of issues during destruction when deep cop
 Asset derivation needs to cease. It is a pain in the ass and needs to go. It is attempting to double delete objects for whatever reasons and by far if a Manager is needed
 an Object of static Asset<T> type should be created in its place instead.
 */
-namespace Graphics
-{
+
+
+
+
+//namespace Graphics
+//{
     /* ==============================================================
     /* TEXTURE CLASS
     /* Image Uploaded to the GPU for Reading/Writing
@@ -25,6 +29,7 @@ namespace Graphics
 	class CREATURE_API Texture
 	{
 	public:
+
 		NO_COPY_OR_ASSIGNMENT(Texture);
 
 		Texture() = default;
@@ -108,9 +113,6 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 		{
             OpenGL::unbind_Texture_Target(Target);
  		}
-         
-        /* Debug Render which Sends a Rect with the given Texture to the Screen */
-		void Render(int _x, int _y, int _w, int _h) noexcept;
 
 		/* Gets the OpenGL Handle of the Texture*/
 		const uint32_t g_Handle() const noexcept
@@ -199,7 +201,7 @@ REFACTOR("Change this for Bindless Textures later on. Odds are we should instead
 		glUniform1i(UniformLocation, _slot);
 		glBindTexture(GL_TEXTURE_BUFFER, GL_Handle);
 	}
-}// NS Graphics
+//}// NS Graphics
 
 
 //http://ogldev.atspace.co.uk/www/tutorial25/tutorial25.html

@@ -45,7 +45,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -79,12 +79,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(Solution)../Bin/glad/include/;$(IncludePath)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/;C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib\Debug</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/</LibraryPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(IncludePath);$(Solution)../Bin/glad/include/; </IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Release/</LibraryPath>
+    <IncludePath>$(ProjectDir);$(IncludePath);$(Solution)../Bin/;$(Solution)../Bin/glad/include/</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/SOIL/lib/Release</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -148,7 +148,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
-      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -168,6 +168,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib; libcmtd.lib; msvcrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Bin\glad\src\glad.c" />
@@ -177,6 +180,7 @@
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
     <ClCompile Include="Core\ECS\TestComponents.cpp" />
     <ClCompile Include="Core\EventSystem.cpp" />
+    <ClCompile Include="Core\Layer.cpp" />
     <ClCompile Include="Core\Math\Easing.cpp" />
     <ClCompile Include="Core\Math\Math.cpp" />
     <ClCompile Include="Core\Memory.cpp" />
@@ -194,7 +198,6 @@
     <ClCompile Include="Profiling\MemoryPerf\MemTracker.cpp" />
     <ClCompile Include="Profiling\SystemInfo.cpp" />
     <ClCompile Include="Profiling\Timing\Profiling.cpp" />
-    <ClCompile Include="Renderer\Layer.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Bitmap.cpp" />
     <ClCompile Include="Renderer\LowLevel\Materials\Image\Textures.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp" />
@@ -207,7 +210,6 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Sprite.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
-    <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Builtin_Shaders.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
     <ClCompile Include="SDKs\ImGUI\imgui.cpp" />
@@ -226,6 +228,7 @@
     <ClInclude Include="Core\ECS\ECSsystem.h" />
     <ClInclude Include="Core\ECS\TestComponents.h" />
     <ClInclude Include="Core\EventSystem.h" />
+    <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Core\Math\Easing.h" />
     <ClInclude Include="Core\Math\Math.h" />
     <ClInclude Include="Core\Memory.h" />
@@ -246,7 +249,6 @@
     <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
     <ClInclude Include="Profiling\Timing\Timer.h" />
-    <ClInclude Include="Renderer\Layer.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Bitmap.h" />
     <ClInclude Include="Renderer\LowLevel\Materials\Image\Texture.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera.h" />

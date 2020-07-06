@@ -108,7 +108,7 @@ namespace Profiling
             }
 
             // Creates the display texture
-            DisplayTexture = Graphics::Texture(*(new Graphics::Bitmap(ReadBuffer, _dataRange)));// We dereference the Memory Address where the object was constructed than we pass that into Texture for construction and this should give us in place construction of the returned texture???
+            DisplayTexture = Texture(*(new Bitmap(ReadBuffer, _dataRange)));// We dereference the Memory Address where the object was constructed than we pass that into Texture for construction and this should give us in place construction of the returned texture???
             VAO = OpenGL::new_VAO();// Create an ID for our VAO
             OpenGL::bind_VAO(VAO);     // Enable our VAO
 
@@ -240,7 +240,7 @@ namespace Profiling
         /*~===============================================~*/
         /*  Data Members for our Profiler Display Window   */
 
-        Graphics::Texture DisplayTexture;
+        Texture DisplayTexture;
 
         Pixel
 			DefaultColor{ 255,255,255, 255 },
@@ -339,7 +339,7 @@ layout(location = 0) in vec4 aPos;          \n\
 uniform mat4 ProjectionMatrix;              \n\
 uniform mat4 ViewMatrix;                    \n\
 uniform mat4 Model;                         \n\
-out vec3 vertexColor;                       \n\
+out vec3 VColor;                       \n\
 out vec2 TexCoords;                         \n\
 void main()                                 \n\
 {                                           \n\
@@ -351,7 +351,7 @@ void main()                                 \n\
 
         std::string fRenderer =
             "#version 330 core \n\
-in vec3 vertexColor;                              \n\
+in vec3 VColor;                              \n\
 uniform sampler2D texture1;                       \n\
 out vec4 FragColor;                               \n\
 in  vec2 TexCoords;                               \n\

@@ -1,3 +1,439 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ //	 	ProfilerTest->Update((uint32_t)(Time));
+		/*   Make a Profiler Window which Displays the FPS as a graph */
+        {/// THIS IS ALL FUCKED UP, Implement ImGUI with the Profiler ~EXTREMELY IMPORTANT~!
+           /// 6/27 TRASH TRASH TRASH WHY ARE YOU STILL HERE? 
+            float Aspect = getCamera().AspectRatio;
+            float Size = 100;
+            ProfilerTest = new Profiling::DisplayWindow
+            (
+                { SCREEN_X / 2  , SCREEN_Y / 2 },
+                { std::floor((Size)* Aspect), std::floor((Size * 2)) },
+                { std::floor(Size*.35 * Aspect), std::floor((Size)) }
+            );
+            ProfilerTest->Update(1);
+        }
+
+
+//    Mesh   *TestMesh{ nullptr };
+//    Shader *TextureShader{ nullptr };
+//    Texture *TestTexture{ nullptr };
+//    Texture *TestTexture2{ nullptr };
+
+ 
+   /* Load Test Textures to Test With using two different Texture Constructors */
+       //{
+       //    Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
+       //    TestTexture = new Texture(*Bmp);
+       //    TestTexture2 = new Texture("../Resources/Test2.bmp");
+       //}
+       //
+       // TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
+
+ 
+
+
+	//Vec2 Vertices[3] = { {200.0, 200.0 },  { 400.0, 200.0 },  { 0.0, 400.0 } };
+	//Vec2 UVcoords[3] = { {  0.0,   0.0 },  {   1.0,   0.0 },  { 1.0,   1.0 } };
+	//GLuint Indices[3] = { 0, 1, 2 };
+
+
+
+
+
+
+        /* Create FBO to Test with */
+       // {
+       //     FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
+       // delete(FBO);
+       // }
+
+
+
+//    GLuint VAO{ 0 }, VBO{ 0 };
+ //   VertexBufferObject<Vec2> *TestGeo;
+ //   VertexBufferObject<Vec4> *TestColor;
+ //   OpenGL::Geometry *GEOMETRY; 
+ //std::vector<Vec2> Triangle_list =
+//{
+//    Vec2(-1),Vec2(-1),
+//    Vec2(1),Vec2(-1),
+//    Vec2(-1),Vec2(1),
+//};
+        /* Create a Triangle to Test with */
+        //getWindow().defaultShader().Bind();
+        //{
+        //    VAO = OpenGL::new_VAO();
+        //    OpenGL::bind_VAO(VAO);
+        //
+        //    VBO = OpenGL::new_VBO();
+        //    OpenGL::bind_VBO(VBO);
+        //    OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
+        //    OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
+        //}
+      //       GEOMETRY = new OpenGL::Geometry(Verts,Cols);
+      //TestColor = new VertexBufferObject<Vec4>(, );
+      //TestGeo   = new VertexBufferObject<Vec2>();
+      //test_RenderPass->set_Attributes
+      //(
+      //    new VertexBufferObject<Vec2>(Verts),
+      //    new VertexBufferObject<Vec4>(Cols )
+      //);
+      // TestGeo->Update(Verts);
+      // TestColor->Update(Cols);
+      //GEOMETRY->Add(TestGeo);
+      //GEOMETRY->Add(TestColor);
+      //FBO->Unbind(); 
+      //==> Renders the Frame Buffer Object we Rendered all the Images to
+      // MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
+      // MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, test_RenderPass->FBO->RenderTarget);
+      // test_RenderPass->update_Geometry(SCENE.Vertices);
+      // MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
+      // TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//     Vec4 clear_color{ .1,.1,.1,1 };
+//    RECT clientRect;
+//         GetClientRect(getWindow().g_Handle(), &clientRect);
+//         int windowWidth = clientRect.right - clientRect.left;
+//         int windowHeight = clientRect.bottom - clientRect.top;
+//         
+//         
+//    glViewport(0, 0, SCREEN_X, SCREEN_Y);
+//    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+//    glClear(GL_COLOR_BUFFER_BIT);
+
+
+
+
+//  HGLRC  backup = wglGetCurrentContext(); 
+//  HDC DC_Backup = getWindow().g_DeviceContext();
+//  ImGui::GetPlatformIO().Monitors.resize(0);
+//  ::EnumDisplayMonitors(NULL, NULL, ImGui_ImplWin32_UpdateMonitors_EnumFunc, NULL);
+//g_WantUpdateMonitors = false;
+
+ /*
+ static void ImGui_ImplDX9_CreateWindow(ImGuiViewport* viewport)
+ {
+     ImGuiViewportDataDx9* data = IM_NEW(ImGuiViewportDataDx9)();
+     viewport->RendererUserData = data;
+
+     // PlatformHandleRaw should always be a HWND, whereas PlatformHandle might be a higher-level handle (e.g. GLFWWindow*, SDL_Window*).
+     // Some back-ends will leave PlatformHandleRaw NULL, in which case we assume PlatformHandle will contain the HWND.
+     HWND hwnd = viewport->PlatformHandleRaw ? (HWND)viewport->PlatformHandleRaw : (HWND)viewport->PlatformHandle;
+     IM_ASSERT(hwnd != 0);
+
+     ZeroMemory(&data->d3dpp, sizeof(D3DPRESENT_PARAMETERS));
+     data->d3dpp.Windowed = TRUE;
+     data->d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+     data->d3dpp.BackBufferWidth = (UINT)viewport->Size.x;
+     data->d3dpp.BackBufferHeight = (UINT)viewport->Size.y;
+     data->d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
+     data->d3dpp.hDeviceWindow = hwnd;
+     data->d3dpp.EnableAutoDepthStencil = FALSE;
+     data->d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
+     data->d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync
+
+     HRESULT hr = g_pd3dDevice->CreateAdditionalSwapChain(&data->d3dpp, &data->SwapChain); IM_UNUSED(hr);
+     IM_ASSERT(hr == D3D_OK);
+     IM_ASSERT(data->SwapChain != NULL);
+ }
+ */
+
+
+ //   glViewport(0, 0, (int)GUI_io.DisplaySize.x, (int)GUI_io.DisplaySize.y);
+//   glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+
+
+\imgui_internal.h(100):  note: see declaration of 'ImGuiDockNodeSettings'
+\imgui.h(1432):          note: while compiling class template member function 'ImVector<ImGuiDockNodeSettings> &ImVector<ImGuiDockNodeSettings>::operator =(const ImVector<ImGuiDockNodeSettings> &)'
+\imgui.h(1431):          note: see reference to function template instantiation 'ImVector<ImGuiDockNodeSettings> &ImVector<ImGuiDockNodeSettings>::operator =(const ImVector<ImGuiDockNodeSettings> &)' being compiled
+\imgui_internal.h(1172): note: see reference to class template instantiation 'ImVector<ImGuiDockNodeSettings>' being compiled
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Application::Init()
+{
+    IMGUI_CHECKVERSION();
+    ImGUI_Context =  ImGui::CreateContext();
+    ImGuiIO&  GUI_io = ImGui::GetIO(); (void)GUI_io;
+    
+    GUI_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+    GUI_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+    GUI_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+    
+    ImGui_ImplWin32_Init(Application::getWindow().g_Handle());
+    ImGui_ImplOpenGL3_Init("#version 130");
+}
+
+void Application::Render()
+{ 
+    ImGuiIO&  GUI_io = ImGui::GetIO();
+     
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+    {
+            ImGui::ShowDemoWindow();   //OnRenderGUI();
+    }
+    ImGui::EndFrame();
+
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+    /*=========================================================================
+        Have tried with and without this Context backup, no luck either way.
+      ========================================================================= */
+
+
+    if (GUI_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        HGLRC  backup = wglGetCurrentContext(); 
+        HDC DC_Backup = getWindow().g_DeviceContext();// Apps main Windows HDC
+
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        wglMakeCurrent(DC_Backup, backup);
+    }
+
+   SwapBuffers(DeviceContext); 
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+
+void Application::OnRenderGUI()
+{
+    ImGui::ShowDemoWindow();
+    
+    static float Slide[3] = { 0,0,-300 };
+    
+    /* Start the Camera Widget */
+    ImGui::Begin("Camera");
+    {
+        Vec2 Camera_Position = WorldCamera->g_Position();
+    
+        /* Position Slider for the Camera */
+        {
+            ImGui::SliderFloat3("Position", Slide, -1000, 1000);
+            WorldCamera->Translate({ Slide[0], Slide[1] });
+            WorldCamera->set_Zoom(Slide[2]);
+        }
+    
+        /* Position Slider for the Camera */
+        {
+            ImGui::InputFloat("X", &Camera_Position.x, 10.0f, 1.0f, "%.3f");
+            ImGui::InputFloat("Y", &Camera_Position.y, 10.0f, 1.0f, "%.3f");
+            WorldCamera->s_Position(Camera_Position);
+        }
+    
+        /* Clickable Position Slider for the Camera */
+        {
+            float
+                H = (float) WorldCamera->Height(), 
+                W = (float) WorldCamera->Width();
+            ImGui::InputFloat("Width", &W, 10.0f, 1.0f, "%.3f");
+            ImGui::InputFloat("Height", &H, 10.0f, 1.0f, "%.3f");
+            WorldCamera->Size = { W,H };
+        }
+        /* Dragable Position Slider for the Camera */
+        {
+            int val = 0, val2 = 100;
+            ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
+            WorldCamera->s_Position(Camera_Position);
+        }
+    
+        /* Color Picker Widget for the Background Color */
+        {
+            Vec4 c = getWindow().g_ClearColor();
+            float Col[3] = { c.x,c.y,c.z };
+            ImGui::ColorPicker3("Background Color", Col, 0);
+            glClearColor(Col[0], Col[1], Col[2], 1);
+            getWindow().s_ClearColor({ Col[0], Col[1], Col[2], 1 });
+        }
+    
+        static float Top_Time = 0;
+        if (FrameTimes.back() > Top_Time)
+        {
+            Top_Time = FrameTimes.back();
+        }
+        ImGui::PlotLines("Frame Times", (float*)&FrameTimes.front(), FrameTimes.size(), 0, std::string("FPS:" + std::to_string((uint32_t)FrameTimes.back())).c_str(), 0, Top_Time, ImVec2(ImGui::GetWindowWidth(), 50));
+    
+    }
+    ImGui::End();
+    
+    /* Displays the FrameBuffers */
+    ImGui::Begin("FrameBuffers");
+    {
+        /* Displays the FrameBuffer */
+        float WinSize = (float)(ImGui::GetWindowHeight() - (ImGui::GetWindowHeight() * 0.15));
+        ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+        ImGui::SameLine();
+        ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)FBO->DepthTarget->g_Handle()), ImVec2(WinSize, WinSize));
+        ImGui::SameLine();
+    
+        ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+        ImGui::SameLine();
+        ImGui::Image(reinterpret_cast<ImTextureID*>((size_t)test_RenderPass->FBO->DepthTarget->g_Handle()) , ImVec2(WinSize, WinSize));
+        ImGui::SameLine();
+    
+    
+        char *Buff = const_cast<char*>(OpenGL_ErrorList.c_str());
+        ImGui::InputTextMultiline("OpenGL Errors",Buff, OpenGL_ErrorList.size());
+    }
+    ImGui::End();
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              /// This needs to go
+            std::string VRenderer =
+                "#version 330 core                                       \n\
+                layout(location = 0) in vec2 Position;             \n\
+                layout(location = 1) in vec4 VColor;                \n\
+                uniform mat4 ProjectionMatrix;                           \n\
+                uniform mat4 ViewMatrix;                                 \n\
+                out vec4 Col;                                            \n\
+                void main()                                              \n\
+                {                                                        \n\
+                    Col = VColor;                                   \n\
+                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));     \n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
+                }";
+          
+            std::string FRenderer =
+                "#version 330 core    \n\
+                in vec4 Col;          \n\
+                out vec4 FragColor;   \n\
+                void main()           \n\
+                {                     \n\
+                    FragColor = Col;  \n\
+                }";
+          
+            /// NOTE: I BELIEVE DEFAULT SHADER IS BROKE
+           // test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, new Shader(VRenderer, FRenderer)); //&MainRenderer->new_RenderPass(SCREEN_X, SCREEN_Y, MainRenderer->InstanceRenderer);
+           // test_RenderPass->attach(GEOMETRY);
+
+
+float Plot_Getter(void* data, int idx)
+{
+//    ImGui::ImGuiPlotArrayGetterData* plot_data = (ImGuiPlotArrayGetterData*)data;
+    const float v = 0;// (float)data[idx]; //*(const float*)(const void*)((const unsigned char*)plot_data->Values + (size_t)idx * plot_data->Stride);
+    return v;
+}
+
+
+        //Vertices_VBO->Bind();
+        //OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec2) / sizeof(float), "Position");
+        //Colors_VBO->Bind();
+        //OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VColor");
+       //
+        //glBindVertexArray(0);
+        // glBindBuffer(GL_ARRAY_BUFFER, 0);
+        /* Setup the Shader so that our Locations are Linked */
+        // {
+         // RENDERER->Bind();
+         // { 
+         //     Vertices_VAO->Bind();
+         // 
+         //     Vertices_VBO->Update(Vertices);
+         //     OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
+         //     Colors_VBO->Update(Colors);
+         //     OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VColor");
+         // 
+         // 
+         //     //Vertices_VAO->Attach(BufferTypes::VERTEX, Vertices_VBO);
+         //     //Vertices_VAO->Attach(BufferTypes::COLOR,  Colors_VBO);
+         // } 
+         // RENDERER->Unbind();
+//m_program->bind();
+//{
+//    m_object.bind();
+//    glDrawArrays(GL_TRIANGLES, 0, sizeof(sg_vertexes) / sizeof(sg_vertexes[0]));
+//    m_object.release();
+//}
+//m_program->release();
+//
+//
+//Vertices_VBO->Update(Vertices);
+//OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
+//Colors_VBO->Update(Colors);
+//OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "VColor");
+       // }
+
+
+
     // GLuint VAO{ 0 }, VBO{ 0 }, COL{ 0 };
         // VAO = OpenGL::new_VAO();  // new VertexArrayObject();
 // VBO = OpenGL::new_VBO();  // Vertices_VBO = new VertexBufferObject<Vec_t>();
@@ -270,7 +706,7 @@ for(auto& S: Shaders)
     using RenderPair = std::pair<Material, Mesh_ID_t>;
 
     std::vector<Shader*> Shaders;
-    std::vector<Graphics::Texture*> Textures;
+    std::vector<Texture*> Textures;
     std::vector<Mesh*> Meshes;
 */
 
@@ -680,7 +1116,7 @@ void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
 //}
 ///     struct RenderPass
 ///     {
-///     	void Submit(Mesh& _mesh, Graphics::Texture& _tex)
+///     	void Submit(Mesh& _mesh, Texture& _tex)
 ///     	{
 ///           //  SurfaceMap[_tex.g_Handle()].push_back( _mesh );
 ///     	}
@@ -703,7 +1139,7 @@ void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
 ///     	}
 ///     	//std::unordered_map<std::vector<uint32_t>, std::vector<Mesh>> SurfaceMap;
 ///     	std::vector<std::vector<int>> Pairs;
-///     	std::vector<Graphics::Texture*> Texts;
+///     	std::vector<Texture*> Texts;
 ///     	std::vector<Mesh*> Meshes;
 ///     	Shader* GPUrenderer;
 ///     	FrameBufferObject FBO;
@@ -712,7 +1148,7 @@ void Attach(BufferTypes bufferT, VertexBufferObject<T>* buffer)
 /// 	struct Surface_s
 /// 	{
 /// 		struct Material {
-/// 			Graphics::Texture Tex;
+/// 			Texture Tex;
 /// 		};
 /// 		Shader* MaterialShader;
 /// 	};
@@ -1314,18 +1750,18 @@ Application::Window::Event::Event(MsgType msg)
 ///	stream << "X:[" << vector.x << "] - Y:[" << vector.y << "]";
 ///	return stream;
 ///std::string BasicVertexShader = "#version 330 \n\
-///layout(location = 0) in vec3 VertexPosition;\n\
-///out vec3 VertexColor;\n\
+///layout(location = 0) in vec3 Position;\n\
+///out vec3 VColor;\n\
 ///out vec4 FragPosition;\n\
 ///void main()\n\
 ///{\n\
-///FragPosition = vec4(VertexPosition.xyz, 1.0f);\n\
-///VertexColor = vec3(1.0,1.0,1.0);\n\
+///FragPosition = vec4(Position.xyz, 1.0f);\n\
+///VColor = vec3(1.0,1.0,1.0);\n\
 ///}";
 ///
 ///std::string BasicFragmentShader = "#version 330 \n\
 ///out vec4 color;         \n\
-///in vec3 VertexColor;    \n\
+///in vec3 VColor;    \n\
 ///in vec4 FragPosition;   \n\
 ///void main(){            \n\
 ///color = vec3(1, 1, 0, 1);  \n\
@@ -1335,19 +1771,19 @@ Application::Window::Event::Event(MsgType msg)
 ///uniform mat4 ProjectionMatrix;              \n\
 ///uniform mat4 ViewMatrix;                    \n\
 ///uniform mat4 ModelMatrix;                   \n\
-///out vec4 vertexColor; 						\n\
+///out vec4 VColor; 						\n\
 ///void main()									\n\
 ///{											\n\
 ///	gl_Position = vec4(aPos, 1.0);			\n\
-///	vertexColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
+///	VColor = vec4(0.5, 1.0, 0.0, 1.0); \n\
 ///}";
 ///vec4(texture(texture1,TexCoords.xy).xyzw); 
 ///std::string FragmentShader = "#version 330 core \n\
 ///out vec4 FragColor;                             \n\
-///in vec4 vertexColor;                            \n\
+///in vec4 VColor;                            \n\
 ///void main()                                     \n\
 ///{                                               \n\
-///	FragColor = vertexColor;                    \n\
+///	FragColor = VColor;                    \n\
 ///}";
 ///
 ///    std::string vRenderer =
@@ -1356,7 +1792,7 @@ Application::Window::Event::Event(MsgType msg)
 ///    uniform mat4 ProjectionMatrix;                    \n\
 ///    uniform mat4 ViewMatrix;                         \n\
 ///    uniform mat4 Model;                         \n\
-///    out vec3 vertexColor;                       \n\
+///    out vec3 VColor;                       \n\
 ///    out vec2 TexCoords;                         \n\
 ///    void main()                                 \n\
 ///    {                                           \n\
@@ -1367,7 +1803,7 @@ Application::Window::Event::Event(MsgType msg)
 ///    }";
 ///    std::string fRenderer =
 ///    "#version 330 core \n\
-///    in vec3 vertexColor;                              \n\
+///    in vec3 VColor;                              \n\
 ///    uniform sampler2D texture1;                       \n\
 ///    out vec4 FragColor;                               \n\
 ///    in  vec2 TexCoords;                               \n\
@@ -1800,25 +2236,25 @@ hello_world_asm ENDP
 //	setPixel(x, y, Pixel(0, 0, 0, 255));//rabg
 //}
 
-//vec4(vertexColor.xyz, 1.0); 
+//vec4(VColor.xyz, 1.0); 
 
-/*	vertexColor = texture(texture1, aPos.zw).xyz; \n\
+/*	VColor = texture(texture1, aPos.zw).xyz; \n\
 
 "#version 330\
 uniform mat4 ProjectionMatrix;\
 uniform mat4 ViewMatrix;\
 uniform mat4 ModelMatrix;\
-layout(location = 0) in vec3 VertexPosition;\
+layout(location = 0) in vec3 Position;\
 layout(location = 1) in vec2 TextureCoord;\
 out vec2 FPosition;\
 out vec2 TCoord;\
 void main(){\
 	mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix);\
 	mat4 ModelViewProjectionMatrix = (Matrix.projection * ModelViewMatrix);\
-	vec4 WorldPosition = vec4(VertexPosition, 1.0f);\
-	FPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;\
+	vec4 WorldPosition = vec4(Position, 1.0f);\
+	FPosition = (ModelMatrix * vec4(Position, 1.0f)).xyz;\
 	TCoord = TextureCoord;\
-	gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);\
+	gl_Position = ModelViewProjectionMatrix * vec4(Position.xyz, 1.0f);\
 }\
 
 "#version 330\

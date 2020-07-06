@@ -11,12 +11,14 @@ Layer::~Layer() {}
 void Layer::OnAttach() {}
 void Layer::OnDetach() {}
 void Layer::OnUpdate() {}
+bool Layer::OnEvent(Event _msg) { return false; }
+
 //void Layer::OnEvent(Event& _msg) {}
 
 // Tells if current layer is enabled or not 
 bool Layer::is_Enabled() { return Enabled _EQUALS_ true; }
 
-layerStack::layerStack() {}
+layerStack::layerStack()  {}
 layerStack::~layerStack() {}
 
 void layerStack::push(Layer* _layer)

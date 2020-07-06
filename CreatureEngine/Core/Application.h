@@ -8,12 +8,14 @@
 #include<windowsx.h>
 #include<unordered_map>
 
+#include"Layer.h"
 #include"EventSystem.h"
+
 #include"../Core/Common.h"
+#include"../Profiling/Timing/Timer.h"
 #include"../Renderer/LowLevel/OpenGL/OpenGL.h"
 #include"../Renderer/LowLevel/OpenGL/Shader/Shader.h"
 #include"../Renderer/LowLevel/OpenGL/Camera/Camera2D.h"
-#include"../Profiling/Timing/Timer.h"
 
 extern std::string BasicVertexShader;
 extern std::string BasicFragmentShader;
@@ -34,7 +36,10 @@ class Application
 private:
     bool Running{ true };
     HINSTANCE Instance{ nullptr };
-    ImGuiIO *io;
+
+    layerStack Layers;
+
+
 
     struct Window
     {
@@ -88,6 +93,7 @@ private:
         }Input;
 
     public:
+
         InputDevices& getInput()
         {
             return Input;
@@ -232,7 +238,12 @@ private:
     }  mainWindow;// Window
 
  public:
+
+    ImGuiContext *ImGUI_Context{ nullptr };
+    ImGuiViewport *Port{ nullptr };
+
      size_t FPS{ 0 };
+     std::vector<float> FrameTimes;
     Application();
     //Application(int _width, int _height, std::string _name) noexcept;
 

@@ -31,6 +31,75 @@ HOW TO UPDATE?
 
 
 -----------------------------------------------------------------------
+ DOCKING+MULTI-VIEWPORT BRANCH (In Progress)
+-----------------------------------------------------------------------
+
+DOCKING FEATURES
+
+- Added Docking system: [BETA] (#2109, #351)
+  - Added ImGuiConfigFlags_DockingEnable flag to enable Docking.
+    Set with `io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;`.
+  - Added DockSpace(), DockSpaceOverViewport() API.
+  - Added ImGuiDockNodeFlags flags for DockSpace().
+  - Added SetNextWindowDockID(), SetNextWindowClass() API.
+  - Added GetWindowDockID(), IsWindowDocked() API.
+  - Added ImGuiWindowFlags_NoDocking window flag to disable the possibility for a window to be docked.
+    Popup, Menu and Child windows always have the ImGuiWindowFlags_NoDocking flag set.
+  - Added ImGuiWindowClass to specify advanced docking/viewport related flags via SetNextWindowClass().
+  - Added io.ConfigDockingNoSplit option.
+  - Added io.ConfigDockingWithShift option.
+  - Added io.ConfigDockingAlwaysTabBar option.
+  - Added io.ConfigDockingTransparentPayload option.
+  - Style: Added ImGuiCol_DockingPreview, ImGuiCol_DockingEmptyBg colors.
+  - Demo: Added "DockSpace" example app showcasing use of explicit dockspace nodes.
+
+MULTI-VIEWPORT FEATURES (was previously 'viewport' branch, merged into 'docking')
+
+Breaking Changes:
+
+- IMPORTANT: When multi-viewports are enabled (with io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable),
+  all coordinates/positions will be in your natural OS coordinates space. It means that:
+   - Reference to hard-coded positions such as in SetNextWindowPos(ImVec2(0,0)) are _probably_ not what you want anymore.
+     Use GetMainViewport()->Pos to offset hard-coded positions, e.g. SetNextWindowPos(GetMainViewport()->Pos).
+   - Likewise io.MousePos and GetMousePos() will use OS coordinates.
+     If you query mouse positions to interact with non-imgui coordinates you will need to offset them.
+     e.g. subtract GetWindowViewport()->Pos.
+- Render function: the ImDrawData structure now contains 'DisplayPos' and 'DisplaySize' fields.
+  To support multi-viewport, you need to use those values when creating your orthographic projection matrix.
+  Use 'draw_data->DisplaySize' instead of 'io.DisplaySize', and 'draw_data->DisplayPos' instead of (0,0) as the upper-left point.
+  You need to subtract 'draw_data->DisplayPos' from your scissor rectangles to convert them from global coordinates to frame-buffer coordinates.
+- IO: Moved IME support functions from io.ImeSetInputScreenPosFn, io.ImeWindowHandle to the PlatformIO api.
+- IO: Removed io.DisplayVisibleMin, io.DisplayVisibleMax settings (they were marked obsoleted, used to clip within the (0,0)..(DisplaySize) range).
+
+Other changes:
+(FIXME: This need a fuller explanation!)
+
+- Added ImGuiPlatformIO structure and GetPlatformIO().
+  Similarly to ImGuiIO and GetIO(), this structure is the main point of communication for back-ends supporting multi-viewports.
+- Added ImGuiPlatformMonitor to feed OS monitor information in the ImGuiPlatformIO::Monitors.
+- Added GetMainViewport().
+- Added GetWindowViewport(), SetNextWindowViewport().
+- Added GetWindowDpiScale().
+- Added GetOverlayDrawList(ImGuiViewport* viewport).
+  The no-parameter version of GetOverlayDrawList() return the overlay for the current window's viewport.
+- Added UpdatePlatformWindows(), RenderPlatformWindows(), DestroyPlatformWindows() for usage for application core.
+- Added FindViewportByID(), FindViewportByPlatformHandle() for usage by back-ends.
+- Added ImGuiConfigFlags_ViewportsEnable configuration flag and other viewport options.
+- Added io.ConfigViewportsNoAutoMerge, io.ConfigViewportsNoTaskBarIcon, io.ConfigViewportsNoDecoration, io.ConfigViewportsNoDefaultParent options.
+- Added ImGuiBackendFlags_PlatformHasViewports, ImGuiBackendFlags_RendererHasViewports, ImGuiBackendFlags_HasMouseHoveredViewport backend flags.
+- Added io.MainViewport, io.Viewports, io.MouseHoveredViewport (MouseHoveredViewport is optional _even_ for multi-viewport support).
+- Added ImGuiViewport structure, ImGuiViewportFlags flags.
+- Added ImGuiWindowClass and SetNextWindowClass() for passing viewport related hints to the OS/platform back-end.
+- Examples: Renderer: OpenGL2, OpenGL3, DirectX11, DirectX12, Vulkan: Added support for multi-viewports.
+- Examples: Platforms: Win32, GLFW, SDL2: Added support for multi-viewports.
+  Note that Linux/Mac still have inconsistent support for multi-viewports. If you want to help see https://github.com/ocornut/imgui/issues/2117.
+- Examples: Win32: Added DPI-related helpers to access DPI features without requiring the latest Windows SDK at compile time,
+  and without requiring Windows 10 at runtime.
+- Examples: Vulkan: Added various optional helpers in imgui_impl_vulkan.h (they are used for multi-viewport support)
+  to make the examples main.cpp easier to read.
+
+
+-----------------------------------------------------------------------
  VERSION 1.77 WIP (In Progress)
 -----------------------------------------------------------------------
 
@@ -38,6 +107,10 @@ Breaking Changes:
 
 - Removed unncessary ID (first arg) of ImFontAtlas::AddCustomRectRegular() function. Please
   note that this is a Beta api and will likely be reworked to support multi-monitor multi-DPI.
+- Renamed OpenPopupOnItemClick() to OpenPopupContextItem(). Kept inline redirection function (will obsolete).
+- Removed BeginPopupContextWindow(const char*, int mouse_button, bool also_over_items) in favor
+  of BeginPopupContextWindow(const char*, ImGuiPopupFlags flags) with ImGuiPopupFlags_NoOverItems.
+- Removed CalcItemRectClosestPoint() entry point which was made obsolete and asserting in December 2017.
 
 Other Changes:
 
@@ -50,18 +123,50 @@ Other Changes:
   Set to 0.0f (default) to always make a close button appear on hover (same as Chrome, VS).
   Set to FLT_MAX to only display a close button when selected (merely hovering is not enough).
   Set to an intermediary value to toggle behavior based on width (same as Firefox).
-- Fix GetGlyphRangesKorean() end-range to end at 0xD7A3 (instead of 0xD79D). (#348, #3217) [@marukrap]
+- Tab: Added a ImGuiTabItemFlags_NoTooltip flag to disable the tooltip for individual tab item
+  (vs ImGuiTabBarFlags_NoTooltip for entire tab bar). [@Xipiryon]
+- Windows: Fix unintended feedback loops when resizing windows close to main viewport edges. [@rokups]
+- Popups: All functions capable of opening popups (OpenPopup*, BeginPopupContext*) now take a new
+  ImGuiPopupFlags sets of flags instead of a mouse button index. The API is automatically backward
+  compatible as ImGuiPopupFlags is guaranteed to hold mouse button index in the lower bits.
+- Popups: Added ImGuiPopupFlags_NoOpenOverExistingPopup for OpenPopup*/BeginPopupContext* functions
+  to first test for the presence of another popup at the same level.
+- Popups: Added ImGuiPopupFlags_NoOpenOverItems for BeginPopupContextWindow() - similar to testing
+  for !IsAnyItemHovered() prior to doing an OpenPopup.
+- Popups: Added ImGuiPopupFlags_AnyPopupId and ImGuiPopupFlags_AnyPopupLevel flags for IsPopupOpen(),
+  allowing to check if any popup is open at the current level, if a given popup is open at any popup
+  level, if any popup is open at all.
+- Popups: Fix an edge case where programatically closing a popup while clicking on its empty space
+  would attempt to focus it and close other popups. (#2880)
+- Popups: Fix BeginPopupContextVoid() when clicking over the area made unavailable by a modal. (#1636)
+- Popups: Clarified some of the comments and function prototypes.
+- Modals: BeginPopupModal() doesn't set the ImGuiWindowFlags_NoSavedSettings flag anymore, and will
+  not always be auto-centered. Note that modals are more similar to regular windows than they are to
+  popups, so api and behavior may evolve further toward embracing this. (#915, #3091)
+  Enforce centering using e.g. SetNextWindowPos(io.DisplaySize * 0.5f, ImGuiCond_Appearing, ImVec2(0.5f,0.5f)).
 - Metrics: Added a "Settings" section with some details about persistent ini settings.
 - Nav, Menus: Fix vertical wrap-around in menus or popups created with multiple appending calls to
   BeginMenu()/EndMenu() or BeginPopup/EndPopup(). (#3223, #1207) [@rokups]
 - Drag and Drop: Fixed unintended fallback "..." tooltip display during drag operation when
   drag source uses _SourceNoPreviewTooltip flags. (#3160) [@rokups]
-- ImDrawList: Fixed an issue where draw command merging or primitive unreserve while crossing the 
+- Columns: Lower overhead on column switches and switching to background channel.
+  Benefits Columns but was primarily made with Tables in mind!
+- Fonts: Fix GetGlyphRangesKorean() end-range to end at 0xD7A3 (instead of 0xD79D). (#348, #3217) [@marukrap]
+- ImDrawList: Fixed an issue where draw command merging or primitive unreserve while crossing the
   VtxOffset boundary would lead to draw commands with wrong VtxOffset. (#3129, #3163, #3232, #2591)
   [@thedmd, @Shironekoben, @sergeyn, @ocornut]
-- ImDrawList, ImDrawListSplitter, Columns: Fixed an issue where starting a split when current 
+- ImDrawList, ImDrawListSplitter, Columns: Fixed an issue where changing channels with different
+  TextureId, VtxOffset would incorrectly apply new settings to draw channels. (#3129, #3163)
+  [@ocornut, @thedmd, @Shironekoben]
+- ImDrawList, ImDrawListSplitter, Columns: Fixed an issue where starting a split when current
   VtxOffset was not zero would lead to draw commands with wrong VtxOffset. (#2591)
+- ImDrawList, ImDrawListSplitter, Columns: Fixed an issue where starting a split right after
+  a callback draw command would incorrectly override the callback draw command.
+- ImDrawList: Fixed minor bug introduced in 1.75 where AddCircle() with 12 segments would
+  generate an extra unrequired vertex. [@ShironekoBen]
 - Misc, Freetype: Fix for rare case where FT_Get_Char_Index() succeed but FT_Load_Glyph() fails.
+- Docs: Improved and moved font documentation to docs/FONTS.md so it can be readable on the web.
+  Updated various links/wiki accordingly. Added FAQ entry about DPI. (#2861) [@ButternCream, @ocornut]
 - CI: Added CI test to verify we're never accidentally dragging libstdc++ (on some compiler setups,
   static constructors for non-pod data seems to drag in libstdc++ due to thread-safety concerns).
   Fixed a static contructor which led to this dependency on some compiler setups (unclear which).
@@ -833,6 +938,7 @@ Breaking Changes:
 - Renamed ImFontAtlas::GlyphRangesBuilder to ImFontGlyphRangesBuilder. Kept redirection typedef (will obsolete).
 
 Other Changes:
+
 - Added BETA api for Tab Bar/Tabs widgets: (#261, #351)
   - Added BeginTabBar(), EndTabBar(), BeginTabItem(), EndTabItem(), SetTabItemClosed() API.
   - Added ImGuiTabBarFlags flags for BeginTabBar().

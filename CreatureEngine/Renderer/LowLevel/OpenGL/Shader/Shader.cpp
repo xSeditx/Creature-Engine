@@ -401,23 +401,329 @@ void Shader::CompileStrings(std::string _vertstring, std::string _fragstring)
 	return;
 }
 
-extern std::string VTextureRenderer;
-extern std::string FTextureRenderer;
-extern GLuint ImageQuadVAO;
-extern GLuint ImageQuadVBO;
+
+
+
+
+
+
+
+
+
+
+
+
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+/// =================================================================================================================================
+
+
+
+
+
+#include"../Camera/Camera2D.h"
+
+
+//===============================================================================================================
+/* Built in Shaders for Rapid usecases
+NOTE: Might Enumerate these in the future to make loading and unloading of specific ones
+      simpler   */           
+//===============================================================================================================
+
+Shader *shader_Basic{ nullptr };     // Simple basic Shader for rapid rendering and prototyping
+Shader *shader_Blur{ nullptr };      // Gaussian Blurs the provided texture
+Shader *shader_Collider{ nullptr };  // Renders GL_LINES around an objects collider the color of the normals for the colliders surface  
+Shader *shader_Debug{ nullptr };     // Basic Debug shader providing various data not otherwise rendered
+Shader *shader_DebugQuad{ nullptr }; // Renders a Texture to the Screen for debug purposes
+Shader *shader_Light{ nullptr };     // Provides basic Lighting for a Scene
+Shader *shader_Shadow{ nullptr };    // Renders the Shadowmap provided 
+Shader *shader_Skybox{ nullptr };    // Renders the Skybox around the world
+Shader *shader_Sprite{ nullptr };    // Renders a Specified Sprite to the screen
+
+Shader *shader_TextureRenderer{nullptr};
+Shader *shader_QuadRenderer{ nullptr };
+Shader *shader_BasicRenderer{ nullptr };
+
+//===============================================================================================================
+
+GLuint ImageQuadVAO{ 0 };
+GLuint ImageQuadVBO{ 0 };
+
+GLuint DebugQuadVAO;
+GLuint DebugQuadVBO;
+
+Camera2D *debug_Camera;
+//===============================================================================================================
+
+
+//===============================================================================================================
+/* Built in Shaders for Rapid usecases
+NOTE: Might Enumerate these in the future to make loading and unloading of specific ones
+      simpler */
+//===============================================================================================================
+
+bool load_Builtin_Shaders()
+{
+    /// ======================================================================================================================================================================================
+    ///   Usage Name                     Location                          Filename                  Description
+    /// ======================================================================================================================================================================================
+    shader_Blur = new Shader("Resources/Blur.sfx");             // Blur.sfx           Gaussian Blurs the provided texture
+    shader_Debug = new Shader("Resources/Debug.sfx");           // Debug.sfx          Basic Debug shader providing various data not otherwise rendered
+    shader_Light = new Shader("Resources/Light.sfx");           // Light Shader.      Provides basic Lighting for a Scene
+    shader_Shadow = new Shader("Resources/Shadow.sfx");         // Shadow.sfx         Renders the Shadowmap provided
+    shader_Skybox = new Shader("Resources/Skybox.sfx");         // Skybox.sfx         Renders the Skybox around the world
+    shader_Sprite = new Shader("Resources/Sprite.sfx");         // Sprite.sfx         Renders a Specified Sprite to the screen
+    shader_Collider = new Shader("Resources/Collider.sfx");     // Collider.sfx       Renders GL_LINES around an objects collider the color of the normals for the colliders surface
+    shader_DebugQuad = new Shader("Resources/DebugQuad.sfx");   // DebugQuad          Renders a Texture to the Screen for debug purposes
+    shader_Basic = new Shader("Resources/BasicShader.sfx");     // BasicShader.sfx    Simple basic Shader for rapid rendering and prototyping
+/// ======================================================================================================================================================================================
+    return true;
+}
+
+/* Frees the memory held by the built in Shaders*/
+bool cleanup_Builting_Shaders()
+{
+    bool Result = true;
+    if (shader_Blur)         delete(shader_Blur);      else  Result = false;
+    if (shader_Debug)        delete(shader_Debug);     else  Result = false;
+    if (shader_Light)        delete(shader_Light);     else  Result = false;
+    if (shader_Shadow)       delete(shader_Shadow);    else  Result = false;
+    if (shader_Skybox)       delete(shader_Skybox);    else  Result = false;
+    if (shader_Sprite)       delete(shader_Sprite);   else  Result = false;
+    if (shader_Collider)     delete(shader_Collider); else  Result = false;
+    if (shader_DebugQuad)    delete(shader_DebugQuad); else  Result = false;
+    if (shader_Basic)        delete(shader_Basic);  else  Result = false;
+    return Result;
+}
+
+
+
+//===============================================================================================================
+/* DUNNO IF HTIS HAS BEEN SETUP BUT IT APPEARS TO HAVE*/
+std::string VInstance_TextureRenderer =
+"#version 330 core                                                                                                                                \n\
+         layout(location = 0) in vec2 aPos;                                                                                                       \n\
+         layout(location = 1) in vec4 Position;                                                                                                   \n\
+         uniform mat4 ProjectionMatrix;                                                                                                           \n\
+         uniform mat4 ViewMatrix;                                                                                                                 \n\
+         out  vec2 TexCoords;                                                                                                                     \n\
+         void main()                                                                                                                              \n\
+         {                                                                                                                                        \n\
+             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                                                                     \n\
+             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);                                                               \n\
+             gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+         }";
+
+
+std::string VTextureRenderer =
+"#version 330 core                          \n\
+         layout(location = 0) in vec2 aPos; \n\
+         uniform vec4 Position;             \n\
+         uniform mat4 ProjectionMatrix;     \n\
+         uniform mat4 ViewMatrix;           \n\
+         out vec2 TexCoords;                \n\
+         void main()                        \n\
+         {                                  \n\
+             TexCoords = aPos;              \n\
+             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+             gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+         }";
+
+
+std::string FAlphaBlendTextureRenderer =
+"#version 330 core                        \n\
+         uniform sampler2D DiffuseTexture;\n\
+         in vec2  TexCoords;              \n\
+         out vec4 FragColor;              \n\
+         void main()                      \n\
+         {                                \n\
+             FragColor = texture(DiffuseTexture, TexCoords);\n\
+         }";
+
+std::string FTextureRenderer =
+"#version 330 core                                                             \n\
+         uniform sampler2D DiffuseTexture;                                     \n\
+         in  vec2 TexCoords;                                                   \n\
+         out vec4 FragColor;                                                   \n\
+         void main()                                                           \n\
+         {                                                                     \n\
+             FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
+         }";
+
+
+//===============================================================================================================
+
+std::string VQuadRenderer =
+"#version 330 core                           \n\
+          layout(location = 0) in vec2 aPos; \n\
+          uniform vec4 Position;             \n\
+          uniform mat4 ProjectionMatrix;     \n\
+          uniform mat4 ViewMatrix;           \n\
+          out vec2 TexCoords;                \n\
+          void main()                        \n\
+          {                                  \n\
+              TexCoords = aPos;              \n\
+              mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+              mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+              gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+          }";
+
+std::string FQuadRenderer =
+"#version 330 core                                           \n\
+          uniform sampler2D DiffuseTexture;                  \n\
+          in vec2 TexCoords;                                 \n\
+          out vec4 FragColor;                                \n\
+          void main()                                        \n\
+          {                                                  \n\
+              FragColor = texture(DiffuseTexture, TexCoords);\n\
+          }";
+ 
+
+//===============================================================================================================
+
+
+std::string VBasicRenderer =
+    "#version 330 core                         \n\
+        layout(location = 0) in vec2 Position; \n\
+        layout(location = 1) in vec4 VColor; \n\
+        uniform mat4 ProjectionMatrix;     \n\
+        uniform mat4 ViewMatrix;           \n\
+        out vec4 Col;                      \n\
+        void main()                        \n\
+        {                                  \n\
+            Col = VColor; \n\
+            mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+            mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+            gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
+        }";
+
+std::string FBasicRenderer =
+    "#version 330 core            \n\
+        in vec4 Col;          \n\
+        out vec4 FragColor;   \n\
+        void main()           \n\
+        {                     \n\
+            FragColor = vec4(Col.x, Col.y, Col.z,1);  \n\
+        }";
+//===============================================================================================================
+
+
+
 
 /* DEPRECATED: please use load builting shaders */
-void init_DefaultShaders()
+bool init_DefaultShaders()
 {
-	ImageQuadVAO = OpenGL::new_VAO();
-	ImageQuadVBO = OpenGL::new_VBO();
+    debug_Camera = new Camera2D(SCREEN_X, SCREEN_Y);
+
+    DebugQuadVAO = OpenGL::new_VAO();
+    DebugQuadVBO = OpenGL::new_VBO();
+
+    ImageQuadVAO = OpenGL::new_VAO();
+    ImageQuadVBO = OpenGL::new_VBO();
+
+    Vec2 QuadData[6] =
+    {
+        Vec2(0, 0),  Vec2(1, 0),  Vec2(0, 1),
+        Vec2(1, 1),  Vec2(0, 1),  Vec2(1, 0)
+    };
 
 
-	TextureRenderer = new Shader(VTextureRenderer, FTextureRenderer);
-	TextureRenderer->Bind();
-	{
-		OpenGL::set_Attribute(2, "aPos");
-	}
-	TextureRenderer->Unbind();
 
+    shader_QuadRenderer = new Shader( VQuadRenderer, FQuadRenderer);
+    shader_QuadRenderer->Bind();
+    {
+        OpenGL::bind_VAO(DebugQuadVAO);
+
+        OpenGL::bind_VBO(DebugQuadVBO);
+        OpenGL::set_Attribute(2, "aPos");
+        OpenGL::set_BufferData(sizeof(QuadData), QuadData);
+    }
+    shader_QuadRenderer->Unbind();
+
+
+    //======================================================================================
+    shader_TextureRenderer = new Shader(VTextureRenderer, FTextureRenderer);
+    shader_TextureRenderer->Bind();
+    {
+        OpenGL::set_Attribute(2, "aPos");
+    }
+    shader_TextureRenderer->Unbind();
+    //======================================================================================
+    shader_BasicRenderer = new Shader(VBasicRenderer, FBasicRenderer);
+    return true;
 }
+
+// In Header
+//enum default_Shader
+//{
+//    Basic,
+//    Blur,
+//    Collider,
+//    Debug,
+//    DebugQuad,
+//    Light,
+//    Shadow,
+//    Skybox,
+//    Sprite,
+//    TextureRenderer,
+//    QuadRenderer,
+//    BasicRenderer
+//};
+//Shader& DefaultShader(default_Shader _type);
+// In CPP
+//Shader& DefaultShader(default_Shader _type)
+//{
+//    switch (_type)
+//    {
+//    case Basic:
+//    {
+//        static Shader *Basic = new Shader(VBasicRenderer, FBasicRenderer);
+//        return *Basic;
+//    }break;
+//    case Blur:
+//    {}break;
+//    case Collider:
+//    {}break;
+//    case Debug:
+//    {}break;
+//    case DebugQuad:
+//    {
+//        Shader *Quad = new Shader(VQuadRenderer, FQuadRenderer);
+//        return *Quad;
+//    }break;
+//    case Light:
+//    {}break;
+//    case Shadow:
+//    {}break;
+//    case Skybox:
+//    {}break;
+//    case Sprite:
+//    {}break;
+//    case TextureRenderer:
+//    {
+//        static Shader *Tex = new Shader(VTextureRenderer, FTextureRenderer);
+//        return *Tex;
+//    }break;
+//    case QuadRenderer:
+//    {}break;
+//    case BasicRenderer:
+//    {}break;
+//    };
+//}

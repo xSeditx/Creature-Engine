@@ -283,7 +283,10 @@ pure_Virtual tells if a function is pure virtual in plain english*/
 
 //======================================================================================
 //========================= DEBUG INFOMATION ======================================================
-#include<Windows.h>
+#define WIN32_LEAN_AND_MEAN      // Exclude rarely-used stuff from Windows headers
+
+#include <windows.h>
+
 
 
 #define CON_DarkBlue 1
@@ -309,7 +312,7 @@ extern HANDLE hConsole;
 #    define DEBUGPrint(col, x) {DEBUGMutex.lock();\
                                 SetColor(col);\
                                 std::thread::id CurrentThread = std::this_thread::get_id();\
-                                std::cout <<  x << " : " << CurrentThread<< std::endl;\
+                                std::cout <<  x << " : Thread[" << CurrentThread << "]" << std::endl;\
                                 SetColor(7);\
                                 DEBUGMutex.unlock();}
 #else
@@ -475,6 +478,110 @@ extern bool TerminateOnError;
 #define RANDOM_RANGE(x)           (RANDOM(x * 2) - (x))
 
 
+
+
+
+
+
+
+
+
+
+
+/* Defines for accessing the upper and lower byte of an integer. */
+#define  LOW_BYTE(x)    (x & 0x00FF)
+#define  HI_BYTE(x)     ((x & 0xFF00) >> 8)
+
+#define  BIT(x)         (1 << x) // GET THE STATE OF A SINGLE BIT AT X POSITION
+#define  MAX_INTEGER    0xFFFFFFFF
+
+#define  BIT_32         0x80000000         //      DEC 2147483648   BIN:  1000 0000 0000 0000 0000 0000 0000 0000
+#define  BIT_31         0x40000000         //      DEC 1073741824	BIN:  0100 0000 0000 0000 0000 0000 0000 0000
+#define  BIT_30         0x20000000         //      DEC 536870912	BIN:  0010 0000 0000 0000 0000 0000 0000 0000
+#define  BIT_29         0x10000000         //      DEC 268435456	BIN:  0001 0000 0000 0000 0000 0000 0000 0000
+#define  BIT_28         0x8000000          //      DEC 134217728	BIN:  0000 1000 0000 0000 0000 0000 0000 0000
+#define  BIT_27         0x4000000          //      DEC 67108864	    BIN:  0000 0100 0000 0000 0000 0000 0000 0000
+#define  BIT_26         0x2000000          //      DEC 33554432	    BIN:  0000 0010 0000 0000 0000 0000 0000 0000
+#define  BIT_25         0x1000000          //      DEC 16777216	    BIN:  0000 0001 0000 0000 0000 0000 0000 0000
+#define  BIT_24         0x800000           //      DEC 8388608		BIN:  0000 0000 1000 0000 0000 0000 0000 0000
+#define  BIT_23         0x400000           //      DEC 4194304		BIN:  0000 0000 0100 0000 0000 0000 0000 0000
+#define  BIT_22         0x200000           //      DEC 2097152		BIN:  0000 0000 0010 0000 0000 0000 0000 0000
+#define  BIT_21         0x100000           //      DEC 1048576		BIN:  0000 0000 0001 0000 0000 0000 0000 0000
+#define  BIT_20         0x80000            //      DEC 524288		BIN:  0000 0000 0000 1000 0000 0000 0000 0000
+#define  BIT_19         0x40000            //      DEC 262144		BIN:  0000 0000 0000 0100 0000 0000 0000 0000
+#define  BIT_18         0x20000            //      DEC 131072		BIN:  0000 0000 0000 0010 0000 0000 0000 0000
+#define  BIT_17         0x10000	           //      DEC 65536		BIN:  0000 0000 0000 0001 0000 0000 0000 0000
+#define  BIT_16         0x8000             //      DEC 32768        BIN:  0000 0000 0000 0000 1000 0000 0000 0000
+#define  BIT_15         0x4000             //      DEC 16384        BIN:  0000 0000 0000 0000 0100 0000 0000 0000
+#define  BIT_14         0x2000             //      DEC 8192         BIN:  0000 0000 0000 0000 0010 0000 0000 0000
+#define  BIT_13         0x1000             //      DEC 4096         BIN:  0000 0000 0000 0000 0001 0000 0000 0000
+#define  BIT_12         0x800              //      DEC 2048         BIN:  0000 0000 0000 0000 0000 1000 0000 0000
+#define  BIT_11         0x400              //      DEC 1024         BIN:  0000 0000 0000 0000 0000 0100 0000 0000
+#define  BIT_10         0x200              //      DEC 512          BIN:  0000 0000 0000 0000 0000 0010 0000 0000
+#define  BIT_9          0x100              //      DEC 256          BIN:  0000 0000 0000 0000 0000 0001 0000 0000
+#define  BIT_8          0x80               //      DEC 128          BIN:  0000 0000 0000 0000 0000 0000 1000 0000
+#define  BIT_7          0x40               //      DEC 64           BIN:  0000 0000 0000 0000 0000 0000 0100 0000
+#define  BIT_6          0x20               //      DEC 32           BIN:  0000 0000 0000 0000 0000 0000 0010 0000
+#define  BIT_5          0x10               //      DEC 16           BIN:  0000 0000 0000 0000 0000 0000 0001 0000
+#define  BIT_4          0x8                //      DEC 8            BIN:  0000 0000 0000 0000 0000 0000 0000 1000
+#define  BIT_3          0x4                //      DEC 4            BIN:  0000 0000 0000 0000 0000 0000 0000 0100
+#define  BIT_2          0x2                //      DEC 2            BIN:  0000 0000 0000 0000 0000 0000 0000 0010
+#define  BIT_1          0x1                //      DEC 1            BIN:  0000 0000 0000 0000 0000 0000 0000 0001
+
+#define BITS_32_25 ( BIT_32 | BIT_31 | BIT_30 | BIT_29 | BIT_28 | BIT_27 | BIT_26 | BIT_25 )
+#define BITS_24_17 ( BIT_24 | BIT_23 | BIT_22 | BIT_21 | BIT_20 | BIT_19 | BIT_18 | BIT_17 )
+#define BITS_16_9  ( BIT_16 | BIT_15 | BIT_14 | BIT_13 | BIT_12 | BIT_11 | BIT_10 | BIT_9  )
+#define BITS_8_1   ( BIT_8  | BIT_7  | BIT_6  | BIT_5  | BIT_4  | BIT_3  | BIT_2  | BIT_1  )
+#define BITS_32_17 ( BITS_32_25 |  BITS_24_17 )
+#define BITS_16_1  ( BITS_16_9  |  BITS_8_1   )
+
+/// THIS ALL NEEDS TO BE FIXED, NO REASON FOR TEMPLATES WHEN THE INPUT TYPE IS ALMOST ALWAYS THE SAME
+template<typename T>
+T ConcatenateBitsets(T _highbits, T _lowbits)
+{// Combines Two values bits to generate a new value
+    return ((int_fast64_t)_highbits << 32) | ((int_fast64_t)_lowbits & MAX_INTEGER);
+}
+
+
+// USE CASE: New_Value = My_Value & Mask(X)
+template<typename T>
+T BitMask(T _value)
+{ // Creates a Bitmask from Value
+    return  BIT(_value) - 1;
+}
+
+// USE CASE: int32_t New_Value = SetBit(8, 0xFFFFFFFF);                           [ RESULTS: FFFFFF7F ]
+template<typename T>
+T SetBit(T _value, int bitIndex, bool _state)
+{// Sets the Value of a Specific Bit for a given Value.
+    if (_state == true)
+    {
+        return _value | BIT(bitIndex);
+    }
+    return _value & ~BIT(bitIndex);
+}
+
+// USE CASE: int32_t New_Value = ExtractLowBits<int32_t>(16, int32_t 0xFFFFFFFF); [ RESULTS:0x0000FFFF ]
+template<typename T>
+T ExtractBitRange(T _value, unsigned char from, unsigned char to)
+{ // Extracts the result of the bits to-from in T _value and returns results
+    unsigned mask = (BIT((to - from + 1)) - 1) << from;
+    return (_value & mask) >> from;
+}
+
+// USE CASE: int32_t New_Value = ExtractLowBitRange(16, 0xFFFFFFFF);              [ RESULTS: 0xFFFF ]
+template<typename T>
+T ExtractLowBitRange(char bitcount, T _value)
+{ // Extracts the Bottom bits from T Value for Bitcount number of Bits and returns the results 
+    return _value & (BIT(bitcount) - 1);
+}
+
+// USE CASE: int32_t New_Value = ExtractHigh16Bits(0xFFF7FFFF)                    [RESULTS: FFF7]
+template<typename T>
+T ExtractHigh16Bits(T _value)
+{// Extracts the Top 16 bits from Likely a 32bit word.
+    return  (_value & (0x1FFFF << (32 - 17))) >> (32 - 17);
+}
 
 
 

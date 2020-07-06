@@ -7,13 +7,16 @@
 #include<utility>//std::pair
 #include<vector>//std::vector
 
-using namespace Graphics;
+//using namespace Graphics;
+
+std::string OpenGL_ErrorList;
+
+
+ wglChoosePixelFormatARB_type *wglChoosePixelFormatARB;
+ wglCreateContextAttribsARB_type *wglCreateContextAttribsARB;
 
 namespace OpenGL
 {
-
-
-
 
     /*
     Experimental nonsense more than likely
@@ -56,7 +59,6 @@ namespace OpenGL
 
         return results;
     }
-
 
 
     /* Far from complete */
@@ -208,8 +210,9 @@ namespace OpenGL
 
     void bind_VAO(int32_t _vaoID)
     {
+        assert(_vaoID != NULL);
         glBindVertexArray(_vaoID);
-        DEBUG_CODE(CheckGLERROR());
+        DEBUG_CODE(CheckGLERROR());  
     }
     void unbind_VAO()
     {
@@ -256,6 +259,7 @@ namespace OpenGL
 
     void bind_VBO(uint32_t _vboID)
     { // Sets Vertex Buffer Object as Current 
+        assert(_vboID != NULL);
         glBindBuffer(GL_ARRAY_BUFFER, _vboID);
         DEBUG_CODE(CheckGLERROR());
     }
@@ -288,9 +292,10 @@ namespace OpenGL
     }
 
 
-    void bind_IBO(int32_t _IboID)
+    void bind_IBO(int32_t _iboID)
     { // Sets Vertex Buffer Object as Current 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IboID);
+        assert(_iboID != NULL);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboID);
         DEBUG_CODE(CheckGLERROR());
     }
     void unbind_IBO()
@@ -328,10 +333,12 @@ namespace OpenGL
 
     void bind_Texture_Target(uint32_t _target, uint32_t _handle)
     {
+        assert(_handle != NULL);
         glBindTexture(_target, _handle);
     }
     void bind_Texture_Target(uint32_t _target, uint32_t _handle, uint32_t _slot)
     {
+        assert(_handle != NULL);
         glActiveTexture(GL_TEXTURE0 + _slot);
         glBindTexture(_target, _handle);
     }
@@ -542,6 +549,11 @@ namespace OpenGL
 
 
     //GL_CLIP_DISTANCEi
+    void set_DepthFunction(uint32_t _func)
+    {
+        glDepthFunc(_func);
+        CheckGLERROR();
+    }
 
 
     /* Enable State Functions */
@@ -592,19 +604,22 @@ namespace OpenGL
 
 
 
-    uint32_t  set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
+
+    uint32_t set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
     {
-        CheckGLERROR();
+        assert(_shaderID != NULL);
 
         uint32_t Location = glGetAttribLocation(_shaderID, _name);
+        assert(Location != -1);
+
         glEnableVertexAttribArray(Location);
         glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+
         CheckGLERROR();
         return Location;
     }
     uint32_t set_Attribute(uint8_t _elements, const char* _name)
     {
-        CheckGLERROR();
         int H = Shader::getHandle();
         int32_t Location = glGetAttribLocation(H, _name);
 
@@ -617,11 +632,21 @@ namespace OpenGL
             }
         );
 
-        glEnableVertexAttribArray(Location);
-        glVertexAttribPointer(Location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+        enable_Attribute(Location);
+        Attribute_Pointer(Location, _elements);
+
         CheckGLERROR();
         return Location;
     }
+    void enable_Attribute(uint32_t _location)
+    {
+        glEnableVertexAttribArray(_location);
+    }
+    void Attribute_Pointer(uint32_t _location, uint32_t _elements)
+    {
+        glVertexAttribPointer(_location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+    }
+
 
     void set_Divisor(uint8_t _location, uint32_t _divisor)
     {
@@ -662,7 +687,10 @@ namespace OpenGL
             case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
             case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
             }
-            std::cout << "OpenGL Error: " << error.c_str() << " \n File: " << file << "\n Line: [" << line << "]" << std::endl;
+            std::string output = "OpenGL Error: " + error + " \n File: " + file + "\n Line: [" + std::to_string(line) + "]" + "\n \n";
+            OpenGL_ErrorList += output;
+            std::cout << output << std::endl; 
+
         }
         return errorCode;
     }
@@ -732,6 +760,7 @@ namespace OpenGL
     /* Frees ID for a Frame Buffer Object*/
     void delete_FBO(uint32_t _id)
     {
+        assert(_id != NULL);
         glDeleteFramebuffers(1, &_id);
         DEBUG_CODE(CheckGLERROR());
     }  
@@ -739,6 +768,7 @@ namespace OpenGL
     /* Sets Frame Buffer Object as Current */
     void bind_FBO(uint32_t _fboID)
     {
+        assert(_fboID != NULL);
         glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
         DEBUG_CODE(CheckGLERROR());
     }
@@ -764,10 +794,24 @@ namespace OpenGL
 
 
 
-    CREATURE_API void clear_DepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT);  }
-    CREATURE_API void clear_ColorBuffer() { glClear(GL_COLOR_BUFFER_BIT);  }
-    CREATURE_API void clear_FrameBuffer() { glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);    }
+    void clear_DepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT);  }
+    void clear_ColorBuffer() { glClear(GL_COLOR_BUFFER_BIT);  }
+    void clear_FrameBuffer() { glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);    }
 
+    Vec4 get_ClearColor()
+    {
+        GLfloat results[4];
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, results);
+        return { results[0], results[1], results[2], results[3] };
+    }
+    void set_ClearColor(float r, float g, float b, float a)
+    {
+        set_ClearColor({ r,g,b,a });
+    }
+    void set_ClearColor(Vec4 _color)
+    {
+        glClearColor(_color.x, _color.y, _color.z, _color.w);
+    }
 
 }
 

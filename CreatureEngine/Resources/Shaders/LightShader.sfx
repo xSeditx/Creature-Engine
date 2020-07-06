@@ -11,8 +11,8 @@ uniform mat4 ViewMatrix;
 uniform mat4 ModelMatrix;
 uniform mat4 DepthMatrix;
 
-layout(location = 0) in vec3 VertexPosition;
-layout(location = 1) in vec3 VertexColor;
+layout(location = 0) in vec3 Position;
+layout(location = 1) in vec3 VColor;
 layout(location = 2) in vec3 VertexNormal;
 layout(location = 3) in vec2 TextureCoord;
 layout(location = 4) in vec3 VertexTangent;
@@ -27,7 +27,7 @@ void main()
 {
 	texCoords = TextureCoord;
 
-    vPosition = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+    vPosition = (ModelMatrix * vec4(Position, 1.0f)).xyz;
 	vNormal = normalize((ModelMatrix * vec4(VertexNormal, 0.0f)).xyz);
 
     vec3 T = normalize((ModelMatrix * vec4(VertexTangent, 0.0f)).xyz);
@@ -36,12 +36,12 @@ void main()
 
     mat4 ModelViewMatrix = (ViewMatrix * ModelMatrix); 
     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);
-	vec4 WorldPosition = ModelMatrix * vec4(VertexPosition, 1.0f);
+	vec4 WorldPosition = ModelMatrix * vec4(Position, 1.0f);
 
-    vColor = vec4(VertexColor, 1.0f);
-    vShadowCoord = DepthMatrix * vec4(VertexPosition, 1.0f);
+    vColor = vec4(VColor, 1.0f);
+    vShadowCoord = DepthMatrix * vec4(Position, 1.0f);
 
-    gl_Position = ModelViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+    gl_Position = ModelViewProjectionMatrix * vec4(Position.xyz, 1.0f);
 }
 
 

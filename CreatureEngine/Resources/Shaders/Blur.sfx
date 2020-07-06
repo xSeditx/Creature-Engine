@@ -1,12 +1,12 @@
 [#SHADER: VERTEX]
 #version 400
 
-layout(location = 0) in vec4 VertexPosition;
+layout(location = 0) in vec4 Position;
 out vec2 texCoord;
 void main()
 {
-    texCoord = VertexPosition.zw;
-    gl_Position = vec4(VertexPosition.xy, 0.0f, 1.0f); 
+    texCoord = Position.zw;
+    gl_Position = vec4(Position.xy, 0.0f, 1.0f); 
 }
 
 [#SHADER: FRAGMENT]

@@ -23,7 +23,7 @@ Camera2D::Camera2D(float _left, float _right, float _top, float _bottom, float _
 
 	ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top, Near, Far);  //OrthographicMatrix(_size.x, _size.y);
 	ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0.0f));
-
+    glViewport(0,0, (GLsizei)Right, (GLsizei)Bottom); // Dunno if I should put this here
 	set(this);
 }
 Camera2D::Camera2D(float _left, float _right, float _top, float _bottom)
@@ -63,8 +63,11 @@ void Camera2D::Translate(Vec2 _pos)
 
 void Camera2D::Bind()
 {// Binds our Camera to OpenGL context and Sets Uniforms
+    DEBUG_CODE(CheckGLERROR());
+    Shader *Current = &Shader::get();
 	Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
 	Shader::get().SetUniform("ViewMatrix", ViewMatrix);
+    DEBUG_CODE(CheckGLERROR());
 }
 void Camera2D::Update()
 {// Updates the interpolation of the Camera

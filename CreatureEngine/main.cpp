@@ -4,6 +4,18 @@
 #include<cmath>
 #include<string>
 
+
+/* 
+
+IMGUI ISSUE:   Docking Branch:
+    SetWindowPos does not function properly when we have windows docked in one another. The Size nor the Position is properly set.
+
+    Color Picker does not move with Window which has been Docked and can only be seen when Hovering the Window above the Area meaning that the World Vertex Positions do not update when the Window Updates if it is docked in another.
+
+    */
+
+
+
 // CMAKE Pluggin
 // https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
 
@@ -93,49 +105,6 @@ Listener MouseWheel( [](Event _msg)
     }
 });
 
-
-EntityComponentSystem *TestECS;
-SystemList MainSystems;
-
-COMPONENT(MovementComponent)
-{
-    Vec3 Velocity;
-    Vec3 Acceleration;
-};
-COMPONENT(PositionComponent)
-{
-    Vec3 Position;
-};
-struct MovementSystem
-    :
-    public BaseSystem
-{
-    MovementSystem()
-        :
-        BaseSystem()
-    {
-        AddComponentType(PositionComponent::ID);
-        AddComponentType(MovementComponent::ID);
-
-        DEBUG_CODE(SystemName = (typeid(this).name()));
-    }
-
-    virtual void UpdateComponents(float _delta, BaseComponent** _components)
-    {
-        PositionComponent* Pos      = (PositionComponent*)_components[0];
-        MovementComponent* Movement = (MovementComponent*)_components[1];
-
-        Movement->Velocity += Movement->Acceleration;
-        Pos->Position += Movement->Velocity;
-        Movement->Velocity *= .9;
-    };
-};
-
-MovementSystem    movementSys;
-PositionComponent PosComponent;
-MovementComponent TestMovementComponent;
-
-
 /* ============================================================================================
            Rough Sketch of a Scene class to determine what I am going to need
            For the Finalized Version of it. Also gives me a Template to rework the 
@@ -150,17 +119,9 @@ public:
     /* Create the Object after OpenGL is Initialized */
     void Create()
     {
-        /* Create all the Needed Buffers for this class */
-        {
-            Vertices_VAO = new VertexArrayObject();
-            Vertices_VBO = new VertexBufferObject<Vec_t>();
-            Colors_VBO = new VertexBufferObject<Vec4>();
-            RENDERER = new Shader(VRenderer, FRenderer);
-        }
-
         /* Create all the Data we are going to fill the Buffers with */
         {
-            float Max = 1000;
+            float Max = 10;
             for_loop(i, 1000 * 3)
             {
                 Vertices.push_back
@@ -171,23 +132,34 @@ public:
                 );
                 Colors.push_back
                 (
-                    OpenGL::Renderer::normalize_RGBA_Color(RANDOM(255), RANDOM(255), RANDOM(255), RANDOM(255))
+                    OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255))
                 );
             }
-            DEBUG_CODE(CheckGLERROR());
+        } 
+        /* Create the FrameBuffer we will be Rendering to */
+        {
+            FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
+            FBO->Bind();
+            {
+                OpenGL::set_ClearColor(.2f, .5f, .7f, 1.0f);
+            }
+            FBO->Unbind();
+        }
+        /* Create all the Needed Buffers for this class */
+        {
+
+            RENDERER = shader_BasicRenderer;
+            Vertices_VAO = new VertexArrayObject();
+            Vertices_VBO = new VertexBufferObject<Vec_t>(Vertices);
+            Colors_VBO   = new VertexBufferObject<Vec4>(Colors);
         }
 
-        /* Setup the Shader so that our Locations are Linked */
+        /* Link all the Buffers into a Single VertexArrayObject */
         {
             RENDERER->Bind();
             {
-                Vertices_VAO->Bind();
-                {
-                    Vertices_VBO->Update(Vertices);
-                    OpenGL::set_Attribute(RENDERER->g_Handle(), sizeof(Vec_t) / sizeof(float), "Position");
-                    Colors_VBO->Update(Colors);
-                    OpenGL::set_Attribute(RENDERER->g_Handle(), 4, "Color");
-                }
+                Vertices_VAO->Attach(BufferTypes::VERTEX, Vertices_VBO);
+                Vertices_VAO->Attach(BufferTypes::COLOR, Colors_VBO);
             }
             RENDERER->Unbind();
         }
@@ -196,7 +168,7 @@ public:
     /* Update the Positions of the Vertices Once Per Frame */
     void Update()
     {
-        float Amount = 10;
+        float Amount = 1;
 
         for_loop(i, 1000 * 3)
         {
@@ -206,47 +178,49 @@ public:
                 Vertices[i].y + RANDOM_RANGE(Amount)
             );
         }
+
+        /* Update my Buffer Object */
         Vertices_VAO->Bind();
-        Vertices_VBO->Update(Vertices);
+        {
+            Vertices_VBO->Bind();
+            {
+                OpenGL::set_Subbuffer_Data(Vertices.size() * sizeof(Vec2), Vertices.data(), 0);
+            }
+            Vertices_VBO->Unbind();
+
+        }
+        Vertices_VAO->Unbind();
     }
 
     /* Render the Entire Scene */
     void Render()
     {
-        Vertices_VAO->Bind();
-        OpenGL::Renderer::drawArray(Vertices_VBO->GL_Handle, Vertices.size());
+        FBO->Bind();
+        {
+            FBO->Clear();
+            RENDERER->Bind();
+            {
+                Vertices_VAO->Bind();
+                {
+                    Application::getCamera().Bind();
+                    OpenGL::Renderer::drawArray(Vertices.size());
+                }
+                Vertices_VAO->Unbind();
+            }
+            RENDERER->Unbind();
+        }
+        FBO->Unbind();
     }
 
-    VertexArrayObject         *Vertices_VAO;
-    VertexBufferObject<Vec_t> *Vertices_VBO;
-    VertexBufferObject<Vec4>  *Colors_VBO;
-    std::vector<Vec_t> Vertices;
+    Shader                        *RENDERER{ nullptr };
+    FrameBufferObject                  *FBO{ nullptr };
+    VertexArrayObject         *Vertices_VAO{ nullptr };
+    VertexBufferObject<Vec_t> *Vertices_VBO{ nullptr };
+    VertexBufferObject<Vec4>    *Colors_VBO{ nullptr };
+
+    std::vector<Vec_t> Vertices;          
     std::vector<Vec4>  Colors;
-    Shader *RENDERER{ nullptr };
 
-    std::string VRenderer =
-        "#version 330 core                         \n\
-                layout(location = 0) in vec2 Position; \n\
-                layout(location = 1) in vec4 Color; \n\
-                uniform mat4 ProjectionMatrix;     \n\
-                uniform mat4 ViewMatrix;           \n\
-                out vec4 Col;                      \n\
-                void main()                        \n\
-                {                                  \n\
-                    Col = Color; \n\
-                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-                    gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
-                }";
-
-    std::string FRenderer =
-        "#version 330 core            \n\
-                in vec4 Col;          \n\
-                out vec4 FragColor;   \n\
-                void main()           \n\
-                {                     \n\
-                    FragColor = Col;  \n\
-                }";
 };
 
 
@@ -260,65 +234,26 @@ class App
     //                                                USER VARIABLES
     //=================================================================================================================================================================
 
-    EntityComponentSystem *ECS{ nullptr };
-
-	Vec2 Vertices[3] = { {200.0, 200.0 },  { 400.0, 200.0 },  { 0.0, 400.0 } };
-	Vec2 UVcoords[3] = { {  0.0,   0.0 },  {   1.0,   0.0 },  { 1.0,   1.0 } };
-
-	GLuint Indices[3] = { 0, 1, 2 };
-    GLuint VAO{ 0 }, VBO{ 0 };
-
-
-    Mesh *TestMesh{ nullptr };
-    Shader *TextureShader{ nullptr };
-
-    FrameBufferObject *FBO{ nullptr };
-    Graphics::Texture *TestTexture{ nullptr };
-    Graphics::Texture *TestTexture2{ nullptr };
-
-	OpenGL::Renderer2D *MainRenderer{ nullptr };
-	Profiling::DisplayWindow *ProfilerTest{ nullptr };
-
-	Transform ModelMatrix = Transform(Vec3(0), Vec3(0), "ModelMatrix");
-
-    /// This needs to go
-    std::string VTextureRenderer =
-        "#version 330 core                                                                                                                        \n\
-         layout(location = 0) in vec2 aPos;                                                                                                       \n\
-         layout(location = 1) in vec4 Position;                                                                                                   \n\
-         uniform mat4 ProjectionMatrix;                                                                                                           \n\
-         uniform mat4 ViewMatrix;                                                                                                                 \n\
-         out  vec2 TexCoords;                                                                                                                     \n\
-         void main()                                                                                                                              \n\
-         {                                                                                                                                        \n\
-             mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));                                                                                     \n\
-             mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);                                                               \n\
-             gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
-         }";
-
-    std::string FTextureRenderer =
-        "#version 330 core                                                     \n\
-         uniform sampler2D DiffuseTexture;                                     \n\
-         in  vec2 TexCoords;                                                   \n\
-         out vec4 FragColor;                                                   \n\
-         void main()                                                           \n\
-         {                                                                     \n\
-             FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
-         }";
-
-    //=================================================================================================================================================================
-  
-    ImGuiIO io;
+    OpenGL::Renderer2D *MainRenderer{ nullptr };
+    OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
-	size_t  PreviousTime;
+    Texture *test_Texture;
+    size_t  PreviousTime;
+    uint32_t *Pixels;
 
+    OpenGL::Surface *testSurface{ nullptr };
+
+    /* Initializes User Variables */
     virtual void OnCreate() override
 	{// Initialization
         
-     //  TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Complete " , " Memory Pool Class Complete ");
-     //  TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Complete ", " Springs Class Complete ");
-     //  TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Complete " , " Ring Buffer Class Complete ");
-         
+        // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Incomplete contains Errors " , " Memory Pool Class Complete ");
+        // TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Incomplete  contains Errors ", " Springs Class Complete ");
+        // TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Incomplete  contains Errors " , " Ring Buffer Class Complete ");
+
+        /// Likely add this to the Base Application class to relieve the user of this. Create a setup that only Initializes the desired shaders
+        init_DefaultShaders();
+
 
         /* Load up the Listeners for the Various Input Events */
         {
@@ -328,41 +263,6 @@ class App
 
         /* Creates a Renderer for our Application */
 		MainRenderer = new OpenGL::Renderer2D({SCREEN_X, SCREEN_Y});
-
-        /* Set the Application window Camera and World Camera to the Renderer */
-        {
-            getWindow().s_Camera(&MainRenderer->g_Camera());
-            WorldCamera = &getCamera();
-        }
-
-        /* Create a Triangle to Test with */
-		getWindow().defaultShader().Bind();
-        {
-            VAO = OpenGL::new_VAO();
-            OpenGL::bind_VAO(VAO);
-
-            VBO = OpenGL::new_VBO();
-            OpenGL::bind_VBO(VBO);
-            OpenGL::set_BufferData(sizeof(Vertices), &Vertices);
-            OpenGL::set_Attribute(getWindow().defaultShader().g_Handle(), 2, "aPos");
-        }
-
- 		/*   Make a Profiler Window which Displays the FPS as a graph */
-        {
-            float Aspect = getCamera().AspectRatio;
-            float Size = 100;
-            ProfilerTest = new Profiling::DisplayWindow
-            (
-                { SCREEN_X / 2  , SCREEN_Y / 2 },
-                { std::floor((Size)* Aspect), std::floor((Size * 2)) },
-                { std::floor(Size*.35 * Aspect), std::floor((Size)) }
-            );
-            ProfilerTest->Update(1);
-        }
-
-        /// UPDATE-6/23/20: What is being rendered to the screen is a Texture, that is capped at 32k x 32 k duh. 
-        /// Idk how the fuck to fix that just yet it means my post processing efforts might be limited or that I need to not scale the texture but need to texture the Images
-        TODO("Find out why instance count is being capped. It is likely being capped at 64,000 roughly if I had to guess. Check to see if unsigned integer is used");
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
@@ -381,163 +281,95 @@ class App
                         { 7, 7 },
                         OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255)
                     );
-                    MainRenderer->draw_Line(x * 8.0f, y * 8.0f ,x * 8.0f + 7 ,y * 8.0f + 7);
+                    MainRenderer->draw_Line(x * 8.0f, y * 8.0f, x * 8.0f + 7, y * 8.0f + 7);
                 }
             }
         }
- 
-        /* Create FBO to Test with */
+
+        /* Set the Application window Camera and World Camera to the Renderer */
         {
-            FBO = new FrameBufferObject(SCREEN_X, SCREEN_Y);
-            FBO->Bind();
+            getWindow().s_Camera(&MainRenderer->g_Camera());
+            WorldCamera = &getCamera();
         }
-  
-        Init_DefaultShaders();
-
-        /* Load Test Textures to Test With using two different Texture Constructors */
-        {
-            Graphics::Bitmap *Bmp = new Graphics::Bitmap("../Resources/Test.bmp");
-            TestTexture = new Graphics::Texture(*Bmp);
-            TestTexture2 = new Graphics::Texture("../Resources/Sheep.bmp");
-        }
-
-        TextureShader = new  Shader(VTextureRenderer, FTextureRenderer); ;
-
-        ///Entity Component System
-        {
-            //    ECS = new EntityComponentSystem();
-            //    SystemList mainSystems;
-            //    ECStest::TransformComponent transformComp;
-            //    ECS->AddComponent(transformComp);
-            //    ECStest::InitECS();
-            //    TestECS = new EntityComponentSystem();
-            /// Create Entities
-            //    EntityPTR Entity = TestECS->MakeEntity(PosComponent, TestMovementComponent);
-            /// Create Systems
-            //    MainSystems.AddSystem(movementSys);
-            //    TestECS->AddComponent(Entity, &PosComponent);
-            //    TestECS->AddComponent(Entity, &TestMovementComponent);
-        }
-
-        // Setup Dear ImGui binding
+        Application::setCamera(MainRenderer->g_Camera());
         SCENE.Create();
+         
+        test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, shader_BasicRenderer);
+        test_RenderPass->attach(  WorldCamera);;//MainRenderer->g_Camera())&Application::getCamera());//
+        test_RenderPass->attach(SCENE.Vertices_VAO);
+      
+        test_Texture = new Texture("../Test2.bmp");
+        //OpenGL::Surface *test2;
+        testSurface = test_RenderPass->new_Surface({ SCREEN_X, SCREEN_Y });
+        //testSurface->blit_Surface(test2, {1,1,100, 100}, {1,1,100,100});
 
+       // Pixels = new int[SCREEN_X * SCREEN_Y * sizeof(int)];
         DEBUG_CODE(CheckGLERROR());
 	}
-  //   OpenGL::bind_VAO(VAO);
-  //   OpenGL::Renderer::drawArray(VBO, 3);
-  //   OpenGL::bind_VAO(SCENE.VAO);
-  //   OpenGL::bind_VBO(SCENE.VBO);
-  //   OpenGL::Renderer::drawArray(SCENE.VBO, 3);
 
-
+    /* Renders User Defined Geometry */
     virtual void OnRender() override
     {
-        FBO->Bind();
-        {// Bind the Framebuffer Object
+        SCENE.Render(); 
+        MainRenderer->Render();
+        test_RenderPass->Render();
 
-            FBO->Clear();
-
-            SCENE.RENDERER->Bind();
-            {// Bind the Shader and the Uniforms
-                ModelMatrix.Bind();
-                getCamera().Bind();
-                SCENE.Render();                
-            }
-            SCENE.RENDERER->Unbind();
-
-        //  MainRenderer->Render();
-            DEBUG_CODE(CheckGLERROR());
-
-            ProfilerTest->Render();
-            TestTexture->g_Handle();
-           
-        //  MainRenderer->renderImage({ 100, 100 }, { 100, 300 }, TestTexture);
-        //  MainRenderer->renderImage({ 400, 300 }, { 300, 300 }, TestTexture2);
+        testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y  * 2});
+        Pixels = (uint32_t*)testSurface->read_Pixels({ 1,1,100, 100 });
+        shader_TextureRenderer->Bind();
+        {
+            OpenGL::bind_VAO(DebugQuadVAO);
+            shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
+            test_Texture->Bind(0);
+            OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
         }
-
-        FBO->Unbind();
-        // Renders the Frame Buffer Object we Rendered all the Images to
-        MainRenderer->renderImage({ 0, 0 }, { SCREEN_X, SCREEN_Y }, FBO->RenderTarget);
+        shader_TextureRenderer->Unbind();
 
         DEBUG_CODE(CheckGLERROR());
 	}
+
+    /* Runs on Applications Frame Update */
 	virtual void OnUpdate() override
 	{// User Genrated Per Frame Update
         SCENE.Update();
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
-	 	ProfilerTest->Update((uint32_t)(Time));
-
-    //  MainRenderer->Submit(*TextureShader, *TestTexture, *TestMesh);
-    //  TestECS->UpdateSystems(MainSystems, (float)(Time / 1000.0f));
 	}
 
-
-
+    /* Cleans up the Memory of stuff we still have Active */
     virtual void OnEnd() override
     {// Exit of the Application and Clean up
-
-        delete(TestTexture);
-        delete(TestTexture2);
-        delete(FBO);
         delete(MainRenderer);
-        delete(ProfilerTest);
-        delete(ECS);
-
     }
 
     /* ==========================================================================================
            GUI STUFF, POTENTIALLY MIGHT CHANGE THIS LATER
     /* ========================================================================================== */
-
-    virtual void OnUpdateGUI() override 
+    /* Updates the GUI Data: NOTE: Incomplete */
+    virtual void OnUpdateGUI() override
     {    }
+
+    /* Renders our ImGui Data */
     virtual void OnRenderGUI() override 
     {
-        bool my_tool_active = true;
-        ImGui::Begin("My First Tool", &my_tool_active, ImGuiWindowFlags_MenuBar);
-        {
-            if (ImGui::BeginMenuBar())
-            {
-                if (ImGui::BeginMenu("File"))
-                {
-                    if (ImGui::MenuItem("Open..", "Ctrl+O")) { }
-                    if (ImGui::MenuItem("Save", "Ctrl+S")) { }
-                    if (ImGui::MenuItem("Close", "Ctrl+W")) { my_tool_active = false; }
-                    ImGui::EndMenu();
-                }
-                ImGui::EndMenuBar();
-            }
 
-            const float my_values[] = { 0.2f, 0.1f, 1.0f, 0.5f, 0.9f, 2.2f };
-            ImGui::PlotLines("Frame Times", my_values, IM_ARRAYSIZE(my_values));
-
-            ImGui::TextColored(ImVec4(1, 1, 0, 1), "Important Stuff");
-            ImGui::BeginChild("Scrolling");
-            {
-                for (int n = 0; n < 50; n++)
-                    ImGui::Text("%04d: Some text", n);
-            }
-            ImGui::EndChild();
-        }
-        ImGui::ShowDemoWindow();
-
-        static bool Check{ false };
-        static float Slide[3] = { 0,0,-300 };
+        static float Slide[3] = {-650,-400,-300 };
+        Vec2 MainWindowSize = getWindow().g_Size();
+        int Boarder = 10;
 
         /* Start the Camera Widget */
         ImGui::Begin("Camera");
         {
             Vec2 Camera_Position = WorldCamera->g_Position();
-
             /* Position Slider for the Camera */
             {
                 ImGui::SliderFloat3("Position", Slide, -1000, 1000);
                 WorldCamera->Translate({ Slide[0], Slide[1] });
                 WorldCamera->set_Zoom(Slide[2]);
             }
+            ImGui::SetWindowPos(ImVec2(MainWindowSize.x - (MainWindowSize.x * 0.15f), 0), true);
+            ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) ) });
 
             /* Position Slider for the Camera */
             {
@@ -545,22 +377,23 @@ class App
                 ImGui::InputFloat("Y", &Camera_Position.y, 10.0f, 1.0f, "%.3f");
                 WorldCamera->s_Position(Camera_Position);
             }
-
+        
             /* Clickable Position Slider for the Camera */
             {
-                float H = WorldCamera->Height(), W = WorldCamera->Width();
+                float
+                    H = (float) WorldCamera->Height(), 
+                    W = (float) WorldCamera->Width();
                 ImGui::InputFloat("Width", &W, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Height", &H, 10.0f, 1.0f, "%.3f");
                 WorldCamera->Size = { W,H };
             }
-
             /* Dragable Position Slider for the Camera */
             {
                 int val = 0, val2 = 100;
                 ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
                 WorldCamera->s_Position(Camera_Position);
             }
-
+        
             /* Color Picker Widget for the Background Color */
             {
                 Vec4 c = getWindow().g_ClearColor();
@@ -569,40 +402,51 @@ class App
                 glClearColor(Col[0], Col[1], Col[2], 1);
                 getWindow().s_ClearColor({ Col[0], Col[1], Col[2], 1 });
             }
+        
+            static float Top_Time = 0;
+            if (FrameTimes.back() > Top_Time)
+            {
+                Top_Time = FrameTimes.back();
+            }
+            ImGui::PlotLines("Frame Times", (float*)&FrameTimes.front(), FrameTimes.size(), 0, std::string("FPS:" + std::to_string((uint32_t)FrameTimes.back())).c_str(), 0, Top_Time, ImVec2(ImGui::GetWindowWidth(), 50));
+        
         }
         ImGui::End();
 
-        /// TEST STUFF FOR LATER, Frames per second
-        //ImGui::PlotLines("FPS:",)
-        /// Texture Picker
-        //ImTextureID
-        //ImGui::Image(
-        //    TestTexture->g_Handle(),
-        //    ImVec2(200, 200),
-        //    ImVec2(0, 0),
-        //    ImVec2(1, 1), 
-        //    ImColor(255, 255, 255, 255),
-        //    ImColor(255, 255, 255, 128)
-        //);
+        /* Displays the FrameBuffers */
+        ImGui::Begin("FrameBuffers");
+        {
+            
+            /* Displays the FrameBuffer */
+            float WinSize = (float)(ImGui::GetWindowHeight() - (ImGui::GetWindowHeight() * 0.15));
+            ImGui::Image((ImTextureID*)((size_t)SCENE.FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            ImGui::SameLine();
+            ImGui::Image((ImTextureID*)((size_t)SCENE.FBO->DepthTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            ImGui::SameLine();
+        
+            ImGui::Image((ImTextureID*)((size_t)test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
+            ImGui::SameLine();
+            ImGui::Image((ImTextureID*)((size_t)testSurface->FBO->RenderTarget->g_Handle()) , ImVec2(WinSize, WinSize));
+            ImGui::SameLine();
+        
+        
+            char *Buff = const_cast<char*>(OpenGL_ErrorList.c_str());
+            ImGui::InputTextMultiline("OpenGL Errors",Buff, OpenGL_ErrorList.size());
+
+            ImGui::SetWindowPos(ImVec2(0, MainWindowSize.y - (MainWindowSize.y  * 0.2f)), true); 
+            ImGui::SetWindowSize({ MainWindowSize.x, (MainWindowSize.y  * 0.2f)  - Boarder});
+        }
+        ImGui::End();
+        ImGui::Begin("Dummy");
+
+        ImGui::ShowDemoWindow();
+        ImGui::SetWindowPos(ImVec2(0, 0), true); // 768 - ImGui::GetWindowHeight() - 40
+        ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - (MainWindowSize.y  * 0.2f) });
+        ImGui::End();
+
     } 
+
 };
-
-
-static const char* fmt_table_int[3][4] =
-{
-    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
-    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
-    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
-};
-static const char* fmt_table_float[3][4] =
-{
-    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
-    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
-    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
-};
-
-
-
 
 
 
@@ -648,9 +492,10 @@ int main()
 
 
 
+
+
 int LOOP_COUNT{ 1000000 };
 
-#define MY_WRAPPER
 #define NUMBER_OF_THREADS 200
 #define _TEST_THREADPOOL_SPEED    1
 
@@ -866,6 +711,39 @@ bool TEST_PROFILE_WINDOW()
 
 	return true;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1179,3 +1057,56 @@ target_link_libraries(main A)
  
  
  */
+
+static const char* fmt_table_int[3][4] =
+{
+    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
+    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
+    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
+};
+static const char* fmt_table_float[3][4] =
+{
+    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
+    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
+    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
+};
+//
+//
+///* Blits the contents of the FrameBuffer with area of _srcRect onto the _destRect of this Surface */
+//void blit_FrameBuffer(FrameBufferObject *_fbo, iVec4 _source, iVec4 _dest)
+//{
+//    CheckGLERROR();
+//
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo->GL_Handle);
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Handle());
+//
+//    glBlitFramebuffer
+//    (
+//        _source.x, _source.y, _source.z, _source.w,
+//        _dest.x, _dest.y, _dest.z, _dest.w,
+//        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR
+//    );
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//    CheckGLERROR();
+//
+//}
+//
+///* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
+//int blit_Surface(Surface *_source, iVec4 _srcRect, iVec4 _destRect)
+//{
+//    blit_FrameBuffer(_source->FBO, _srcRect, _destRect);
+//}
+//
+///* Read a Rectangle of pixels from the Surface */
+//void *read_Pixels(iVec4 _sourceRect, uint32_t _format = GL_RGBA, uint32_t _type = GL_UNSIGNED_SHORT_4_4_4_4) //format = GL_ALPHA, GL_RGB, and GL_RGBA. type = GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1.
+//{/// NOTE: Should I lock this first
+//    void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
+//    CheckGLERROR();
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
+//    glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//    CheckGLERROR();
+//    return results;
+//}
+//

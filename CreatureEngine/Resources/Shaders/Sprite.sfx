@@ -1,7 +1,7 @@
 [#SHADER: VERTEX]
 #version 430
  
-layout(location = 0) in vec2 VertexPosition;// <vec2 position, vec2 texCoords>
+layout(location = 0) in vec2 Position;// <vec2 position, vec2 texCoords>
 layout(location = 1) in vec2 TextureCoord;
 
 uniform mat4 ProjectionMatrix;
@@ -13,7 +13,7 @@ out vec2 TCoords;
 void main()
 {
     TCoords = TextureCoord;
-    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition.xy, 0.0, 1.0);
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(Position.xy, 0.0, 1.0);
 }
 
 //===========================================================================

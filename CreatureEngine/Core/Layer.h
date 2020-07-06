@@ -15,7 +15,10 @@ public:
 	virtual void OnDetach();
 	virtual void OnUpdate();
 
-	/* Returns the Debug name of our current Layer */
+    /* If The Layer Desires to Handle this return True */
+    virtual bool OnEvent(Event _msg);
+    
+    /* Returns the Debug name of our current Layer */
     inline const std::string& g_Name() const { return LayerName; }
 
 	/* Tells if current layer is enabled or not */

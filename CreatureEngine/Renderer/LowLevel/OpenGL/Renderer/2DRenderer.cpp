@@ -1,44 +1,183 @@
 #include "2DRenderer.h"
 
 
-GLuint DebugQuadVAO{ 0 };
-GLuint DebugQuadVBO{ 0 };
-Shader *QuadRenderer{ nullptr };
-Camera2D *debugCamera{ nullptr };
+//GLuint DebugQuadVAO{ 0 };
+//GLuint DebugQuadVBO{ 0 };
+//Shader *QuadRenderer{ nullptr };
+//Camera2D *debugCamera{ nullptr };
 
-
-//===============================================================================================================
-
-std::string VQuadRenderer =
-"#version 330 core     \n\
-layout(location = 0) in vec2 aPos; \n\
-uniform vec4 Position; \n\
-uniform mat4 ProjectionMatrix;     \n\
-uniform mat4 ViewMatrix;           \n\
-out vec2 TexCoords; \n\
-void main()                        \n\
-{                                  \n\
-    TexCoords = aPos; \n\
-    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
-    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
-}";
-
-std::string FQuadRenderer =
-"#version 330 core \n\
-uniform sampler2D DiffuseTexture;\n\
-in vec2 TexCoords; \n\
-out vec4 FragColor;            \n\
-void main()                    \n\
-{                              \n\
-    FragColor = texture(DiffuseTexture, TexCoords);\n\
-}";
 
 
 
 namespace OpenGL
 {
+
+
+
+    /* Constructs the Render pass object */
+    RenderPass::RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal, GLenum _format)
+        :
+        GPU_Program{ _shader }
+    {
+        std::vector<Vec2> VertData;
+        std::vector<Vec4> ColorData;
+        float MaxX{ 100 }, MaxY{ 100 };
+        float grid = 1;
+        float size = 100;
+        for_loop(y, MaxY)
+        {
+            for_loop(x, MaxX)
+            {
+                Vec2 TL = { x* grid,y * grid };
+                Vec2 BR = { x * grid + size, y * grid + size };
+
+                VertData.push_back({ TL.x, TL.y });
+                VertData.push_back({ BR.x, TL.y });
+                VertData.push_back({ TL.y, BR.x });
+                VertData.push_back({ BR.x ,BR.y });
+                VertData.push_back({ TL.x, BR.y });
+                VertData.push_back({ BR.x, TL.y });
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+                ColorData.push_back(OpenGL::Renderer::normalize_RGBA_Color((int)RANDOM(255), (int)RANDOM(255), (int)RANDOM(255), 255));
+
+            }
+        }
+
+        FBO = new FrameBufferObject(_width, _height, _datatype, _internal, _format);
+        FBO->Bind();
+        {
+            OpenGL::set_Viewport(0, 0, _width, _height);
+        }
+        FBO->Unbind();
+
+        VAO = new VertexArrayObject();
+        mainCamera = new Camera2D();
+        my_Mesh = new Geometry();
+
+        GPU_Program->Bind();
+        {
+            VAO->Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec2>(VertData));
+            VAO->Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec4>(ColorData));
+        }
+        GPU_Program->Unbind();
+    }
+
+    void RenderPass::Render()
+    {
+        Vec4 Stored_Color = OpenGL::get_ClearColor();
+        // Can likely do away with Unbind in the future but for now it is needed
+        FBO->Bind();
+        {// Our FrameBuffer
+            OpenGL::set_ClearColor(Stored_Color);
+            FBO->Clear();
+            GPU_Program->Bind();
+            {// Our Shader
+                /// GEOMETRY NEEDS TO GO HERE
+                VAO->Bind();
+                {
+                    mainCamera->Bind();
+                    //GPU_Program->SetUniform("ModelMatrix", Mat4(1.0f));
+
+                    Renderer::drawArray(10000);
+                }
+                VAO->Unbind();
+            }
+            GPU_Program->Bind();
+        }
+        FBO->Unbind();
+        OpenGL::set_ClearColor(Stored_Color);
+    }
+    void RenderPass::attach(Camera2D *_camera)
+    {
+        mainCamera = _camera;
+    }
+    void RenderPass::attach(Geometry *_mesh)
+    {
+        GPU_Program->Bind();
+        {
+            VAO->Bind();
+            {
+                my_Mesh = _mesh;
+                VAO->Attach(BufferTypes::VERTEX, _mesh->Vertices);
+                VAO->Attach(BufferTypes::COLOR, _mesh->Colors);
+            }
+            VAO->Unbind();
+        }
+    }
+    void RenderPass::attach(VertexArrayObject* _vao)
+    {
+        VAO = _vao;
+    }
+
+
+
     
+
+
+
+    void RenderPass::set_Attributes(VertexBufferObject<Vec2>* _vertices, VertexBufferObject<Vec4>* _colors)
+    {
+        __debugbreak();
+        my_Mesh->Add(_vertices);
+        my_Mesh->Add(_colors);
+
+        GPU_Program->Bind();
+        {
+            VAO->Attach(BufferTypes::VERTEX, _vertices);
+            VAO->Attach(BufferTypes::COLOR, _colors);
+        }
+        GPU_Program->Unbind();
+    }
+    void RenderPass::update_Geometry(std::vector<Vec2> _vertices)
+    {
+        __debugbreak();
+        my_Mesh->Vertices->Update(_vertices);
+    }
+    void RenderPass::Update()
+    {
+        __debugbreak();
+        if (needs_Updated)
+        {
+            /// UPDATE THE BUFFERS IF WE HAVE CHANGED ANYTHING IN THEM'
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     Renderer2D::Renderer2D(Vec2 _size)
     {
         WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
@@ -52,8 +191,8 @@ namespace OpenGL
 
         InstanceRenderer->Bind();
         {// Sets up the VAO for the Quads
-            OpenGL::bind_VAO(QuadVAO);
 
+            OpenGL::bind_VAO(QuadVAO);
             OpenGL::bind_VBO(QuadVBO);
             OpenGL::set_Attribute(2, "aPos");
 
@@ -71,14 +210,14 @@ namespace OpenGL
         OpenGL::set_BufferData(sizeof(QuadData), QuadData);
 
 
-        Layers.push(new Layer("Root Layer"));
+///     Layers.push(new Layer("Root Layer"));
 
         LineVAO = OpenGL::new_VAO();
         LineVBO = OpenGL::new_VBO();
 
         LineRenderer = new Shader(Line_shader_v, Line_shader_f);
         VBO_Test = new VertexBufferObject<Vec4>();
-        DEBUG_CODE(CheckGLERROR());
+
         LineRenderer->Bind();
         {
             OpenGL::bind_VAO(LineVAO);
@@ -108,7 +247,6 @@ namespace OpenGL
     }
     void Renderer2D::Render()
     {
-        DEBUG_CODE(CheckGLERROR());
 
         OpenGL::bind_VAO(QuadVAO);
         Update();
@@ -121,7 +259,6 @@ namespace OpenGL
         InstanceRenderer->Unbind();
 
         OpenGL::bind_VAO(LineVAO);
-        DEBUG_CODE(CheckGLERROR());
 
         LineRenderer->Bind();
         {
@@ -130,7 +267,6 @@ namespace OpenGL
             Renderer::drawArrayLines(VBO_Test->GL_Handle, (uint32_t)Line_Data.size() * 2);
         }
         LineRenderer->Unbind();
-        DEBUG_CODE(CheckGLERROR());
     }
     void Renderer2D::Flush()
     {// Clears buffer, perhaps change this idk
@@ -174,7 +310,7 @@ namespace OpenGL
         CurrentRenderColor.a = _a * coef;
     }
 
-    void Renderer2D::Submit(Shader& _shader, Graphics::Texture& _texture, Mesh& _mesh)
+    void Renderer2D::Submit(Shader& _shader, Texture& _texture, Mesh& _mesh)
     {
         uint32_t Shader_Index = static_cast<uint32_t>(Shaders.size());
         Texture_ID_t Texture_Index = static_cast<uint32_t>(Textures.size());
@@ -192,48 +328,19 @@ namespace OpenGL
         Buckets.emplace_back(Mat, Mesh_Index); //  RenderPair Bucket = { Mat, Mesh_Index };
 
     }
-    void Renderer2D::Render_Buckets()
-    {
-        std::vector<FrameBufferObject*> FrameBuffers;
-
-        for (auto& F : FrameBuffers)
-        {// This and the Following Loop are literally the same thing
-            for (auto& S : Shaders)
-            {
-                S->Bind();
-                {
-                    int TextureSlot{ 0 };
-                    for (auto& T : Textures)
-                    {// Binds all relavent Textures. Not needed in AZDO
-                        glActiveTexture(GL_TEXTURE0 + (TextureSlot++));
-                        glBindTexture(GL_TEXTURE_2D, T->g_Handle());
-                    }// PBR Material is now bound and Active in the Shader 
-                }
-                for (auto& B : Buckets)
-                {
-                    // B.first.first.
-                }
-                S->Unbind();
-            }
-        }
-
-
-
-    }
-
-    void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Graphics::Texture *_image)
+    void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Texture *_image)
     {
         OpenGL::bind_VAO(DebugQuadVAO);   
         mainCamera.Update();
 
-        QuadRenderer->Bind();
+        shader_QuadRenderer->Bind();
         {
             mainCamera.Bind();
-            QuadRenderer->SetUniform("Position", _pos.x, _pos.y, _size.x, _size.y);
-            QuadRenderer->SetTextureUniform("DiffuseTexture", _image->g_Handle(), 1);
+            shader_QuadRenderer->SetUniform("Position", _pos.x, _pos.y, _size.x, _size.y);
+            shader_QuadRenderer->SetTextureUniform("DiffuseTexture", _image->g_Handle(), 1);
             Renderer::drawArray(DebugQuadVBO,  6 );
         }
-        QuadRenderer->Unbind();
+        shader_QuadRenderer->Unbind();
     }
 
     void Renderer2D::draw_Line(float x1, float y1, float x2, float y2)
@@ -250,34 +357,72 @@ namespace OpenGL
     }
 
     std::vector<Vec4> Line_Data;
+
+
+
+
+
+
+    void Renderer2D::Render_Buckets()
+    {
+
+        for (auto& F : RenderPasses)
+        {// This and the Following Loop are literally the same thing
+            F.FBO->Bind();
+
+            for (auto& S : Shaders)
+            {
+                S->Bind();
+                {
+                    int TextureSlot{ 0 };
+                    for (auto& T : Textures)
+                    {// Binds all relavent Textures. Not needed in AZDO
+
+                        OpenGL::bind_Texture(T->g_Handle(), ++TextureSlot);
+
+                    }// PBR Material is now bound and Active in the Shader 
+                }
+                for (auto& B : Buckets)
+                {
+                    // B.first.first.
+                }
+                S->Unbind();
+            }
+        }
+    }
+
+    RenderPass& Renderer2D::new_RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal , GLenum _format )
+    {
+        return  RenderPasses.emplace_back(RenderPass(_width, _height,_shader, _datatype, _internal, _format)); //RenderPasses.back();
+    }
+
 }//NS OpenGL
 
 
 
-bool Init_DefaultShaders()
-{
-    QuadRenderer = new Shader(VQuadRenderer, FQuadRenderer);
-    DebugQuadVAO = OpenGL::new_VAO();
-    DebugQuadVBO = OpenGL::new_VBO();
-    debugCamera = new Camera2D(SCREEN_X, SCREEN_Y);
-    Vec2 QuadData[6] =
-    {
-        Vec2(0, 0),  Vec2(1, 0),  Vec2(0, 1),
-        Vec2(1, 1),  Vec2(0, 1),  Vec2(1, 0)
-    };
-    QuadRenderer->Bind();
-    {
-        OpenGL::bind_VAO(DebugQuadVAO);
-
-        OpenGL::bind_VBO(DebugQuadVBO);
-        OpenGL::set_Attribute(2, "aPos");
-        OpenGL::set_BufferData(sizeof(QuadData), QuadData);
-    }
-    QuadRenderer->Unbind();
+//    using Texture_ID_t = uint32_t;
+//    using Mesh_ID_t    = uint32_t;
+//    using Shader_ID_t  = uint32_t;
+//    using Texture_ID_t = uint32_t;
+//    using Texture_ID_t = uint32_t;
+//    enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
+//    using SurfaceFragment = std::pair   < Surface_t, Texture_ID_t >;
+//    using Surface    = std::vector < SurfaceFragment         >;
+//    using Material   = std::pair   < Surface, Shader_ID_t    >;
+//    using RenderPair = std::pair   < Material, Mesh_ID_t     >;
+//    std::vector<Shader*> Shaders;
+//    std::vector<Texture*> Textures;
+//    std::vector<Mesh*> Meshes;
+//    std::vector<RenderPair> Buckets;
 
 
-    return true;
-}
+// 1:) Create Render Pass: new_RenderPass returns a Handle to the FrameBuffer Bucket and Rendering to that Pass will be done using that Handle
+// 2:) Add Shaders to that Render Pass so that Geometry can be rendered using that Shader
+
+
+
+
+
 
 
 /*
@@ -299,3 +444,14 @@ foreach( object )           //
 }
 
 */
+
+
+
+
+
+
+
+
+
+//  FrameBuffers.emplace_back(new FrameBufferObject(_width, _height, _datatype, _internal, _format));
+//  return FrameBuffers.size() - 1;

@@ -11,6 +11,19 @@ Attribute::Attribute(BufferTypes t)
 	:
 	AttributeType(t)
 {}
+template<typename _Ty>
+Attribute::Attribute(uint32_t _handle, _Ty *_data, uint32_t _count)
+    :
+    AttributeType(BufferTypes::NONE),
+    ElementCount(_count),
+    Stride(sizeof(_Ty)),
+    Size(ElementCount + sizeof(_Ty)),
+    GL_Handle(OpenGL::new_VBO)
+{
+    OpenGL::bind_VBO(GL_Handle);
+    OpenGL::set_BufferData(ElementCount*Stride, NULL);
+    OpenGL::unbind_VBO();
+}
 
 void Attribute::Bind()
 {
@@ -18,12 +31,11 @@ void Attribute::Bind()
 }
 void Attribute::Unbind()
 {
-    OpenGL::bind_VBO(0);
+    OpenGL::unbind_VBO();
 }
 void Attribute::Release()
 {// Should I just orphan this? Should I delete it? I wish to reclaim the name and free any allocation associate with it.
-	__debugbreak();
-    // Maybe I just need to delete it and forget it ever existed
+	__debugbreak();    // Maybe I just need to delete it and forget it ever existed
 	REFACTOR("Yeah, idk what the fuck to do with this. Release in VertexBufferObject class");
 }
 void Attribute::Destroy()
@@ -118,6 +130,10 @@ void ElementArrayBuffer::Unbind()
 ///=================================================================================================================
 
 
+GLuint GL_Handle;
+int ElementCount;
+std::vector<Attribute*> Buffers;
+
 
 VertexArrayObject::VertexArrayObject()
 	:
@@ -126,35 +142,31 @@ VertexArrayObject::VertexArrayObject()
 {
 	Buffers.reserve(5);
 }
-VertexArrayObject::VertexArrayObject(VertexBufferObject<Vec3>& vbo)
+
+template<typename _Ty>
+VertexArrayObject::VertexArrayObject(VertexBufferObject<_Ty>& vbo)
 	:
 	ElementCount(0),
-	GL_Handle(NULL)
+	GL_Handle(OpenGL::new_VAO())
 {
-	_GL(glGenVertexArrays(1, &GL_Handle));
 	Buffers.reserve(5);
 }
+
 #ifdef BINDLESS_ATTRIBUTES
-void VertexArrayObject::Bind() {}
-void VertexArrayObject::Unbind() {}
-
+    void VertexArrayObject::Bind()   {}
+    void VertexArrayObject::Unbind() {}
 #else
-void VertexArrayObject::Bind()
-{
-    OpenGL::bind_VAO(GL_Handle);
-}
-void VertexArrayObject::Unbind()
-{
-    OpenGL::bind_VBO(0);
-}
-
+    void VertexArrayObject::Bind()
+    {
+        OpenGL::bind_VAO(GL_Handle);
+    }
+    void VertexArrayObject::Unbind()
+    {
+        OpenGL::unbind_VAO();
+        REFACTOR("Get Rid of all this rendering shit below and remove it from the Buffers in order to remove dependencies on Texture and Image classes. It is fucking useless. ")
+    }
 #endif
-void VertexArrayObject::Render()
-{
-    REFACTOR("While I almost like this it will likely lead to confusion and should be reconsidered and potentially changed ");
-	Bind();
-	_GL(glDrawElements(GL_TRIANGLES, ElementCount, GL_UNSIGNED_INT, nullptr));
-}
+ 
 
 _static Shader* FrameBufferObject::ScreenShader{ nullptr };
 _static uint32_t FrameBufferObject::ScreenVAO{ 0 };
@@ -235,15 +247,14 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
 
     Bind();
 
-    RenderTarget = new Graphics::Texture(Size, GL_RGBA);
-    DepthTarget = new  Graphics::Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
+    RenderTarget = new Texture(Size, GL_RGBA);
+    DepthTarget = new  Texture(Size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTarget->g_Handle(), 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTarget->g_Handle(), 0);
 	ValidateFrameBuffer();
     OpenGL::EnableDepthTest();
-  
-	glDepthFunc(GL_LEQUAL);
+  	OpenGL::set_DepthFunction(GL_LEQUAL);
     OpenGL::set_Viewport(0, 0, _width, _height);
     Unbind();
 
@@ -264,6 +275,7 @@ void FrameBufferObject::Destroy()
 void FrameBufferObject::Bind()
 {
 	OpenGL::bind_FBO(GL_Handle);
+    DEBUG_CODE(isActive = true);
 }
 void FrameBufferObject::BindWrite()
 {// Bind for Reading 
@@ -292,7 +304,8 @@ void FrameBufferObject::ClearDepthBuffer()
 
 void FrameBufferObject::Unbind()
 {
-    OpenGL::bind_FBO(0);
+    OpenGL::unbind_FBO();
+    DEBUG_CODE(isActive = false);
 }
 bool FrameBufferObject::ValidateFrameBuffer()
 {

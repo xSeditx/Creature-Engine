@@ -188,19 +188,19 @@ _________________________________________________________
 /// 
 /// 		std::string BasicVertexShader = "\
 /// #version 330 \n\
-/// layout(location = 0) in vec3 VertexPosition;\n\
-/// out vec3 VertexColor;\n\
+/// layout(location = 0) in vec3 Position;\n\
+/// out vec3 VColor;\n\
 /// out vec4 FragPosition;\n\
 /// void main()\n\
 /// {\n\
-/// FragPosition = vec4(VertexPosition.xyz, 1.0f);\n\
-/// VertexColor = vec3(1.0,1.0,1.0);\n\
+/// FragPosition = vec4(Position.xyz, 1.0f);\n\
+/// VColor = vec3(1.0,1.0,1.0);\n\
 /// }";
 /// 
 /// 		std::string BasicFragmentShader = "\n\
 /// #version 330            \n\
 /// out vec3 color;         \n\
-/// in vec3 VertexColor;    \n\
+/// in vec3 VColor;    \n\
 /// in vec4 FragPosition; \n\
 /// void main(){            \n\
 /// color = vec3(1, 0, 0);  \n\
@@ -208,21 +208,21 @@ _________________________________________________________
 /// 
 /// 		std::string VertexShader = " #version 330 core \n\
 /// layout(location = 0) in vec3 aPos; 			\n\
-/// out vec4 vertexColor; 						\n\
+/// out vec4 VColor; 						\n\
 /// void main()									\n\
 /// {											\n\
 /// 	gl_Position = vec4(aPos, 1.0);			\n\
-/// 	vertexColor = vec4(0.5, 0.0, 0.0, 1.0); \n\
+/// 	VColor = vec4(0.5, 0.0, 0.0, 1.0); \n\
 /// }";
 /// 
 /// 
 /// 
 /// 		std::string FragmentShader = "#version 330 core \n\
 /// out vec4 FragColor;									 \n\
-/// in vec4 vertexColor;  								 \n\
+/// in vec4 VColor;  								 \n\
 /// void main()											 \n\
 /// {													 \n\
-/// 	FragColor = vertexColor;						 \n\
+/// 	FragColor = VColor;						 \n\
 /// }";
 /// 
 /// 

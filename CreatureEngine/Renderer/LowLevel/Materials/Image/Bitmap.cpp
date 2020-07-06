@@ -2,8 +2,8 @@
 
 #include"../Bin/SOIL/src/SOIL.h"
 
-namespace Graphics
-{
+//namespace Graphics
+//{
 	Bitmap::Bitmap(void * _memory, Vec2 _dimensions) noexcept
 		:
 		rawData(static_cast<uint8_t*>(_memory)),// Raw Mapped Data 
@@ -28,6 +28,11 @@ namespace Graphics
         int BPP{ 0 };
 
         rawData = SOIL_load_image(_file.c_str(), &Sx, &Sy, &BPP, SOIL_LOAD_AUTO);
+        if (!rawData)
+        {
+            DEBUGPrint(CON_Red, "Failed to load texture: " << _file);
+            return;
+        }
 
         Size = Vec2(Sx, Sy);
         BytesPerPixel = BPP;
@@ -76,5 +81,5 @@ namespace Graphics
          memcpy(rawData, TempImage, ImageSize);
          delete[](TempImage);
     }
-}// NS Graphics
+//}// NS Graphics
  
