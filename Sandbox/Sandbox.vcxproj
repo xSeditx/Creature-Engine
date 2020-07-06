@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:/Users/curti/source/repos/xSeditx/Creature-Engine/x64/Debug;$(Solution)../Bin/Soil/Debug/;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(Solution)../x64/Debug;$(Solution)../Bin/Soil/Debug/;$(LibraryPath)</LibraryPath>
     <IncludePath>$(Solution)../Bin/glad/include;$(IncludePath);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
