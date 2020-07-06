@@ -184,10 +184,8 @@ namespace OpenGL
         DEBUG_CODE(CheckGLERROR());
         return result;
     }
-
-
     void set_Hint(Hint_t _hint, Mode_t _mode)
-    {
+    {// Sets a Hint for the OpenGL Context
         glHint(_hint, _mode);
         DEBUG_CODE(CheckGLERROR());
     }
@@ -202,12 +200,10 @@ namespace OpenGL
         DEBUG_CODE(CheckGLERROR());
         return result;
     }
-
     void delete_VAO(uint32_t _id)
     {// Frees ID for a Vertex Array Object
         glDeleteVertexArrays(1, &_id);
     }
-
     void bind_VAO(int32_t _vaoID)
     {
         assert(_vaoID != NULL);
@@ -233,7 +229,6 @@ namespace OpenGL
         glBindBuffer(_target, _bufferID);
         DEBUG_CODE(CheckGLERROR());
     }
-
     bool is_Mapped(uint32_t _target)
     {
         int Result{ 0 };
@@ -255,6 +250,7 @@ namespace OpenGL
     void delete_VBO(uint32_t _id)
     {// Frees ID for a Vertex Buffer Object
         glDeleteBuffers(1, &_id);
+        DEBUG_CODE(CheckGLERROR());
     }
 
     void bind_VBO(uint32_t _vboID)
@@ -263,12 +259,12 @@ namespace OpenGL
         glBindBuffer(GL_ARRAY_BUFFER, _vboID);
         DEBUG_CODE(CheckGLERROR());
     }
-
     void unbind_VBO()
     { // Unbinds all Vertex Buffer Objects from OpenGL
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         DEBUG_CODE(CheckGLERROR());
     }
+
     bool isVBO(int _array)
     {// Is an ID a Vertex Buffer Object 
         return (bool)(glIsBuffer(_array));
@@ -289,6 +285,7 @@ namespace OpenGL
     void delete_IBO(uint32_t _id)
     {// Frees ID for a Element Array Object
         glDeleteBuffers(1, &_id);
+        DEBUG_CODE(CheckGLERROR());
     }
 
 
@@ -319,15 +316,18 @@ namespace OpenGL
     void bind_Texture(uint32_t _handle) 
     {
         glBindTexture(GL_TEXTURE_2D, _handle);
+        DEBUG_CODE(CheckGLERROR());
     }
     void bind_Texture(uint32_t _handle, uint32_t _slot)
     {
         glActiveTexture(GL_TEXTURE0 + _slot);
         glBindTexture(GL_TEXTURE_2D, _handle);
+        DEBUG_CODE(CheckGLERROR());
     }
     void unbind_Texture()
     {
         glBindTexture(GL_TEXTURE_2D, 0);
+        DEBUG_CODE(CheckGLERROR());
     }
 
 
@@ -451,7 +451,10 @@ namespace OpenGL
     {
         glTexParameteri(_target, GL_TEXTURE_WRAP_T, param);
     }
-
+    void  delete_Texture(uint32_t _handle)
+    {
+        glDeleteTextures(1, &_handle);
+    }
     ///=================================================================================
     /// Texture Buffer Object 
     ///=================================================================================
@@ -669,6 +672,7 @@ namespace OpenGL
     void set_Subbuffer_Data(uint32_t _size, const void* _data, uint32_t _offset)
     {
         glBufferSubData(GL_ARRAY_BUFFER, _offset, _size, _data);
+        DEBUG_CODE(CheckGLERROR());
     }
 
     GLenum glCheckError_(const char *file, int line)
@@ -692,6 +696,7 @@ namespace OpenGL
             std::cout << output << std::endl; 
 
         }
+        OpenGL_Debug::GetFirstNMessages(5);
         return errorCode;
     }
 
@@ -742,11 +747,6 @@ namespace OpenGL
         DEBUG_CODE(CheckGLERROR());
         return result;
     }
-    int check_FBO_Status() {  return glCheckFramebufferStatus(GL_FRAMEBUFFER);  }
-
-
-
-
 
     /* Creates a Unique ID for a Frame Buffer Object*/
     uint32_t new_FBO(uint32_t _count)
@@ -755,6 +755,12 @@ namespace OpenGL
         glGenFramebuffers(_count, &result);
         DEBUG_CODE(CheckGLERROR());
         return result;
+    }
+
+    /* Checks the Status of our FrameBuffer */
+    int check_FBO_Status()
+    { 
+        return glCheckFramebufferStatus(GL_FRAMEBUFFER); 
     }
 
     /* Frees ID for a Frame Buffer Object*/
@@ -782,7 +788,7 @@ namespace OpenGL
     /* Is an ID a Vertex Buffer Object */
   //  bool isFBO(int _array) { return true; }
 
-
+    /* Gets a pointer to the Bindless Buffer on the GPU */
     size_t get_Bindless_Address()
     {
         size_t Result{ 0 };
@@ -813,7 +819,104 @@ namespace OpenGL
         glClearColor(_color.x, _color.y, _color.z, _color.w);
     }
 
+    void attach_ColorBuffer(uint32_t _texture, uint32_t _attachmentPoint)
+    { 
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + _attachmentPoint, GL_TEXTURE_2D, _texture, 0);
+    }
+
+    void attach_DepthBuffer(uint32_t _texture)
+    {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _texture, 0);
+    }
+    void attach_ColorBuffer(uint32_t _fboID, uint32_t _texture, uint32_t _attachmentPoint)
+    {
+        OpenGL::bind_FBO(_fboID);
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + _attachmentPoint, GL_TEXTURE_2D, _texture, 0);
+        }
+        OpenGL::unbind_FBO();
+    }
+
+    void attach_DepthBuffer(uint32_t _fboID, uint32_t _texture)
+    {
+        OpenGL::bind_FBO(_fboID);
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _texture, 0);
+        }
+        OpenGL::unbind_FBO();
+    }
+
+
+
+
+
+
+   
+    void enable_DebugOutput()
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+    }
+    void disable_DebugOutput()
+    {
+        glDisable(GL_DEBUG_OUTPUT);
+    }
 }
+
+
+
+
+
+
+namespace OpenGL_Debug
+{
+
+    void GetFirstNMessages(GLuint numMsgs)
+    {
+        GLint maxMsgLen = 0;
+        glGetIntegerv(GL_MAX_DEBUG_MESSAGE_LENGTH, &maxMsgLen);
+
+        std::vector<GLchar> msgData(numMsgs * maxMsgLen);
+        std::vector<GLenum> sources(numMsgs);
+        std::vector<GLenum> types(numMsgs);
+        std::vector<GLenum> severities(numMsgs);
+        std::vector<GLuint> ids(numMsgs);
+        std::vector<GLsizei> lengths(numMsgs);
+
+        uint32_t Size = 255;//msgs.size() made this Size'
+        GLuint numFound = glGetDebugMessageLog(numMsgs, Size, &sources[0], &types[0], &ids[0], &severities[0], &lengths[0], &msgData[0]);
+
+        sources.resize(numFound);
+        types.resize(numFound);
+        severities.resize(numFound);
+        ids.resize(numFound);
+        lengths.resize(numFound);
+
+        std::vector<std::string> messages;
+        messages.reserve(numFound);
+
+        std::vector<GLchar>::iterator currPos = msgData.begin();
+        for (size_t msg = 0; msg < lengths.size(); ++msg)
+        {
+            messages.push_back(std::string(currPos, currPos + lengths[msg] - 1));
+            currPos = currPos + lengths[msg];
+        }
+
+        for (auto& M : messages)
+        {
+            Print("Debug Message:" << M);
+        }
+    }
+
+}
+
+
+
+
+
+
+
+
+
 
 
 

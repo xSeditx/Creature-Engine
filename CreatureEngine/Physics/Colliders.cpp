@@ -573,24 +573,24 @@ bool Collider::Sweep(std::vector<Parent_t*>& _test)
 ///         continue;
 ///     }
 
-
-        if (g_Group() _NOT_EQUAL_TO_ Other->g_Collider().g_Group() _AND_ Other->is_Alive() _EQUALS_ true)
-        {// If they are not in the same Collision Group AND As long as Other Collider is Active Test them
-            if (isCollision(&Other->g_Collider()))
-            {// If they Collide Call the User defined Response Function. In a perfect world we would detect all
-                Respond(*Other); //(g_Parent(), 
-                //return{};
-            }
-            if (hasChildren())
-            {
-                Other->g_Collider().Sweep(g_Parent().Children);
-            }
-            if (Other->Children.size())
-            {
-                Sweep(Other->Children);// If this Collider has Children Pass them to Sweep and Recurse
-            }
-           DEBUG_CODE( CollisionTestCounter++);
-        }
+// REMOVED THE COLLIDER FROM THE GAME OBJECT CLASS, FIGURE SOMETHING ELSE OUT
+//if (g_Group() _NOT_EQUAL_TO_ Other->g_Collider().g_Group() _AND_ Other->is_Alive() _EQUALS_ true)
+//{// If they are not in the same Collision Group AND As long as Other Collider is Active Test them
+//    if (isCollision(&Other->g_Collider()))
+//    {// If they Collide Call the User defined Response Function. In a perfect world we would detect all
+//        Respond(*Other); //(g_Parent(), 
+//        //return{};
+//    }
+//    if (hasChildren())
+//    {
+//        Other->g_Collider().Sweep(g_Parent().Children);
+//    }
+//    if (Other->Children.size())
+//    {
+//        Sweep(Other->Children);// If this Collider has Children Pass them to Sweep and Recurse
+//    }
+//   DEBUG_CODE( CollisionTestCounter++);
+//}
     }
     return {};
 }

@@ -50,10 +50,13 @@ void SetMinFiltering(unsigned int param);| Sets Specific Filtering mode for Mini
 void SetWrap(unsigned int param);| Sets the Wrap mode for the X and Y wrap of the Texture
 void SetWrapX(unsigned int param);|Sets the Wrap mode for the X wrap of the Texture
 void SetWrapY(unsigned int param);|Sets the Wrap mode for the Y wrap of the Texture
+void *get_Pixels()| Returns a Memory Address of the Pixels in the Texture 
+void *get_Pixels(Vec4 _sourceRect)| Returns a Memory Address of the Pixels in the Texture of the given area 
 inline void Bind();| Bind the Texture to OpenGL so it is currently active in the Active Texture Slot
 inline void Unbind();| Releases the Texture so it is not Current in OpenGL
 inline void MipmapOn();| Enables Mipmapping for the Texture
 inline void MipmapOff();| Disables Mipmapping for the Texture
+
 
 void Render(int _x, int _y, int _w, int _h);| Renders a Quad with the Specific texture at the XY coords specified
 

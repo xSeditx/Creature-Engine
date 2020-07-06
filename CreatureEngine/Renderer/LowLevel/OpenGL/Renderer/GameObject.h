@@ -1,93 +1,47 @@
 #pragma once
-
-class Shader;
-#include"../../../../Physics/Colliders.h"
-
-// struct Collider
-// {
-//     void Update(float _dt){}
-//     void Sweep(std::vector<Collider*> _potentialPairs) {}// *&SpatialTree->RootNode->QueryRange(C->g_Position(), { 100,100 }));
-// };
-
+#include"Transform.h"
 
 class GameObject
 {
 public:
-	GameObject()
-		:
-		Scale(0),
-		Position(0),
-		Rotation(0),
-		Transform(Mat4(1.0f)),
-		Handle(ObjectCount++)
-	{
+    GameObject()
+        :
+        model_Matrix(Transform(Vec3(0),Vec3(0),"ModelMatrix")),
+        Handle(ObjectCount++)
+    {
         WARN_ME("Pure Virtual Nature of this Class has been Removed. All derived classes must use Override");
-		Transform = glm::translate(Transform, Position);
-		Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
-		Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
-		Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
 	}
 
 	GameObject(Vec3 _pos, Vec3 _rot, Vec3 _scale)
 		:
-		Position(_pos),
-		Rotation(_rot),
-		Scale(_scale),
-		Handle(ObjectCount++)
-	{
-		Transform = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
-		Transform = glm::translate(Transform, _pos);
-		Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
-		Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
-		Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
-	}
+        model_Matrix(Transform()),
+        Handle(ObjectCount++)
+	{}
 
-    virtual void Update()= pure_virtual; // { DEBUGPrint(CON_Red,"Pure Virtual Removed from GameObject Class, Update your Derived class to include Override Statement"); }           //
+ //   virtual void Update()= pure_virtual; // { DEBUGPrint(CON_Red,"Pure Virtual Removed from GameObject Class, Update your Derived class to include Override Statement"); }           //
     virtual void Unbind() = pure_virtual; // { DEBUGPrint(CON_Red,"Pure Virtual Removed from GameObject Class, Update your Derived class to include Override Statement"); }           //
     virtual void Bind() = pure_virtual; // { DEBUGPrint(CON_Red,"Pure Virtual Removed from GameObject Class, Update your Derived class to include Override Statement"); }           //
     virtual void Render() = pure_virtual; // { DEBUGPrint(CON_Red,"Pure Virtual Removed from GameObject Class, Update your Derived class to include Override Statement"); }           //
 
 
-	inline void s_Scale(Vec3 _scale) { Scale = _scale; }
-	inline void s_Scale(float _scale) { Scale = Vec3(_scale); }
-	inline void s_Position(Vec3 _position) { Position = _position; }
-	inline void s_Rotation(Vec3 _rotation) { Rotation = _rotation; }
-	inline void s_Transform(Mat4 _transform) { Transform = _transform; }
+	inline void s_Scale(Vec3 _scale) { model_Matrix.Scale = _scale; }
+	inline void s_Scale(float _scale) { model_Matrix.Scale = Vec3(_scale); }
+	inline void s_Position(Vec3 _position) { model_Matrix.Position = _position; }
+	inline void s_Rotation(Vec3 _rotation) { model_Matrix.Rotation = _rotation; }
+	inline void s_Transform(Mat4 _transform) { model_Matrix.Matrix = _transform; }
  
-    inline Vec3 g_Scale()      { return Scale;     }
-    inline Vec3 g_Position()   { return Position;  }
-    inline Vec3 g_Rotation()   { return Rotation;  }
-    inline Mat4 g_Transform()  { return Transform; }
+    inline Vec3 g_Scale()      { return model_Matrix.Scale;     }
+    inline Vec3 g_Position()   { return model_Matrix.Position;  }
+    inline Vec3 g_Rotation()   { return model_Matrix.Rotation;  }
+    inline Mat4 g_Transform()  { return model_Matrix.Matrix; }
 
-    inline float g_PositionX() { return Position.x; }
-    inline float g_PositionY() { return Position.y; }
-    inline float g_PositionZ() { return Position.z; }
+    inline float g_PositionX() { return model_Matrix.Position.x; }
+    inline float g_PositionY() { return model_Matrix.Position.y; }
+    inline float g_PositionZ() { return model_Matrix.Position.z; }
 
-    inline float g_RotationX() { return Rotation.x; }
-    inline float g_RotationY() { return Rotation.y; }
-    inline float g_RotationZ() { return Rotation.z; }
-
-
-    inline Collider& g_Collider()
-    {
-        WARN_ME("g_Collider() only returns a Temp object for now be sure to correct this in the future");  
-        return *(new SphereCollider(this));                //        *(new Collider());
-    }
-
-  
-
-
-
-
-	void UpdateTransform()
-	{
-		Transform = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
-		Transform = glm::translate(Transform, Position);
-		Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
-		Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
-		Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
-	}
-
+    inline float g_RotationX() { return model_Matrix.Rotation.x; }
+    inline float g_RotationY() { return model_Matrix.Rotation.y; }
+    inline float g_RotationZ() { return model_Matrix.Rotation.z; }
 
     /* Gets the Handle of the Object that the Engine uses */
     const uint32_t g_Handle() const
@@ -115,15 +69,16 @@ public:
     }
 
     /* Removes a Child object from its list and returns that GameObject */
-    //GameObject& pop_Child(GameObject& _child)
-    //{ 
-    //   //WARN_ME("I have concerns that I am deleting the object before dereferencing it and attempting to return it \n Since it is a Virtual Object I can not instantiate a physical copy of GameObject ");
-    //   //auto Obj = std::find(Children.begin(), Children.end(), _child);
-    //   //GameObject *results{ *Obj };
-    //   //Children.erase(Obj);
-    //    return *results;
-    //}
-    //
+    GameObject& pop_Child(GameObject& _child)
+    { 
+     // WARN_ME("I have concerns that I am deleting the object before dereferencing it and attempting to return it \n\
+     //          Since it is a Virtual Object I can not instantiate a physical copy of GameObject ");
+     // auto results = std::find(Children.begin(), Children.end(), _child);
+     // Children.erase(results);
+     // return **results;
+    }
+
+
     /* Test to see if the Object is alive and should be Updated */
     bool is_Alive() { return Active; }
 
@@ -136,37 +91,33 @@ public:
 
 
     /* Checks if this was created After _other */
-     bool operator >(const GameObject& _other)
-     {
-         return Handle > _other.Handle;
-     }
- 
-     /* Checks if this was created before _other */
-     bool operator <(const GameObject& _other)
-     {
-         return Handle < _other.Handle;
-     }
- 
-     /* Compares if two objects refer to a different object. */
-     bool operator !=(const GameObject& _other)
-     {
-         return Handle != _other.Handle;
-     }
- 
-     /* Compares two object references to see if they refer to the same object.*/
-     bool operator ==(const GameObject& _other)
-     {
-         return Handle == _other.Handle;
-     }
+    bool operator >(const GameObject& _other)
+    {
+        return Handle > _other.Handle;
+    }
 
-     bool operator ==(GameObject** _other)
-     {
-         auto Test = *_other;  // GameObject *Test;
-         auto Test2 = &_other; // GameObject ***Test
-         //auto Test3 = **_other;// GameObject Test
-         auto Test4 = _other;  // GameObject **Test
-         return this->Handle == (*_other)->Handle;
-     }
+    /* Checks if this was created before _other */
+    bool operator <(const GameObject& _other)
+    {
+        return Handle < _other.Handle;
+    }
+
+    /* Compares if two objects refer to a different object. */
+    bool operator !=(const GameObject& _other)
+    {
+        return Handle != _other.Handle;
+    }
+
+    /* Compares two object references to see if they refer to the same object.*/
+    bool operator ==(const GameObject& _other)
+    {
+        return Handle == _other.Handle;
+    }
+
+    bool operator ==(GameObject** _other)
+    {
+        return this->Handle == (*_other)->Handle;
+    }
 
     //template<typename _Ty>
     //bool operator ==(const _Ty& _other)
@@ -175,9 +126,7 @@ public:
     //}
 
 
-
-    Mat4 Transform{ 1.0f };
-    Vec3 Position{ 0.0f }, Rotation{ 0 }, Scale{ 1.0f };
+    Transform model_Matrix;
 
     std::vector<GameObject*> Children;
 
@@ -186,8 +135,8 @@ public:
     friend std::ostream& operator <<(std::ostream& _str, GameObject& _object);
 
 private:
-	uint32_t GL_Handle{ 0 };
-	uint32_t Handle{ 0 };
+    uint32_t GL_Handle{ 0 };
+    uint32_t Handle{ 0 };
     bool Active{ true };
 };
 
@@ -198,10 +147,7 @@ std::ostream& operator <<(std::ostream& _stream, GameObject& _object);
 static std::ostream& operator <<(std::ostream& _stream, GameObject& _object)
 {
 
-    _stream << " Transform: " << _object.Transform  << "\n";
-    _stream << " Position: " << _object.Position    << "\n";
-    _stream << " Rotation: " << _object.Rotation    << "\n";
-    _stream << " Scale: " << _object.Scale          << "\n";
+    _stream <<  _object.model_Matrix  << "\n";
     _stream << " Active: " << PBool(_object.Active) << "\n";
     _stream << " VAO Handle: " << _object.GL_Handle << "\n";
     _stream << " Object ID: " << _object.Handle     << "\n";
@@ -272,12 +218,41 @@ operator  ==            Compares two object references to see if they refer to t
 /*===============================================================================================================================================
                                                                TRASH
   ===============================================================================================================================================
+
+
+
+//void UpdateTransform()
+//{
+//	Transform = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
+//	Transform = glm::translate(Transform, Position);
+//	Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
+//	Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
+//	Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
+//}
+
+
+
+//inline Collider& g_Collider()
+//{
+//    WARN_ME("g_Collider() only returns a Temp object for now be sure to correct this in the future");
+//    return *(new SphereCollider(this));                //        *(new Collider());
+//}
+
+
 //class GameObject;
 //bool operator == (std::vector<GameObject *>::iterator &lhv, const GameObject& rhv);
 bool operator == (std::vector<GameObject *>::iterator &lhv, const GameObject& rhv)
 {
     return (*lhv)->g_Handle() == rhv.g_Handle();
 }
+//class Shader;
+//#include"../../../../Physics/Colliders.h"
+// struct Collider
+// {
+//     void Update(float _dt){}
+//     void Sweep(std::vector<Collider*> _potentialPairs) {}// *&SpatialTree->RootNode->QueryRange(C->g_Position(), { 100,100 }));
+// };
+
 
 
 
@@ -307,3 +282,12 @@ bool operator == (std::vector<GameObject *>::iterator &lhv, const GameObject& rh
 
 
 */
+//Transform = glm::translate(Transform, Position);
+//Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
+//Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
+//Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
+//Transform = glm::mat4(1.0f); //  Set Identity and Rotate all axis followed with the Translation.
+//Transform = glm::translate(Transform, _pos);
+//Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
+//Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
+//Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));

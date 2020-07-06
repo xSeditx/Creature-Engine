@@ -141,6 +141,9 @@
     <ClCompile Include="..\CreatureEngine\main.cpp" />
     <ClCompile Include="Utility_Test.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Creature.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

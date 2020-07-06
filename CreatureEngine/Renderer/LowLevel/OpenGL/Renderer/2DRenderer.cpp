@@ -80,7 +80,6 @@ namespace OpenGL
                 VAO->Bind();
                 {
                     mainCamera->Bind();
-                    //GPU_Program->SetUniform("ModelMatrix", Mat4(1.0f));
 
                     Renderer::drawArray(10000);
                 }
@@ -114,11 +113,6 @@ namespace OpenGL
     }
 
 
-
-    
-
-
-
     void RenderPass::set_Attributes(VertexBufferObject<Vec2>* _vertices, VertexBufferObject<Vec4>* _colors)
     {
         __debugbreak();
@@ -128,14 +122,14 @@ namespace OpenGL
         GPU_Program->Bind();
         {
             VAO->Attach(BufferTypes::VERTEX, _vertices);
-            VAO->Attach(BufferTypes::COLOR, _colors);
+            VAO->Attach( BufferTypes::COLOR,   _colors);
         }
         GPU_Program->Unbind();
     }
     void RenderPass::update_Geometry(std::vector<Vec2> _vertices)
     {
         __debugbreak();
-        my_Mesh->Vertices->Update(_vertices);
+        my_Mesh->Vertices->Update(_vertices.data(), _vertices.size() * sizeof(Vec2));
     }
     void RenderPass::Update()
     {
@@ -154,34 +148,10 @@ namespace OpenGL
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     Renderer2D::Renderer2D(Vec2 _size)
     {
         WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
-        mainCamera = Camera2D(_size);
+        //mainCamera = new Camera2D(_size);
 
         QuadVAO      = OpenGL::new_VAO();
         QuadVBO      = OpenGL::new_VBO();
@@ -194,7 +164,7 @@ namespace OpenGL
 
             OpenGL::bind_VAO(QuadVAO);
             OpenGL::bind_VBO(QuadVBO);
-            OpenGL::set_Attribute(2, "aPos");
+            OpenGL::set_Attribute(2, "WorldPosition");
 
             OpenGL::bind_VBO(TransformVBO);
             OpenGL::set_Divisor(OpenGL::set_Attribute(4, "Position"), 1 ); // Divisor, number of vertices before skipping to next Transform
@@ -212,19 +182,16 @@ namespace OpenGL
 
 ///     Layers.push(new Layer("Root Layer"));
 
-        LineVAO = OpenGL::new_VAO();
-        LineVBO = OpenGL::new_VBO();
+       // LineVAO = OpenGL::new_VAO();
+       // LineVBO = OpenGL::new_VBO();
 
         LineRenderer = new Shader(Line_shader_v, Line_shader_f);
-        VBO_Test = new VertexBufferObject<Vec4>();
+       // VBO_Test = new VertexBufferObject<Vec2>(nullptr, 0);
 
         LineRenderer->Bind();
         {
-            OpenGL::bind_VAO(LineVAO);
-        //  VBO_Test->Bind();
-        //  OpenGL::bind_VBO(LineVBO);
-            OpenGL::bind_VBO(VBO_Test->GL_Handle);
-            OpenGL::set_Attribute(2, "Position");
+            //OpenGL::bind_VAO(LineVAO);
+            VAO_Lines.Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec2>(nullptr, 0));
         }
         LineRenderer->Unbind();
      // OpenGL::set_LineWidth(6);
@@ -253,18 +220,17 @@ namespace OpenGL
 
         InstanceRenderer->Bind();
         {
-            mainCamera.Bind();
+            mainCamera->Bind();
             Renderer::drawArrayInstanced(6, InstanceCount);
         }
         InstanceRenderer->Unbind();
 
-        OpenGL::bind_VAO(LineVAO);
 
         LineRenderer->Bind();
         {
-            mainCamera.Bind(); 
-            // Renderer::drawArrayLines(LineVBO, (uint32_t)Line_Data.size() * 2);
-            Renderer::drawArrayLines(VBO_Test->GL_Handle, (uint32_t)Line_Data.size() * 2);
+            VAO_Lines.Bind();
+            mainCamera->Bind(); 
+            Renderer::drawArrayLines( (uint32_t)Line_Data.size());
         }
         LineRenderer->Unbind();
     }
@@ -277,7 +243,7 @@ namespace OpenGL
     }
     void Renderer2D::Update()
     {
-        mainCamera.Update();
+        mainCamera->Update();
  
         if (Positions.size())
         {
@@ -290,16 +256,17 @@ namespace OpenGL
 
         if (Line_Data.size())
         {
+            VAO_Lines.Buffers[0]->Update(Line_Data);// .data(), Line_Data.size());
             // OpenGL::bind_VBO(LineVBO);
             // OpenGL::set_BufferData(Line_Data);
-            OpenGL::bind_VBO(VBO_Test->GL_Handle);
-            OpenGL::set_BufferData(Line_Data);
+            //OpenGL::bind_VBO(VBO_Test->GL_Handle);
+            //OpenGL::set_BufferData(Line_Data);
             //*VBO_Test = Line_Data;
         }
     }
     void Renderer2D::Resize(Vec2 _size)
     {
-        mainCamera.Resize(_size);
+        mainCamera->Resize(_size);
     }
     void Renderer2D::SetRenderColor(int _r, int _g, int _b, int _a)
     {
@@ -331,11 +298,11 @@ namespace OpenGL
     void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Texture *_image)
     {
         OpenGL::bind_VAO(DebugQuadVAO);   
-        mainCamera.Update();
+        mainCamera->Update();
 
         shader_QuadRenderer->Bind();
         {
-            mainCamera.Bind();
+            mainCamera->Bind();
             shader_QuadRenderer->SetUniform("Position", _pos.x, _pos.y, _size.x, _size.y);
             shader_QuadRenderer->SetTextureUniform("DiffuseTexture", _image->g_Handle(), 1);
             Renderer::drawArray(DebugQuadVBO,  6 );
@@ -345,18 +312,21 @@ namespace OpenGL
 
     void Renderer2D::draw_Line(float x1, float y1, float x2, float y2)
     {// Render a Line in the Current Render color as floats
-        Line_Data.emplace_back(x1,y1,x2,y2);
+        Line_Data.emplace_back( x1, y1);
+        Line_Data.emplace_back( x2, y2);
     }
     void Renderer2D::draw_Line(Vec2 _p1, Vec2 _p2)
     {// Render a Line in the Current Render color as two Points
-        Line_Data.emplace_back(_p1.x, _p1.y, _p2.x, _p2.y);
+        Line_Data.emplace_back(_p1.x, _p1.y);
+        Line_Data.emplace_back(_p2.x, _p2.y);
     }
     void Renderer2D::draw_Line(Vec4 _line)
     { // Render a Line in the Current Render color as Vec4
-        Line_Data.emplace_back(_line.x, _line.y, _line.z, _line.w);
+        Line_Data.emplace_back(_line.x, _line.y);
+        Line_Data.emplace_back(_line.z, _line.w);
     }
 
-    std::vector<Vec4> Line_Data;
+    //std::vector<Vec4> Line_Data;
 
 
 
@@ -373,7 +343,7 @@ namespace OpenGL
             for (auto& S : Shaders)
             {
                 S->Bind();
-                {
+                {// Shader/Textures Material group
                     int TextureSlot{ 0 };
                     for (auto& T : Textures)
                     {// Binds all relavent Textures. Not needed in AZDO
@@ -397,6 +367,32 @@ namespace OpenGL
     }
 
 }//NS OpenGL
+
+
+
+std::vector<Vec2> make_Quad(Vec2 _center, Vec2 _sz)
+{
+    std::vector<Vec2> result;
+
+    result.push_back(Vec2((-1.0f * _sz.x) + _center.x, (-1.0f * _sz.y) + _center.y));
+    result.push_back(Vec2((1.0f * _sz.x) + _center.x, (-1.0f * _sz.y) + _center.y));
+    result.push_back(Vec2((-1.0f * _sz.x) + _center.x, (1.0f * _sz.y) + _center.y));
+    result.push_back(Vec2((1.0f * _sz.x) + _center.x, (1.0f * _sz.y) + _center.y));
+    result.push_back(Vec2((-1.0f * _sz.x) + _center.x, (1.0f * _sz.y) + _center.y));
+    result.push_back(Vec2((1.0f * _sz.x) + _center.x, (-1.0f * _sz.y) + _center.y));
+    return result;
+}
+
+std::vector<Vec2> make_Triangle(Vec2 _center, Vec2 _sz)
+{
+    std::vector<Vec2> result;
+
+    result.push_back(Vec2((-1.0f * _sz.x) + _center.x, (-1.0f * _sz.y) + _center.y));
+    result.push_back(Vec2((1.0f * _sz.x) + _center.x, (-1.0f * _sz.y) + _center.y));
+    result.push_back(Vec2((-1.0f * _sz.x) + _center.x, (1.0f * _sz.y) + _center.y));
+    return result;
+}
+
 
 
 
@@ -455,3 +451,7 @@ foreach( object )           //
 
 //  FrameBuffers.emplace_back(new FrameBufferObject(_width, _height, _datatype, _internal, _format));
 //  return FrameBuffers.size() - 1;
+        //  VBO_Test->Bind();
+        //  OpenGL::bind_VBO(LineVBO);
+        //    OpenGL::bind_VBO(VBO_Test->GL_Handle);
+        //    OpenGL::set_Attribute(2, "Position");

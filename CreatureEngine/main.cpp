@@ -4,6 +4,8 @@
 #include<cmath>
 #include<string>
 
+#include"Creature_Engine.h"
+
 
 /* 
 
@@ -16,6 +18,80 @@ IMGUI ISSUE:   Docking Branch:
 
 
 
+static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
+static int numProcessors;
+static HANDLE self;
+
+#include "TCHAR.h"
+#include "pdh.h"
+static PDH_HQUERY cpuQuery;
+static PDH_HCOUNTER cpuTotal;
+#pragma comment(lib, "Pdh.lib")
+void init_CPUmonitor() {
+    PdhOpenQuery(NULL, NULL, &cpuQuery);
+    // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
+    PdhAddEnglishCounter(cpuQuery, "\\Processor(_Total)\\% Processor Time", NULL, &cpuTotal);
+    PdhCollectQueryData(cpuQuery);
+}
+
+double getCurrentValueCPU() {
+    PDH_FMT_COUNTERVALUE counterVal;
+
+    PdhCollectQueryData(cpuQuery);
+    PdhGetFormattedCounterValue(cpuTotal, PDH_FMT_DOUBLE, NULL, &counterVal);
+    return counterVal.doubleValue;
+}
+//
+//void init_CPUmonitor() {
+//    SYSTEM_INFO sysInfo;
+//    FILETIME ftime, fsys, fuser;
+//
+//    GetSystemInfo(&sysInfo);
+//    numProcessors = sysInfo.dwNumberOfProcessors;
+//
+//    GetSystemTimeAsFileTime(&ftime);
+//    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
+//
+//    self = GetCurrentProcess();
+//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+//    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
+//    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+//}
+//double getCurrentValueCPU() {
+//    FILETIME ftime, fsys, fuser;
+//    ULARGE_INTEGER now, sys, user;
+//    double percent;
+//
+//    GetSystemTimeAsFileTime(&ftime);
+//    memcpy(&now, &ftime, sizeof(FILETIME));
+//
+//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+//    memcpy(&sys, &fsys, sizeof(FILETIME));
+//    memcpy(&user, &fuser, sizeof(FILETIME));
+//    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
+//        (user.QuadPart - lastUserCPU.QuadPart);
+//    percent /= (now.QuadPart - lastCPU.QuadPart);
+//    percent /= numProcessors;
+//    lastCPU = now;
+//    lastUserCPU = user;
+//    lastSysCPU = sys;
+//
+//    return percent * 100;
+//}
+//
+
+
+
+
+int branchless_min(int a, int b)
+{// Interesting take... terrible perf
+    return a * (a < b) + b * (b <= a);// (a * 1) _ (b * 0);;
+}
+int branchless_max(int a, int b)
+{ 
+    return a * (a > b) + b * (b >= a); 
+}
+
 // CMAKE Pluggin
 // https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
 
@@ -25,8 +101,6 @@ IMGUI ISSUE:   Docking Branch:
 //https://jamanetwork.com/journals/jama/fullarticle/2762130
 
 #define _PROFILE_MEMORY
-
-#include"Creature_Engine.h"
 // https://www.scmp.com/news/china/society/article/3075567/people-blood-type-may-be-more-vulnerable-coronavirus-china-study?utm_content=article&utm_medium=Social&utm_source=Facebook&fbclid=IwAR1VsuqHUzDgoU6-zaafrHJI89Qniyxbzppif6x_SvsC9LXHGjsfwo7tM6k#Echobox=1584436870
 
 using namespace Core;
@@ -34,9 +108,7 @@ using namespace Threading;
 
 #include<stack>
 #include<utility>
-#include"Core/ECS/ECS.h"
-#include"Core/ECS/TestComponents.h"
-#include"Core/Math/Easing.h"
+
 
 std::stack<std::string> CS;
 
@@ -45,7 +117,7 @@ bool TEST_PROFILE_WINDOW();
 
 
 /* This Camera Situation is all wrong, figure a way to fix this */
-Camera2D* WorldCamera{ nullptr };
+
 #define CAMERA_SPEED 4.0f
 #define ZOOM_SPEED 1.0
 
@@ -57,36 +129,36 @@ Listener KeyListener([](Event _msg)
 	{
 	case 37:
 	{// Left Key
-		WorldCamera->MoveX(-CAMERA_SPEED);
+        Application::getCamera().MoveX(-CAMERA_SPEED);
 	}
 	break;
 
 	case 38:
 	{// Up  Key
-		WorldCamera->MoveY(-CAMERA_SPEED);
+        Application::getCamera().MoveY(-CAMERA_SPEED);
 	}
 	break;
 
 	case 39:
 	{// Right  Key
-		WorldCamera->MoveX(CAMERA_SPEED);
+        Application::getCamera().MoveX(CAMERA_SPEED);
 	}
 	break;
 
 	case 40:
 	{// Down  Key
-		WorldCamera->MoveY(CAMERA_SPEED);
+        Application::getCamera().MoveY(CAMERA_SPEED);
 	}
     break;
 
 	case 107: 
 	{//- Key
-        WorldCamera->ZoomOut(ZOOM_SPEED);
+        Application::getCamera().ZoomOut(ZOOM_SPEED);
 	}break;
 
 	case 109:
 	{//+ Key
-        WorldCamera->ZoomIn(ZOOM_SPEED);
+        Application::getCamera().ZoomIn(ZOOM_SPEED);
 	}break;
 
 	}// End of Switch
@@ -97,11 +169,11 @@ Listener MouseWheel( [](Event _msg)
 
     if ((int16_t)SplitLParam((int)_msg.wParam).y > 0)
     {// Mouse Wheel UP
-        WorldCamera->ZoomInto(Mpos, ZOOM_SPEED);
+        Application::getCamera().ZoomInto(Mpos, ZOOM_SPEED);
     }
     else
     {// Mouse Wheel DOWN
-        WorldCamera->ZoomOutFrom(Mpos, ZOOM_SPEED);
+        Application::getCamera().ZoomOutFrom(Mpos, ZOOM_SPEED);
     }
 });
 
@@ -121,7 +193,7 @@ public:
     {
         /* Create all the Data we are going to fill the Buffers with */
         {
-            float Max = 10;
+            float Max = 0;
             for_loop(i, 1000 * 3)
             {
                 Vertices.push_back
@@ -234,6 +306,7 @@ class App
     //                                                USER VARIABLES
     //=================================================================================================================================================================
 
+    Renderer_test *Bucket_Test;
     OpenGL::Renderer2D *MainRenderer{ nullptr };
     OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
@@ -241,28 +314,52 @@ class App
     size_t  PreviousTime;
     uint32_t *Pixels;
 
+
+    Texture *test_Texture2;
+    Texture *test_Texture3;
+    Texture *White;
+    Texture *Black;
+
     OpenGL::Surface *testSurface{ nullptr };
 
     /* Initializes User Variables */
     virtual void OnCreate() override
-	{// Initialization
-        
+    {// Initialization
+
         // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Incomplete contains Errors " , " Memory Pool Class Complete ");
         // TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Incomplete  contains Errors ", " Springs Class Complete ");
         // TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Incomplete  contains Errors " , " Ring Buffer Class Complete ");
 
+        MEMORYSTATUSEX memInfo;
+        memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+        GlobalMemoryStatusEx(&memInfo);
+        DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+        DWORDLONG         totalPhysMem = memInfo.ullAvailPhys;
+        Print("Physical Memory:" << totalPhysMem);
         /// Likely add this to the Base Application class to relieve the user of this. Create a setup that only Initializes the desired shaders
         init_DefaultShaders();
 
 
         /* Load up the Listeners for the Various Input Events */
         {
-            RegisterListener(   WM_KEYDOWN, KeyListener);
+            RegisterListener(WM_KEYDOWN, KeyListener);
             RegisterListener(WM_MOUSEWHEEL, MouseWheel);
         }
 
-        /* Creates a Renderer for our Application */
-		MainRenderer = new OpenGL::Renderer2D({SCREEN_X, SCREEN_Y});
+        /* Creates Different Test Renderers for our Application to try out */
+        MainRenderer = new OpenGL::Renderer2D({ SCREEN_X, SCREEN_Y });
+        MainRenderer->Attach(new Camera2D(SCREEN_X, SCREEN_Y));
+        Application::setCamera(MainRenderer->g_Camera());
+
+        SCENE.Create();
+
+        testSurface = test_RenderPass->new_Surface({ SCREEN_X, SCREEN_Y });
+        test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, shader_BasicRenderer);// SCENE.RENDERER);
+        Bucket_Test = new Renderer_test(&MainRenderer->g_Camera());
+
+
+        std::vector<Vec2> Verts;
+        std::vector<Vec4> Cols;
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
@@ -282,30 +379,101 @@ class App
                         OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255)
                     );
                     MainRenderer->draw_Line(x * 8.0f, y * 8.0f, x * 8.0f + 7, y * 8.0f + 7);
+
+                    Verts.push_back({ x * 8.0f, y * 8.0f });
+                    Verts.push_back({ x * 8.0f + 100, y * 8.0f });
+                    Verts.push_back({ x * 8.0f, y * 8.0f + 100 });
+                    Verts.push_back({ x * 8.0f + 100, y * 8.0f + 100 });
+                    Verts.push_back({ x * 8.0f, y * 8.0f + 100 });
+                    Verts.push_back({ x * 8.0f + 100, y * 8.0f });
+                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
+                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
+                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
+                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
+                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
+                    Cols.push_back(OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255));
                 }
             }
         }
 
-        /* Set the Application window Camera and World Camera to the Renderer */
-        {
-            getWindow().s_Camera(&MainRenderer->g_Camera());
-            WorldCamera = &getCamera();
-        }
-        Application::setCamera(MainRenderer->g_Camera());
-        SCENE.Create();
-         
-        test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, shader_BasicRenderer);
-        test_RenderPass->attach(  WorldCamera);;//MainRenderer->g_Camera())&Application::getCamera());//
+        test_RenderPass->attach(&Application::getCamera());;//MainRenderer->g_Camera())&Application::getCamera());//
         test_RenderPass->attach(SCENE.Vertices_VAO);
-      
-        test_Texture = new Texture("../Test2.bmp");
-        //OpenGL::Surface *test2;
-        testSurface = test_RenderPass->new_Surface({ SCREEN_X, SCREEN_Y });
-        //testSurface->blit_Surface(test2, {1,1,100, 100}, {1,1,100,100});
 
-       // Pixels = new int[SCREEN_X * SCREEN_Y * sizeof(int)];
+        //   [  ] FIX THE GOD DAMN CAMERA ALREADY WILL YOU. 
+        //   [  ] MAKE SURE IT UPDATES PROPERLY, 
+        //   [  ] COVERS PROPER AREA, 
+        //   [  ] ATTACHES PROPER UNIFORMS 
+        //   [  ] FUCKING MAKE IT PROPER GOD DAMNIT
+
+        White = new Texture("../Resources/White.bmp");
+        Black = new Texture("../Resources/Black.bmp");
+        test_Texture = new Texture("../Test2.bmp");
+        test_Texture2 = new Texture("../Resources/Test.bmp");
+        test_Texture3 = new Texture("../Resources/Test2.bmp");
+        Texture *ttt = new Texture("../Resources/Texture.bmp");
+        Renderer_test::Material *MAT = new Renderer_test::Material(shader_BasicRenderer, test_Texture2);
+        Renderer_test::Material *MAT2 = new Renderer_test::Material(shader_BasicRenderer, ttt);
+
+        float sz = 1000, sy = 1000;
+        std::vector<Vec2> Quad = make_Quad({ 10, 10 }, { sz, sy });
+        std::vector<Vec2>UVcoord;
+        UVcoord.push_back({  (Quad[0].x / sz + 1) * 0.5f ,   (Quad[0].y / sy + 1) * 0.5f  });
+        UVcoord.push_back({  (Quad[1].x / sz + 1) * 0.5f ,   (Quad[1].y / sy + 1) * 0.5f  });
+        UVcoord.push_back({  (Quad[2].x / sz + 1) * 0.5f ,   (Quad[2].y / sy + 1) * 0.5f  });
+        UVcoord.push_back({  (Quad[3].x / sz + 1) * 0.5f ,   (Quad[3].y / sy + 1) * 0.5f  });
+        UVcoord.push_back({  (Quad[4].x / sz + 1) * 0.5f ,   (Quad[4].y / sy + 1) * 0.5f  });
+        UVcoord.push_back({  (Quad[5].x / sz + 1) * 0.5f ,   (Quad[5].y / sy + 1) * 0.5f  });
+      
+        std::vector<Vec4> C;
+        C.push_back({ RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f), });        C.push_back({ RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f), });        C.push_back({ RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f), });        C.push_back({ RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f), });        C.push_back({ RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f), });        C.push_back({ RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f),RANDOM(1.0f), });
+        std::vector<Vec2>UVcoord2;
+        for (auto& C : Verts)
+        {
+            UVcoord2.push_back({ 1 / C.x, 1 / C.y });
+        }
+
+
+        for_loop(i, 10)
+        {
+            Bucket_Test->Submit
+            (
+                new Renderer_test::Geometry(new VertexBufferObject<Vec2>(make_Quad({ RANDOM(1300), RANDOM(1300) }, { RANDOM(100), RANDOM(100) })), new VertexBufferObject<Vec4>(C), new VertexBufferObject<Vec2>(UVcoord)),
+                MAT
+            );
+        }
+
+
+
+        for_loop(i, 10)
+        {
+            Bucket_Test->Submit
+            (
+                new Renderer_test::Geometry(new VertexBufferObject<Vec2>(make_Quad({ RANDOM(3000), RANDOM(3000) }, { RANDOM(100), RANDOM(100) })), new VertexBufferObject<Vec4>(C), new VertexBufferObject<Vec2>(UVcoord)),
+                MAT2
+            );
+        }
+
+
+
+
+//  Bucket_Test->Submit
+//  (
+//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Quad), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
+//      MAT
+//  );
+// 
+//  Bucket_Test->Submit
+//  (
+//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Verts), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
+//      MAT
+//  );
+       /// IF DEBUG
+        OpenGL::enable_DebugOutput();
+
+        void init_CPUmonitor();
+
         DEBUG_CODE(CheckGLERROR());
-	}
+    }
 
     /* Renders User Defined Geometry */
     virtual void OnRender() override
@@ -313,25 +481,15 @@ class App
         SCENE.Render(); 
         MainRenderer->Render();
         test_RenderPass->Render();
-
         testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y  * 2});
-        Pixels = (uint32_t*)testSurface->read_Pixels({ 1,1,100, 100 });
-        shader_TextureRenderer->Bind();
-        {
-            OpenGL::bind_VAO(DebugQuadVAO);
-            shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
-            test_Texture->Bind(0);
-            OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
-        }
-        shader_TextureRenderer->Unbind();
-
+        Bucket_Test->Render();
         DEBUG_CODE(CheckGLERROR());
 	}
 
     /* Runs on Applications Frame Update */
 	virtual void OnUpdate() override
-	{// User Genrated Per Frame Update
-        SCENE.Update();
+	{// User Generated Per Frame Update
+        if(Update_Geometry) SCENE.Update();
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
@@ -341,60 +499,76 @@ class App
     virtual void OnEnd() override
     {// Exit of the Application and Clean up
         delete(MainRenderer);
+        delete(test_Texture);
     }
 
     /* ==========================================================================================
            GUI STUFF, POTENTIALLY MIGHT CHANGE THIS LATER
     /* ========================================================================================== */
-    /* Updates the GUI Data: NOTE: Incomplete */
-    virtual void OnUpdateGUI() override
-    {    }
+
+    int Update_Interval = 60;
+    int Update_counter = Update_Interval-1;
+    bool Update_Geometry = true;
 
     /* Renders our ImGui Data */
-    virtual void OnRenderGUI() override 
+    
+    virtual void OnRenderGUI() override
     {
 
-        static float Slide[3] = {-650,-400,-300 };
+        static float Slide[3] =  {-(SCREEN_X / 2), -(SCREEN_Y / 2), 0 };//{ 0.0f, 0.0f, 0.0f }; //
+
         Vec2 MainWindowSize = getWindow().g_Size();
         int Boarder = 10;
-
-        /* Start the Camera Widget */
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(.25f, 0.25f, 0.25f, 1.0f)); // Set window background to red
+        // Start the Camera Widget 
         ImGui::Begin("Camera");
         {
-            Vec2 Camera_Position = WorldCamera->g_Position();
-            /* Position Slider for the Camera */
+            /// IF i UPDATE CAMERA HERE THE SLIDERS CAN MOVE THE CAMERA, IF I UPDATE AFTER THIS THE SLIDERS TRANSLATE IT BACK INTO PLACE EVERY FRAME NULLIFYING WHAT IS BEING DONE TO IT.
+                   //Application::getCamera().Update();
+
+            // Position Slider for the Camera 
             {
-                ImGui::SliderFloat3("Position", Slide, -1000, 1000);
-                WorldCamera->Translate({ Slide[0], Slide[1] });
-                WorldCamera->set_Zoom(Slide[2]);
+            // ImGui::SliderFloat3("Position", Slide, -1000, 1000);
+            // Application::getCamera().Translate({ Slide[0], Slide[1] });
+            // Application::getCamera().s_Position({ Slide[0], Slide[1] });
+            // Application::getCamera().set_Zoom(Slide[2]);
             }
             ImGui::SetWindowPos(ImVec2(MainWindowSize.x - (MainWindowSize.x * 0.15f), 0), true);
             ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) ) });
 
-            /* Position Slider for the Camera */
+
+            static Vec2 Camera_Position = { -(SCREEN_X / 2), -(SCREEN_Y / 2)};//Application::getCamera().g_Position();
+
+            float
+                H = (float)Application::getCamera().Height(),
+                W = (float)Application::getCamera().Width();
+
+            float Scale = Application::getCamera().get_Zoom();
+
+            // Position Slider for the Camera 
             {
                 ImGui::InputFloat("X", &Camera_Position.x, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Y", &Camera_Position.y, 10.0f, 1.0f, "%.3f");
-                WorldCamera->s_Position(Camera_Position);
+                ImGui::InpitFloat("Scale", &A)
+                Application::getCamera().Translate(Camera_Position);
             }
         
-            /* Clickable Position Slider for the Camera */
+            // Clickable Position Slider for the Camera 
             {
-                float
-                    H = (float) WorldCamera->Height(), 
-                    W = (float) WorldCamera->Width();
                 ImGui::InputFloat("Width", &W, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Height", &H, 10.0f, 1.0f, "%.3f");
-                WorldCamera->Size = { W,H };
+                Application::getCamera().Resize( { W,H });
             }
-            /* Dragable Position Slider for the Camera */
-            {
-                int val = 0, val2 = 100;
-                ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
-                WorldCamera->s_Position(Camera_Position);
-            }
-        
-            /* Color Picker Widget for the Background Color */
+
+            // Dragable Position Slider for the Camera 
+            //{
+            //    int val = 0, val2 = 100;
+            //    ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
+            //    Application::getCamera().s_Position(Camera_Position);
+            //}
+
+
+            // Color Picker Widget for the Background Color 
             {
                 Vec4 c = getWindow().g_ClearColor();
                 float Col[3] = { c.x,c.y,c.z };
@@ -402,7 +576,7 @@ class App
                 glClearColor(Col[0], Col[1], Col[2], 1);
                 getWindow().s_ClearColor({ Col[0], Col[1], Col[2], 1 });
             }
-        
+
             static float Top_Time = 0;
             if (FrameTimes.back() > Top_Time)
             {
@@ -410,22 +584,45 @@ class App
             }
             ImGui::PlotLines("Frame Times", (float*)&FrameTimes.front(), FrameTimes.size(), 0, std::string("FPS:" + std::to_string((uint32_t)FrameTimes.back())).c_str(), 0, Top_Time, ImVec2(ImGui::GetWindowWidth(), 50));
         
+
+
+            static std::vector<float> memUsage;
+            static std::vector<double> CPUUsage;
+            if (++Update_counter % Update_Interval == 0)
+            {
+
+                MEMORYSTATUSEX memInfo;
+                memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+                GlobalMemoryStatusEx(&memInfo);
+
+                GlobalMemoryStatusEx(&memInfo);
+                memUsage.push_back(25000 - ((float)memInfo.ullAvailPhys / 1024 / 1024));
+                CPUUsage.push_back(getCurrentValueCPU());
+            }
+            ImGui::PlotLines("Memory Usage", (float*)&memUsage.front(), memUsage.size(), 0, std::string("Memory:" + std::to_string(25000 + (uint32_t)memUsage.back())).c_str(), 0, 2000, ImVec2(ImGui::GetWindowWidth(), 50));
+            ImGui::PlotLines("CPU Usage", (float*)&CPUUsage.front(), CPUUsage.size(), 0, std::string("CPU%:" + std::to_string((uint32_t)CPUUsage.back())).c_str(), 0, 100, ImVec2(ImGui::GetWindowWidth(), 50));
+        
+
+            ImGui::Checkbox("Update Geometry", &Update_Geometry);
         }
         ImGui::End();
 
-        /* Displays the FrameBuffers */
+        // Displays the FrameBuffers 
         ImGui::Begin("FrameBuffers");
         {
             
-            /* Displays the FrameBuffer */
+            // Displays the FrameBuffer 
             float WinSize = (float)(ImGui::GetWindowHeight() - (ImGui::GetWindowHeight() * 0.15));
             ImGui::Image((ImTextureID*)((size_t)SCENE.FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
             ImGui::Image((ImTextureID*)((size_t)SCENE.FBO->DepthTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
         
+
             ImGui::Image((ImTextureID*)((size_t)test_RenderPass->FBO->RenderTarget->g_Handle()), ImVec2(WinSize, WinSize));
             ImGui::SameLine();
+
+
             ImGui::Image((ImTextureID*)((size_t)testSurface->FBO->RenderTarget->g_Handle()) , ImVec2(WinSize, WinSize));
             ImGui::SameLine();
         
@@ -437,18 +634,49 @@ class App
             ImGui::SetWindowSize({ MainWindowSize.x, (MainWindowSize.y  * 0.2f)  - Boarder});
         }
         ImGui::End();
-        ImGui::Begin("Dummy");
+        ImGui::Begin("Textures");
+        {// Displays ALL the created Textures
+            
+            float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+            float WinSize = 200; 
+            ImGuiStyle& style = ImGui::GetStyle();
+            uint32_t n = 0;
+            for (auto& T : Texture::Texture_Resources)
+            {
+                // Displays the FrameBuffer  
+                ImGui::Image((ImTextureID*)((size_t)T->g_Handle()), ImVec2(WinSize, WinSize));
+                float last_button_x2 = ImGui::GetItemRectMax().x;
+                float next_button_x2 = last_button_x2 + style.ItemSpacing.x + WinSize; // Expected position if next button was on same line
+                if (n + 1 < Texture::Texture_Resources.size() && next_button_x2 < window_visible_x2)
+                {
+                    ImGui::SameLine();
+                }
+                ++n;
 
-        ImGui::ShowDemoWindow();
-        ImGui::SetWindowPos(ImVec2(0, 0), true); // 768 - ImGui::GetWindowHeight() - 40
-        ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - (MainWindowSize.y  * 0.2f) });
+            }
+
+            ImGui::ShowDemoWindow();
+            ImGui::SetWindowPos(ImVec2(0, 0), true); // 768 - ImGui::GetWindowHeight() - 40MainWindowSize.x * 0.15f
+            ImGui::SetWindowSize({ ImGui::GetWindowWidth(), MainWindowSize.y - (MainWindowSize.y  * 0.2f) });
+        }
         ImGui::End();
-
+        ImGui::PopStyleColor();
     } 
-
+    
 };
-
-
+//capture_previous_context(&GS_ContextRecord);
+//GS_ContextRecord.Rip = (ULONGLONG)_ReturnAddress();
+//GS_ContextRecord.Rsp = (ULONGLONG)_AddressOfReturnAddress() + 8;
+//GS_ExceptionRecord.ExceptionAddress = (PVOID)GS_ContextRecord.Rip;
+//GS_ContextRecord.Rcx = stack_cookie;
+//shader_TextureRenderer->Bind();
+//{
+//    OpenGL::bind_VAO(DebugQuadVAO);
+//    shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
+//    test_Texture->Bind(0);
+//    OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
+//}
+//shader_TextureRenderer->Unbind();
 
 
 
@@ -711,17 +939,6 @@ bool TEST_PROFILE_WINDOW()
 
 	return true;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,5 +1,5 @@
 #include"Physics.h"
-
+/* 
 _static Simulation *Simulation::Instance{ nullptr };
 
 // Set the default for the Static variables
@@ -118,3 +118,4 @@ void Simulation::AddtoQuadTree(Object_type *_object)
         AddtoQuadTree(C);
     }
 }
+*/

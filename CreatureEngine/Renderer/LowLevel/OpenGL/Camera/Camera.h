@@ -16,23 +16,28 @@ public:
 		Near{ 0.1f },
 		Far{ 1000.0f };
 
-	void PushProjectionMatrix();
-	void PushViewMatrix();
-	void PopProjectionMatrix();
-	void PopViewMatrix();
+	void push_ProjectionMatrix();
+	void push_ViewMatrix();
+	void pop_ProjectionMatrix();
+	void pop_ViewMatrix();
 
-	Mat4 ProjectionMatrix = Mat4(0);
+
 	Mat4 ViewMatrix = Mat4(0);
-	Mat4 Identity = Mat4(1.0f);
+	Mat4 ProjectionMatrix = Mat4(0);
+    Mat4 ViewProjectionMatrix = Mat4(0);
 
-	Mat4 GetViewMatrix();
+
+
+	Mat4 get_ViewMatrix();
+    Mat4 get_ProjectionMatrix();
+    Mat4 get_ViewProjectionMatrix();
+
+	void set_ViewMatrix(Mat4 mat);
+	void set_ProjectionMatrix(Mat4 mat);
 
 
     virtual Vec2 get_Center() { WARN_ME("get_Canter in Viewport Class is just returning junk: Be sure to correct this"); return Vec2(SCREEN_X, SCREEN_Y); }
     //=======================================================================================================================================================
-
-	void Set_ViewMatrix(Mat4 mat);
-	void Set_ProjectionMatrix(Mat4 mat);
 
 	static Viewport& get()               { return *ActiveCamera; }
 	static void      set(Viewport* _cam) { ActiveCamera = _cam; }
