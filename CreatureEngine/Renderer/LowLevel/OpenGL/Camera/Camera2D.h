@@ -34,6 +34,7 @@ public:
 	/* Gets the Height of the Cameras Dimensions*/
 	const int Height() { return static_cast<int>(Size.y); }
 
+    void set_Zoom(float _amount);
 	/*  Zooms in or out of a scene by manipulating the Projection Matrix */
 	void Zoom(float _amount);
 	/*  Zooms in on a scene by manipulating the Projection Matrix */
@@ -47,6 +48,16 @@ public:
     void ZoomOutFrom(Vec2 _pos, float _amount);
 
 
+                                          
+    float g_PositionX() { return Position.x;}
+    float g_PositionY() { return Position.y;}
+    Vec2  g_Position()  { return Position;  }
+    void  s_PositionX(float _val) { Position.x = _val; }
+    void  s_PositionY(float _val) { Position.y = _val; }
+    void  s_Position (Vec2 _val)  { Position   = _val; }
+
+
+	Vec2  Size{ 0,0 };
 
     virtual Vec2 get_Center() override { return { Width() * 0.5f, Height() * 0.5f }; }
 
@@ -55,9 +66,8 @@ public:
 private:
 
 	float ZoomLevel{ 1.0f };
-	Vec2  Size{ 0,0 };
-	Vec2  Position{ 0,0 };
 
+    Vec2  Position{ 0,0 };
 	Vec2  TargetSize{ 0,0 };
 	Vec2  TargetPosition{ 0,0 };
 

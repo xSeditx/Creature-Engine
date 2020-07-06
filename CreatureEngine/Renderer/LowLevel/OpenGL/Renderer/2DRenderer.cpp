@@ -49,6 +49,7 @@ namespace OpenGL
         ColorVBO     = OpenGL::new_VBO();
         TransformVBO = OpenGL::new_VBO();
         InstanceRenderer = new Shader(VinstanceRenderer, FinstanceRenderer);
+
         InstanceRenderer->Bind();
         {// Sets up the VAO for the Quads
             OpenGL::bind_VAO(QuadVAO);
@@ -63,6 +64,7 @@ namespace OpenGL
             OpenGL::set_Divisor(OpenGL::set_Attribute(4, "Color"), 1);
         }
         InstanceRenderer->Unbind();
+
         WARN_ME("Did you mean Unbind here?");
 
         OpenGL::bind_VBO(QuadVBO); 
@@ -80,13 +82,13 @@ namespace OpenGL
         LineRenderer->Bind();
         {
             OpenGL::bind_VAO(LineVAO);
-           // VBO_Test->Bind();
-            // OpenGL::bind_VBO(LineVBO);
+        //  VBO_Test->Bind();
+        //  OpenGL::bind_VBO(LineVBO);
             OpenGL::bind_VBO(VBO_Test->GL_Handle);
             OpenGL::set_Attribute(2, "Position");
         }
         LineRenderer->Unbind();
-       // OpenGL::set_LineWidth(6);
+     // OpenGL::set_LineWidth(6);
     }
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size, Vec4 _color)
     {
@@ -110,6 +112,7 @@ namespace OpenGL
 
         OpenGL::bind_VAO(QuadVAO);
         Update();
+
         InstanceRenderer->Bind();
         {
             mainCamera.Bind();
@@ -128,7 +131,6 @@ namespace OpenGL
         }
         LineRenderer->Unbind();
         DEBUG_CODE(CheckGLERROR());
-
     }
     void Renderer2D::Flush()
     {// Clears buffer, perhaps change this idk

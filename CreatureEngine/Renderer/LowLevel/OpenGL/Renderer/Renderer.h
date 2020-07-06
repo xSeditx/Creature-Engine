@@ -96,6 +96,11 @@ namespace OpenGL
             return result;
         }
 
-
+        /* Returns a single Normalzed Color value for OpenGL Accepts 0-255*/
+        static float normalize_Color(int _col)
+        {
+            constexpr float coef = 1.0f / 255.0f;
+            return _col * coef;;
+        }
 	};
 }

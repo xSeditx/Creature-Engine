@@ -88,3 +88,53 @@ ___
 * This will return the Subimage of the Texture that this sprite uses for when single Texture pages contain multiple Image Objects 
 * Graphics::Texture& get_Texture(uint32_t _subimage);
 * void sprite_get_uvs()  Description: This function returns an array with the UV coordinates and other data for the texture of the sprite sub - image on the texture page.The function returns an array with the following 8 elements:
+
+
+
+
+
+
+
+
+
+
+___
+## DISCUSSION AND NOTES
+___
+
+
+A batch breaks in other Game Engines like GMS2 for instance can occur when you update one of the engines draw settings. <br>  
+These include things such as changing color/alpha, font, blendmode, as well as others.                                  <br> 
+                                                                                                                        <br> 
+Here are some common buckets in GMS2: |                                                                                 <br> 
+-----------|----------------------------------------------------------------                                                                                                                         
+Primitives | draw_rectangle, draw_circle, draw_primitive_begin, etc.                                                     
+Surfaces| surface_set_target, surface_reset_target                                                                     
+Shaders | shader_set_target, shader_reset_target                                                                         
+Draw settings |  draw_set_font, draw_set_colour, etc.                                                                   
+GPU settings | gpu_set_blendmode, gpu_set_alphaenable, etc.                                                             
+                                                                                                                        <br> 
+                                                                                                                        <br> 
+This falls inline with the structure I am shooting for although having a bit of trouble realizing which is the following<br> 
+and is what Driver writers suggest one does inorder to get the lowest possible overhead from Modern OpenGL Drivers      <br>
+
+```
+foreach(render target)     // framebuffer
+foreach(pass)              // depth, blending, etc... states
+foreach(material)          // shaders
+foreach(material instance) // textures, normals, diffuse,
+foreach(vertex format)     // vertex buffers
+foreach(object)            //
+{
+    WriteUniformData(object);
+    glDrawElementBaseVertex
+    (
+        GL_TRIANGLES,
+        object->indexCount,
+        GL_UNSIGNED_SHORT,
+        object->indexDataOffset,
+        object->baseVertex
+    );
+}
+```
+

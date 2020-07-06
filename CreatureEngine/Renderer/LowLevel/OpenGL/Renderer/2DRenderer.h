@@ -5,24 +5,6 @@
 #include "../../../Layer.h"
 #include"GLBuffers.h"
 
-/*     foreach(render target)      // framebuffer
-        foreach(pass)              // depth, blending, etc... states
-
-        foreach(material)          // shaders
-        foreach(material instance) // textures, normals, diffuse,
-
-        foreach(vertex format)     // vertex buffers
-        foreach(object)            //
-    {
-        WriteUniformData(object);
-        glDrawElementBaseVertex(
-            GL_TRIANGLES,
-            object->indexCount,
-            GL_UNSIGNED_SHORT,
-            object->indexDataOffset,
-            object->baseVertex);
-    }
- */
 
 namespace OpenGL
 {
@@ -213,10 +195,10 @@ namespace OpenGL
         using Texture_ID_t = uint32_t;
 
 		enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
-        using SurfaceFragment = std::pair<Surface_t, Texture_ID_t>;
-        using Surface = std::vector<SurfaceFragment>;
-        using Material = std::pair<Surface, Shader_ID_t>;
-        using RenderPair = std::pair<Material, Mesh_ID_t>;
+        using SurfaceFragment = std::pair   < Surface_t, Texture_ID_t >;
+        using Surface         = std::vector < SurfaceFragment         >;
+        using Material        = std::pair   < Surface, Shader_ID_t    >;
+        using RenderPair      = std::pair   < Material, Mesh_ID_t     >;
 
         std::vector<Shader*> Shaders;
         std::vector<Graphics::Texture*> Textures;
@@ -318,7 +300,7 @@ namespace OpenGL
                  }";
 
 
-        std::string  Line_shader_f = 
+        std::string Line_shader_f = 
             "#version 330 core                              \n\
                  out vec4 FragColor;                        \n\
                  void main()                                \n\
@@ -391,6 +373,16 @@ extern Shader *QuadRenderer;
 extern GLuint DebugQuadVAO;
 extern GLuint DebugQuadVBO;
 extern Camera2D *debugCamera;
+
+
+
+
+
+
+
+
+
+
 
 
 
