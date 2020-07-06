@@ -592,8 +592,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE:
 	{
 		Vec2 sz = SplitLParam((int)lParam);
-        sz += 16;
-        sz += 39;
+        sz.x += 16; // Did not have the .x and .y here? Why?
+        sz.y += 39;
 		Application::get().Resize({ sz.x, sz.y });
 	}break;
 

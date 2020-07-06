@@ -209,7 +209,6 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Sprite.cpp" />
-    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Shader\Shader.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\UniformBuffer.cpp" />
     <ClCompile Include="SDKs\ImGUI\imgui.cpp" />
@@ -277,6 +276,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\Notes.txt" />
+    <Text Include="Functions.txt" />
     <Text Include="Trash.txt" />
   </ItemGroup>
   <ItemGroup>

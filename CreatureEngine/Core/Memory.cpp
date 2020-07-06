@@ -9,7 +9,7 @@
 
 
 bool ConsoleMessages{ true };
-bool TerminateOnError{ true };
+bool TerminateOnError{ false };
 
 static void AssertDisplayOn()  { ConsoleMessages = true; }
 static void AssertDisplayOff() { ConsoleMessages = false; }

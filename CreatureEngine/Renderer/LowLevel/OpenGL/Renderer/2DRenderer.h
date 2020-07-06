@@ -12,6 +12,7 @@
          // uint32_t new_RenderPass(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format);
           //std::vector<FrameBufferObject*> FrameBuffers;
 
+/// Material = Shader && Bunch of Uniforms
 
 namespace OpenGL
 {
@@ -47,11 +48,24 @@ namespace OpenGL
         VertexBufferObject<Vec4> *Colors;
     };
 
+    struct Pixel_Format
+    {
+        uint32_t format;
+        struct SDL_Palette {}*palette;
+        uint8_t BitsPerPixel{ 32 };// 8, 15, 16, 24, 32
+        uint8_t BytesPerPixel{ 4 };// the number of bytes required to hold a pixel value, eg: 1, 2, 3, 4; see Remarks for related data type
 
+        iVec4 Mask
+        { // Default 32bit Mask. 
+            BITS_32_25, BITS_24_17, BITS_16_9, BITS_8_1
+        };
 
-// int Width() { return Size.x; }
-// int Height() { return Size.y; }
-// iVec2 Size{ 0,0 };
+    private:
+        uint8_t  Red_Shift;
+        uint8_t  Green_Shift;
+        uint8_t  Blue_Shift;
+        uint8_t  Alpha_Shift;
+    };
 
     struct Surface
     {
@@ -59,43 +73,8 @@ namespace OpenGL
             :
             FBO(new FrameBufferObject(_size.x, _size.y))
         {}
-        uint32_t Flags;
 
-        struct Pixel_Format
-        {
-            uint32_t format;
-            struct SDL_Palette {}*palette;
-            uint8_t BitsPerPixel{ 32 };// 8, 15, 16, 24, 32
-            uint8_t BytesPerPixel{ 4 };// the number of bytes required to hold a pixel value, eg: 1, 2, 3, 4; see Remarks for related data type
 
-            iVec4 Mask{ // Default 32bit Mask. 
-                BITS_32_25, BITS_24_17, BITS_16_9, BITS_8_1
-            };
-
-        private:
-            uint8_t  Red_Shift;
-            uint8_t  Green_Shift;
-            uint8_t  Blue_Shift;
-            uint8_t  Alpha_Shift;
-        }Format;
-
-        int Pitch() { return RowSize; }
-
-        void *data() { return Pixels; }
-
-        void *User_Data;//an arbitrary pointer you can set(read - write)
-
-        bool Locked{ false };// For locking and Unlocking the FrameBuffer;
-        iVec4 Clip_Rect{ 0,0,0,0 };
-
-        int Reference_count{ 0 };/// Implement count everytime it is referenced
-
-        void Lock() { Locked = true; }
-        void Unlock() { Locked = false; }
-
-        uint32_t Width() { return FBO->Width(); }
-        uint32_t Height() { return FBO->Height(); }
-        uint32_t Handle() { return FBO->GL_Handle; }
 
         /* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
         int blit_Surface(Surface *_source, iVec4 _srcRect, iVec4 _destRect)
@@ -110,7 +89,6 @@ namespace OpenGL
                 GL_COLOR_BUFFER_BIT , GL_LINEAR
             );
         }
-
 
         /* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
         void blit_FrameBuffer(FrameBufferObject *_fbo, iVec4 _source, iVec4 _dest)
@@ -131,17 +109,52 @@ namespace OpenGL
         /* Read a Rectangle of pixels from the Surface */
         void *read_Pixels(iVec4 _sourceRect, uint32_t _format = GL_RGBA, uint32_t _type = GL_UNSIGNED_SHORT_4_4_4_4) //format = GL_ALPHA, GL_RGB, and GL_RGBA. type = GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1.
         {/// NOTE: Should I lock this first
-            void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
-            glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-            CheckGLERROR();
-            return results;
+
+            //void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
+            //glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
+            //glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
+            //glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            //CheckGLERROR();
+            return FBO->RenderTarget->get_Pixels();
         }
 
+        void attach_ColorBuffer(Texture *_texture)
+        {
+            FBO->Bind();
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture->g_Handle(), 0);
+            FBO->ValidateFrameBuffer();
+            FBO->Unbind();
+
+        }
+        void attach_DepthBuffer(Texture *_texture)
+        {
+            FBO->Bind();
+
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _texture->g_Handle(), 0);
+            FBO->ValidateFrameBuffer();
+            FBO->Unbind();
+        }
+
+        Pixel_Format Format;
+
+        void Lock() { Locked = true; }
+        void Unlock() { Locked = false; }
+
+        void *data() { return Pixels; }
+
+        uint32_t Pitch() { return RowSize; }
+        uint32_t Width() { return FBO->Width(); }
+        uint32_t Height() { return FBO->Height(); }
+        uint32_t Handle() { return FBO->GL_Handle; }
 
         FrameBufferObject *FBO{ nullptr };
+
+        void *User_Data;//an arbitrary pointer you can set(read - write)
     private:
+        iVec4 Clip_Rect{ 0,0,0,0 };
+        bool Locked{ false };// For locking and Unlocking the FrameBuffer;
+        uint32_t Flags;
+        int Reference_count{ 0 };/// Implement count everytime it is referenced
         int RowSize{ 0 };
         void *Pixels;
     };
@@ -198,7 +211,7 @@ namespace OpenGL
         :
         public Renderer
     {
-        Camera2D mainCamera;
+        Camera2D *mainCamera;
 
     public:
 
@@ -265,7 +278,7 @@ namespace OpenGL
         void Resize(Vec2 _size);
 
         /* Gets the Camera the Renderer uses */
-        Camera2D& g_Camera() { return mainCamera; }
+        Camera2D& g_Camera() { return *mainCamera; }
         void renderImage(Vec2 _pos, Vec2 _size, Texture *_image);
 
         /* Render a Line in the Current Render color as floats */
@@ -277,18 +290,24 @@ namespace OpenGL
         /* Render a Line in the Current Render color as Vec4*/
         void draw_Line(Vec4 _line);
 
-
+        void Attach(Camera2D *_camera)
+        {
+            mainCamera = _camera;
+        }
         /// ========= STATICS ========= May very well change where these are located as they are more of a Utility than a rendering option
 
         Shader* InstanceRenderer;
         Shader* LineRenderer;
 
     private:
-        uint32_t LineVAO{ 0 };
-        uint32_t LineVBO{ 0 };
-        VertexBufferObject<Vec4> *VBO_Test;
+    //    uint32_t LineVAO{ 0 };
+    //    uint32_t LineVBO{ 0 };
+    //    VertexBufferObject<Vec2> *VBO_Test;
 
-        std::vector<Vec4> Line_Data;
+        VertexArrayObject VAO_Lines;
+
+
+        std::vector<Vec2> Line_Data;
 
         uint32_t QuadVAO{ 0 };
         uint32_t InstanceCount{ 0 };
@@ -338,7 +357,7 @@ namespace OpenGL
 
         std::string VinstanceRenderer =
             "#version 330 core                         \n\
-                layout(location = 0) in vec2 aPos;     \n\
+                layout(location = 0) in vec2 WorldPosition;     \n\
                 layout(location = 1) in vec4 Position; \n\
                 layout(location = 2) in vec4 Color; \n\
                 uniform mat4 ProjectionMatrix;     \n\
@@ -349,7 +368,7 @@ namespace OpenGL
                     Col = Color; \n\
                     mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
                     mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
-                    gl_Position = ModelViewProjectionMatrix * vec4( (aPos.x * Position.z) + Position.x, (aPos.y * Position.w) +  Position.y, -1.0, 1.0); \n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( (WorldPosition.x * Position.z) + Position.x, (WorldPosition.y * Position.w) +  Position.y, -1.0, 1.0); \n\
                 }";
 
         std::string FinstanceRenderer =
@@ -395,18 +414,229 @@ namespace OpenGL
 
 
 
+struct Renderer_test
+{
+    Renderer_test(Camera2D *_cam)
+    {
+        TEST_ASSERT(_cam != nullptr, "Renderer_Test needs a Camera", "");
+
+        Camera = _cam;
+        FBO = new FrameBufferObject({ Camera->Width(), Camera->Height() });
+    }
+
+
+    void Attach(Camera2D *_cam)
+    {
+        Camera = _cam;
+    }
 
 
 
+    struct Material
+    {
+        Material(Shader *_program, Texture* _tex)
+            :
+            Program( _program)
+        {
+            Program = new Shader(V, F);
+            Diffuse = _tex;
+        }
+
+        void Bind()
+        {
+            Program->Bind();
+            Diffuse->Bind(0);
+            //Program->SetUniform("DiffuseTexture", (int));
+            Program->SetTextureUniform("DiffuseTexture", Diffuse->g_Handle(), 0);
+        }
+
+        Shader *Program;
+        Texture *Diffuse;
+
+        std::string V =
+            "#version 330 core                             \n\
+                layout(location = 0) in vec2 Position;     \n\
+                layout(location = 1) in vec4 VColor;       \n\
+                layout(location = 2) in vec2 TextureCoord; \n\
+                uniform mat4 ProjectionMatrix;             \n\
+                uniform mat4 ViewMatrix;                   \n\
+                out vec2 TexCoords;                        \n\
+                out vec4 Col;                              \n\
+                void main()                                \n\
+                {                                          \n\
+                    Col = VColor;                          \n\
+                    TexCoords = TextureCoord;              \n\
+                    mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+                    mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);  \n\
+                    gl_Position = ModelViewProjectionMatrix * vec4( Position.x, Position.y, -1.0, 1.0); \n\
+                }";
+
+        std::string F =
+            "#version 330 core                    \n\
+                uniform sampler2D DiffuseTexture; \n\
+                in  vec2 TexCoords;               \n\
+                in  vec4 Col;                     \n\
+                out vec4 FragColor;               \n\
+                void main()                       \n\
+                {                                 \n\
+                    FragColor = (Col ) + vec4(texture(DiffuseTexture, TexCoords.xy).xyz, .51);  \n\
+                }";
+
+    }; //vec4 color = texture(sampler2D(DiffuseTexture), IN.TCoord.xy);vec4(texture(DiffuseTexture, TexCoords.xy).xyz, 1.0);  );  vec4(TexCoords, 0.0,1.0
+    struct Geometry
+    {
+        Geometry(VertexBufferObject<Vec2> *_verts, VertexBufferObject<Vec4> *_colors, VertexBufferObject<Vec2> *_uv)
+        {
+            VAO = new VertexArrayObject();
+            Verts = _verts;
+            Colors = _colors;
+            UVs = _uv;
+            Length = _verts->size();
+         }
+        void Validate()
+        {
+            VAO->Attach(BufferTypes::VERTEX, Verts);
+            VAO->Attach(BufferTypes::COLOR, Colors);
+            VAO->Attach(BufferTypes::UVCOORD, UVs);
+        }
+        void Bind()
+        {
+            VAO->Bind();
+        }
+
+        // size_t Start; // Should store the Start and the Length and push all Geometry into a single buffer with the Renderer defining that
+        size_t Length;
+        VertexArrayObject *VAO;
+        VertexBufferObject<Vec2> *UVs;
+        VertexBufferObject<Vec2> *Verts;
+        VertexBufferObject<Vec4> *Colors;
+    };
+
+    Camera2D *Camera;
+    FrameBufferObject *FBO;
+
+    std::vector<Material *> Materials;
+    std::vector<Geometry *> Models;
+
+    void Submit(Geometry *_mesh, Material *_mat)
+    {
+        
+        uint8_t MatIndex{ 0 }, MeshIndex{ 0 };
+        bool found = false;
+        for_loop(i, Materials.size())
+        {
+            found = (Materials[i] == _mat);
+            if (found)
+            {
+                break;
+            }
+
+            ++MatIndex;
+        }
+        if (!found)
+        {// Create New Entry for the Model and the Material
+            Materials.push_back(_mat);
+            Models.push_back(_mesh);
+            Materials.back()->Bind();
+            Models.back()->Validate();
+           // Buckets.push_back(std::vector<uint32_t>());
+        }
+        else
+        {// It was found Append the Mesh data to the Material Bucket
+            Materials[MatIndex]->Bind();
+            _mesh->Validate();
+
+            Models[MatIndex]->Bind();
+            Models[MatIndex]->VAO->Append(_mesh->VAO);
+            Models[MatIndex]->Length += _mesh->Length;
+        }
+        
+    }
+    void Render()
+    {
+        int i=0, j=0;
+        FBO->Bind(); // Bind the FrameBuffer
+        {
+            FBO->Clear();
+
+            for_loop(i, Materials.size())
+            {
+                Materials[i]->Bind();
+                Models[i]->Bind();
+                Camera->Bind(); 
+                OpenGL::Renderer::drawArray((size_t)Models[i]->Length);
+            }
+
+        }
+        FBO->Unbind();
+    }
+};
 
 
-
+std::vector<Vec2> make_Quad(Vec2 _center, Vec2 _sz);
+std::vector<Vec2> make_Triangle(Vec2 _center, Vec2 _sz);
 
 /*=======================================================================================================================================================
 /*                                               TRASH
 /*=======================================================================================================================================================
+            //    Materials[i]->Bind();
+            //    for_loop(j, Buckets[i].size())
+            //    {
+            //        auto B = Buckets[i];
+            //        Models[B[j]]->Bind();
+            //        Camera->Bind();            // Bind ProjectionMatrix and ViewMatrix
+            //        OpenGL::Renderer::drawArray((uint32_t)Models[B[j]]->Length);
+            //    }
+            //}
+        //auto Found = std::find(Materials.begin(), Materials.end(), _mat);
+        //if (Found != Materials.end())
+        //{// Found it
+        //
+        //}
+        //else
+        //{// New
+        //
+        //}
+        //_mat->Bind();
+        //_mesh->Bind();
+        //Vec2 * MeshPTR = (Vec2*)_mesh->VAO->Buffers[0]->Map(GL_READ_BUFFER);
+        // Check to see if the Material is already here, if it is use that Index, if not add it
 
+        // Check to see if the Mesh is already here, if it is use that Index, if not add it
 
+        //Buckets[MatIndex].push_back((uint32_t)Models.size() - 1);
+//  Buckets
+//  (
+//      {
+//          MatIndex,//(uint32_t)Materials.size()- 1
+//          (uint32_t)Models.size() - 1
+//      }
+//  ); /
+//
+//
+//  Buckets.push_back
+//  (
+//      {
+//          MatIndex,//(uint32_t)Materials.size()- 1
+//          (uint32_t)Models.size()   - 1
+//      }
+//  ); // Adds the Index of the Material and the Index of the Model to the Renderer
+//
+
+//for (auto&B : Buckets)
+//{
+//    j = 0;
+//    for (auto &M : Buckets[i])
+//    {
+//        M[j]->Bind();
+//        ++j;
+//    }
+//    ++i;
+//    //Materials[B.first]->Bind();// Binds Shaders, Textures, Material Uniforms
+//   // Models[B.second]->Bind();  // Binds VAO, VBOs
+//    Camera->Bind();            // Bind ProjectionMatrix and ViewMatrix
+//    OpenGL::Renderer::drawArray((uint32_t)Models[B.second]->Length);
+//}
     //The mask​ parameter is a bitfield that specifies which kinds of buffers you want copied
     //Filter = GL_NEAREST or GL_LINEAR.
     //mask =    The bitwise OR of the flags indicating which buffers are to be copied.The allowed flags are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT and GL_STENCIL_BUFFER_BIT.
@@ -414,10 +644,6 @@ namespace OpenGL
     //uint32_t Green_Mask{ BIT_24 | BIT_23 | BIT_22 | BIT_21 | BIT_20 | BIT_19 | BIT_18 | BIT_17 };
     //uint32_t Blue_Mask{ BIT_16 | BIT_15 | BIT_14 | BIT_13 | BIT_12 | BIT_11 | BIT_10 | BIT_9 };
     //uint32_t Alpha_Mask{ BIT_8 | BIT_7 | BIT_6 | BIT_5 | BIT_4 | BIT_3 | BIT_2 | BIT_1 };
-
-
-
-
 //         std::string Vrenderer =
 //             "#version 330 core     \n\
 // layout(location = 0) in vec2 aPos; \n\
@@ -513,7 +739,6 @@ namespace OpenGL
             }";
 
 */
-
 /*
 
 
@@ -555,19 +780,9 @@ foreach(render target)         // framebuffer
 ///  {
 ///      std::vector<Program> Shader_Programs;
 ///  };
-
-
-
-
-
-
-
-
-
 /// 6/25/ 2020
 /// NEED TO CLEAN UP THE  2D RENDERER CLASS TO IMPLEMENT REAL SOLUTIONS
-
-    /*
+/*
     template<typename _Ty>
     struct Geometry
     {
@@ -733,4 +948,9 @@ foreach(render target)         // framebuffer
     };
 
 */
-
+//Models[MatIndex]->Validate();
+//Models[MatIndex]->VAO->Buffers[0]->Append(_mesh->VAO->Buffers[0]->BufferPtr, _mesh->VAO->Buffers[0]->Size);
+//Models[MatIndex]->VAO->Buffers[1]->Append(_mesh->VAO->Buffers[1]->BufferPtr, _mesh->VAO->Buffers[1]->Size);
+//Models[MatIndex]->VAO->Buffers[2]->Append(_mesh->VAO->Buffers[2]->BufferPtr, _mesh->VAO->Buffers[2]->Size);
+//Models[MatIndex]->VAO->Buffers[0]->Update
+//  Buckets[MatIndex].front()       //push_back((uint32_t)Models.size() - 1);

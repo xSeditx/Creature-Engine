@@ -47,7 +47,9 @@
 #include"Creatures/Physics/Springs.h"
 
 
-
+#include"../CreatureEngine/Core/ECS/ECS.h"
+#include"../CreatureEngine/Core/ECS/TestComponents.h"
+#include"../CreatureEngine/Core/Math/Easing.h"
 //
 //
 //class Mesh;

@@ -119,9 +119,6 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp">
       <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Transform.cpp">
-      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera.cpp">
       <Filter>Source Files\Graphics\Camera</Filter>
     </ClCompile>
@@ -385,6 +382,9 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="..\Resources\Notes.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Functions.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

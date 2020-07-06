@@ -60,6 +60,14 @@ namespace OpenGL
             DEBUG_CODE(OpenGL::unbind_VBO());
             DEBUG_CODE(CheckGLERROR());
         }
+        static void drawArrayLines(uint32_t _elementCount)
+        {
+            glDrawArrays(GL_LINES, 0, _elementCount);
+            DEBUG_CODE(OpenGL::unbind_VBO());
+            DEBUG_CODE(CheckGLERROR());
+        }
+
+
         static void drawArrayInstanced(uint32_t _indicesCount, uint32_t _instanceCount)
 		{
 			glDrawArraysInstanced(GL_TRIANGLES, 0, _indicesCount, _instanceCount);//mode/first/count/instancecount

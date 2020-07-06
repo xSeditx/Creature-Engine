@@ -97,6 +97,8 @@
 #define NOEXCEPT noexcept
 
 #define NO_VTABLE __declspec(novtable) 
+
+
 // ===================================================================================================================================================
 // TYPES FOR OUR ENGINE
 // ===================================================================================================================================================
@@ -130,7 +132,7 @@ typedef glm::uint64 Uint64;
 
 
 // Object Tags
-typedef uint32_t idTag;
+typedef uint32_t     idTag;
 typedef std::string  nameTag;
 
 // 64 bit pointer to resident GPU objects
@@ -146,7 +148,7 @@ using GPUptr = uint64_t;
 #define NO_COPY_OR_ASSIGNMENT(Class_X) Class_X(const Class_X&) = delete;\
 									   Class_X& operator=(const Class_X&) = delete
 
-#define  NO_COPY_ASSIGNMENT_OR_MOVE(Class_X)  NO_COPY_OR_ASSIGNMENT(Class_X);\
+#define NO_COPY_ASSIGNMENT_OR_MOVE(Class_X)  NO_COPY_OR_ASSIGNMENT(Class_X);\
                                                  Class_X(Class_X&&) = delete;\
 									             Class_X& operator=(Class_X&&) = delete;
                                          
@@ -413,7 +415,7 @@ if((ERR = OpenGL::glCheckError_(__FILE__, __LINE__)))\
 }\
 }
 
-
+/* I REALLY DON"T LIKE THIS BEING HERE, IT NEEDS A HOME OTHER THAN IN COMMON AS IT IS POLLUTING EVERYTHING */
 #include<atomic>
 template<typename _Ty>
 struct CREATURE_API Protected_Value
@@ -436,7 +438,6 @@ private:
 };
 
 
-#define Property (_getter, _setter) __declspec(property(get = _getter, put = _setter))
 #define Squared(x)   ((x) * (x))
 
 
@@ -585,6 +586,12 @@ T ExtractHigh16Bits(T _value)
 
 
 
+
+
+
+// THESE NEED A HOME DEFINED IN UTILITY.CPP But I want utilities to have roughly global scope
+std::string get_FileName(const  std::string& s);
+
 #endif// COMMON_H
 
 
@@ -624,14 +631,18 @@ T ExtractHigh16Bits(T _value)
 
 
 
+// OLD POSSIBLE TRASH
 
 
-
+//#define Property (_getter, _setter) __declspec(property(get = _getter, put = _setter))
 
 
 ///================================================================================================================
 ///================= SIMPLE ERROR HANDLING ========================================================================
 ///================================================================================================================
+
+
+
 /* Later on we will use this Error flag as a global that is checked as we will be turning off Exceptions. Should make
    my Error handling module before moving forward with this project
 
@@ -703,5 +714,55 @@ COMPILER:
 LINKER:
 / OUT:"C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\Bin\Soil\Debug\SOIL.lib" / MACHINE : X64 / NOLOGO
 
+
+*/
+
+
+
+
+/*
+===================================================================================================================================================================================================
+                                           BIT PATTERN MEANING
+===================================================================================================================================================================================================
+0xcccccccc
+  bit pattern it means that you are reading memory that is on the current thread stack that has not been initialised.
+
+0xC0000005 
+  Access Violation error.
+
+0xbaadf00d
+  The 0xbaadf00d bit pattern is the bit pattern for memory allocated with HeapAlloc(), LocalAlloc(LMEM_FIXED), GlobalAlloc(GMEM_FIXED).
+  If you are seeing the 0xbaadf00d bit pattern it means that you are reading memory that has been allocated by HeapAlloc() (or reallocated by HeapReAlloc()) and which has not been initialised by the caller of HeapAlloc(or HeapReAlloc, LocalAlloc, GlobalAlloc).
+
+0xdeadbeef
+  The 0xdeadbeef bit pattern is the bit pattern for memory deallocated using HeapFree(), LocalFree(), GlobalFree().
+  If you are seeing the 0xdeadbeef bit pattern it means that you are reading memory that has been deallocated by HeapFree(), LocalFree() or GlobalFree().
+
+0xabababab
+  The 0xabababab bit pattern is the bit pattern for the guard block after memory allocated using HeapAlloc(), LocalAlloc(LMEM_FIXED), GlobalAlloc(GMEM_FIXED) or CoTaskMemAlloc().
+  If you are seeing the 0xabababab bit pattern it means that you are reading memory after a memory block that has been allocated by HeapAlloc(), LocalAlloc(LMEM_FIXED), GlobalAlloc(GMEM_FIXED) or CoTaskMemAlloc().
+
+0xbdbdbdbd
+  The 0xbdbdbdbd bit pattern is the guard pattern around memory allocations allocated with the "aligned" allocators.
+  Memory allocated with malloc(), realloc(), new and new[] are provided with a guard block before and after the memory allocation.When this happens with an aligned memory allocator, the bit pattern used in the guard block is 0xbdbdbdbd.
+  If you are seeing the 0xbdbdbdbd bit pattern it means that you are reading memory before the start of a memory block created by an aligned allocation.
+
+0xfdfdfdfd
+  The 0xfdfdfdfd bit pattern is the guard pattern around memory allocations allocated with the "non-aligned" (default) allocators.
+  Memory allocated with malloc(), realloc(), new and new[] are provided with a guard block before and after the memory allocation.When this happens with an non - aligned(default) memory allocator, the bit pattern used in the guard block is 0xfdfdfdfd.
+  If you are seeing the 0xfdfdfdfd bit pattern it means that you are reading memory either before the start of a memory block or past the end of a memory block.In either case the memory has been allocated by malloc(), realloc() or new.
+
+0xcdcdcdcd
+  The 0xcdcdcdcd bit pattern indicates that this memory has been initialised by the memory allocator(malloc() or new) but has not been initialised by your software(object constructor or local code).
+  If you are seeing the 0xcdcdcdcd bit pattern it means that you are reading memory that has been allocated by malloc(), realloc() or new, but which has not been initialised.
+
+0xdddddddd
+  The 0xdddddddd bit pattern indicates that this memory is part of a deallocated memory allocation(free() or delete).
+  If you are seeing the 0xdddddddd bit pattern it means that you are reading memory that has been deallocated by free() or delete.
+
+0xfeeefeee
+  The 0xfeeefeee bit pattern indicates that this memory is part of a deallocated memory allocation(free() or delete).
+  If you are seeing the 0xfeeefeee bit pattern it means that you are reading memory that has been deallocated by free() or delete.
+===================================================================================================================================================================================================
 
 */
