@@ -18,24 +18,24 @@ public:
 	/* Binds the Camera and makes it Active on our OpenGL context */
 	void Bind();
 
-	/* Move Camera by _amount            */
+	/* Move Camera by _amount */
 	void Move(Vec2 _pos);
 	/* Move Camera on X axis by _amount  */
 	void MoveX(float _amount);
 	/* Move Camera on Y axis by _amount  */
 	void MoveY(float _amount);
 
-	/* Move Camera to Position _pos	  */
+	/* Move Camera to Position _pos */
 	void Translate(Vec2 pos);
-	/* Rotate the Camera by _angle		  */
+	/* Rotate the Camera by _angle */
 	void Rotate(float _angle);
 
 	/* Resizes the Projection Matrix to the given _size */
 	void Resize(Vec2 _size);
 
-	/* Gets the Width of the Cameras Dimensions*/
+	/* Gets the Width of the Cameras Dimensions */
 	const int Width() { return  static_cast<int>(Size.x); }
-	/* Gets the Height of the Cameras Dimensions*/
+	/* Gets the Height of the Cameras Dimensions */
 	const int Height() { return static_cast<int>(Size.y); }
 
 
@@ -44,7 +44,6 @@ public:
         ProjectionMatrix = glm::ortho(_left, _right, _bottom, _top, Near, Far);
         ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
     }
-
 
 
     Vec2  g_Position()            { return Position;   }
@@ -58,7 +57,6 @@ public:
 
 
     virtual Vec2 get_Center() override { return { Width() * 0.5f, Height() * 0.5f }; }
-
 
 
 	/*  Zooms in or out of a scene by manipulating the Projection Matrix */
@@ -80,7 +78,7 @@ public:
 private:
 	Vec2  Size{ 0,0 };
 
-	float ZoomLevel{ 1.0f };
+	float ZoomLevel{ .0000010f };
 
     Vec2  Position{ 0,0 };
 	float Rotation{ 0 };
@@ -123,4 +121,32 @@ private:
 
 
 
+
+
+
+
+// glViewport(-(_size.x * 0.5f), -(_size.y * 0.5f), _size.x * 0.5f, _size.y * 0.5f);
+//  Size *= Aspect;
+//  OpenGL::set_Viewport(0, 0, (GLsizei)Size.x, (GLsizei)Size.y);
+//  Zoom(Aspect * 100);
+//	ViewMatrix = Mat4(1.0f);
+//	Translate(Position);
+//	ViewMatrix = glm::rotate(ViewMatrix, glm::radians(Rotation), Vec3(0, 0, 1.0f));
+//ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
+//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(Size.x * 0.5f, Size.y * 0.5f, 0));
+//ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
+//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(Size.x * 0.5f), -(Size.y * 0.5f), 0));
+// ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
+//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(Size.x * 0.5f, Size.y * 0.5f,0));
+// ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
+//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(Size.x * 0.5f), -(Size.y * 0.5f), 0));
+// ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
+// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(_pos.x, _pos.y, 0));
+// ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
+// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(_pos.x), -(_pos.y), 0));
+
+// ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
+// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(_pos.x, _pos.y, 0));
+// ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
+// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(_pos.x), -(_pos.y), 0));
 

@@ -564,7 +564,7 @@ struct Renderer_test
                 Materials[i]->Bind();
                 Models[i]->Bind();
                 Camera->Bind(); 
-                OpenGL::Renderer::drawArray((size_t)Models[i]->Length);
+                OpenGL::Renderer::drawArray((uint32_t)Models[i]->Length);
             }
 
         }

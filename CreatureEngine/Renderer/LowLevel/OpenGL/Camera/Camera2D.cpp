@@ -13,6 +13,7 @@ Camera2D::Camera2D(float _left, float _right, float _top, float _bottom, float _
 			_bottom - _top
 		})
 {
+    ZoomLevel = 1.0f;
 	Near = _near;
 	Far = _far;
 
@@ -41,10 +42,6 @@ Camera2D::Camera2D(Vec2 _size)
 	Camera2D(0,  _size.x, 0, _size.y)
 {}
 
-
-
-
-
 void Camera2D::Move(Vec2 _amount)
 {// Move Camera by _amount
 	Position += _amount;
@@ -72,7 +69,6 @@ void Camera2D::Translate(Vec2 _pos)
 }
 
 
-
 void Camera2D::Bind()
 {// Binds our Camera to OpenGL context and Sets Uniforms
     Shader& Current = Shader::get();
@@ -83,32 +79,38 @@ void Camera2D::Bind()
 void Camera2D::Update()
 {// Updates the interpolation of the Camera
     Mat4 Transform =
+         
         glm::translate(Mat4(1.0f), Vec3(Position.x, Position.y, -1.0f)) *
         glm::rotate(Mat4(1.0f), Rotation, Vec3(0, 0, 1.0f));
+
     ViewMatrix = glm::inverse(Transform);
     ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-
-//	ViewMatrix = Mat4(1.0f);
-//	Translate(Position);
-//	ViewMatrix = glm::rotate(ViewMatrix, glm::radians(Rotation), Vec3(0, 0, 1.0f));
 }
 
 void Camera2D::Resize(Vec2 _size)
 {
-    AspectRatio = _size.x / _size.y; // _size.y / _size.x;
-    set_ProjectionMatrix(-AspectRatio * ZoomLevel, AspectRatio * ZoomLevel, -ZoomLevel, ZoomLevel);
-
-  //  Size *= Aspect;
-  //  OpenGL::set_Viewport(0, 0, (GLsizei)Size.x, (GLsizei)Size.y);
-  //  Zoom(Aspect * 100);
+    AspectRatio = _size.x / _size.y; 
+    ZoomLevel = (ZoomLevel > 0.1f) ? ZoomLevel : 0.1f;
+    float Level = 1.0f / ZoomLevel;
+    float HalfH = _size.y * 0.5f;
+    Size = _size;
+    set_ProjectionMatrix
+    (
+        (-AspectRatio * Level) * HalfH,
+        ( AspectRatio * Level) * HalfH,
+        -Level * HalfH,
+         Level * HalfH
+    );
+    glViewport(0,0, _size.x , _size.y );
 }
+
 
 void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
     TODO("Make a Zoom In To Function that Zooms to an XY location regardless of specifically where the cameras Center is at that moment");
     REFACTOR("I believe it is fixed although it appears ever so slightly off on the Y axis. Perhaps I need to adjust for aspect ratio or something idk");
     ZoomLevel += (_amount / 100);
-
+    __debugbreak();
     if (ZoomLevel < 0)
     {// Prevent Projection Matrix from Inverting
         ZoomLevel = 0;  
@@ -117,12 +119,9 @@ void Camera2D::Zoom(float _amount)
 }
 void Camera2D::ZoomIn(float _amount) {  Zoom(-_amount);  }
 void Camera2D::ZoomOut(float _amount){  Zoom(_amount); }
-
-
-
-/*  Zooms in or out of a scene by manipulating the Projection Matrix */
 void Camera2D::ZoomInto(Vec2 _pos, float _amount)
-{
+{//  Zooms in or out of a scene by manipulating the Projection Matrix 
+
     ZoomLevel += (-(_amount) / 100);
     if (ZoomLevel < 0)
     {// Prevent Projection Matrix from Inverting
@@ -130,11 +129,9 @@ void Camera2D::ZoomInto(Vec2 _pos, float _amount)
         return;
     }
 }
-
-
-/*  Zooms in or out of a scene by manipulating the Projection Matrix */
 void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
-{
+{//  Zooms in or out of a scene by manipulating the Projection Matrix 
+
     ZoomLevel += ((_amount) / 100);
     if (ZoomLevel < 0)
     {// Prevent Projection Matrix from Inverting
@@ -143,23 +140,6 @@ void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
     }
 }
 
-//ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
-//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(Size.x * 0.5f, Size.y * 0.5f, 0));
-//ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
-//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(Size.x * 0.5f), -(Size.y * 0.5f), 0));
-// ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
-//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(Size.x * 0.5f, Size.y * 0.5f,0));
-// ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
-//ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(Size.x * 0.5f), -(Size.y * 0.5f), 0));
-// ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
-// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(_pos.x, _pos.y, 0));
-// ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
-// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(_pos.x), -(_pos.y), 0));
-
-// ProjectionMatrix = glm::ortho(0.0f, Size.x, Size.y, 0.0f, Near, Far);
-// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(_pos.x, _pos.y, 0));
-// ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
-// ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(_pos.x), -(_pos.y), 0));
 
 
 
@@ -172,9 +152,6 @@ void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
 
 Transformations:
 https://www.opengl.org/archives/resources/faq/technical/transformations.htm
-
-
-
 
 
 */

@@ -17,7 +17,7 @@ Attribute::Attribute(void *_data, uint32_t _count, uint32_t _stride)
     Bind();
     {
       //  glBufferStorage(GL_ARRAY_BUFFER, Size, _data, GL_DYNAMIC_STORAGE_BIT);
-        OpenGL::set_BufferData(Size, _data);
+        OpenGL::set_BufferData((uint32_t)Size, _data);
     }
     Unbind();
 }
@@ -114,7 +114,7 @@ void Attribute::Append(void * _data, size_t _sz)
     BufferPtr = newBuffer;
 
     Size = newSize;
-    ElementCount = Size / Stride;
+    ElementCount = (uint32_t)Size / Stride;
 
     Update(newBuffer, newSize);
 }

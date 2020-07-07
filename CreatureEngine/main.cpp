@@ -153,12 +153,12 @@ Listener KeyListener([](Event _msg)
 
 	case 107: 
 	{//- Key
-        Application::getCamera().ZoomOut(ZOOM_SPEED);
+   ///     Application::getCamera().ZoomOut(ZOOM_SPEED);
 	}break;
 
 	case 109:
 	{//+ Key
-        Application::getCamera().ZoomIn(ZOOM_SPEED);
+  ///      Application::getCamera().ZoomIn(ZOOM_SPEED);
 	}break;
 
 	}// End of Switch
@@ -345,10 +345,19 @@ class App
             RegisterListener(WM_KEYDOWN, KeyListener);
             RegisterListener(WM_MOUSEWHEEL, MouseWheel);
         }
-
+       
         /* Creates Different Test Renderers for our Application to try out */
         MainRenderer = new OpenGL::Renderer2D({ SCREEN_X, SCREEN_Y });
-        MainRenderer->Attach(new Camera2D(SCREEN_X, SCREEN_Y));
+        MainRenderer->Attach
+        (
+            new Camera2D
+            (
+                Application::getWindow().Width(),
+                Application::getWindow().Height()
+            )
+        );
+
+
         Application::setCamera(MainRenderer->g_Camera());
 
         SCENE.Create();
@@ -360,6 +369,8 @@ class App
 
         std::vector<Vec2> Verts;
         std::vector<Vec4> Cols;
+
+
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
@@ -467,6 +478,7 @@ class App
 //      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Verts), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
 //      MAT
 //  );
+
        /// IF DEBUG
         OpenGL::enable_DebugOutput();
 
@@ -478,8 +490,8 @@ class App
     /* Renders User Defined Geometry */
     virtual void OnRender() override
     {
-        SCENE.Render(); 
         MainRenderer->Render();
+        SCENE.Render(); 
         test_RenderPass->Render();
         testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y  * 2});
         Bucket_Test->Render();
@@ -537,20 +549,23 @@ class App
             ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) ) });
 
 
-            static Vec2 Camera_Position = { -(SCREEN_X / 2), -(SCREEN_Y / 2)};//Application::getCamera().g_Position();
+            static Vec2 Camera_Position = { 0,0 };// { -(SCREEN_X / 2), -(SCREEN_Y / 2)};//Application::getCamera().g_Position();
 
             float
                 H = (float)Application::getCamera().Height(),
                 W = (float)Application::getCamera().Width();
 
-            float Scale = Application::getCamera().get_Zoom();
-
+//            float Scale = Application::getCamera().get_Zoom();
+            float Z = (float)Application::getCamera().g_Zoom();
             // Position Slider for the Camera 
             {
                 ImGui::InputFloat("X", &Camera_Position.x, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Y", &Camera_Position.y, 10.0f, 1.0f, "%.3f");
-                ImGui::InpitFloat("Scale", &A)
+                ImGui::InputFloat("Zoom", &Z, .1f, 1.0f, "%.3f");
+
+          //      ImGui::InpitFloat("Scale", &A)
                 Application::getCamera().Translate(Camera_Position);
+                Application::getCamera().s_Zoom(Z);
             }
         
             // Clickable Position Slider for the Camera 
