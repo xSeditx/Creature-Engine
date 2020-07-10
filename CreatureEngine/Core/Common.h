@@ -587,12 +587,29 @@ T ExtractHigh16Bits(T _value)
 
 
 
+#define MIN(v1, v2)   ( ((v1) < (v2)) ? (v1) : (v2) )
+#define MAX(v1, v2)   ( ((v1) > (v2)) ? (v1) : (v2) )
+#define CLAMP(_x1, _val)  (fmod((_x1), (_val)))
 
+// _x1 = 
 
 // THESE NEED A HOME DEFINED IN UTILITY.CPP But I want utilities to have roughly global scope
 std::string get_FileName(const  std::string& s);
 
+
 #endif// COMMON_H
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

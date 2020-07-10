@@ -27,6 +27,7 @@ public:
 
 	/* Move Camera to Position _pos */
 	void Translate(Vec2 pos);
+
 	/* Rotate the Camera by _angle */
 	void Rotate(float _angle);
 
@@ -45,7 +46,6 @@ public:
         ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
     }
 
-
     Vec2  g_Position()            { return Position;   }
     void  s_Position (Vec2 _val)  { Position   = _val; }
 
@@ -53,6 +53,9 @@ public:
     float g_PositionY() { return Position.y;}
     void  s_PositionX(float _val) { Position.x = _val; }
     void  s_PositionY(float _val) { Position.y = _val; }
+
+    void  s_Rotation(float _rotation){  Rotation = (float)CLAMP(_rotation, 360);    }
+    float g_Rotation() { return  Rotation; }
 
 
 

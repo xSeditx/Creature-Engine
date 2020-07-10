@@ -110,12 +110,12 @@ void Camera2D::Zoom(float _amount)
     TODO("Make a Zoom In To Function that Zooms to an XY location regardless of specifically where the cameras Center is at that moment");
     REFACTOR("I believe it is fixed although it appears ever so slightly off on the Y axis. Perhaps I need to adjust for aspect ratio or something idk");
     ZoomLevel += (_amount / 100);
-    __debugbreak();
-    if (ZoomLevel < 0)
-    {// Prevent Projection Matrix from Inverting
-        ZoomLevel = 0;  
-        return;
-    }
+// __debugbreak();
+// if (ZoomLevel < 0)
+// {// Prevent Projection Matrix from Inverting
+//     ZoomLevel = 0;  
+//     return;
+// }
 }
 void Camera2D::ZoomIn(float _amount) {  Zoom(-_amount);  }
 void Camera2D::ZoomOut(float _amount){  Zoom(_amount); }

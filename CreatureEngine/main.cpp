@@ -352,8 +352,8 @@ class App
         (
             new Camera2D
             (
-                Application::getWindow().Width(),
-                Application::getWindow().Height()
+                (float)Application::getWindow().Width(),
+                (float)Application::getWindow().Height()
             )
         );
 
@@ -518,9 +518,17 @@ class App
            GUI STUFF, POTENTIALLY MIGHT CHANGE THIS LATER
     /* ========================================================================================== */
 
-    int Update_Interval = 60;
-    int Update_counter = Update_Interval-1;
-    bool Update_Geometry = true;
+    int Update_Interval{ 60 };
+    int Update_counter{ Update_Interval - 1 };
+    bool Update_Geometry{ true };
+    float Rot{ 0 };
+    Vec2 Camera_Position { 0,0 };// { -(SCREEN_X / 2), -(SCREEN_Y / 2)};//Application::getCamera().g_Position();
+
+
+    float Top_Time{ 0 };
+
+    std::vector<float> memUsage;
+    std::vector<double> CPUUsage;
 
     /* Renders our ImGui Data */
     
@@ -535,52 +543,47 @@ class App
         // Start the Camera Widget 
         ImGui::Begin("Camera");
         {
-            /// IF i UPDATE CAMERA HERE THE SLIDERS CAN MOVE THE CAMERA, IF I UPDATE AFTER THIS THE SLIDERS TRANSLATE IT BACK INTO PLACE EVERY FRAME NULLIFYING WHAT IS BEING DONE TO IT.
-                   //Application::getCamera().Update();
 
-            // Position Slider for the Camera 
-            {
-            // ImGui::SliderFloat3("Position", Slide, -1000, 1000);
-            // Application::getCamera().Translate({ Slide[0], Slide[1] });
-            // Application::getCamera().s_Position({ Slide[0], Slide[1] });
-            // Application::getCamera().set_Zoom(Slide[2]);
-            }
+
             ImGui::SetWindowPos(ImVec2(MainWindowSize.x - (MainWindowSize.x * 0.15f), 0), true);
             ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) ) });
 
-
-            static Vec2 Camera_Position = { 0,0 };// { -(SCREEN_X / 2), -(SCREEN_Y / 2)};//Application::getCamera().g_Position();
 
             float
                 H = (float)Application::getCamera().Height(),
                 W = (float)Application::getCamera().Width();
 
-//            float Scale = Application::getCamera().get_Zoom();
             float Z = (float)Application::getCamera().g_Zoom();
+
+
             // Position Slider for the Camera 
             {
                 ImGui::InputFloat("X", &Camera_Position.x, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Y", &Camera_Position.y, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Zoom", &Z, .1f, 1.0f, "%.3f");
+            }
 
-          //      ImGui::InpitFloat("Scale", &A)
+
+            // Rotation Slider for Camera
+            {
                 Application::getCamera().Translate(Camera_Position);
                 Application::getCamera().s_Zoom(Z);
             }
-        
+
+
+            // Set the Rotation of the Default Framebuffer
+            {
+                ImGui::InputFloat("Rotation", &Rot, 1.0f, 1.0f, "%.3f");
+                Application::getCamera().s_Rotation((float)(RADIANS(Rot)));
+            }
+            
+
             // Clickable Position Slider for the Camera 
             {
                 ImGui::InputFloat("Width", &W, 10.0f, 1.0f, "%.3f");
                 ImGui::InputFloat("Height", &H, 10.0f, 1.0f, "%.3f");
                 Application::getCamera().Resize( { W,H });
             }
-
-            // Dragable Position Slider for the Camera 
-            //{
-            //    int val = 0, val2 = 100;
-            //    ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
-            //    Application::getCamera().s_Position(Camera_Position);
-            //}
 
 
             // Color Picker Widget for the Background Color 
@@ -592,35 +595,38 @@ class App
                 getWindow().s_ClearColor({ Col[0], Col[1], Col[2], 1 });
             }
 
-            static float Top_Time = 0;
-            if (FrameTimes.back() > Top_Time)
+
+            // FPS Times
             {
-                Top_Time = FrameTimes.back();
+                if (FrameTimes.back() > Top_Time)
+                {
+                    Top_Time = FrameTimes.back();
+                }
+                ImGui::PlotLines("Frame Times", (float*)&FrameTimes.front(), FrameTimes.size(), 0, std::string("FPS:" + std::to_string((uint32_t)FrameTimes.back())).c_str(), 0, Top_Time, ImVec2(ImGui::GetWindowWidth(), 50));
             }
-            ImGui::PlotLines("Frame Times", (float*)&FrameTimes.front(), FrameTimes.size(), 0, std::string("FPS:" + std::to_string((uint32_t)FrameTimes.back())).c_str(), 0, Top_Time, ImVec2(ImGui::GetWindowWidth(), 50));
-        
 
-
-            static std::vector<float> memUsage;
-            static std::vector<double> CPUUsage;
-            if (++Update_counter % Update_Interval == 0)
+            // Gets the Memory and the CPU Usage 
             {
+                if (++Update_counter % Update_Interval == 0)
+                {
 
-                MEMORYSTATUSEX memInfo;
-                memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-                GlobalMemoryStatusEx(&memInfo);
+                    MEMORYSTATUSEX memInfo;
+                    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+                    GlobalMemoryStatusEx(&memInfo);
 
-                GlobalMemoryStatusEx(&memInfo);
-                memUsage.push_back(25000 - ((float)memInfo.ullAvailPhys / 1024 / 1024));
-                CPUUsage.push_back(getCurrentValueCPU());
+                    GlobalMemoryStatusEx(&memInfo);
+                    memUsage.push_back(25000 - ((float)memInfo.ullAvailPhys / 1024 / 1024));
+                    CPUUsage.push_back(getCurrentValueCPU());
+                }
+                ImGui::PlotLines("Memory Usage", (float*)&memUsage.front(), memUsage.size(), 0, std::string("Memory:" + std::to_string(25000 + (uint32_t)memUsage.back())).c_str(), 0, 2000, ImVec2(ImGui::GetWindowWidth(), 50));
+                ImGui::PlotLines("CPU Usage", (float*)&CPUUsage.front(), CPUUsage.size(), 0, std::string("CPU%:" + std::to_string((uint32_t)CPUUsage.back())).c_str(), 0, 100, ImVec2(ImGui::GetWindowWidth(), 50));
             }
-            ImGui::PlotLines("Memory Usage", (float*)&memUsage.front(), memUsage.size(), 0, std::string("Memory:" + std::to_string(25000 + (uint32_t)memUsage.back())).c_str(), 0, 2000, ImVec2(ImGui::GetWindowWidth(), 50));
-            ImGui::PlotLines("CPU Usage", (float*)&CPUUsage.front(), CPUUsage.size(), 0, std::string("CPU%:" + std::to_string((uint32_t)CPUUsage.back())).c_str(), 0, 100, ImVec2(ImGui::GetWindowWidth(), 50));
-        
 
             ImGui::Checkbox("Update Geometry", &Update_Geometry);
         }
         ImGui::End();
+
+
 
         // Displays the FrameBuffers 
         ImGui::Begin("FrameBuffers");
@@ -649,6 +655,9 @@ class App
             ImGui::SetWindowSize({ MainWindowSize.x, (MainWindowSize.y  * 0.2f)  - Boarder});
         }
         ImGui::End();
+
+
+
         ImGui::Begin("Textures");
         {// Displays ALL the created Textures
             
@@ -679,21 +688,6 @@ class App
     } 
     
 };
-//capture_previous_context(&GS_ContextRecord);
-//GS_ContextRecord.Rip = (ULONGLONG)_ReturnAddress();
-//GS_ContextRecord.Rsp = (ULONGLONG)_AddressOfReturnAddress() + 8;
-//GS_ExceptionRecord.ExceptionAddress = (PVOID)GS_ContextRecord.Rip;
-//GS_ContextRecord.Rcx = stack_cookie;
-//shader_TextureRenderer->Bind();
-//{
-//    OpenGL::bind_VAO(DebugQuadVAO);
-//    shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
-//    test_Texture->Bind(0);
-//    OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
-//}
-//shader_TextureRenderer->Unbind();
-
-
 
 
 int main()
@@ -1098,6 +1092,24 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
 /
 
 
+//capture_previous_context(&GS_ContextRecord);
+//GS_ContextRecord.Rip = (ULONGLONG)_ReturnAddress();
+//GS_ContextRecord.Rsp = (ULONGLONG)_AddressOfReturnAddress() + 8;
+//GS_ExceptionRecord.ExceptionAddress = (PVOID)GS_ContextRecord.Rip;
+//GS_ContextRecord.Rcx = stack_cookie;
+//shader_TextureRenderer->Bind();
+//{
+//    OpenGL::bind_VAO(DebugQuadVAO);
+//    shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
+//    test_Texture->Bind(0);
+//    OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
+//}
+//shader_TextureRenderer->Unbind();
+
+
+
+
+
         Organ *Test1[100];
 
         for (int i = 0; i < 100; ++i)
@@ -1342,3 +1354,22 @@ static const char* fmt_table_float[3][4] =
 //    return results;
 //}
 //
+
+
+// ImGui::InpitFloat("Scale", &A)     
+// ImGui::InpitFloat("Scale", &A)
+// Dragable Position Slider for the Camera 
+// {
+//    int val = 0, val2 = 100;
+//    ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
+//    Application::getCamera().s_Position(Camera_Position);
+//}
+/// IF i UPDATE CAMERA HERE THE SLIDERS CAN MOVE THE CAMERA, IF I UPDATE AFTER THIS THE SLIDERS TRANSLATE IT BACK INTO PLACE EVERY FRAME NULLIFYING WHAT IS BEING DONE TO IT.
+// Position Slider for the Camera 
+//{                   //Application::getCamera().Update();
+// ImGui::SliderFloat3("Position", Slide, -1000, 1000);
+// Application::getCamera().Translate({ Slide[0], Slide[1] });
+// Application::getCamera().s_Position({ Slide[0], Slide[1] });
+// Application::getCamera().set_Zoom(Slide[2]);
+//}
+
