@@ -535,7 +535,7 @@ class App
     virtual void OnRenderGUI() override
     {
 
-        static float Slide[3] =  {-(SCREEN_X / 2), -(SCREEN_Y / 2), 0 };//{ 0.0f, 0.0f, 0.0f }; //
+        static float Slide[3] =  {-(SCREEN_X * 0.5f), -(SCREEN_Y * 0.5f), 0 };
 
         Vec2 MainWindowSize = getWindow().g_Size();
         int Boarder = 10;
