@@ -169,6 +169,7 @@ namespace OpenGL
 	/* Creates an OpenGL context from an OS native Device Context */
 	CREATURE_API HGLRC create_OpenGLContext(HDC _dc);
 
+
     CREATURE_API void clear_DepthBuffer();
     CREATURE_API void clear_ColorBuffer();
     CREATURE_API void clear_FrameBuffer();
@@ -190,35 +191,35 @@ namespace OpenGL
     CREATURE_API void delete_FBO(uint32_t _id);
 
 
-    CREATURE_API size_t get_Bindless_Address();
-
-
-
-    CREATURE_API void enable_DebugOutput();
 
 	/* Disables states for OpenGL */
-	CREATURE_API void  EnableBlending();
-	CREATURE_API void  EnableColorLogicOperation();
-	CREATURE_API void  EnableCulling();
-	CREATURE_API void  EnableDepthClamp();
-	CREATURE_API void  EnableDepthTest();
-	CREATURE_API void  EnableDithering();
-	CREATURE_API void  EnableFramebufferSRGB();
-	CREATURE_API void  EnableLineSmoothing();
-	CREATURE_API void  EnableMultisampling();
-	CREATURE_API void  EnablePolygonOffsetFill();
-	CREATURE_API void  EnablePolygonOffsetLine();
-	CREATURE_API void  EnablePolygonOffsetPoint();
-	CREATURE_API void  EnablePolygonOffsetSmooth();
-	CREATURE_API void  EnablePrimativeRestart();
-	CREATURE_API void  EnableSampleAlphatToCoverage();
-	CREATURE_API void  EnableSampleAlphaToOne();
-	CREATURE_API void  EnableSampleCoverage();
-	CREATURE_API void  EnableScissorTest();
-	CREATURE_API void  EnableStencilTest();
-	CREATURE_API void  EnableSeemlessTextureCubemap();
-	CREATURE_API void  EnableProgramPointSize();
+    CREATURE_API void enable_DebugOutput();
+	CREATURE_API void enable_Blending();
+	CREATURE_API void enable_ColorLogicOperation();
+	CREATURE_API void enable_Culling();
+	CREATURE_API void enable_DepthClamp();
+	CREATURE_API void enable_DepthTest();
+	CREATURE_API void enable_Dithering();
+	CREATURE_API void enable_FramebufferSRGB();
+	CREATURE_API void enable_LineSmoothing();
+	CREATURE_API void enable_Multisampling();
+	CREATURE_API void enable_PolygonOffsetFill();
+	CREATURE_API void enable_PolygonOffsetLine();
+	CREATURE_API void enable_PolygonOffsetPoint();
+	CREATURE_API void enable_PolygonOffsetSmooth();
+	CREATURE_API void enable_PrimativeRestart();
+	CREATURE_API void enable_SampleAlphatToCoverage();
+	CREATURE_API void enable_SampleAlphaToOne();
+	CREATURE_API void enable_SampleCoverage();
+	CREATURE_API void enable_ScissorTest();
+	CREATURE_API void enable_StencilTest();
+	CREATURE_API void enable_SeemlessTextureCubemap();
+	CREATURE_API void enable_ProgramPointSize();
     CREATURE_API void enable_Attribute(uint32_t _location);
+
+
+    CREATURE_API size_t get_Bindless_Address();
+
     /* Creates Mip map for bound 2D Texture  */
     CREATURE_API void generate_MipMap();
 
@@ -289,11 +290,13 @@ namespace OpenGL
     CREATURE_API bool isIBO(int _array);
 
 
-
-
-
-
     CREATURE_API GLenum glCheckError_(const char *file, int line);
+
+
+    ///========================================================
+
+
+    CREATURE_API bool make_Context_Current(HDC _device, HGLRC _context);
 
     CREATURE_API void make_Buffer_Resident();
     template<typename _Ty>

@@ -372,18 +372,21 @@ class FrameBufferObject
 public:
 	FrameBufferObject() = default;
 
+    /* Creates a Framebuffer of specified size using Default Parameters */
+    /// FrameBufferObject(Vec2 _size);
+
     /* Creates a Frame Buffer Object for the user to Render to */
 	FrameBufferObject(int _width, int _height, GLenum _datatype = GL_FLOAT, GLenum _internal = GL_RGBA32F, GLenum _format = GL_RGBA);
     
+
     GLuint GL_Handle{ NULL };
     Texture *RenderTarget{ nullptr };
     Texture *DepthTarget{ nullptr };
-
-
-    void Resize(Vec2 _size);
-
     bool isValid{ false };
 
+    /* Resize the Viewport and Recreate the Render Targets
+         Note: Invalidates FrameBuffer Destroys content */
+    void Resize(Vec2 _size);
 
     /* Returns the Dimensions of the ColorBuffer */
     iVec2 Size() { return RenderTarget->Size(); }
@@ -411,10 +414,9 @@ public:
 	void Destroy();
 
     /* Test the Frame Buffer to see if it is complete.
-       Returns: True if complete.
-       Returns: False if incomplete and displays a message to the console explaining why FrameBuffer creation failed */
+         Returns: True if complete.
+         Returns: False if incomplete and displays a message to the console explaining why FrameBuffer creation failed */
 	bool ValidateFrameBuffer();    
-
 
 	/* Checks an ID to see if it is a Frame Buffer Object already */
 	static bool isFBO(uint32_t _fbo)

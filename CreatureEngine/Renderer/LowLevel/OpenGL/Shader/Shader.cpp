@@ -456,6 +456,7 @@ Shader *shader_Sprite{ nullptr };    // Renders a Specified Sprite to the screen
 Shader *shader_TextureRenderer{nullptr};
 Shader *shader_QuadRenderer{ nullptr };
 Shader *shader_BasicRenderer{ nullptr };
+Shader *shader_Basic3DRenderer{ nullptr };
 
 //===============================================================================================================
 
@@ -621,7 +622,33 @@ std::string FBasicRenderer =
         }";
 //===============================================================================================================
 
+std::string VBasic3D =
+"#version 330 core                             \n\
+    layout(location = 0) in vec3 Position; \n\
+    layout(location = 1) in vec4 VColor;   \n\
+    uniform mat4 ProjectionMatrix;     \n\
+    uniform mat4 ViewMatrix;           \n\
+    out vec4 Col;                      \n\
+    void main()                        \n\
+    {                                  \n\
+        Col = VColor; \n\
+        mat4 ModelViewMatrix = (ViewMatrix * mat4(1.0));  \n\
+        mat4 ModelViewProjectionMatrix = (ProjectionMatrix * ModelViewMatrix);\n\
+        gl_Position = ModelViewProjectionMatrix * vec4(Position.xyz, 1.0); \n\
+    }";
 
+std::string FBasic3D =
+"#version 330 core        \n\
+    in vec4 Col;          \n\
+    out vec4 FragColor;   \n\
+    void main()           \n\
+    {                     \n\
+        FragColor =  Col;  \n\
+    }";
+//===============================================================================================================
+
+
+//vec4(Col.x, Col.y, Col.z,1);
 
 
 /* DEPRECATED: please use load builting shaders */
@@ -663,9 +690,13 @@ bool init_DefaultShaders()
     }
     shader_TextureRenderer->Unbind();
     //======================================================================================
-    shader_BasicRenderer = new Shader(VBasicRenderer, FBasicRenderer);
-    return true;
+
+    shader_BasicRenderer   = new Shader(VBasicRenderer, FBasicRenderer);
+    shader_Basic3DRenderer = new Shader(VBasic3D, FBasic3D);
+     return true;
 }
+
+
 
 // In Header
 //enum default_Shader
@@ -724,3 +755,6 @@ bool init_DefaultShaders()
 //    {}break;
 //    };
 //}
+// Shader *shader_BasicRenderer{ nullptr };
+// Shader *shader_Basic3DRenderer{ nullptr };
+

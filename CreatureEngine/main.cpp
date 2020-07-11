@@ -6,19 +6,35 @@
 
 #include"Creature_Engine.h"
 
+#include<stack>
+#include<utility>
+
+#include"Renderer/LowLevel/OpenGL/Renderer/3DRenderer.h"
+#include"Renderer/LowLevel/OpenGL/Camera/Camera3D.h"
+
+std::stack<std::string> CS;
+
+
+bool TEST_PROFILE_WINDOW();
 
 /* 
 
 IMGUI ISSUE:   Docking Branch:
-    SetWindowPos does not function properly when we have windows docked in one another. The Size nor the Position is properly set.
+    1) SetWindowPos does not function properly when we have windows docked in one another. 
+    2) The Size nor the Position is properly set.
+    3) Color Picker does not move with Window which has been Docked and can only be seen when Hovering the Window above the Area meaning 
+       that the World Vertex Positions do not update when the Window Updates if it is docked in another.
 
-    Color Picker does not move with Window which has been Docked and can only be seen when Hovering the Window above the Area meaning that the World Vertex Positions do not update when the Window Updates if it is docked in another.
-
-    */
+*/
 
 
+Camera3D *Camera_3D{ nullptr };
 
-static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
+static ULARGE_INTEGER
+        lastCPU,
+        lastSysCPU, 
+        lastUserCPU;
+
 static int numProcessors;
 static HANDLE self;
 
@@ -26,94 +42,31 @@ static HANDLE self;
 #include "pdh.h"
 static PDH_HQUERY cpuQuery;
 static PDH_HCOUNTER cpuTotal;
+
 #pragma comment(lib, "Pdh.lib")
-void init_CPUmonitor() {
+void init_CPUmonitor() 
+{
     PdhOpenQuery(NULL, NULL, &cpuQuery);
     // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
     PdhAddEnglishCounter(cpuQuery, "\\Processor(_Total)\\% Processor Time", NULL, &cpuTotal);
     PdhCollectQueryData(cpuQuery);
 }
 
-double getCurrentValueCPU() {
+double getCurrentValueCPU()
+{
     PDH_FMT_COUNTERVALUE counterVal;
 
     PdhCollectQueryData(cpuQuery);
     PdhGetFormattedCounterValue(cpuTotal, PDH_FMT_DOUBLE, NULL, &counterVal);
     return counterVal.doubleValue;
 }
-//
-//void init_CPUmonitor() {
-//    SYSTEM_INFO sysInfo;
-//    FILETIME ftime, fsys, fuser;
-//
-//    GetSystemInfo(&sysInfo);
-//    numProcessors = sysInfo.dwNumberOfProcessors;
-//
-//    GetSystemTimeAsFileTime(&ftime);
-//    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
-//
-//    self = GetCurrentProcess();
-//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-//    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
-//    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
-//}
-//double getCurrentValueCPU() {
-//    FILETIME ftime, fsys, fuser;
-//    ULARGE_INTEGER now, sys, user;
-//    double percent;
-//
-//    GetSystemTimeAsFileTime(&ftime);
-//    memcpy(&now, &ftime, sizeof(FILETIME));
-//
-//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-//    memcpy(&sys, &fsys, sizeof(FILETIME));
-//    memcpy(&user, &fuser, sizeof(FILETIME));
-//    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
-//        (user.QuadPart - lastUserCPU.QuadPart);
-//    percent /= (now.QuadPart - lastCPU.QuadPart);
-//    percent /= numProcessors;
-//    lastCPU = now;
-//    lastUserCPU = user;
-//    lastSysCPU = sys;
-//
-//    return percent * 100;
-//}
-//
 
-
-
-
-int branchless_min(int a, int b)
-{// Interesting take... terrible perf
-    return a * (a < b) + b * (b <= a);// (a * 1) _ (b * 0);;
-}
-int branchless_max(int a, int b)
-{ 
-    return a * (a > b) + b * (b >= a); 
-}
-
-// CMAKE Pluggin
-// https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
-
-//#pragma optimize( "", off )
-
-//CORONA VIRUS STUDY
-//https://jamanetwork.com/journals/jama/fullarticle/2762130
 
 #define _PROFILE_MEMORY
 // https://www.scmp.com/news/china/society/article/3075567/people-blood-type-may-be-more-vulnerable-coronavirus-china-study?utm_content=article&utm_medium=Social&utm_source=Facebook&fbclid=IwAR1VsuqHUzDgoU6-zaafrHJI89Qniyxbzppif6x_SvsC9LXHGjsfwo7tM6k#Echobox=1584436870
 
 using namespace Core;
 using namespace Threading;
-
-#include<stack>
-#include<utility>
-
-
-std::stack<std::string> CS;
-
-
-bool TEST_PROFILE_WINDOW();
 
 
 /* This Camera Situation is all wrong, figure a way to fix this */
@@ -130,38 +83,69 @@ Listener KeyListener([](Event _msg)
 	case 37:
 	{// Left Key
         Application::getCamera().MoveX(-CAMERA_SPEED);
-	}
+        Camera_3D->MoveLeft(CAMERA_SPEED);
+    }
 	break;
 
 	case 38:
 	{// Up  Key
         Application::getCamera().MoveY(-CAMERA_SPEED);
+        Camera_3D->MoveForward(CAMERA_SPEED);
+
 	}
 	break;
 
 	case 39:
 	{// Right  Key
         Application::getCamera().MoveX(CAMERA_SPEED);
+        Camera_3D->MoveRight(CAMERA_SPEED);
+
 	}
 	break;
 
 	case 40:
 	{// Down  Key
         Application::getCamera().MoveY(CAMERA_SPEED);
+        Camera_3D->MoveBack(CAMERA_SPEED);
 	}
     break;
 
-	case 107: 
+	case 189: 
 	{//- Key
-   ///     Application::getCamera().ZoomOut(ZOOM_SPEED);
+         Application::getCamera().ZoomOut(ZOOM_SPEED);
 	}break;
 
-	case 109:
+    case 187:
 	{//+ Key
-  ///      Application::getCamera().ZoomIn(ZOOM_SPEED);
+         Application::getCamera().ZoomIn(ZOOM_SPEED);
 	}break;
+
+
+
+    case 188:
+    {// <  
+       // static float keyRotate = Application::getCamera().g_Rotation();
+
+        float R =(float)(DEGREES(Application::getCamera().g_Rotation()));
+        Application::getCamera().s_Rotation(R - 20);// (float)(RADIANS(Rot)));
+        Camera_3D->RotateY(-RADIANS(CAMERA_SPEED));
+
+       // Application::getCamera().Rotate(-1);
+    }
+    break;
+
+    case 190:
+    {// > 
+        Application::getCamera().Rotate(2);
+        Camera_3D->RotateY(RADIANS(CAMERA_SPEED));
+    }
+    break;
+
+    
+
 
 	}// End of Switch
+
 });
 Listener MouseWheel( [](Event _msg)
 {
@@ -170,12 +154,46 @@ Listener MouseWheel( [](Event _msg)
     if ((int16_t)SplitLParam((int)_msg.wParam).y > 0)
     {// Mouse Wheel UP
         Application::getCamera().ZoomInto(Mpos, ZOOM_SPEED);
+        Camera_3D->MoveForward(CAMERA_SPEED);
+
     }
     else
     {// Mouse Wheel DOWN
         Application::getCamera().ZoomOutFrom(Mpos, ZOOM_SPEED);
+        Camera_3D->MoveBack(CAMERA_SPEED);
+
     }
 });
+
+
+Vec2 GLOBAL_OldMouse{ 0 };
+Vec2 GLOBAL_Delta_Mouse{ 0 };
+bool Drag_Triggered{ false };
+
+
+
+Listener Mouse_Click
+(
+    [](Event _msg)
+{
+    Vec2 NewMouse = SplitLParam((int)_msg.lParam);
+
+    POINT Mouse_Position = { NewMouse.x, NewMouse.y};
+    if (DragDetect(Application::getWindow().g_Handle(), Mouse_Position))
+    {// We are Dragging the Screen, Get the Normal and the Velocity and apply to the Rotation of the 3D Camera
+        GLOBAL_Delta_Mouse = NewMouse - GLOBAL_OldMouse;
+        GLOBAL_OldMouse = NewMouse;
+
+        Drag_Triggered = true;
+        Print( " Dragging the Mouse :" << NewMouse << " : " << GLOBAL_Delta_Mouse);
+    }
+});
+
+//  BOOL DragDetect
+//  (
+//      HWND  hwnd,
+//      POINT pt
+//  );
 
 /* ============================================================================================
            Rough Sketch of a Scene class to determine what I am going to need
@@ -296,6 +314,7 @@ public:
 };
 
 
+
 /* ============================================================================================
       Main Application class which holds all the functionality and Data for our program 
 /* ============================================================================================ */
@@ -308,6 +327,7 @@ class App
 
     Renderer_test *Bucket_Test;
     OpenGL::Renderer2D *MainRenderer{ nullptr };
+    OpenGL::Renderer3D *TestRenderer{ nullptr };
     OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
     Texture *test_Texture;
@@ -344,22 +364,24 @@ class App
         {
             RegisterListener(WM_KEYDOWN, KeyListener);
             RegisterListener(WM_MOUSEWHEEL, MouseWheel);
+            RegisterListener(WM_MOUSEMOVE, Mouse_Click);
         }
-       
+
         /* Creates Different Test Renderers for our Application to try out */
         MainRenderer = new OpenGL::Renderer2D({ SCREEN_X, SCREEN_Y });
         MainRenderer->Attach
         (
             new Camera2D
             (
-                (float)Application::getWindow().Width(),
+            (float)Application::getWindow().Width(),
                 (float)Application::getWindow().Height()
             )
         );
-
-
         Application::setCamera(MainRenderer->g_Camera());
 
+
+        TestRenderer = new OpenGL::Renderer3D({SCREEN_X, SCREEN_Y });
+        Camera_3D = &TestRenderer->g_Camera();
         SCENE.Create();
 
         testSurface = test_RenderPass->new_Surface({ SCREEN_X, SCREEN_Y });
@@ -410,11 +432,11 @@ class App
         test_RenderPass->attach(&Application::getCamera());;//MainRenderer->g_Camera())&Application::getCamera());//
         test_RenderPass->attach(SCENE.Vertices_VAO);
 
-        //   [  ] FIX THE GOD DAMN CAMERA ALREADY WILL YOU. 
-        //   [  ] MAKE SURE IT UPDATES PROPERLY, 
-        //   [  ] COVERS PROPER AREA, 
-        //   [  ] ATTACHES PROPER UNIFORMS 
-        //   [  ] FUCKING MAKE IT PROPER GOD DAMNIT
+        //   [ ] FIX THE GOD DAMN CAMERA ALREADY WILL YOU. 
+        //   [X] MAKE SURE IT UPDATES PROPERLY, 
+        //   [X] COVERS PROPER AREA, 
+        //   [X] ATTACHES PROPER UNIFORMS 
+        //   [ ] FUCKING MAKE IT PROPER GOD DAMNIT
 
         White = new Texture("../Resources/White.bmp");
         Black = new Texture("../Resources/Black.bmp");
@@ -443,6 +465,21 @@ class App
             UVcoord2.push_back({ 1 / C.x, 1 / C.y });
         }
 
+   //  OpenGL::make_Context_Current
+   //  (
+   //      Application::getWindow().g_DeviceContext(), 
+   //      Application::getWindow().g_Loading_Context()
+   //  );
+
+//  what is shared are 
+//      shaders, programs, textures, buffers, samplers, renderbuffers, sync objects.
+//      FBO are shared only when created through EXT version of extension.
+//      ARB version FBO are NOT shared. 
+//      if you mix EXT and ARB version of FBO functions it can lead to undefined behavior.
+
+        
+
+
 
         for_loop(i, 10)
         {
@@ -464,7 +501,11 @@ class App
             );
         }
 
-
+ //  OpenGL::make_Context_Current
+//  (
+//      Application::getWindow().g_DeviceContext(), 
+//      Application::getWindow().g_GL_Context()
+//  );
 
 
 //  Bucket_Test->Submit
@@ -490,6 +531,7 @@ class App
     /* Renders User Defined Geometry */
     virtual void OnRender() override
     {
+        TestRenderer->Render();
         MainRenderer->Render();
         SCENE.Render(); 
         test_RenderPass->Render();
@@ -499,9 +541,32 @@ class App
 	}
 
     /* Runs on Applications Frame Update */
-	virtual void OnUpdate() override
-	{// User Generated Per Frame Update
-        if(Update_Geometry) SCENE.Update();
+    virtual void OnUpdate() override
+    {// User Generated Per Frame Update
+     //TestRenderer->Main_Camera->s_Rotation
+     //(
+     //    {
+     //        RADIANS(GLOBAL_Delta_Mouse.x), 
+     //        0,
+     //        RADIANS(GLOBAL_Delta_Mouse.y)
+     //    }
+     //);
+    //    TestRenderer->Main_Camera->RotateX(RADIANS(GLOBAL_Delta_Mouse.x));
+     //   TestRenderer->Main_Camera->RotateZ(RADIANS(GLOBAL_Delta_Mouse.y));
+
+       // TestRenderer->Main_Camera->Rotation.x += ((GLOBAL_Delta_Mouse.x));
+        //TestRenderer->Main_Camera->Rotation.y += ((GLOBAL_Delta_Mouse.y));
+
+        TestRenderer->Main_Camera->Rotate(GLOBAL_Delta_Mouse.x, GLOBAL_Delta_Mouse.y);
+        //TestRenderer->Update();
+        //TestRenderer->g_Camera().Position.x += .1;
+        //TestRenderer->g_Camera().Position.z += .1;
+
+
+        if (Update_Geometry)
+        {
+            SCENE.Update();
+        }
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
@@ -518,12 +583,11 @@ class App
            GUI STUFF, POTENTIALLY MIGHT CHANGE THIS LATER
     /* ========================================================================================== */
 
-    int Update_Interval{ 60 };
-    int Update_counter{ Update_Interval - 1 };
-    bool Update_Geometry{ true };
-    float Rot{ 0 };
-    Vec2 Camera_Position { 0,0 };// { -(SCREEN_X / 2), -(SCREEN_Y / 2)};//Application::getCamera().g_Position();
-
+    int   Update_Interval { 60 };
+    int   Update_counter  { Update_Interval - 1 };
+    Vec2  Camera_Position { 0,0 }; 
+    bool  Update_Geometry { true };
+    float Rot             { 0 };
 
     float Top_Time{ 0 };
 
@@ -570,11 +634,13 @@ class App
                 Application::getCamera().s_Zoom(Z);
             }
 
-
             // Set the Rotation of the Default Framebuffer
             {
+               
+                
                 ImGui::InputFloat("Rotation", &Rot, 1.0f, 1.0f, "%.3f");
-                Application::getCamera().s_Rotation((float)(RADIANS(Rot)));
+                float R = (float)(DEGREES(Application::getCamera().g_Rotation())); 
+                Application::getCamera().Rotate(Rot - R);// (float)(RADIANS(Rot)));
             }
             
 
@@ -585,6 +651,15 @@ class App
                 Application::getCamera().Resize( { W,H });
             }
 
+            // Camera for Test 3D Renderer
+            {
+                ImGui::InputFloat("3D Px", &Camera_3D->Target_Position.x, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("3D Py", &Camera_3D->Target_Position.y, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("3D Pz", &Camera_3D->Target_Position.z, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("Rotation X", &Camera_3D->Rotation.x, .1f, 1.0f, "%.3f");
+                ImGui::InputFloat("Rotation Y", &Camera_3D->Rotation.y, .1f, 1.0f, "%.3f");
+                ImGui::InputFloat("Rotation Z", &Camera_3D->Rotation.z, .1f, 1.0f, "%.3f");
+            }
 
             // Color Picker Widget for the Background Color 
             {
@@ -1372,4 +1447,65 @@ static const char* fmt_table_float[3][4] =
 // Application::getCamera().s_Position({ Slide[0], Slide[1] });
 // Application::getCamera().set_Zoom(Slide[2]);
 //}
+// { -(SCREEN_X / 2), -(SCREEN_Y / 2)}; 
+// Application::getCamera().g_Position();
 
+
+
+//void init_CPUmonitor() {
+//    SYSTEM_INFO sysInfo;
+//    FILETIME ftime, fsys, fuser;
+//
+//    GetSystemInfo(&sysInfo);
+//    numProcessors = sysInfo.dwNumberOfProcessors;
+//
+//    GetSystemTimeAsFileTime(&ftime);
+//    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
+//
+//    self = GetCurrentProcess();
+//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+//    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
+//    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+//}
+//double getCurrentValueCPU() {
+//    FILETIME ftime, fsys, fuser;
+//    ULARGE_INTEGER now, sys, user;
+//    double percent;
+//
+//    GetSystemTimeAsFileTime(&ftime);
+//    memcpy(&now, &ftime, sizeof(FILETIME));
+//
+//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+//    memcpy(&sys, &fsys, sizeof(FILETIME));
+//    memcpy(&user, &fuser, sizeof(FILETIME));
+//    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
+//        (user.QuadPart - lastUserCPU.QuadPart);
+//    percent /= (now.QuadPart - lastCPU.QuadPart);
+//    percent /= numProcessors;
+//    lastCPU = now;
+//    lastUserCPU = user;
+//    lastSysCPU = sys;
+//
+//    return percent * 100;
+//}
+//
+
+
+
+
+int branchless_min(int a, int b)
+{// Interesting take... terrible perf
+    return a * (a < b) + b * (b <= a);// (a * 1) _ (b * 0);;
+}
+int branchless_max(int a, int b)
+{
+    return a * (a > b) + b * (b >= a);
+}
+
+// CMAKE Pluggin
+// https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
+
+//#pragma optimize( "", off )
+
+//CORONA VIRUS STUDY
+//https://jamanetwork.com/journals/jama/fullarticle/2762130

@@ -59,7 +59,7 @@ void Camera2D::MoveY(float _amount)
 }
 void Camera2D::Rotate(float _angle)
 {// Rotate the Camera by _angle
-	Rotation += _angle;
+	Rotation += RADIANS(_angle);
     Update();
 }
 void Camera2D::Translate(Vec2 _pos)
@@ -110,6 +110,7 @@ void Camera2D::Zoom(float _amount)
     TODO("Make a Zoom In To Function that Zooms to an XY location regardless of specifically where the cameras Center is at that moment");
     REFACTOR("I believe it is fixed although it appears ever so slightly off on the Y axis. Perhaps I need to adjust for aspect ratio or something idk");
     ZoomLevel += (_amount / 100);
+    ZoomLevel = (ZoomLevel < 0) ? 0 : ZoomLevel;
 // __debugbreak();
 // if (ZoomLevel < 0)
 // {// Prevent Projection Matrix from Inverting
@@ -119,29 +120,22 @@ void Camera2D::Zoom(float _amount)
 }
 void Camera2D::ZoomIn(float _amount) {  Zoom(-_amount);  }
 void Camera2D::ZoomOut(float _amount){  Zoom(_amount); }
+
+
 void Camera2D::ZoomInto(Vec2 _pos, float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix 
-
-    ZoomLevel += (-(_amount) / 100);
-    if (ZoomLevel < 0)
-    {// Prevent Projection Matrix from Inverting
-        ZoomLevel = 0;
-        return;
-    }
+    REFACTOR("Whole thing, Zoomin andoutfromisFucked. Not worth the effort at the moment");
+    //Position = Vec2(_pos.x, _pos.y);
+    ZoomIn(_amount);
+    Update();
 }
 void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
-{//  Zooms in or out of a scene by manipulating the Projection Matrix 
+{    //  Zooms in or out of a scene by manipulating the Projection Matrix 
 
-    ZoomLevel += ((_amount) / 100);
-    if (ZoomLevel < 0)
-    {// Prevent Projection Matrix from Inverting
-        ZoomLevel = 0;
-        return;
-    }
+  //  Position = Vec2(_pos.x, _pos.y);
+    ZoomOut(_amount);
+    Update();
 }
-
-
-
 
 
 /*=======================================================================================================================================================
@@ -150,8 +144,8 @@ void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
 /*=======================================================================================================================================================
 
 
-Transformations:
-https://www.opengl.org/archives/resources/faq/technical/transformations.htm
+ Transformations:
+ --- https://www.opengl.org/archives/resources/faq/technical/transformations.htm
 
 
 */
