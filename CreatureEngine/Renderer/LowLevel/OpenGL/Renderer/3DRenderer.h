@@ -3,6 +3,7 @@
 #include"../Camera/Camera3D.h"
 
 #include"../Shader/Shader.h"
+#include"../../../../Core/Threading/Threadpool.h"
 
 namespace OpenGL
 {
@@ -17,41 +18,155 @@ namespace OpenGL
             Main_FBO = new FrameBufferObject(_size.x, _size.y);
             Main_Camera = new Camera3D( _size, Vec3(0, 0, 1000), Vec3(0, 0, 0));
 
-            float sz = 500;
 
+
+            //===================================================================
+            // VERTEX BUFFER ONE
+            //===================================================================
+/*
+ 
+            auto VertexBuffer =
+                Core::Threading::ThreadPool::get().Async(
+                    []()
+            { 
+                float sz = 500; // Size of the Cluster
+                size_t Count = 10000;
+                Vec3 *result =(Vec3*)malloc(Count * sizeof(Vec3));
+
+                // Create a Load of Random Geometry to Test 
+                for_loop(i, Count)
+                {
+                    Vec3 Vert = // Random Vertices from -sz to sz range
+                    { 
+                        RANDOM_RANGE(sz), 
+                        RANDOM_RANGE(sz),
+                        RANDOM_RANGE(sz)
+                    };
+                    result[i] = Vert;
+                }
+                return result;
+            });
+
+            //===================================================================
+            // VERTEX BUFFER TWO
+            //===================================================================
+            auto VertexBuffer2 =
+                Core::Threading::ThreadPool::get().Async(
+                    []()
+            {
+                float sz = 500; // Size of the Cluster
+                size_t Count = 10000;
+                Vec3 *result = (Vec3*)(malloc(Count * sizeof(Vec3)));
+
+                for_loop(i, Count)
+                {
+                    Vec3 Vert = // Random Vertices from -sz to sz range
+                    {
+                        RANDOM_RANGE(sz),
+                        RANDOM_RANGE(sz),
+                        RANDOM_RANGE(sz)
+                    };
+                    result[i] = Vert;
+                }
+                return result;
+            });
+
+
+
+            //===================================================================
+            // COLOR BUFFER 
+            //===================================================================
+
+            auto ColorBuffer =
+                Core::Threading::ThreadPool::get().Async(
+                    []()
+            {
+                size_t Count = 10000;
+                Vec4 *result = (Vec4*)malloc(Count * sizeof(Vec4));
+
+                for_loop(i, Count)
+                {
+                    Vec4 Col = // Also use Random Colors
+                        OpenGL::Renderer::normalize_RGBA_Color
+                        (
+                        (int)RANDOM(255),
+                            (int)RANDOM(255),
+                            (int)RANDOM(255),
+                            (int)RANDOM(255)
+                        );
+                    result[i] = Col;
+                }
+                return result;
+            });
+
+
+                //===================================================================
+                auto FullBuffer = Core::Threading::ThreadPool::get().Async
+            (
+                Concat_Vertices, 
+                VertexBuffer.get(), 10000 * sizeof(Vec3),
+                VertexBuffer2.get(), 10000 * sizeof(Vec3)
+            );
+            auto Buff = FullBuffer.get();
+  */    
+            //===================================================================
+            std::vector<Vec3> VertexBuffer;
+            std::vector<Vec3> VertexBuffer2;
+            std::vector<Vec4> ColorBuffer;
+            float sz = 500; // Size of the Cluster
+            size_t Count = 10000;
+ 
             // Create a Load of Random Geometry to Test 
-            for_loop(i, 10000)
+            for_loop(i, Count)
             {
                 Vec3 Vert = // Random Vertices from -sz to sz range
-                { 
-                    RANDOM_RANGE(sz), 
+                {
+                    RANDOM_RANGE(sz),
                     RANDOM_RANGE(sz),
                     RANDOM_RANGE(sz)
                 };
 
+                VertexBuffer.push_back(Vert);
+            }
+
+//  for_loop(i, Count)
+//  {
+//      Vec3 Vert = // Random Vertices from -sz to sz range
+//      {
+//          RANDOM_RANGE(sz),
+//          RANDOM_RANGE(sz),
+//          RANDOM_RANGE(sz)
+//      };
+//      VertexBuffer2.push_back(Vert);
+//  }
+
+
+            for_loop(i, Count)
+            {
                 Vec4 Col = // Also use Random Colors
                     OpenGL::Renderer::normalize_RGBA_Color
                     (
-                        (int)RANDOM(255),
+                    (int)RANDOM(255),
                         (int)RANDOM(255),
                         (int)RANDOM(255),
                         (int)RANDOM(255)
                     );
-
-
-                Vertices.push_back(Vert);
-                Colors.push_back(Col);
+                ColorBuffer.push_back(Col);
             }
+
 
             Main_VAO = new VertexArrayObject();
 
             Main_Program = shader_Basic3DRenderer;
             Main_Program->Bind();
             {
-                Main_VAO->Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec3>(Vertices));
-                Main_VAO->Attach(BufferTypes::COLOR, new VertexBufferObject<Vec4>(Colors));
+                Main_VAO->Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec3>(VertexBuffer ));
+                Main_VAO->Attach(BufferTypes::COLOR,  new VertexBufferObject<Vec4>(ColorBuffer ));
             }
             Main_Program->Unbind();
+
+
+           // static Vec3 *Concat_Vertices(Vec3 *_dataA, size_t _szA, Vec3 *_dataB, size_t _szB)
         }
 
 
@@ -96,8 +211,28 @@ namespace OpenGL
 
         std::vector<Vec3> Vertices; // The xyz components to our Geometry
         std::vector<Vec4> Colors;   // The Colors of our Geometry
+
+        /* Returns a new buffer which is a combination of the two old buffers */
+        static Vec3 *Concat_Vertices(Vec3 *_dataA, size_t _szA, Vec3 *_dataB, size_t _szB)
+        {
+            size_t newSize = _szA + _szB;
+
+            Vec3 *newBuffer = (Vec3*)malloc(newSize);
+            memcpy(newBuffer, _dataA, _szA);
+
+            memcpy((uint8_t*)newBuffer + _szA, _dataB, _szB);
+
+            // Destroy our old buffer so we can concatnate it with the new one
+            delete(_dataB);
+            delete(_dataA);
+
+            return newBuffer;
+        }
+
+
+        Vec3 *Vertex_Data;
+        Vec4 *Color_Data;
+        uint32_t Vertex_Elements{ 0 };
     };
 
 }// NS OpenGL
-
- 

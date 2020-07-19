@@ -128,7 +128,7 @@ Listener KeyListener([](Event _msg)
 
         float R =(float)(DEGREES(Application::getCamera().g_Rotation()));
         Application::getCamera().s_Rotation(R - 20);// (float)(RADIANS(Rot)));
-        Camera_3D->RotateY(-RADIANS(CAMERA_SPEED));
+        Camera_3D->RotateY(-DEGREES(CAMERA_SPEED));
 
        // Application::getCamera().Rotate(-1);
     }
@@ -137,7 +137,7 @@ Listener KeyListener([](Event _msg)
     case 190:
     {// > 
         Application::getCamera().Rotate(2);
-        Camera_3D->RotateY(RADIANS(CAMERA_SPEED));
+        Camera_3D->RotateY(DEGREES(CAMERA_SPEED));
     }
     break;
 
@@ -489,7 +489,6 @@ class App
                 MAT
             );
         }
-
 
 
         for_loop(i, 10)
