@@ -2,12 +2,10 @@
 
 #include"../Materials/Image/Texture.h"
 #include"Shader/Shader.h"
-//../Image/Texture.h"
 
 #include<utility>//std::pair
-#include<vector>//std::vector
+#include<vector> //std::vector
 
-//using namespace Graphics;
 
 std::string OpenGL_ErrorList;
 
@@ -31,18 +29,20 @@ namespace OpenGL
 
 
 
+
     HGLRC create_OpenGLContext(HDC _dc)
     { // Create OpenGL Rendering Context
         HGLRC results{ nullptr };
         results = wglCreateContext(_dc);
         if (!wglMakeCurrent(_dc, results))
         {
-            std::cout << "Making Current Rendering Context Failed" << "\n";
+            DEBUGPrint(CON_Red, "Making Current Rendering Context Failed");
         }
         if (!results)
         {
             MessageBox
-            (/// Turn all this into a Macro for Clearity
+            (/// Turn all this into a Macro for Clearity 
+                /// DEBUGPRINT THIS and Get rid of the damn box
                 NULL,
                 "GL Context Creation Failed  "
                 "Cannot Create Renderer",
@@ -50,16 +50,33 @@ namespace OpenGL
                 MB_OK
             );
         }
-        if (!gladLoadGL())
-        {// If the Loading of OpenGL functions fails report it and exit
-            int error_code = glGetError();
-            std::cout << "Failed to initialize GLAD" << error_code << std::endl;
-            __debugbreak();
-        };
 
+        bool static first_Load_STATIC = false;
+        if (!first_Load_STATIC)
+        {// Only load up GLAD a single time
+
+            first_Load_STATIC = true;
+            if (!gladLoadGL())
+            {// If the Loading of OpenGL functions fails report it and exit
+                DEBUGPrint(CON_Red, "Failed to initialize GLAD" << glGetError());
+                __debugbreak();
+            };
+        }
+
+        DEBUG_CODE(CheckGLERROR());
         return results;
     }
+    bool make_Context_Current(HDC _device, HGLRC _context)
+    {
+        bool result = wglMakeCurrent(_device, _context);
+        if (!result)
+        {
+            DEBUGPrint(CON_Red, "Making Current Rendering Context Failed");
+        }
 
+        DEBUG_CODE(CheckGLERROR());
+        return result;
+    }
 
     /* Far from complete */
     struct DeviceContext_t
@@ -74,6 +91,13 @@ namespace OpenGL
         PIXELFORMATDESCRIPTOR PixelFormatDescriptor;
 
     };
+
+
+
+
+
+
+
 
     void set_PixelFormat()
     {// Creating and Setting Pixel Format Scope
@@ -133,9 +157,6 @@ namespace OpenGL
             &PixelFormatDescriptor
         );
     }
-
-    /* Create an OpenGL Context for a Win32 Application */
-    HGLRC create_OpenGLContext(HDC _dc);
 
     int  get_RecommendedIndices()
     {// Recommended maximum number of vertex array indices  */
@@ -206,6 +227,7 @@ namespace OpenGL
     }
     void bind_VAO(int32_t _vaoID)
     {
+        DEBUG_CODE(CheckGLERROR());
         assert(_vaoID != NULL);
         glBindVertexArray(_vaoID);
         DEBUG_CODE(CheckGLERROR());  
@@ -560,27 +582,27 @@ namespace OpenGL
 
 
     /* Enable State Functions */
-    void  EnableBlending() { glEnable(GL_BLEND); }
-    void  EnableColorLogicOperation() { glEnable(GL_COLOR_LOGIC_OP); }
-    void  EnableCulling() { glEnable(GL_CULL_FACE); }
-    void  EnableDepthClamp() { glEnable(GL_DEPTH_CLAMP); }
-    void  EnableDepthTest() { glEnable(GL_DEPTH_TEST); }
-    void  EnableDithering() { glEnable(GL_DITHER); }
-    void  EnableFramebufferSRGB() { glEnable(GL_FRAMEBUFFER_SRGB); }
-    void  EnableLineSmoothing() { glEnable(GL_LINE_SMOOTH); }
-    void  EnableMultisampling() { glEnable(GL_MULTISAMPLE); }
-    void  EnablePolygonOffsetFill() { glEnable(GL_POLYGON_OFFSET_FILL); }
-    void  EnablePolygonOffsetLine() { glEnable(GL_POLYGON_OFFSET_LINE); }
-    void  EnablePolygonOffsetPoint() { glEnable(GL_POLYGON_OFFSET_POINT); }
-    void  EnablePolygonOffsetSmooth() { glEnable(GL_POLYGON_SMOOTH); }
-    void  EnablePrimativeRestart() { glEnable(GL_PRIMITIVE_RESTART); }
-    void  EnableSampleAlphatToCoverage() { glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE); }
-    void  EnableSampleAlphaToOne() { glEnable(GL_SAMPLE_ALPHA_TO_ONE); }
-    void  EnableSampleCoverage() { glEnable(GL_SAMPLE_COVERAGE); }
-    void  EnableScissorTest() { glEnable(GL_SCISSOR_TEST); }
-    void  EnableStencilTest() { glEnable(GL_STENCIL_TEST); }
-    void  EnableSeemlessTextureCubemap() { glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); }
-    void  EnableProgramPointSize() { glEnable(GL_PROGRAM_POINT_SIZE); }
+    void  enable_Blending() { glEnable(GL_BLEND); }
+    void  enable_ColorLogicOperation() { glEnable(GL_COLOR_LOGIC_OP); }
+    void  enable_Culling() { glEnable(GL_CULL_FACE); }
+    void  enable_DepthClamp() { glEnable(GL_DEPTH_CLAMP); }
+    void  enable_DepthTest() { glEnable(GL_DEPTH_TEST); }
+    void  enable_Dithering() { glEnable(GL_DITHER); }
+    void  enable_FramebufferSRGB() { glEnable(GL_FRAMEBUFFER_SRGB); }
+    void  enable_LineSmoothing() { glEnable(GL_LINE_SMOOTH); }
+    void  enable_Multisampling() { glEnable(GL_MULTISAMPLE); }
+    void  enable_PolygonOffsetFill() { glEnable(GL_POLYGON_OFFSET_FILL); }
+    void  enable_PolygonOffsetLine() { glEnable(GL_POLYGON_OFFSET_LINE); }
+    void  enable_PolygonOffsetPoint() { glEnable(GL_POLYGON_OFFSET_POINT); }
+    void  enable_PolygonOffsetSmooth() { glEnable(GL_POLYGON_SMOOTH); }
+    void  enable_PrimativeRestart() { glEnable(GL_PRIMITIVE_RESTART); }
+    void  enable_SampleAlphatToCoverage() { glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE); }
+    void  enable_SampleAlphaToOne() { glEnable(GL_SAMPLE_ALPHA_TO_ONE); }
+    void  enable_SampleCoverage() { glEnable(GL_SAMPLE_COVERAGE); }
+    void  enable_ScissorTest() { glEnable(GL_SCISSOR_TEST); }
+    void  enable_StencilTest() { glEnable(GL_STENCIL_TEST); }
+    void  enable_SeemlessTextureCubemap() { glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); }
+    void  enable_ProgramPointSize() { glEnable(GL_PROGRAM_POINT_SIZE); }
 
     /* Disable State Functions */
     void  DisableBlending() { glDisable(GL_BLEND); }

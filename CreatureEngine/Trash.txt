@@ -3,6 +3,450 @@
 
 
 
+     //    TestRenderer->Main_Camera->RotateX(RADIANS(GLOBAL_Delta_Mouse.x));
+     //   TestRenderer->Main_Camera->RotateZ(RADIANS(GLOBAL_Delta_Mouse.y));
+     // TestRenderer->Main_Camera->Rotation.x += ((GLOBAL_Delta_Mouse.x));
+     //TestRenderer->Main_Camera->Rotation.y += ((GLOBAL_Delta_Mouse.y));
+     //  TestRenderer->Main_Camera->Rotate
+     //  (
+     //      (float)GLOBAL_Delta_Mouse.x, 
+     //      (float)GLOBAL_Delta_Mouse.y
+     //  );
+
+
+
+
+
+
+
+
+ /*
+ /
+ //capture_previous_context(&GS_ContextRecord);
+ //GS_ContextRecord.Rip = (ULONGLONG)_ReturnAddress();
+ //GS_ContextRecord.Rsp = (ULONGLONG)_AddressOfReturnAddress() + 8;
+ //GS_ExceptionRecord.ExceptionAddress = (PVOID)GS_ContextRecord.Rip;
+ //GS_ContextRecord.Rcx = stack_cookie;
+ //shader_TextureRenderer->Bind();
+ //{
+ //    OpenGL::bind_VAO(DebugQuadVAO);
+ //    shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
+ //    test_Texture->Bind(0);
+ //    OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
+ //}
+ //shader_TextureRenderer->Unbind();
+
+         Organ *Test1[100];
+
+         for (int i = 0; i < 100; ++i)
+         {
+             Test1[i] = new Organ(i);
+         }
+
+         for (int i = 0; i < 50; ++i)
+         {
+             delete(Test1[i]);
+         }
+         for (int i = 0; i < 50; ++i)
+         {
+             Test1[i] = new Organ(i);
+         }
+         for (int i = 0; i < 25; ++i)
+         {
+             delete(Test1[i]);
+         }
+         for (int i = 0; i < 25; ++i)
+         {
+             Test1[i] = new Organ(i);
+         }
+
+         size_t ElementTest{ 0 };
+         for (auto& T : Organ::Pool)
+         {// Cycle over ever Block in the Pool
+             Print("Range ForLoop: " << T.Value);
+             ++ElementTest;
+         }
+         assert(ElementTest   == Organ::Pool.chunkCount());
+         assert(sizeof(Organ) == Organ::Pool.chunkSize());
+
+         for (int i{ 0 }; i < Organ::Pool.size(); ++i)
+         {// Cycle over every Byte in the Raw Data
+             Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
+         }
+
+         Print("Pool Size" << Organ::Pool.size());
+
+         Organ::Pool.clear();
+         for (int i{ 0 }; i < Organ::Pool.size(); ++i)
+         {
+             Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
+         }
+
+
+         Print("Is It Full : " << Organ::Pool.is_Empty());
+         assert(Organ::Pool.is_Full() == true);
+
+         delete(Test1[1]);
+         Print("Testing Delete to Free up Space... Is it Still Full : " << Organ::Pool.is_Full());
+         assert(Organ::Pool.is_Full() == false);
+
+
+         Print("Is It Empty : " << Organ::Pool.is_Full());
+         assert(Organ::Pool.is_Empty() == false);
+
+         Test1[1] = new Organ(1);
+         Print("Allocating Again Is it Full Again: " << Organ::Pool.is_Full());
+         assert(Organ::Pool.is_Full() == true);
+ /
+
+ */
+ //int TestRecursion(int _param)
+ //{
+ //	_param--;
+ //	Print("Recursion " << _param);
+ //	if(_param > 0)
+ //	{
+ //       
+ //            WARN_ME("This is Currently disabled due to Error cant convert _Ty' to 'int (__cdecl *const )(int &) ------ _Ty=int (__cdecl &)(int) ")
+ //		//auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
+ //	//	E.get();
+ //	}
+ //	Print("Exit " << _param);
+ //
+ //	return 65;
+ //}
+ //
+
+//static const char* fmt_table_int[3][4] =
+//{
+//    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
+//    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
+//    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
+//};
+//static const char* fmt_table_float[3][4] =
+//{
+//    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
+//    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
+//    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
+//};
+//
+///* Blits the contents of the FrameBuffer with area of _srcRect onto the _destRect of this Surface */
+//void blit_FrameBuffer(FrameBufferObject *_fbo, iVec4 _source, iVec4 _dest)
+//{
+//    CheckGLERROR();
+//
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo->GL_Handle);
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Handle());
+//
+//    glBlitFramebuffer
+//    (
+//        _source.x, _source.y, _source.z, _source.w,
+//        _dest.x, _dest.y, _dest.z, _dest.w,
+//        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR
+//    );
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//    CheckGLERROR();
+//
+//}
+
+///* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
+//int blit_Surface(Surface *_source, iVec4 _srcRect, iVec4 _destRect)
+//{
+//    blit_FrameBuffer(_source->FBO, _srcRect, _destRect);
+//}
+//
+
+///* Read a Rectangle of pixels from the Surface */
+//void *read_Pixels(iVec4 _sourceRect, uint32_t _format = GL_RGBA, uint32_t _type = GL_UNSIGNED_SHORT_4_4_4_4) //format = GL_ALPHA, GL_RGB, and GL_RGBA. type = GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1.
+//{/// NOTE: Should I lock this first
+//    void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
+//    CheckGLERROR();
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
+//    glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//    CheckGLERROR();
+//    return results;
+//}
+//
+
+// ImGui::InpitFloat("Scale", &A)     
+// ImGui::InpitFloat("Scale", &A)
+// Dragable Position Slider for the Camera 
+// {
+//    int val = 0, val2 = 100;
+//    ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
+//    Application::getCamera().s_Position(Camera_Position);
+//}
+/// IF i UPDATE CAMERA HERE THE SLIDERS CAN MOVE THE CAMERA, IF I UPDATE AFTER THIS THE SLIDERS TRANSLATE IT BACK INTO PLACE EVERY FRAME NULLIFYING WHAT IS BEING DONE TO IT.
+// Position Slider for the Camera 
+//{                   //Application::getCamera().Update();
+// ImGui::SliderFloat3("Position", Slide, -1000, 1000);
+// Application::getCamera().Translate({ Slide[0], Slide[1] });
+// Application::getCamera().s_Position({ Slide[0], Slide[1] });
+// Application::getCamera().set_Zoom(Slide[2]);
+//}
+// { -(SCREEN_X / 2), -(SCREEN_Y / 2)}; 
+// Application::getCamera().g_Position();
+
+//void init_CPUmonitor() {
+//    SYSTEM_INFO sysInfo;
+//    FILETIME ftime, fsys, fuser;
+//
+//    GetSystemInfo(&sysInfo);
+//    numProcessors = sysInfo.dwNumberOfProcessors;
+//
+//    GetSystemTimeAsFileTime(&ftime);
+//    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
+//
+//    self = GetCurrentProcess();
+//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+//    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
+//    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+//}
+//double getCurrentValueCPU() {
+//    FILETIME ftime, fsys, fuser;
+//    ULARGE_INTEGER now, sys, user;
+//    double percent;
+//
+//    GetSystemTimeAsFileTime(&ftime);
+//    memcpy(&now, &ftime, sizeof(FILETIME));
+//
+//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+//    memcpy(&sys, &fsys, sizeof(FILETIME));
+//    memcpy(&user, &fuser, sizeof(FILETIME));
+//    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
+//        (user.QuadPart - lastUserCPU.QuadPart);
+//    percent /= (now.QuadPart - lastCPU.QuadPart);
+//    percent /= numProcessors;
+//    lastCPU = now;
+//    lastUserCPU = user;
+//    lastSysCPU = sys;
+//
+//    return percent * 100;
+//}
+//
+//
+//
+//
+//int branchless_min(int a, int b)
+//{// Interesting take... terrible perf
+//    return a * (a < b) + b * (b <= a);// (a * 1) _ (b * 0);;
+//}
+//int branchless_max(int a, int b)
+//{
+//    return a * (a > b) + b * (b >= a);
+//}
+//
+// CMAKE Pluggin
+// https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
+//#pragma optimize( "", off )
+//CORONA VIRUS STUDY
+//https://jamanetwork.com/journals/jama/fullarticle/2762130
+//  OpenGL::make_Context_Current
+//  (
+//      Application::getWindow().g_DeviceContext(), 
+//      Application::getWindow().g_Loading_Context()
+//  );
+//  what is shared are 
+//      shaders, programs, textures, buffers, samplers, renderbuffers, sync objects.
+//      FBO are shared only when created through EXT version of extension.
+//      ARB version FBO are NOT shared. 
+//      if you mix EXT and ARB version of FBO functions it can lead to undefined behavior.
+//  OpenGL::make_Context_Current
+//  (
+//      Application::getWindow().g_DeviceContext(), 
+//      Application::getWindow().g_GL_Context()
+//  );
+//  Bucket_Test->Submit
+//  (
+//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Quad), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
+//      MAT
+//  );
+// 
+//  Bucket_Test->Submit
+//  (
+//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Verts), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
+//      MAT
+//  );
+
+
+
+
+
+
+
+/*
+
+//#define GLM_FORCE_RADIANS       //Triggers Error telling us we need to use Macro GLM_ENABLE_EXPERIMENTAL in order to use Experimental GLM
+
+#define GLM_ENABLE_EXPERIMENTAL 
+
+#include "../../../../../Bin/glm/glm/glm.hpp"
+#include "../../../../../Bin/glm/glm/gtx/rotate_vector.hpp"
+
+class camera3d
+{
+public:
+    camera3d() = default;
+    camera3d
+    (
+        float posX, float posY, float PosZ,
+        float dirX, float dirY, float dirZ
+    );
+    void Bind();
+
+    void moveForward(float val);    // move along direction vector
+    void moveBackward(float val);
+    void moveRight(float val);      // move side to side
+    void moveLeft(float val);
+    void moveUp(float val);         // move along up vector
+    void moveDown(float val);
+
+    void rotateRight(float rad);    // rotaties about up vector
+    void rotateLeft(float rad);
+    void rotateUp(float rad);       // rotate about right/left vector
+    void rotateDown(float rad);
+
+    void rollRight(float rad);      // roll about direction vector
+    void rollLeft(float rad);
+
+    glm::vec3 position;
+    glm::vec3 direction;
+    glm::vec3 up;          // assume <0,1,0> on initialization
+
+    Mat4 ProjectionMatrix; 
+
+};
+
+//#include "camera3d.h"
+//#include <QDebug>
+
+
+
+
+/*
+
+
+// Camera is initialized with a position and direction
+camera3d::camera3d
+(
+    float posX, float posY, float posZ,
+    float dirX, float dirY, float dirZ
+)
+{
+    position = glm::vec3(posX, posY, posZ);
+    direction = glm::normalize(glm::vec3(dirX, dirY, dirZ));
+
+    // find up direction
+    glm::vec3 right = glm::cross(direction, glm::vec3(0.0, 1.0, 0.0));
+    up = glm::normalize(glm::cross(right, direction));
+    ProjectionMatrix = glm::perspective(glm::radians(90.0f), (float)SCREEN_X / (float)SCREEN_Y, 0.1f, 1000.0f);
+}
+
+void camera3d::moveForward(float val) {
+    position = position + val * direction;
+}
+
+void camera3d::moveBackward(float val) {
+    position = position - val * direction;
+}
+
+void camera3d::moveRight(float val) {
+    glm::vec3 right = glm::cross(direction, up);
+    position = position + val * right;
+}
+
+void camera3d::moveLeft(float val) {
+    glm::vec3 left = -glm::cross(direction, up);
+    position = position + val * left;
+}
+
+void camera3d::moveUp(float val) {
+    position = position + val * up;
+}
+
+void camera3d::moveDown(float val) {
+    position = position - val * up;
+}
+
+void camera3d::rotateRight(float rad) {
+    direction = glm::rotate(direction, rad, -up);
+}
+
+void camera3d::rotateLeft(float rad) {
+    direction = glm::rotate(direction, -rad, -up);
+}
+
+void camera3d::rotateUp(float rad) {
+    glm::vec3 right = glm::cross(direction, up);
+    up = glm::rotate(up, rad, right);
+    direction = glm::rotate(direction, rad, right);
+}
+
+void camera3d::rotateDown(float rad) {
+    glm::vec3 right = glm::cross(direction, up);
+    up = glm::rotate(up, -rad, right);
+    direction = glm::rotate(direction, -rad, right);
+}
+
+void camera3d::rollRight(float rad) {
+    up = glm::rotate(up, rad, -direction);
+}
+
+void camera3d::rollLeft(float rad) {
+    up = glm::rotate(up, -rad, -direction);
+}
+
+void  camera3d::Bind()
+{
+
+    Vec3 vz = glm::normalize(position - (position + direction));
+    Vec3 vx = glm::normalize(glm::cross(up, vz));
+    Vec3 vy = glm::cross(vz, vx);
+    Mat4 ViewMatrix =
+        Mat4
+        (
+            Vec4(vx, 0),
+            Vec4(vy, 0),
+            Vec4(vz, 0),
+            Vec4(position, 1)
+        );
+
+
+    Shader::get().SetUniform("ViewMatrix", ViewMatrix );
+    Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
+}
+
+// Position = position;
+// Rotation = rotation;
+//
+// Forward = Vec3(0.0f, 0.0f, 1.0f);
+// Right = Vec3(0.1f, 0.0f, 0.0f);
+// Up = Vec3(0.0f, 1.0f, 0.0f);
+//
+// ProjectionMatrix = glm::perspective(glm::radians(FOV), AspectRatio, Near, Far);
+// ViewMatrix = Mat4(1.0f);
+// set(this);
+// }
+// ViewMatrix = glm::lookAt(Position, Position - Forward, Up);
+//
+//return results;
+//    = Mat4
+//(
+//    Vec4(, , , ),
+//    Vec4(, , , ),
+//    Vec4(, , , ),
+//    Vec4(, , , )
+//);
+ //  ProjectionMatrix = glm::perspective(glm::radians(FOV), AspectRatio, Near, Far);
+
+
+  */
+ */
+
+
+
 
 
 

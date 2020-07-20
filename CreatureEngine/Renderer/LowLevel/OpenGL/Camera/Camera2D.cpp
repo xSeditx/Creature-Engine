@@ -3,63 +3,63 @@
 
 
 Camera2D::Camera2D(float _left, float _right, float _top, float _bottom, float _near, float _far)
-	:
-	Top(_top),
-	Left(_left),
-	Right(_right),
-	Bottom(_bottom),
-	Size({
-			_right - _left,
-			_bottom - _top
-		})
+    :
+    Top(_top),
+    Left(_left),
+    Right(_right),
+    Bottom(_bottom),
+    Size({
+            _right - _left,
+            _bottom - _top
+        })
 {
     ZoomLevel = 1.0f;
-	Near = _near;
-	Far = _far;
+    Near = _near;
+    Far = _far;
 
-	AspectRatio = Size.x / Size.y;
+    AspectRatio = Size.x / Size.y;
 
-	Position = Vec3(0);
-	Rotation = 0;
+    Position = Vec3(0);
+    Rotation = 0;
 
-	ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top, Near, Far);  //OrthographicMatrix(_size.x, _size.y);
-	ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0.0f));
+    ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top, Near, Far);  //OrthographicMatrix(_size.x, _size.y);
+    ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0.0f));
     ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
-   // glViewport(0,0, (GLsizei)Right, (GLsizei)Bottom); // Dunno if I should put this here
-	set(this);
+    // glViewport(0,0, (GLsizei)Right, (GLsizei)Bottom); // Dunno if I should put this here
+    set(this);
 }
 Camera2D::Camera2D(float _left, float _right, float _top, float _bottom)
-	:
-	Camera2D(_left, _right, _top, _bottom , -1.0f, 10.0f)
+    :
+    Camera2D(_left, _right, _top, _bottom, -1.0f, 10.0f)
 {}
 Camera2D::Camera2D(float _left, float _right)
     :
     Camera2D(0, _left, 0, _right)
 {}
 Camera2D::Camera2D(Vec2 _size)
-	:
-	Camera2D(0,  _size.x, 0, _size.y)
+    :
+    Camera2D(0, _size.x, 0, _size.y)
 {}
 
 void Camera2D::Move(Vec2 _amount)
 {// Move Camera by _amount
-	Position += _amount;
+    Position += _amount;
     Update();
 }
 void Camera2D::MoveX(float _amount)
 {// Move Camera on X axis by _amount
-	Position.x += _amount;
+    Position.x += _amount;
     Update();
 }
 void Camera2D::MoveY(float _amount)
 {// Move Camera on Y axis by _amount
-	Position.y += _amount;
+    Position.y += _amount;
     Update();
 }
 void Camera2D::Rotate(float _angle)
 {// Rotate the Camera by _angle
-	Rotation += _angle;
+    Rotation += _angle;
     Update();
 }
 void Camera2D::Translate(Vec2 _pos)
@@ -72,8 +72,8 @@ void Camera2D::Translate(Vec2 _pos)
 void Camera2D::Bind()
 {// Binds our Camera to OpenGL context and Sets Uniforms
     Shader& Current = Shader::get();
-	Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
-	Shader::get().SetUniform("ViewMatrix", ViewMatrix);
+    Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
+    Shader::get().SetUniform("ViewMatrix", ViewMatrix);
     DEBUG_CODE(CheckGLERROR());
 }
 void Camera2D::Update()
@@ -93,7 +93,7 @@ void Camera2D::Update()
 
 void Camera2D::Resize(iVec2 _size)
 {
-    AspectRatio = _size.x / _size.y; 
+    AspectRatio = _size.x / _size.y;
     ZoomLevel = (ZoomLevel > 0.1f) ? ZoomLevel : 0.1f;
     float Level = 1.0f / ZoomLevel;
     float HalfH = _size.y * 0.5f;
@@ -101,11 +101,11 @@ void Camera2D::Resize(iVec2 _size)
     set_ProjectionMatrix
     (
         (-AspectRatio * Level) * HalfH,
-        ( AspectRatio * Level) * HalfH,
+        (AspectRatio * Level) * HalfH,
         -Level * HalfH,
-         Level * HalfH
+        Level * HalfH
     );
-    glViewport(0,0, _size.x , _size.y );
+    glViewport(0, 0, _size.x, _size.y);
 }
 
 
@@ -114,8 +114,8 @@ void Camera2D::Zoom(float _amount)
     ZoomLevel += (_amount / 100);
 }
 
-void Camera2D::ZoomIn(float _amount) {  Zoom(-_amount);  }
-void Camera2D::ZoomOut(float _amount){  Zoom(_amount); }
+void Camera2D::ZoomIn(float _amount) { Zoom(-_amount); }
+void Camera2D::ZoomOut(float _amount) { Zoom(_amount); }
 void Camera2D::ZoomInto(Vec2 _pos, float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix 
 
@@ -137,17 +137,3 @@ void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
     }
 }
 
-
-
-
-
-/*=======================================================================================================================================================
-/*                                               NOTES:
-/*=======================================================================================================================================================
-/*=======================================================================================================================================================
-
-
- Transformations: https://www.opengl.org/archives/resources/faq/technical/transformations.htm
-
-
-*/

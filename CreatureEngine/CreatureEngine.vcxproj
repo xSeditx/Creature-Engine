@@ -205,6 +205,7 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Camera\Camera3D.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\Camera\Camera3D.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GameObject.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h" />

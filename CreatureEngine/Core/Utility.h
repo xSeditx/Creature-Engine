@@ -2,6 +2,10 @@
 #include<vector>
 #include<atomic>
 
+struct Async_Dynamic_Buffer
+{
+   
+};
 
 /* ==============================================================================================================
        LIKELY NOTHING BUT JUST MULLING OVER THE IDEA OF USING PROPERTY GETTERS AND SETTERS

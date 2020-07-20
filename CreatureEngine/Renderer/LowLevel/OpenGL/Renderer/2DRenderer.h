@@ -421,7 +421,7 @@ struct Renderer_test
         TEST_ASSERT(_cam != nullptr, "Renderer_Test needs a Camera", "");
 
         Camera = _cam;
-        FBO = new FrameBufferObject({ Camera->Width(), Camera->Height() });
+        FBO = new FrameBufferObject( Camera->Width(), Camera->Height() );
     }
 
 

@@ -212,6 +212,9 @@
     <ClCompile Include="Core\Layer.cpp">
       <Filter>Source Files\System\Input</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.cpp">
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">
@@ -375,6 +378,9 @@
     </ClInclude>
     <ClInclude Include="Core\Layer.h">
       <Filter>Source Files\System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.h">
+      <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

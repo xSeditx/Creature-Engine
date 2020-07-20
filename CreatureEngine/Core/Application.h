@@ -179,6 +179,9 @@ private:
         /* Returns the OpenGL Context*/
         HGLRC g_GL_Context(){ return GL_Context; };
 
+        /* Returns the OpenGL Context*/
+        HGLRC g_Loading_Context() { return Loading_GL_Context; };
+
         /* Return the Most basic and default Shader */
         uint32_t defaultShaderHandle() noexcept { return WindowShader->g_Handle(); }
 
@@ -211,6 +214,7 @@ private:
         Window* Parent = nullptr;
 
         HGLRC GL_Context{ nullptr };
+        HGLRC Loading_GL_Context{ nullptr };
 
         HWND Handle{ nullptr };
         HDC  DeviceContext{ nullptr };

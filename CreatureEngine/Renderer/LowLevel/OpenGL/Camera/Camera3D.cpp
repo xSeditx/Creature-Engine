@@ -2,41 +2,44 @@
 #include"../Shader/Shader.h"
 
 
-Camera3D::Camera3D(Vec3 position, Vec3 rotation)
+Camera3D::Camera3D(Vec2 _screen, Vec3 position, Vec3 rotation)
 {
 	FOV = 60.0;
-	AspectRatio = 640.0f / 480.0f;
+	Far = 1024.0f;
 	Near = .10f;
-	Far = 4096.0f;
+	AspectRatio = _screen.x / _screen.y;
 
 	Position = position;
 	Rotation = rotation;
+    Target_Position = position;
+    Target_Rotation = rotation;
 
-	Forward = Vec3(0.0f, 0.0f, 1.0f);
-	Right = Vec3(0.1f, 0.0f, 0.0f);
 	Up = Vec3(0.0f, 1.0f, 0.0f);
+	Right = Vec3(0.1f, 0.0f, 0.0f);
+	Forward = Vec3(0.0f, 0.0f, 1.0f);
 
-	ProjectionMatrix = glm::perspective(glm::radians(FOV), AspectRatio, Near, Far);
 	ViewMatrix = Mat4(1.0f);
+	ProjectionMatrix = glm::perspective(glm::radians(FOV), AspectRatio, Near, Far);
+
 	set(this);
 }
 
+
 void Camera3D::Bind()
 {
-	Shader::get().SetUniform("EyePosition", Position);
+//	Shader::get().SetUniform("EyePosition", Position); This is for Lighting later
 	Shader::get().SetUniform("ProjectionMatrix", ProjectionMatrix);
 	Shader::get().SetUniform("ViewMatrix", ViewMatrix);
 }
 
-void Camera3D::Unbind()
-{
-}
+// Updates the Camera to the new Target Position 
 void Camera3D::Update()
 {
 	WARN_ME(" I am Changing GetTime to a flat number to make this work Change Immediately ");
 	float Time = .1f; //GetTime();
+    /// We are using Fixed time for Debug purposes however this needs to change. 
 
-	Delta_Time = (Time - Current_Time);
+    Delta_Time = 0.1f;// (Time - Current_Time);
 	Current_Time = Time;
 
 	Position += (Target_Position - Position) * 10.f * Delta_Time;
@@ -54,9 +57,7 @@ void Camera3D::Update()
 	Forward = glm::normalize(Vec3(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2]));
 	ViewMatrix = glm::lookAt(Position, Position - Forward, Up);
 }
-void Camera3D::Render()
-{
-}
+
 
 // CAMERA MANIPULATIONS
 void Camera3D::Rotate(float pitch, float yaw)
@@ -133,3 +134,4 @@ Mat4 Camera3D::LookAt(Vec3 eye, Vec3 target, Vec3 up)
 		);
 	return results; 
 }// MATRIX STATE HANDLING
+

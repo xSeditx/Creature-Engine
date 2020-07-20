@@ -18,6 +18,7 @@ _________________________________ APPLICATION CLASS ____________________________
 USAGE:
 =========================================================================================================
 */
+#include"../Profiling/Timing/Benchmark.h"
 
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -37,9 +38,8 @@ std::mutex DEBUGMutex;
  //_______________________________ STATE and FLOW HANDLING _______________________________________________
  //=======================================================================================================
 
- void Application::Init()
+ void Application::Init() trace(1)
  {
-
 	 set(*this);
 	 CreateApplicationWindow();
 	 DEBUG_CODE(CheckGLERROR());
@@ -94,11 +94,10 @@ std::mutex DEBUGMutex;
      GUI_io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;          // We can honor io.WantSetMousePos requests (optional, rarely used)
      GUI_io.BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can set io.MouseHoveredViewport correctly (optional, not easy)
      GUI_io.BackendPlatformName = "imgui_impl_win32";
-   // GUI_io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;    // We can create multi-viewports on the Platform side (optional)
-   // GUI_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-
-     //GUI_io.Platform_RenderWindow = ImGui_ImplWin32_RenderWindow;
-     //GUI_io.Platform_SwapBuffers = ImGui_ImplWin32_SwapBuffers;
+     // GUI_io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;    // We can create multi-viewports on the Platform side (optional)
+     // GUI_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+     // GUI_io.Platform_RenderWindow = ImGui_ImplWin32_RenderWindow;
+     // GUI_io.Platform_SwapBuffers = ImGui_ImplWin32_SwapBuffers;
  
      ImGui::StyleColorsDark();
 
@@ -119,6 +118,8 @@ std::mutex DEBUGMutex;
 
      ImGui_ImplWin32_Init(getWindow().g_Handle());// ImGui_ImplWin32_InitPlatformInterface();//
      ImGui_ImplOpenGL3_Init("#version 130");
+
+     Return();
  }
 
  // Helper structure we store in the void* RenderUserData field of each ImGuiViewport to easily retrieve our backend data.
@@ -233,8 +234,8 @@ std::mutex DEBUGMutex;
  void Application::OnUpdateGUI() { }
  void Application::OnRenderGUI() { }
 
- //   HGLRC  backup = wglGetCurrentContext();
-//     wglMakeCurrent(getWindow().g_DeviceContext(), backup);
+// HGLRC  backup = wglGetCurrentContext();
+// wglMakeCurrent(getWindow().g_DeviceContext(), backup);
 
 
  // WGL_EXT_swap_control
@@ -283,6 +284,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
     s_Title(_name);
 	/// Create Window Handle and Device Context
 	{
+        trace_scope("CreateWindow")
 		assert(&Application::get() != nullptr);
 		WindowProperties.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 		WindowProperties.lpfnWndProc = (WNDPROC)WindowProc;
@@ -326,7 +328,9 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	/// Set Pixel Format
 	{// Creating and Setting Pixel Format Scope
 		/* 	NOTE:  A good pixel format to choose for the dummy context is a simple 32-bit RGBA color buffer, with a 24-bit depth buffer and 8-bit stencil, as we did in the above sample PFD. This will usually get a hardware accelerated pixel format. */
-		memset(&PixelFormatDescriptor, 0, sizeof(PixelFormatDescriptor));
+        trace_scope("SetPixelFormat");
+
+        memset(&PixelFormatDescriptor, 0, sizeof(PixelFormatDescriptor));
 		PixelFormatDescriptor.nSize = sizeof(PixelFormatDescriptor);
 		PixelFormatDescriptor.nVersion = 1;
 		PixelFormatDescriptor.dwFlags = PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | _flags;
@@ -378,10 +382,35 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 
 	/// Create OpenGL Rendering Context
     GL_Context = OpenGL::create_OpenGLContext(DeviceContext);
+    Loading_GL_Context = OpenGL::create_OpenGLContext(DeviceContext);
 
-	s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));
+    /// wglShareLists causes a few things to be shared such as textures, display lists, VBO/IBO, shaders.
+    if (wglShareLists(GL_Context, Loading_GL_Context) == FALSE)
+    {// Checks to make sure the Loading thread and the GL render thread are in proper communication
+        DWORD errorCode = GetLastError();
+        LPVOID lpMsgBuf;
+        FormatMessage
+        (
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            errorCode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&lpMsgBuf,
+            0, 
+            NULL
+        );
+        MessageBox(NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION);
+        LocalFree(lpMsgBuf);
+        wglDeleteContext(Loading_GL_Context);// Destroy if not Applicable
+    }
+    OpenGL::make_Context_Current(DeviceContext, GL_Context);
+
+
+
+	s_Title(std::string("OPENGL VERSION ") + std::string( (char*)glGetString(GL_VERSION)) );
 	s_Camera(new Camera2D());
 	Application::setWindow(*this);
+
 	/// Set Window State
 	{
 		SetForegroundWindow(Handle);                           // Slightly Higher Priority
@@ -389,31 +418,47 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
         ShowWindow(Handle, SW_MAXIMIZE);// SW_SHOW);
 		UpdateWindow(Handle);
 	}
+
     RECT rect;
     GetWindowRect(Handle, &rect);
-    
     int width = rect.right - rect.left;
     int height = rect.bottom - rect.top;
-    
 
     ResizeWindow(width, height);
 
-    s_Title(std::string("OPENGL VERSION ") + std::string((char*)glGetString(GL_VERSION)));
+    s_Title(std::string("OPENGL VERSION ") + std::string( (char*)glGetString(GL_VERSION)) );
 
-	/// Set OpenGL State
+
+	/// Set OpenGL State for Loading thread Context
 	{
+        OpenGL::make_Context_Current(DeviceContext, Loading_GL_Context);
 		glShadeModel(GL_SMOOTH);
-		glClearColor(0.0f, 0.0f, 0.25f, 1.0f);                  // Black Background
+        OpenGL::set_ClearColor(0.0f, 0.0f, 0.25f, 1.0f);       // Black Background
 		glClearDepth(1.0f);                                    // Depth Buffer Setup
-		glEnable(GL_DEPTH_TEST);                               // Enables Depth Testing
-		glDepthFunc(GL_LEQUAL);                                // The Type Of Depth Test To Do
+		OpenGL::enable_DepthTest();                            // Enables Depth Testing
+        OpenGL::set_DepthFunction(GL_LEQUAL);                                // The Type Of Depth Test To Do
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);     // Really Nice Perspective Calculations
     	OpenGL::set_Viewport(0, 0, _width, _height);
 
-		glEnable(GL_BLEND);
+        OpenGL::enable_Blending();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	}
+ 
+
+    /// Set OpenGL State  
+    {
+        OpenGL::make_Context_Current(DeviceContext, GL_Context);
+        glShadeModel(GL_SMOOTH);
+        OpenGL::set_ClearColor(0.0f, 0.0f, 0.25f, 1.0f);       // Black Background
+        glClearDepth(1.0f);                                    // Depth Buffer Setup
+        OpenGL::enable_DepthTest();                            // Enables Depth Testing
+        OpenGL::set_DepthFunction(GL_LEQUAL);                                // The Type Of Depth Test To Do
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);     // Really Nice Perspective Calculations
+        OpenGL::set_Viewport(0, 0, _width, _height);
+        OpenGL::enable_Blending();
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
 
 	/// Set FullScreen Mode : Define _FULL_SCREEN_MODE to activate
 	{
@@ -436,6 +481,42 @@ Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, 
 {
 	Parent = _parent;
 }
+
+
+
+//
+//
+//// Thread_1:
+//wglMakeCurrent(NULL, NULL);
+//WaitForThread2(); OrDoSomeCPUJob();
+//wglMakeCurrent(dc, glrc);
+//// Thread_2:
+//wglMakeCurrent(dc, glrc);
+//DoSome_GL_Work();
+//wglMakeCurrent(NULL, NULL);
+//TerminateThread2_And_GiveControlToThread1();
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void Application::Window::Sync()
 {//Display the contents of the back buffer to the Screen (*note:future at VSync if Specified) 
@@ -531,9 +612,10 @@ void Application::Dispatch( Event _msg)
         }
     }
 }
-bool Application::PeekMSG ( Event& _msg) 
+
+bool Application::PeekMSG ( Event& _msg) trace("",1)
 { ///This is a test of my Trace macro
-	 return  getWindow().Messenger().PeekMSG(_msg);
+	Return( getWindow().Messenger().PeekMSG(_msg));
 }
 bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _rangemax, int _handlingflags)
 {
@@ -550,6 +632,8 @@ Listener ResizeListener(
 	WorldCamera->Resize({ W, H });
 });
 */
+
+
 Vec2 SplitLParam(int lParam)
 {
 	return Vec2((int)(lParam) & 0xFFFF, ((int)(lParam) >> 16) & 0xFFFF);
@@ -570,7 +654,7 @@ void Application::Resize(Vec2 _size)
 
 
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) trace(1)
 {
     if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
         return true;
@@ -605,12 +689,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	};
 
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	Return( DefWindowProc(hwnd, uMsg, wParam, lParam));
 }
 
 
 _static Application::Window::InputDevices::_mouse    Application::Window::InputDevices::Mouse;
 _static Application::Window::InputDevices::_keyboard Application::Window::InputDevices::Keyboard;
+
 //_static Application::Window::EventHandler& Application::Window::EventHandler::get()
 //{
 //	static Application::Window::EventHandler instance;
@@ -755,3 +840,8 @@ Mortality:
 
 
  */
+
+
+
+
+

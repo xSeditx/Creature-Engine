@@ -221,6 +221,10 @@ VertexArrayObject::VertexArrayObject(VertexBufferObject<_Ty>& vbo)
 
  #include"Renderer.h"
 
+//FrameBufferObject::FrameBufferObject(Vec2 _size)
+//    : FrameBufferObject(_size.x, _size.y)
+//{}
+
 
 /* Creates a Frame Buffer Object for the user to Render to */
 FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, GLenum _internal, GLenum _format)
@@ -228,21 +232,22 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
     GL_Handle(OpenGL::new_FBO())
 {
 
-	TODO(" Need to create : \n\		[x]Color : the outputs written with the output variables from the fragment shader \n\		[x]Depth : this works as the Z buffer for the framebuffer object \n\		[ ]Stencil : the stencil buffer");
+	TODO("Need to create : \n\
+		[x]Color : the outputs written with the output variables from the fragment shader \n\
+		[x]Depth : this works as the Z buffer for the framebuffer object \n\
+		[ ]Stencil : the stencil buffer");
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);
     {
         RenderTarget = new Texture({ _width, _height }, GL_RGBA);
-        DepthTarget = new Texture({ _width, _height }, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
+        DepthTarget  = new Texture({ _width, _height }, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
 
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTarget->g_Handle(), 0);
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTarget->g_Handle(), 0);
         OpenGL::attach_ColorBuffer(RenderTarget->g_Handle());
         OpenGL::attach_DepthBuffer(DepthTarget->g_Handle());
 
         ValidateFrameBuffer();
-        OpenGL::EnableDepthTest();
+        OpenGL::enable_DepthTest();
         OpenGL::set_DepthFunction(GL_LEQUAL);
         OpenGL::set_Viewport(0, 0, _width, _height);
     }
@@ -250,8 +255,6 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
 
     DEBUG_CODE(CheckGLERROR());
 }
-
-
 
 
 
@@ -271,23 +274,17 @@ void FrameBufferObject::Resize(Vec2 _size)
     {
         delete(RenderTarget);
     }
-
     RenderTarget = new Texture(_size, GL_RGBA);
+
 
     if (DepthTarget != nullptr)
     {
         delete(DepthTarget);
     }
-
     DepthTarget = new Texture(_size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24);
-
-
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTarget->g_Handle(), 0);
-   // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTarget->g_Handle(), 0);
 
     OpenGL::attach_ColorBuffer(RenderTarget->g_Handle());
     OpenGL::attach_DepthBuffer(DepthTarget->g_Handle());
-
 }
 
 void FrameBufferObject::Destroy()

@@ -170,6 +170,7 @@ extern Shader *shader_Sprite;
 extern Shader *shader_TextureRenderer;
 extern Shader *shader_QuadRenderer;
 extern Shader *shader_BasicRenderer;
+extern Shader *shader_Basic3DRenderer;
 
 extern GLuint ImageQuadVAO;
 extern GLuint ImageQuadVBO;

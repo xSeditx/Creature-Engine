@@ -6,19 +6,35 @@
 
 #include"Creature_Engine.h"
 
+#include<stack>
+#include<utility>
+
+#include"Renderer/LowLevel/OpenGL/Renderer/3DRenderer.h"
+#include"Renderer/LowLevel/OpenGL/Camera/Camera3D.h"
+#include"Profiling/Timing/Benchmark.h"
+std::stack<std::string> CS;
+
+
+bool TEST_PROFILE_WINDOW();
 
 /* 
 
 IMGUI ISSUE:   Docking Branch:
-    SetWindowPos does not function properly when we have windows docked in one another. The Size nor the Position is properly set.
+    1) SetWindowPos does not function properly when we have windows docked in one another. 
+    2) The Size nor the Position is properly set.
+    3) Color Picker does not move with Window which has been Docked and can only be seen when Hovering the Window above the Area meaning 
+       that the World Vertex Positions do not update when the Window Updates if it is docked in another.
 
-    Color Picker does not move with Window which has been Docked and can only be seen when Hovering the Window above the Area meaning that the World Vertex Positions do not update when the Window Updates if it is docked in another.
-
-    */
+*/
 
 
+Camera3D *Camera_3D{ nullptr };
 
-static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
+static ULARGE_INTEGER
+        lastCPU,
+        lastSysCPU, 
+        lastUserCPU;
+
 static int numProcessors;
 static HANDLE self;
 
@@ -26,94 +42,31 @@ static HANDLE self;
 #include "pdh.h"
 static PDH_HQUERY cpuQuery;
 static PDH_HCOUNTER cpuTotal;
+
 #pragma comment(lib, "Pdh.lib")
-void init_CPUmonitor() {
+void init_CPUmonitor() 
+{
     PdhOpenQuery(NULL, NULL, &cpuQuery);
     // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
     PdhAddEnglishCounter(cpuQuery, "\\Processor(_Total)\\% Processor Time", NULL, &cpuTotal);
     PdhCollectQueryData(cpuQuery);
 }
 
-double getCurrentValueCPU() {
+double getCurrentValueCPU()
+{
     PDH_FMT_COUNTERVALUE counterVal;
 
     PdhCollectQueryData(cpuQuery);
     PdhGetFormattedCounterValue(cpuTotal, PDH_FMT_DOUBLE, NULL, &counterVal);
     return counterVal.doubleValue;
 }
-//
-//void init_CPUmonitor() {
-//    SYSTEM_INFO sysInfo;
-//    FILETIME ftime, fsys, fuser;
-//
-//    GetSystemInfo(&sysInfo);
-//    numProcessors = sysInfo.dwNumberOfProcessors;
-//
-//    GetSystemTimeAsFileTime(&ftime);
-//    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
-//
-//    self = GetCurrentProcess();
-//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-//    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
-//    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
-//}
-//double getCurrentValueCPU() {
-//    FILETIME ftime, fsys, fuser;
-//    ULARGE_INTEGER now, sys, user;
-//    double percent;
-//
-//    GetSystemTimeAsFileTime(&ftime);
-//    memcpy(&now, &ftime, sizeof(FILETIME));
-//
-//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-//    memcpy(&sys, &fsys, sizeof(FILETIME));
-//    memcpy(&user, &fuser, sizeof(FILETIME));
-//    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
-//        (user.QuadPart - lastUserCPU.QuadPart);
-//    percent /= (now.QuadPart - lastCPU.QuadPart);
-//    percent /= numProcessors;
-//    lastCPU = now;
-//    lastUserCPU = user;
-//    lastSysCPU = sys;
-//
-//    return percent * 100;
-//}
-//
 
-
-
-
-int branchless_min(int a, int b)
-{// Interesting take... terrible perf
-    return a * (a < b) + b * (b <= a);// (a * 1) _ (b * 0);;
-}
-int branchless_max(int a, int b)
-{ 
-    return a * (a > b) + b * (b >= a); 
-}
-
-// CMAKE Pluggin
-// https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
-
-//#pragma optimize( "", off )
-
-//CORONA VIRUS STUDY
-//https://jamanetwork.com/journals/jama/fullarticle/2762130
 
 #define _PROFILE_MEMORY
 // https://www.scmp.com/news/china/society/article/3075567/people-blood-type-may-be-more-vulnerable-coronavirus-china-study?utm_content=article&utm_medium=Social&utm_source=Facebook&fbclid=IwAR1VsuqHUzDgoU6-zaafrHJI89Qniyxbzppif6x_SvsC9LXHGjsfwo7tM6k#Echobox=1584436870
 
 using namespace Core;
 using namespace Threading;
-
-#include<stack>
-#include<utility>
-
-
-std::stack<std::string> CS;
-
-
-bool TEST_PROFILE_WINDOW();
 
 
 /* This Camera Situation is all wrong, figure a way to fix this */
@@ -130,38 +83,69 @@ Listener KeyListener([](Event _msg)
 	case 37:
 	{// Left Key
         Application::getCamera().MoveX(-CAMERA_SPEED);
-	}
+        Camera_3D->MoveLeft(CAMERA_SPEED);
+    }
 	break;
 
 	case 38:
 	{// Up  Key
         Application::getCamera().MoveY(-CAMERA_SPEED);
+        Camera_3D->MoveForward(CAMERA_SPEED);
+
 	}
 	break;
 
 	case 39:
 	{// Right  Key
         Application::getCamera().MoveX(CAMERA_SPEED);
+        Camera_3D->MoveRight(CAMERA_SPEED);
+
 	}
 	break;
 
 	case 40:
 	{// Down  Key
         Application::getCamera().MoveY(CAMERA_SPEED);
+        Camera_3D->MoveBack(CAMERA_SPEED);
 	}
     break;
 
-	case 107: 
+	case 189: 
 	{//- Key
-   ///     Application::getCamera().ZoomOut(ZOOM_SPEED);
+         Application::getCamera().ZoomOut(ZOOM_SPEED);
 	}break;
 
-	case 109:
+    case 187:
 	{//+ Key
-  ///      Application::getCamera().ZoomIn(ZOOM_SPEED);
+         Application::getCamera().ZoomIn(ZOOM_SPEED);
 	}break;
+
+
+
+    case 188:
+    {// <  
+       // static float keyRotate = Application::getCamera().g_Rotation();
+
+        float R =(float)(DEGREES(Application::getCamera().g_Rotation()));
+        Application::getCamera().s_Rotation(R - 20);// (float)(RADIANS(Rot)));
+        Camera_3D->RotateY((float)-RADIANS(CAMERA_SPEED));
+
+       // Application::getCamera().Rotate(-1);
+    }
+    break;
+
+    case 190:
+    {// > 
+        Application::getCamera().Rotate(2);
+        Camera_3D->RotateY((float)RADIANS(CAMERA_SPEED));
+    }
+    break;
+
+    
+
 
 	}// End of Switch
+
 });
 Listener MouseWheel( [](Event _msg)
 {
@@ -170,12 +154,42 @@ Listener MouseWheel( [](Event _msg)
     if ((int16_t)SplitLParam((int)_msg.wParam).y > 0)
     {// Mouse Wheel UP
         Application::getCamera().ZoomInto(Mpos, ZOOM_SPEED);
+        Camera_3D->MoveForward(CAMERA_SPEED);
+
     }
     else
     {// Mouse Wheel DOWN
         Application::getCamera().ZoomOutFrom(Mpos, ZOOM_SPEED);
+        Camera_3D->MoveBack(CAMERA_SPEED);
+
     }
 });
+
+
+iVec2 GLOBAL_OldMouse{ 0 };
+iVec2 GLOBAL_Delta_Mouse{ 0 };
+bool Drag_Triggered{ false };
+
+
+
+Listener Mouse_Click
+(
+    [](Event _msg)
+{
+    iVec2 NewMouse = SplitLParam((int)_msg.lParam);
+
+    POINT Mouse_Position = { NewMouse.x, NewMouse.y};
+    if (DragDetect(Application::getWindow().g_Handle(), Mouse_Position))
+    {// We are Dragging the Screen, Get the Normal and the Velocity and apply to the Rotation of the 3D Camera
+        GLOBAL_Delta_Mouse = NewMouse - GLOBAL_OldMouse;
+        GLOBAL_OldMouse = NewMouse;
+
+        Drag_Triggered = true;
+       // Print( " Dragging the Mouse :" << NewMouse << " : " << GLOBAL_Delta_Mouse);
+    }
+});
+
+ 
 
 /* ============================================================================================
            Rough Sketch of a Scene class to determine what I am going to need
@@ -238,7 +252,7 @@ public:
     }
 
     /* Update the Positions of the Vertices Once Per Frame */
-    void Update()
+    void Update() trace(1)
     {
         float Amount = 1;
 
@@ -262,18 +276,22 @@ public:
 
         }
         Vertices_VAO->Unbind();
+        Return();
     }
 
     /* Render the Entire Scene */
-    void Render()
+    void Render() trace(1)
     {
         FBO->Bind();
         {
+            trace_scope("FBO_bind");
             FBO->Clear();
             RENDERER->Bind();
             {
+                trace_scope("Shader_Bind");
                 Vertices_VAO->Bind();
                 {
+                    trace_scope("VAO_Bind");
                     Application::getCamera().Bind();
                     OpenGL::Renderer::drawArray(Vertices.size());
                 }
@@ -282,6 +300,7 @@ public:
             RENDERER->Unbind();
         }
         FBO->Unbind();
+        Return();
     }
 
     Shader                        *RENDERER{ nullptr };
@@ -296,6 +315,7 @@ public:
 };
 
 
+
 /* ============================================================================================
       Main Application class which holds all the functionality and Data for our program 
 /* ============================================================================================ */
@@ -308,6 +328,9 @@ class App
 
     Renderer_test *Bucket_Test;
     OpenGL::Renderer2D *MainRenderer{ nullptr };
+   
+    OpenGL::Renderer3D *TestRenderer{ nullptr };
+
     OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
     Texture *test_Texture;
@@ -323,7 +346,7 @@ class App
     OpenGL::Surface *testSurface{ nullptr };
 
     /* Initializes User Variables */
-    virtual void OnCreate() override
+    virtual void OnCreate() override trace(1)
     {// Initialization
 
         // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Incomplete contains Errors " , " Memory Pool Class Complete ");
@@ -344,22 +367,24 @@ class App
         {
             RegisterListener(WM_KEYDOWN, KeyListener);
             RegisterListener(WM_MOUSEWHEEL, MouseWheel);
+            RegisterListener(WM_MOUSEMOVE, Mouse_Click);
         }
-       
+
         /* Creates Different Test Renderers for our Application to try out */
         MainRenderer = new OpenGL::Renderer2D({ SCREEN_X, SCREEN_Y });
         MainRenderer->Attach
         (
             new Camera2D
             (
-                (float)Application::getWindow().Width(),
+            (float)Application::getWindow().Width(),
                 (float)Application::getWindow().Height()
             )
         );
-
-
         Application::setCamera(MainRenderer->g_Camera());
 
+
+        TestRenderer = new OpenGL::Renderer3D({SCREEN_X, SCREEN_Y });
+        Camera_3D = &TestRenderer->g_Camera();
         SCENE.Create();
 
         testSurface = test_RenderPass->new_Surface({ SCREEN_X, SCREEN_Y });
@@ -410,11 +435,11 @@ class App
         test_RenderPass->attach(&Application::getCamera());;//MainRenderer->g_Camera())&Application::getCamera());//
         test_RenderPass->attach(SCENE.Vertices_VAO);
 
-        //   [  ] FIX THE GOD DAMN CAMERA ALREADY WILL YOU. 
-        //   [  ] MAKE SURE IT UPDATES PROPERLY, 
-        //   [  ] COVERS PROPER AREA, 
-        //   [  ] ATTACHES PROPER UNIFORMS 
-        //   [  ] FUCKING MAKE IT PROPER GOD DAMNIT
+        //   [ ] FIX THE GOD DAMN CAMERA ALREADY WILL YOU. 
+        //   [X] MAKE SURE IT UPDATES PROPERLY, 
+        //   [X] COVERS PROPER AREA, 
+        //   [X] ATTACHES PROPER UNIFORMS 
+        //   [ ] FUCKING MAKE IT PROPER GOD DAMNIT
 
         White = new Texture("../Resources/White.bmp");
         Black = new Texture("../Resources/Black.bmp");
@@ -443,7 +468,6 @@ class App
             UVcoord2.push_back({ 1 / C.x, 1 / C.y });
         }
 
-
         for_loop(i, 10)
         {
             Bucket_Test->Submit
@@ -452,7 +476,6 @@ class App
                 MAT
             );
         }
-
 
 
         for_loop(i, 10)
@@ -464,52 +487,85 @@ class App
             );
         }
 
-
-
-
-//  Bucket_Test->Submit
-//  (
-//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Quad), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
-//      MAT
-//  );
-// 
-//  Bucket_Test->Submit
-//  (
-//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Verts), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
-//      MAT
-//  );
-
        /// IF DEBUG
         OpenGL::enable_DebugOutput();
 
         void init_CPUmonitor();
 
         DEBUG_CODE(CheckGLERROR());
+        Return();
     }
 
+
+
     /* Renders User Defined Geometry */
-    virtual void OnRender() override
+    virtual void OnRender() override trace(1)
     {
-        MainRenderer->Render();
-        SCENE.Render(); 
-        test_RenderPass->Render();
-        testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y  * 2});
-        Bucket_Test->Render();
+        /// Currently if ANY Camera is bound before this call it trashes the MainRenderers Camera
+        /// It is possibly not the Camera but the Shader Instead. 
+        /// Would like to Detach all these systems as seperate entities and make them their own form of DrawCalls.
+        {
+            trace_scope("MainRenderer");
+            MainRenderer->Render();
+        }
+        {
+            trace_scope("SceneRender");
+            SCENE.Render();
+        }
+
+        {
+            trace_scope("Test RenderPass");
+            test_RenderPass->Render();
+        }
+
+        {
+            trace_scope("Blit FrameBuffer");
+            testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1, SCREEN_X, SCREEN_Y }, { 1, 1, SCREEN_X * 2, SCREEN_Y * 2 });
+        }
+
+        {
+            trace_scope("Bucket_Test");
+            Bucket_Test->Render();
+        }
+        {
+            trace_scope("TestRenderer");
+            TestRenderer->Render();
+        }
+
         DEBUG_CODE(CheckGLERROR());
+        Return();
 	}
 
     /* Runs on Applications Frame Update */
-	virtual void OnUpdate() override
-	{// User Generated Per Frame Update
-        if(Update_Geometry) SCENE.Update();
+    virtual void OnUpdate() override trace(1)
+    {
+        TestRenderer->Main_Camera->s_Rotation
+        (
+            {
+                DEGREES(GLOBAL_Delta_Mouse.x), 
+                0,
+                DEGREES(GLOBAL_Delta_Mouse.y)
+            }
+        );
+
+        TestRenderer->Update();
+            
+        if (Update_Geometry)
+        {
+            trace_scope("UpdateGeometry")
+            SCENE.Update();
+        }
+
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
-    	size_t Time = NewTime - PreviousTime;
+    	size_t Time = Timing::Timer<Milliseconds>::GetTime() - PreviousTime;
 		PreviousTime = NewTime;
+
+        Return();
 	}
 
     /* Cleans up the Memory of stuff we still have Active */
     virtual void OnEnd() override
-    {// Exit of the Application and Clean up
+    {
         delete(MainRenderer);
         delete(test_Texture);
     }
@@ -518,12 +574,11 @@ class App
            GUI STUFF, POTENTIALLY MIGHT CHANGE THIS LATER
     /* ========================================================================================== */
 
-    int Update_Interval{ 60 };
-    int Update_counter{ Update_Interval - 1 };
-    bool Update_Geometry{ true };
-    float Rot{ 0 };
-    Vec2 Camera_Position { 0,0 };// { -(SCREEN_X / 2), -(SCREEN_Y / 2)};//Application::getCamera().g_Position();
-
+    int   Update_Interval { 60 };
+    int   Update_counter  { Update_Interval - 1 };
+    Vec2  Camera_Position { 0,0 }; 
+    bool  Update_Geometry { true };
+    float Rot             { 0 };
 
     float Top_Time{ 0 };
 
@@ -532,10 +587,10 @@ class App
 
     /* Renders our ImGui Data */
     
-    virtual void OnRenderGUI() override
+    virtual void OnRenderGUI() override trace(1)
     {
 
-        static float Slide[3] =  {-(SCREEN_X / 2), -(SCREEN_Y / 2), 0 };//{ 0.0f, 0.0f, 0.0f }; //
+        static float Slide[3] =  {-(SCREEN_X * 0.5f), -(SCREEN_Y * 0.5f), 0 };
 
         Vec2 MainWindowSize = getWindow().g_Size();
         int Boarder = 10;
@@ -544,10 +599,8 @@ class App
         ImGui::Begin("Camera");
         {
 
-
             ImGui::SetWindowPos(ImVec2(MainWindowSize.x - (MainWindowSize.x * 0.15f), 0), true);
             ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) ) });
-
 
             float
                 H = (float)Application::getCamera().Height(),
@@ -570,11 +623,13 @@ class App
                 Application::getCamera().s_Zoom(Z);
             }
 
-
             // Set the Rotation of the Default Framebuffer
             {
+               
+                
                 ImGui::InputFloat("Rotation", &Rot, 1.0f, 1.0f, "%.3f");
-                Application::getCamera().s_Rotation((float)(RADIANS(Rot)));
+                float R = (float)(DEGREES(Application::getCamera().g_Rotation())); 
+                Application::getCamera().Rotate(Rot - R);// (float)(RADIANS(Rot)));
             }
             
 
@@ -585,6 +640,15 @@ class App
                 Application::getCamera().Resize( { W,H });
             }
 
+            // Camera for Test 3D Renderer
+            {
+                ImGui::InputFloat("3D Px", &Camera_3D->Target_Position.x, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("3D Py", &Camera_3D->Target_Position.y, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("3D Pz", &Camera_3D->Target_Position.z, 10.0f, 1.0f, "%.3f");
+                ImGui::InputFloat("Rotation X", &Camera_3D->Rotation.x, .1f, 1.0f, "%.3f");
+                ImGui::InputFloat("Rotation Y", &Camera_3D->Rotation.y, .1f, 1.0f, "%.3f");
+                ImGui::InputFloat("Rotation Z", &Camera_3D->Rotation.z, .1f, 1.0f, "%.3f");
+            }
 
             // Color Picker Widget for the Background Color 
             {
@@ -685,6 +749,7 @@ class App
         }
         ImGui::End();
         ImGui::PopStyleColor();
+        Return();
     } 
     
 };
@@ -700,7 +765,12 @@ int main()
  It would be wise to reformat and refactor the project before these minor issues become big ones  ");
 
     App MyApp;
-	MyApp.Init();
+
+    PROFILE_BEGIN_SESSION("Init", "ProfileInitResults.json");
+    {
+        MyApp.Init();
+    }
+    PROFILE_END_SESSION();
 
     /* Get the Viewport Dimensions and the Max view dimensions */
     {
@@ -710,7 +780,11 @@ int main()
         Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w);
     }
 
-	MyApp.Run();
+    PROFILE_BEGIN_SESSION("Run", "ProfileRunResults.json");
+    {
+        MyApp.Run();
+    }
+    PROFILE_END_SESSION();
 
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();
@@ -1077,137 +1151,6 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
 */
 
 
-
-
-
-
-
-
-
-
-
-
-
-/*
-/
-
-
-//capture_previous_context(&GS_ContextRecord);
-//GS_ContextRecord.Rip = (ULONGLONG)_ReturnAddress();
-//GS_ContextRecord.Rsp = (ULONGLONG)_AddressOfReturnAddress() + 8;
-//GS_ExceptionRecord.ExceptionAddress = (PVOID)GS_ContextRecord.Rip;
-//GS_ContextRecord.Rcx = stack_cookie;
-//shader_TextureRenderer->Bind();
-//{
-//    OpenGL::bind_VAO(DebugQuadVAO);
-//    shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
-//    test_Texture->Bind(0);
-//    OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
-//}
-//shader_TextureRenderer->Unbind();
-
-
-
-
-
-        Organ *Test1[100];
-
-        for (int i = 0; i < 100; ++i)
-        {
-            Test1[i] = new Organ(i);
-        }
-
-        for (int i = 0; i < 50; ++i)
-        {
-            delete(Test1[i]);
-        }
-        for (int i = 0; i < 50; ++i)
-        {
-            Test1[i] = new Organ(i);
-        }
-        for (int i = 0; i < 25; ++i)
-        {
-            delete(Test1[i]);
-        }
-        for (int i = 0; i < 25; ++i)
-        {
-            Test1[i] = new Organ(i);
-        }
-
-        size_t ElementTest{ 0 };
-        for (auto& T : Organ::Pool)
-        {// Cycle over ever Block in the Pool
-            Print("Range ForLoop: " << T.Value);
-            ++ElementTest;
-        }
-        assert(ElementTest   == Organ::Pool.chunkCount());
-        assert(sizeof(Organ) == Organ::Pool.chunkSize());
-
-        for (int i{ 0 }; i < Organ::Pool.size(); ++i)
-        {// Cycle over every Byte in the Raw Data
-            Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
-        }
-
-        Print("Pool Size" << Organ::Pool.size());
-
-        Organ::Pool.clear();
-        for (int i{ 0 }; i < Organ::Pool.size(); ++i)
-        {
-            Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
-        }
-
-
-        Print("Is It Full : " << Organ::Pool.is_Empty());
-        assert(Organ::Pool.is_Full() == true);
-
-        delete(Test1[1]);
-        Print("Testing Delete to Free up Space... Is it Still Full : " << Organ::Pool.is_Full());
-        assert(Organ::Pool.is_Full() == false);
-
-
-        Print("Is It Empty : " << Organ::Pool.is_Full());
-        assert(Organ::Pool.is_Empty() == false);
-
-        Test1[1] = new Organ(1);
-        Print("Allocating Again Is it Full Again: " << Organ::Pool.is_Full());
-        assert(Organ::Pool.is_Full() == true);
-/
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//int TestRecursion(int _param)
-//{
-//	_param--;
-//	Print("Recursion " << _param);
-//	if(_param > 0)
-//	{
-//       
-//            WARN_ME("This is Currently disabled due to Error cant convert _Ty' to 'int (__cdecl *const )(int &) ------ _Ty=int (__cdecl &)(int) ")
-//		//auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
-//	//	E.get();
-//	}
-//	Print("Exit " << _param);
-//
-//	return 65;
-//}
-//
-
-
  /*
  
  add_executable (${PROJECT_NAME} ../Bin/glad/src/glad.c    Core/Application.cpp    Core/ECS/ECS.cpp   Core/ECS/ECScomponent.cpp    Core/ECS/ECSsystem.cpp    Core/ECS/TestComponents.cpp    Core/EventSystem.cpp    Core/Math/Easing.cpp  
@@ -1234,11 +1177,7 @@ Add any required libraries to the target_link_libraries line. For example:
 target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c mycustomlibrary)
 
 
-
-
-
 $(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/
-
 
 /OUT:"C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\x64\Debug\CreatureEngine.lib" "SOIL.lib" /MACHINE:X64 /NOLOGO 
 
@@ -1248,128 +1187,53 @@ target_link_libraries(A B)
 target_link_libraries(B A)
 add_executable(main main.c)
 target_link_libraries(main A)
-
-
- Core/Application.h   
- Core/Common.h   
- Core/Defines.h   
- Core/ECS/ECS.h   
- Core/ECS/ECScomponent.h   
- Core/ECS/ECSsystem.h   
- Core/ECS/TestComponents.h   
- Core/EventSystem.h   
- Core/Math/Easing.h   
- Core/Math/Math.h   
- Core/Memory.h   
- Core/Observer.h   
- Core/Threading/Future.h   
- Core/Threading/TestFunctions.h   
- Core/Threading/Threadpool.h   
- Core/Utility.h   
- Creatures/AI/Evolution.h   
- Creatures/AI/NeuralNetwork.h   
- Creatures/Creatures.h   
- Creatures/Physics/Springs.h   
- Physics/Colliders.h   
- Physics/Physics.h   
- Physics/Quadtree.h   
- Profiling/MemoryPerf/MemTracker.h   
- Profiling/RenderUtilities.h   
- Profiling/SystemInfo.h   
- Profiling/Timing/Benchmark.h   
- Profiling/Timing/Timer.h   
- Renderer/Layer.h   
- Renderer/LowLevel/Materials/Image/Bitmap.h   
- Renderer/LowLevel/Materials/Image/Texture.h   
- Renderer/LowLevel/OpenGL/Camera/Camera.h   
- Renderer/LowLevel/OpenGL/Camera/Camera2D.h   
- Renderer/LowLevel/OpenGL/Camera/Camera3D.h   
- Renderer/LowLevel/OpenGL/OpenGL.h   
- Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h   
- Renderer/LowLevel/OpenGL/Renderer/GameObject.h   
- Renderer/LowLevel/OpenGL/Renderer/GLBuffers.h   
- Renderer/LowLevel/OpenGL/Renderer/Mesh.h   
- Renderer/LowLevel/OpenGL/Renderer/Pipeline.h   
- Renderer/LowLevel/OpenGL/Renderer/Primitives.h   
- Renderer/LowLevel/OpenGL/Renderer/Renderer.h   
- Renderer/LowLevel/OpenGL/Renderer/Sprite.h   
- Renderer/LowLevel/OpenGL/Renderer/Transform.h   
- Renderer/LowLevel/OpenGL/Shader/Shader.h   
- Renderer/LowLevel/OpenGL/UniformBuffer.h   
- 
- 
- 
- 
- */
-
-static const char* fmt_table_int[3][4] =
-{
-    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
-    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
-    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
-};
-static const char* fmt_table_float[3][4] =
-{
-    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
-    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
-    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
-};
-//
-//
-///* Blits the contents of the FrameBuffer with area of _srcRect onto the _destRect of this Surface */
-//void blit_FrameBuffer(FrameBufferObject *_fbo, iVec4 _source, iVec4 _dest)
-//{
-//    CheckGLERROR();
-//
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo->GL_Handle);
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Handle());
-//
-//    glBlitFramebuffer
-//    (
-//        _source.x, _source.y, _source.z, _source.w,
-//        _dest.x, _dest.y, _dest.z, _dest.w,
-//        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR
-//    );
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//    CheckGLERROR();
-//
-//}
-//
-///* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
-//int blit_Surface(Surface *_source, iVec4 _srcRect, iVec4 _destRect)
-//{
-//    blit_FrameBuffer(_source->FBO, _srcRect, _destRect);
-//}
-//
-///* Read a Rectangle of pixels from the Surface */
-//void *read_Pixels(iVec4 _sourceRect, uint32_t _format = GL_RGBA, uint32_t _type = GL_UNSIGNED_SHORT_4_4_4_4) //format = GL_ALPHA, GL_RGB, and GL_RGBA. type = GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1.
-//{/// NOTE: Should I lock this first
-//    void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
-//    CheckGLERROR();
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
-//    glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-//    CheckGLERROR();
-//    return results;
-//}
-//
-
-
-// ImGui::InpitFloat("Scale", &A)     
-// ImGui::InpitFloat("Scale", &A)
-// Dragable Position Slider for the Camera 
-// {
-//    int val = 0, val2 = 100;
-//    ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
-//    Application::getCamera().s_Position(Camera_Position);
-//}
-/// IF i UPDATE CAMERA HERE THE SLIDERS CAN MOVE THE CAMERA, IF I UPDATE AFTER THIS THE SLIDERS TRANSLATE IT BACK INTO PLACE EVERY FRAME NULLIFYING WHAT IS BEING DONE TO IT.
-// Position Slider for the Camera 
-//{                   //Application::getCamera().Update();
-// ImGui::SliderFloat3("Position", Slide, -1000, 1000);
-// Application::getCamera().Translate({ Slide[0], Slide[1] });
-// Application::getCamera().s_Position({ Slide[0], Slide[1] });
-// Application::getCamera().set_Zoom(Slide[2]);
-//}
-
+   
+   HEADERS
+  =========
+    Core/Application.h   
+    Core/Common.h   
+    Core/Defines.h   
+    Core/ECS/ECS.h   
+    Core/ECS/ECScomponent.h   
+    Core/ECS/ECSsystem.h   
+    Core/ECS/TestComponents.h   
+    Core/EventSystem.h   
+    Core/Math/Easing.h   
+    Core/Math/Math.h   
+    Core/Memory.h   
+    Core/Observer.h   
+    Core/Threading/Future.h   
+    Core/Threading/TestFunctions.h   
+    Core/Threading/Threadpool.h   
+    Core/Utility.h   
+    Creatures/AI/Evolution.h   
+    Creatures/AI/NeuralNetwork.h   
+    Creatures/Creatures.h   
+    Creatures/Physics/Springs.h   
+    Physics/Colliders.h   
+    Physics/Physics.h   
+    Physics/Quadtree.h   
+    Profiling/MemoryPerf/MemTracker.h   
+    Profiling/RenderUtilities.h   
+    Profiling/SystemInfo.h   
+    Profiling/Timing/Benchmark.h   
+    Profiling/Timing/Timer.h   
+    Renderer/Layer.h   
+    Renderer/LowLevel/Materials/Image/Bitmap.h   
+    Renderer/LowLevel/Materials/Image/Texture.h   
+    Renderer/LowLevel/OpenGL/Camera/Camera.h   
+    Renderer/LowLevel/OpenGL/Camera/Camera2D.h   
+    Renderer/LowLevel/OpenGL/Camera/Camera3D.h   
+    Renderer/LowLevel/OpenGL/OpenGL.h   
+    Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h   
+    Renderer/LowLevel/OpenGL/Renderer/GameObject.h   
+    Renderer/LowLevel/OpenGL/Renderer/GLBuffers.h   
+    Renderer/LowLevel/OpenGL/Renderer/Mesh.h   
+    Renderer/LowLevel/OpenGL/Renderer/Pipeline.h   
+    Renderer/LowLevel/OpenGL/Renderer/Primitives.h   
+    Renderer/LowLevel/OpenGL/Renderer/Renderer.h   
+    Renderer/LowLevel/OpenGL/Renderer/Sprite.h   
+    Renderer/LowLevel/OpenGL/Renderer/Transform.h   
+    Renderer/LowLevel/OpenGL/Shader/Shader.h   
+    Renderer/LowLevel/OpenGL/UniformBuffer.h   
+*/
