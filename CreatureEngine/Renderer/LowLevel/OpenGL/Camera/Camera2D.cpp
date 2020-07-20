@@ -87,7 +87,7 @@ void Camera2D::Update()
     ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 }
 
-void Camera2D::Resize(Vec2 _size)
+void Camera2D::Resize(iVec2 _size)
 {
     AspectRatio = _size.x / _size.y; 
     ZoomLevel = (ZoomLevel > 0.1f) ? ZoomLevel : 0.1f;

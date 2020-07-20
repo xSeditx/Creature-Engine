@@ -32,7 +32,7 @@ public:
 	void Rotate(float _angle);
 
 	/* Resizes the Projection Matrix to the given _size */
-	void Resize(Vec2 _size);
+	void Resize(iVec2 _size);
 
 	/* Gets the Width of the Cameras Dimensions */
 	const int Width() { return  static_cast<int>(Size.x); }
@@ -153,3 +153,18 @@ private:
 // ProjectionMatrix = glm::scale(ProjectionMatrix, Vec3(ZoomLevel, ZoomLevel, ZoomLevel));
 // ProjectionMatrix = glm::translate(ProjectionMatrix, Vec3(-(_pos.x), -(_pos.y), 0));
 
+
+// Zoominto
+//ZoomLevel += ((_amount) / 100);
+//if (ZoomLevel < 0)
+//{// Prevent Projection Matrix from Inverting
+//    ZoomLevel = 0;
+//    return;
+//}
+// Zoomoutfrom
+//ZoomLevel += (-(_amount) / 100);
+//if (ZoomLevel < 0)
+//{// Prevent Projection Matrix from Inverting
+//    ZoomLevel = 0;
+//    return;
+//}
