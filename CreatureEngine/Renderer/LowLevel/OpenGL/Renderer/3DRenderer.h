@@ -172,7 +172,7 @@ namespace OpenGL
 
         void Update() trace(1)
         {
-            Main_Camera->Update();
+        //    Main_Camera->Update();
             Return();
         }
 

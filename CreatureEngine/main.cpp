@@ -328,7 +328,9 @@ class App
 
     Renderer_test *Bucket_Test;
     OpenGL::Renderer2D *MainRenderer{ nullptr };
+   
     OpenGL::Renderer3D *TestRenderer{ nullptr };
+
     OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
     Texture *test_Texture;
@@ -466,22 +468,6 @@ class App
             UVcoord2.push_back({ 1 / C.x, 1 / C.y });
         }
 
-   //  OpenGL::make_Context_Current
-   //  (
-   //      Application::getWindow().g_DeviceContext(), 
-   //      Application::getWindow().g_Loading_Context()
-   //  );
-
-//  what is shared are 
-//      shaders, programs, textures, buffers, samplers, renderbuffers, sync objects.
-//      FBO are shared only when created through EXT version of extension.
-//      ARB version FBO are NOT shared. 
-//      if you mix EXT and ARB version of FBO functions it can lead to undefined behavior.
-
-        
-
-
-
         for_loop(i, 10)
         {
             Bucket_Test->Submit
@@ -501,25 +487,6 @@ class App
             );
         }
 
- //  OpenGL::make_Context_Current
-//  (
-//      Application::getWindow().g_DeviceContext(), 
-//      Application::getWindow().g_GL_Context()
-//  );
-
-
-//  Bucket_Test->Submit
-//  (
-//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Quad), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
-//      MAT
-//  );
-// 
-//  Bucket_Test->Submit
-//  (
-//      new Renderer_test::Geometry(new VertexBufferObject<Vec2>(Verts), new VertexBufferObject<Vec4>(Cols), new VertexBufferObject<Vec2>(UVcoord)),
-//      MAT
-//  );
-
        /// IF DEBUG
         OpenGL::enable_DebugOutput();
 
@@ -534,10 +501,9 @@ class App
     /* Renders User Defined Geometry */
     virtual void OnRender() override trace(1)
     {
-        {
-            trace_scope("TestRenderer");
-            TestRenderer->Render();
-        }
+        /// Currently if ANY Camera is bound before this call it trashes the MainRenderers Camera
+        /// It is possibly not the Camera but the Shader Instead. 
+        /// Would like to Detach all these systems as seperate entities and make them their own form of DrawCalls.
         {
             trace_scope("MainRenderer");
             MainRenderer->Render();
@@ -554,12 +520,16 @@ class App
 
         {
             trace_scope("Blit FrameBuffer");
-            testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y * 2 });
+            testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1, SCREEN_X, SCREEN_Y }, { 1, 1, SCREEN_X * 2, SCREEN_Y * 2 });
         }
 
         {
             trace_scope("Bucket_Test");
             Bucket_Test->Render();
+        }
+        {
+            trace_scope("TestRenderer");
+            TestRenderer->Render();
         }
 
         DEBUG_CODE(CheckGLERROR());
@@ -568,7 +538,7 @@ class App
 
     /* Runs on Applications Frame Update */
     virtual void OnUpdate() override trace(1)
-    {// User Generated Per Frame Update
+    {
         TestRenderer->Main_Camera->s_Rotation
         (
             {
@@ -577,28 +547,17 @@ class App
                 DEGREES(GLOBAL_Delta_Mouse.y)
             }
         );
-     //    TestRenderer->Main_Camera->RotateX(RADIANS(GLOBAL_Delta_Mouse.x));
-     //   TestRenderer->Main_Camera->RotateZ(RADIANS(GLOBAL_Delta_Mouse.y));
-     // TestRenderer->Main_Camera->Rotation.x += ((GLOBAL_Delta_Mouse.x));
-     //TestRenderer->Main_Camera->Rotation.y += ((GLOBAL_Delta_Mouse.y));
-     //  TestRenderer->Main_Camera->Rotate
-     //  (
-     //      (float)GLOBAL_Delta_Mouse.x, 
-     //      (float)GLOBAL_Delta_Mouse.y
-     //  );
 
-
-        //TestRenderer->Update();
-        //TestRenderer->g_Camera().Position.x += .1;
-        //TestRenderer->g_Camera().Position.z += .1;
+        TestRenderer->Update();
             
         if (Update_Geometry)
         {
             trace_scope("UpdateGeometry")
             SCENE.Update();
         }
+
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
-    	size_t Time = NewTime - PreviousTime;
+    	size_t Time = Timing::Timer<Milliseconds>::GetTime() - PreviousTime;
 		PreviousTime = NewTime;
 
         Return();
@@ -606,7 +565,7 @@ class App
 
     /* Cleans up the Memory of stuff we still have Active */
     virtual void OnEnd() override
-    {// Exit of the Application and Clean up
+    {
         delete(MainRenderer);
         delete(test_Texture);
     }
@@ -1192,137 +1151,6 @@ Best case ptrs	                /vmb	Use best case “pointer to class member” repr
 */
 
 
-
-
-
-
-
-
-
-
-
-
-
-/*
-/
-
-
-//capture_previous_context(&GS_ContextRecord);
-//GS_ContextRecord.Rip = (ULONGLONG)_ReturnAddress();
-//GS_ContextRecord.Rsp = (ULONGLONG)_AddressOfReturnAddress() + 8;
-//GS_ExceptionRecord.ExceptionAddress = (PVOID)GS_ContextRecord.Rip;
-//GS_ContextRecord.Rcx = stack_cookie;
-//shader_TextureRenderer->Bind();
-//{
-//    OpenGL::bind_VAO(DebugQuadVAO);
-//    shader_TextureRenderer->SetUniform("Position", {1,1,100,100 });
-//    test_Texture->Bind(0);
-//    OpenGL::Renderer::drawArray(DebugQuadVBO, 6);
-//}
-//shader_TextureRenderer->Unbind();
-
-
-
-
-
-        Organ *Test1[100];
-
-        for (int i = 0; i < 100; ++i)
-        {
-            Test1[i] = new Organ(i);
-        }
-
-        for (int i = 0; i < 50; ++i)
-        {
-            delete(Test1[i]);
-        }
-        for (int i = 0; i < 50; ++i)
-        {
-            Test1[i] = new Organ(i);
-        }
-        for (int i = 0; i < 25; ++i)
-        {
-            delete(Test1[i]);
-        }
-        for (int i = 0; i < 25; ++i)
-        {
-            Test1[i] = new Organ(i);
-        }
-
-        size_t ElementTest{ 0 };
-        for (auto& T : Organ::Pool)
-        {// Cycle over ever Block in the Pool
-            Print("Range ForLoop: " << T.Value);
-            ++ElementTest;
-        }
-        assert(ElementTest   == Organ::Pool.chunkCount());
-        assert(sizeof(Organ) == Organ::Pool.chunkSize());
-
-        for (int i{ 0 }; i < Organ::Pool.size(); ++i)
-        {// Cycle over every Byte in the Raw Data
-            Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
-        }
-
-        Print("Pool Size" << Organ::Pool.size());
-
-        Organ::Pool.clear();
-        for (int i{ 0 }; i < Organ::Pool.size(); ++i)
-        {
-            Print("Data[" << i << "] = " << (int)*Organ::Pool.get_Data(i));
-        }
-
-
-        Print("Is It Full : " << Organ::Pool.is_Empty());
-        assert(Organ::Pool.is_Full() == true);
-
-        delete(Test1[1]);
-        Print("Testing Delete to Free up Space... Is it Still Full : " << Organ::Pool.is_Full());
-        assert(Organ::Pool.is_Full() == false);
-
-
-        Print("Is It Empty : " << Organ::Pool.is_Full());
-        assert(Organ::Pool.is_Empty() == false);
-
-        Test1[1] = new Organ(1);
-        Print("Allocating Again Is it Full Again: " << Organ::Pool.is_Full());
-        assert(Organ::Pool.is_Full() == true);
-/
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//int TestRecursion(int _param)
-//{
-//	_param--;
-//	Print("Recursion " << _param);
-//	if(_param > 0)
-//	{
-//       
-//            WARN_ME("This is Currently disabled due to Error cant convert _Ty' to 'int (__cdecl *const )(int &) ------ _Ty=int (__cdecl &)(int) ")
-//		//auto E = ThreadPool::get().Async(TestRecursion, (int)_param );
-//	//	E.get();
-//	}
-//	Print("Exit " << _param);
-//
-//	return 65;
-//}
-//
-
-
  /*
  
  add_executable (${PROJECT_NAME} ../Bin/glad/src/glad.c    Core/Application.cpp    Core/ECS/ECS.cpp   Core/ECS/ECScomponent.cpp    Core/ECS/ECSsystem.cpp    Core/ECS/TestComponents.cpp    Core/EventSystem.cpp    Core/Math/Easing.cpp  
@@ -1349,11 +1177,7 @@ Add any required libraries to the target_link_libraries line. For example:
 target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c mycustomlibrary)
 
 
-
-
-
 $(VC_LibraryPath_x64); $(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/
-
 
 /OUT:"C:\Users\curti\Source\Repos\xSeditx\Creature-Engine\x64\Debug\CreatureEngine.lib" "SOIL.lib" /MACHINE:X64 /NOLOGO 
 
@@ -1363,189 +1187,53 @@ target_link_libraries(A B)
 target_link_libraries(B A)
 add_executable(main main.c)
 target_link_libraries(main A)
-
-
- Core/Application.h   
- Core/Common.h   
- Core/Defines.h   
- Core/ECS/ECS.h   
- Core/ECS/ECScomponent.h   
- Core/ECS/ECSsystem.h   
- Core/ECS/TestComponents.h   
- Core/EventSystem.h   
- Core/Math/Easing.h   
- Core/Math/Math.h   
- Core/Memory.h   
- Core/Observer.h   
- Core/Threading/Future.h   
- Core/Threading/TestFunctions.h   
- Core/Threading/Threadpool.h   
- Core/Utility.h   
- Creatures/AI/Evolution.h   
- Creatures/AI/NeuralNetwork.h   
- Creatures/Creatures.h   
- Creatures/Physics/Springs.h   
- Physics/Colliders.h   
- Physics/Physics.h   
- Physics/Quadtree.h   
- Profiling/MemoryPerf/MemTracker.h   
- Profiling/RenderUtilities.h   
- Profiling/SystemInfo.h   
- Profiling/Timing/Benchmark.h   
- Profiling/Timing/Timer.h   
- Renderer/Layer.h   
- Renderer/LowLevel/Materials/Image/Bitmap.h   
- Renderer/LowLevel/Materials/Image/Texture.h   
- Renderer/LowLevel/OpenGL/Camera/Camera.h   
- Renderer/LowLevel/OpenGL/Camera/Camera2D.h   
- Renderer/LowLevel/OpenGL/Camera/Camera3D.h   
- Renderer/LowLevel/OpenGL/OpenGL.h   
- Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h   
- Renderer/LowLevel/OpenGL/Renderer/GameObject.h   
- Renderer/LowLevel/OpenGL/Renderer/GLBuffers.h   
- Renderer/LowLevel/OpenGL/Renderer/Mesh.h   
- Renderer/LowLevel/OpenGL/Renderer/Pipeline.h   
- Renderer/LowLevel/OpenGL/Renderer/Primitives.h   
- Renderer/LowLevel/OpenGL/Renderer/Renderer.h   
- Renderer/LowLevel/OpenGL/Renderer/Sprite.h   
- Renderer/LowLevel/OpenGL/Renderer/Transform.h   
- Renderer/LowLevel/OpenGL/Shader/Shader.h   
- Renderer/LowLevel/OpenGL/UniformBuffer.h   
- 
- 
- 
- 
- */
-
-static const char* fmt_table_int[3][4] =
-{
-    {   "%3d",   "%3d",   "%3d",   "%3d" }, // Short display
-    { "R:%3d", "G:%3d", "B:%3d", "A:%3d" }, // Long display for RGBA
-    { "H:%3d", "S:%3d", "V:%3d", "A:%3d" }  // Long display for HSVA
-};
-static const char* fmt_table_float[3][4] =
-{
-    {   "%0.3f",   "%0.3f",   "%0.3f",   "%0.3f" }, // Short display
-    { "R:%0.3f", "G:%0.3f", "B:%0.3f", "A:%0.3f" }, // Long display for RGBA
-    { "H:%0.3f", "S:%0.3f", "V:%0.3f", "A:%0.3f" }  // Long display for HSVA
-};
-//
-//
-///* Blits the contents of the FrameBuffer with area of _srcRect onto the _destRect of this Surface */
-//void blit_FrameBuffer(FrameBufferObject *_fbo, iVec4 _source, iVec4 _dest)
-//{
-//    CheckGLERROR();
-//
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo->GL_Handle);
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Handle());
-//
-//    glBlitFramebuffer
-//    (
-//        _source.x, _source.y, _source.z, _source.w,
-//        _dest.x, _dest.y, _dest.z, _dest.w,
-//        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR
-//    );
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//    CheckGLERROR();
-//
-//}
-//
-///* Blits the contents of _source with area of _srcRect onto the _destRect of this Surface */
-//int blit_Surface(Surface *_source, iVec4 _srcRect, iVec4 _destRect)
-//{
-//    blit_FrameBuffer(_source->FBO, _srcRect, _destRect);
-//}
-//
-///* Read a Rectangle of pixels from the Surface */
-//void *read_Pixels(iVec4 _sourceRect, uint32_t _format = GL_RGBA, uint32_t _type = GL_UNSIGNED_SHORT_4_4_4_4) //format = GL_ALPHA, GL_RGB, and GL_RGBA. type = GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_4_4_4_4, or GL_UNSIGNED_SHORT_5_5_5_1.
-//{/// NOTE: Should I lock this first
-//    void *results = new int[_sourceRect.z * _sourceRect.w * sizeof(int)];
-//    CheckGLERROR();
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO->GL_Handle);
-//    glReadPixels(_sourceRect.x, _sourceRect.y, _sourceRect.z, _sourceRect.w, _format, _type, results);
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-//    CheckGLERROR();
-//    return results;
-//}
-//
-
-
-// ImGui::InpitFloat("Scale", &A)     
-// ImGui::InpitFloat("Scale", &A)
-// Dragable Position Slider for the Camera 
-// {
-//    int val = 0, val2 = 100;
-//    ImGui::DragFloatRange2("Range", &Camera_Position.x, &Camera_Position.y);
-//    Application::getCamera().s_Position(Camera_Position);
-//}
-/// IF i UPDATE CAMERA HERE THE SLIDERS CAN MOVE THE CAMERA, IF I UPDATE AFTER THIS THE SLIDERS TRANSLATE IT BACK INTO PLACE EVERY FRAME NULLIFYING WHAT IS BEING DONE TO IT.
-// Position Slider for the Camera 
-//{                   //Application::getCamera().Update();
-// ImGui::SliderFloat3("Position", Slide, -1000, 1000);
-// Application::getCamera().Translate({ Slide[0], Slide[1] });
-// Application::getCamera().s_Position({ Slide[0], Slide[1] });
-// Application::getCamera().set_Zoom(Slide[2]);
-//}
-// { -(SCREEN_X / 2), -(SCREEN_Y / 2)}; 
-// Application::getCamera().g_Position();
-
-
-
-//void init_CPUmonitor() {
-//    SYSTEM_INFO sysInfo;
-//    FILETIME ftime, fsys, fuser;
-//
-//    GetSystemInfo(&sysInfo);
-//    numProcessors = sysInfo.dwNumberOfProcessors;
-//
-//    GetSystemTimeAsFileTime(&ftime);
-//    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
-//
-//    self = GetCurrentProcess();
-//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-//    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
-//    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
-//}
-//double getCurrentValueCPU() {
-//    FILETIME ftime, fsys, fuser;
-//    ULARGE_INTEGER now, sys, user;
-//    double percent;
-//
-//    GetSystemTimeAsFileTime(&ftime);
-//    memcpy(&now, &ftime, sizeof(FILETIME));
-//
-//    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-//    memcpy(&sys, &fsys, sizeof(FILETIME));
-//    memcpy(&user, &fuser, sizeof(FILETIME));
-//    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
-//        (user.QuadPart - lastUserCPU.QuadPart);
-//    percent /= (now.QuadPart - lastCPU.QuadPart);
-//    percent /= numProcessors;
-//    lastCPU = now;
-//    lastUserCPU = user;
-//    lastSysCPU = sys;
-//
-//    return percent * 100;
-//}
-//
-
-
-
-
-int branchless_min(int a, int b)
-{// Interesting take... terrible perf
-    return a * (a < b) + b * (b <= a);// (a * 1) _ (b * 0);;
-}
-int branchless_max(int a, int b)
-{
-    return a * (a > b) + b * (b >= a);
-}
-
-// CMAKE Pluggin
-// https://marketplace.visualstudio.com/items?itemName=DaisukeAtaraxiA.VSslnToCMakePlugin
-
-//#pragma optimize( "", off )
-
-//CORONA VIRUS STUDY
-//https://jamanetwork.com/journals/jama/fullarticle/2762130
+   
+   HEADERS
+  =========
+    Core/Application.h   
+    Core/Common.h   
+    Core/Defines.h   
+    Core/ECS/ECS.h   
+    Core/ECS/ECScomponent.h   
+    Core/ECS/ECSsystem.h   
+    Core/ECS/TestComponents.h   
+    Core/EventSystem.h   
+    Core/Math/Easing.h   
+    Core/Math/Math.h   
+    Core/Memory.h   
+    Core/Observer.h   
+    Core/Threading/Future.h   
+    Core/Threading/TestFunctions.h   
+    Core/Threading/Threadpool.h   
+    Core/Utility.h   
+    Creatures/AI/Evolution.h   
+    Creatures/AI/NeuralNetwork.h   
+    Creatures/Creatures.h   
+    Creatures/Physics/Springs.h   
+    Physics/Colliders.h   
+    Physics/Physics.h   
+    Physics/Quadtree.h   
+    Profiling/MemoryPerf/MemTracker.h   
+    Profiling/RenderUtilities.h   
+    Profiling/SystemInfo.h   
+    Profiling/Timing/Benchmark.h   
+    Profiling/Timing/Timer.h   
+    Renderer/Layer.h   
+    Renderer/LowLevel/Materials/Image/Bitmap.h   
+    Renderer/LowLevel/Materials/Image/Texture.h   
+    Renderer/LowLevel/OpenGL/Camera/Camera.h   
+    Renderer/LowLevel/OpenGL/Camera/Camera2D.h   
+    Renderer/LowLevel/OpenGL/Camera/Camera3D.h   
+    Renderer/LowLevel/OpenGL/OpenGL.h   
+    Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h   
+    Renderer/LowLevel/OpenGL/Renderer/GameObject.h   
+    Renderer/LowLevel/OpenGL/Renderer/GLBuffers.h   
+    Renderer/LowLevel/OpenGL/Renderer/Mesh.h   
+    Renderer/LowLevel/OpenGL/Renderer/Pipeline.h   
+    Renderer/LowLevel/OpenGL/Renderer/Primitives.h   
+    Renderer/LowLevel/OpenGL/Renderer/Renderer.h   
+    Renderer/LowLevel/OpenGL/Renderer/Sprite.h   
+    Renderer/LowLevel/OpenGL/Renderer/Transform.h   
+    Renderer/LowLevel/OpenGL/Shader/Shader.h   
+    Renderer/LowLevel/OpenGL/UniformBuffer.h   
+*/

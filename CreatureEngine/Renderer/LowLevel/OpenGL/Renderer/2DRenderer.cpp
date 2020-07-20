@@ -253,7 +253,6 @@ namespace OpenGL
     }
     void Renderer2D::Update() trace(1)
     {
-        //mainCamera->Update();
  
         if (Positions.size())
         {
