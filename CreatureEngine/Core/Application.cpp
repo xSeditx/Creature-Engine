@@ -18,6 +18,7 @@ _________________________________ APPLICATION CLASS ____________________________
 USAGE:
 =========================================================================================================
 */
+#include"../Profiling/Timing/Benchmark.h"
 
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -37,9 +38,8 @@ std::mutex DEBUGMutex;
  //_______________________________ STATE and FLOW HANDLING _______________________________________________
  //=======================================================================================================
 
- void Application::Init()
+ void Application::Init() trace(1)
  {
-
 	 set(*this);
 	 CreateApplicationWindow();
 	 DEBUG_CODE(CheckGLERROR());
@@ -118,6 +118,8 @@ std::mutex DEBUGMutex;
 
      ImGui_ImplWin32_Init(getWindow().g_Handle());// ImGui_ImplWin32_InitPlatformInterface();//
      ImGui_ImplOpenGL3_Init("#version 130");
+
+     Return();
  }
 
  // Helper structure we store in the void* RenderUserData field of each ImGuiViewport to easily retrieve our backend data.
@@ -282,6 +284,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
     s_Title(_name);
 	/// Create Window Handle and Device Context
 	{
+        trace_scope("CreateWindow")
 		assert(&Application::get() != nullptr);
 		WindowProperties.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 		WindowProperties.lpfnWndProc = (WNDPROC)WindowProc;
@@ -325,7 +328,9 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 	/// Set Pixel Format
 	{// Creating and Setting Pixel Format Scope
 		/* 	NOTE:  A good pixel format to choose for the dummy context is a simple 32-bit RGBA color buffer, with a 24-bit depth buffer and 8-bit stencil, as we did in the above sample PFD. This will usually get a hardware accelerated pixel format. */
-		memset(&PixelFormatDescriptor, 0, sizeof(PixelFormatDescriptor));
+        trace_scope("SetPixelFormat");
+
+        memset(&PixelFormatDescriptor, 0, sizeof(PixelFormatDescriptor));
 		PixelFormatDescriptor.nSize = sizeof(PixelFormatDescriptor);
 		PixelFormatDescriptor.nVersion = 1;
 		PixelFormatDescriptor.dwFlags = PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | _flags;
@@ -607,7 +612,8 @@ void Application::Dispatch( Event _msg)
         }
     }
 }
-bool Application::PeekMSG ( Event& _msg) trace(1)
+
+bool Application::PeekMSG ( Event& _msg) trace("",1)
 { ///This is a test of my Trace macro
 	Return( getWindow().Messenger().PeekMSG(_msg));
 }
@@ -648,7 +654,7 @@ void Application::Resize(Vec2 _size)
 
 
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) trace(1)
 {
     if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
         return true;
@@ -683,12 +689,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	};
 
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	Return( DefWindowProc(hwnd, uMsg, wParam, lParam));
 }
 
 
 _static Application::Window::InputDevices::_mouse    Application::Window::InputDevices::Mouse;
 _static Application::Window::InputDevices::_keyboard Application::Window::InputDevices::Keyboard;
+
 //_static Application::Window::EventHandler& Application::Window::EventHandler::get()
 //{
 //	static Application::Window::EventHandler instance;

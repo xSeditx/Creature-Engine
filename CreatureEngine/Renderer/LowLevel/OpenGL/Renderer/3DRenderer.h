@@ -13,7 +13,7 @@ namespace OpenGL
     /* =========================================================================================================== */
     struct Renderer3D
     {
-        Renderer3D(iVec2 _size)
+        Renderer3D(iVec2 _size) trace(1);
         {
             Main_FBO = new FrameBufferObject(_size.x, _size.y);
             Main_Camera = new Camera3D( _size, Vec3(0, 0, 1000), Vec3(0, 0, 0));
@@ -165,17 +165,18 @@ namespace OpenGL
             }
             Main_Program->Unbind();
 
-
+            Return();
            // static Vec3 *Concat_Vertices(Vec3 *_dataA, size_t _szA, Vec3 *_dataB, size_t _szB)
         }
 
 
-        void Update()
+        void Update() trace(1)
         {
             Main_Camera->Update();
+            Return();
         }
 
-        void Render()
+        void Render() trace(1)
         {
             Update();
             Main_FBO->Bind();
@@ -191,6 +192,8 @@ namespace OpenGL
                 Main_Program->Unbind();
             }
             Main_FBO->Unbind();
+
+            Return();
         }
 
 
@@ -213,7 +216,7 @@ namespace OpenGL
         std::vector<Vec4> Colors;   // The Colors of our Geometry
 
         /* Returns a new buffer which is a combination of the two old buffers */
-        static Vec3 *Concat_Vertices(Vec3 *_dataA, size_t _szA, Vec3 *_dataB, size_t _szB)
+        static Vec3 *Concat_Vertices(Vec3 *_dataA, size_t _szA, Vec3 *_dataB, size_t _szB) trace(1)
         {
             size_t newSize = _szA + _szB;
 
@@ -226,7 +229,7 @@ namespace OpenGL
             delete(_dataB);
             delete(_dataA);
 
-            return newBuffer;
+            Return( newBuffer);
         }
 
 

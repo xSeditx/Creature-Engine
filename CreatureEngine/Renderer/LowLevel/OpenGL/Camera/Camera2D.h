@@ -32,7 +32,7 @@ public:
 	void Rotate(float _angle);
 
 	/* Resizes the Projection Matrix to the given _size */
-	void Resize(Vec2 _size);
+	void Resize(iVec2 _size);
 
 	/* Gets the Width of the Cameras Dimensions */
 	const int Width() { return  static_cast<int>(Size.x); }

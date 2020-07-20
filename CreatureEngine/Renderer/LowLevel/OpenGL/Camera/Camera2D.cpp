@@ -59,7 +59,7 @@ void Camera2D::MoveY(float _amount)
 }
 void Camera2D::Rotate(float _angle)
 {// Rotate the Camera by _angle
-	Rotation += RADIANS(_angle);
+	Rotation += (float)RADIANS(_angle);
     Update();
 }
 void Camera2D::Translate(Vec2 _pos)
@@ -87,9 +87,9 @@ void Camera2D::Update()
     ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 }
 
-void Camera2D::Resize(Vec2 _size)
+void Camera2D::Resize(iVec2 _size)
 {
-    AspectRatio = _size.x / _size.y; 
+    AspectRatio = (float)_size.x / (float)_size.y;
     ZoomLevel = (ZoomLevel > 0.1f) ? ZoomLevel : 0.1f;
     float Level = 1.0f / ZoomLevel;
     float HalfH = _size.y * 0.5f;

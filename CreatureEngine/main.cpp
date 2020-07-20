@@ -11,7 +11,7 @@
 
 #include"Renderer/LowLevel/OpenGL/Renderer/3DRenderer.h"
 #include"Renderer/LowLevel/OpenGL/Camera/Camera3D.h"
-
+#include"Profiling/Timing/Benchmark.h"
 std::stack<std::string> CS;
 
 
@@ -128,7 +128,7 @@ Listener KeyListener([](Event _msg)
 
         float R =(float)(DEGREES(Application::getCamera().g_Rotation()));
         Application::getCamera().s_Rotation(R - 20);// (float)(RADIANS(Rot)));
-        Camera_3D->RotateY(-DEGREES(CAMERA_SPEED));
+        Camera_3D->RotateY((float)-RADIANS(CAMERA_SPEED));
 
        // Application::getCamera().Rotate(-1);
     }
@@ -137,7 +137,7 @@ Listener KeyListener([](Event _msg)
     case 190:
     {// > 
         Application::getCamera().Rotate(2);
-        Camera_3D->RotateY(DEGREES(CAMERA_SPEED));
+        Camera_3D->RotateY((float)RADIANS(CAMERA_SPEED));
     }
     break;
 
@@ -166,8 +166,8 @@ Listener MouseWheel( [](Event _msg)
 });
 
 
-Vec2 GLOBAL_OldMouse{ 0 };
-Vec2 GLOBAL_Delta_Mouse{ 0 };
+iVec2 GLOBAL_OldMouse{ 0 };
+iVec2 GLOBAL_Delta_Mouse{ 0 };
 bool Drag_Triggered{ false };
 
 
@@ -176,7 +176,7 @@ Listener Mouse_Click
 (
     [](Event _msg)
 {
-    Vec2 NewMouse = SplitLParam((int)_msg.lParam);
+    iVec2 NewMouse = SplitLParam((int)_msg.lParam);
 
     POINT Mouse_Position = { NewMouse.x, NewMouse.y};
     if (DragDetect(Application::getWindow().g_Handle(), Mouse_Position))
@@ -185,15 +185,11 @@ Listener Mouse_Click
         GLOBAL_OldMouse = NewMouse;
 
         Drag_Triggered = true;
-        Print( " Dragging the Mouse :" << NewMouse << " : " << GLOBAL_Delta_Mouse);
+       // Print( " Dragging the Mouse :" << NewMouse << " : " << GLOBAL_Delta_Mouse);
     }
 });
 
-//  BOOL DragDetect
-//  (
-//      HWND  hwnd,
-//      POINT pt
-//  );
+ 
 
 /* ============================================================================================
            Rough Sketch of a Scene class to determine what I am going to need
@@ -256,7 +252,7 @@ public:
     }
 
     /* Update the Positions of the Vertices Once Per Frame */
-    void Update()
+    void Update() trace(1)
     {
         float Amount = 1;
 
@@ -280,18 +276,22 @@ public:
 
         }
         Vertices_VAO->Unbind();
+        Return();
     }
 
     /* Render the Entire Scene */
-    void Render()
+    void Render() trace(1)
     {
         FBO->Bind();
         {
+            trace_scope("FBO_bind");
             FBO->Clear();
             RENDERER->Bind();
             {
+                trace_scope("Shader_Bind");
                 Vertices_VAO->Bind();
                 {
+                    trace_scope("VAO_Bind");
                     Application::getCamera().Bind();
                     OpenGL::Renderer::drawArray(Vertices.size());
                 }
@@ -300,6 +300,7 @@ public:
             RENDERER->Unbind();
         }
         FBO->Unbind();
+        Return();
     }
 
     Shader                        *RENDERER{ nullptr };
@@ -343,7 +344,7 @@ class App
     OpenGL::Surface *testSurface{ nullptr };
 
     /* Initializes User Variables */
-    virtual void OnCreate() override
+    virtual void OnCreate() override trace(1)
     {// Initialization
 
         // TEST_ASSERT( TEST_Memory_Pool_Class() , " Memory Pool Class Incomplete contains Errors " , " Memory Pool Class Complete ");
@@ -525,50 +526,82 @@ class App
         void init_CPUmonitor();
 
         DEBUG_CODE(CheckGLERROR());
+        Return();
     }
 
+
+
     /* Renders User Defined Geometry */
-    virtual void OnRender() override
+    virtual void OnRender() override trace(1)
     {
-        TestRenderer->Render();
-        MainRenderer->Render();
-        SCENE.Render(); 
-        test_RenderPass->Render();
-        testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y  * 2});
-        Bucket_Test->Render();
+        {
+            trace_scope("TestRenderer");
+            TestRenderer->Render();
+        }
+        {
+            trace_scope("MainRenderer");
+            MainRenderer->Render();
+        }
+        {
+            trace_scope("SceneRender");
+            SCENE.Render();
+        }
+
+        {
+            trace_scope("Test RenderPass");
+            test_RenderPass->Render();
+        }
+
+        {
+            trace_scope("Blit FrameBuffer");
+            testSurface->blit_FrameBuffer(SCENE.FBO, { 1,1,SCREEN_X, SCREEN_Y }, { 1,1,SCREEN_X * 2, SCREEN_Y * 2 });
+        }
+
+        {
+            trace_scope("Bucket_Test");
+            Bucket_Test->Render();
+        }
+
         DEBUG_CODE(CheckGLERROR());
+        Return();
 	}
 
     /* Runs on Applications Frame Update */
-    virtual void OnUpdate() override
+    virtual void OnUpdate() override trace(1)
     {// User Generated Per Frame Update
-     //TestRenderer->Main_Camera->s_Rotation
-     //(
-     //    {
-     //        RADIANS(GLOBAL_Delta_Mouse.x), 
-     //        0,
-     //        RADIANS(GLOBAL_Delta_Mouse.y)
-     //    }
-     //);
-    //    TestRenderer->Main_Camera->RotateX(RADIANS(GLOBAL_Delta_Mouse.x));
+        TestRenderer->Main_Camera->s_Rotation
+        (
+            {
+                DEGREES(GLOBAL_Delta_Mouse.x), 
+                0,
+                DEGREES(GLOBAL_Delta_Mouse.y)
+            }
+        );
+     //    TestRenderer->Main_Camera->RotateX(RADIANS(GLOBAL_Delta_Mouse.x));
      //   TestRenderer->Main_Camera->RotateZ(RADIANS(GLOBAL_Delta_Mouse.y));
+     // TestRenderer->Main_Camera->Rotation.x += ((GLOBAL_Delta_Mouse.x));
+     //TestRenderer->Main_Camera->Rotation.y += ((GLOBAL_Delta_Mouse.y));
+     //  TestRenderer->Main_Camera->Rotate
+     //  (
+     //      (float)GLOBAL_Delta_Mouse.x, 
+     //      (float)GLOBAL_Delta_Mouse.y
+     //  );
 
-       // TestRenderer->Main_Camera->Rotation.x += ((GLOBAL_Delta_Mouse.x));
-        //TestRenderer->Main_Camera->Rotation.y += ((GLOBAL_Delta_Mouse.y));
 
-        TestRenderer->Main_Camera->Rotate(GLOBAL_Delta_Mouse.x, GLOBAL_Delta_Mouse.y);
         //TestRenderer->Update();
         //TestRenderer->g_Camera().Position.x += .1;
         //TestRenderer->g_Camera().Position.z += .1;
-
-
+            
         if (Update_Geometry)
         {
+            trace_scope("UpdateGeometry")
             SCENE.Update();
         }
 		size_t NewTime = Timing::Timer<Milliseconds>::GetTime();
     	size_t Time = NewTime - PreviousTime;
 		PreviousTime = NewTime;
+
+        Return();
 	}
 
     /* Cleans up the Memory of stuff we still have Active */
@@ -595,7 +628,7 @@ class App
 
     /* Renders our ImGui Data */
     
-    virtual void OnRenderGUI() override
+    virtual void OnRenderGUI() override trace(1)
     {
 
         static float Slide[3] =  {-(SCREEN_X * 0.5f), -(SCREEN_Y * 0.5f), 0 };
@@ -607,10 +640,8 @@ class App
         ImGui::Begin("Camera");
         {
 
-
             ImGui::SetWindowPos(ImVec2(MainWindowSize.x - (MainWindowSize.x * 0.15f), 0), true);
             ImGui::SetWindowSize({ MainWindowSize.x * 0.15f, MainWindowSize.y - ((MainWindowSize.y  * 0.2f) ) });
-
 
             float
                 H = (float)Application::getCamera().Height(),
@@ -759,6 +790,7 @@ class App
         }
         ImGui::End();
         ImGui::PopStyleColor();
+        Return();
     } 
     
 };
@@ -774,7 +806,12 @@ int main()
  It would be wise to reformat and refactor the project before these minor issues become big ones  ");
 
     App MyApp;
-	MyApp.Init();
+
+    PROFILE_BEGIN_SESSION("Init", "ProfileInitResults.json");
+    {
+        MyApp.Init();
+    }
+    PROFILE_END_SESSION();
 
     /* Get the Viewport Dimensions and the Max view dimensions */
     {
@@ -784,7 +821,11 @@ int main()
         Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w);
     }
 
-	MyApp.Run();
+    PROFILE_BEGIN_SESSION("Run", "ProfileRunResults.json");
+    {
+        MyApp.Run();
+    }
+    PROFILE_END_SESSION();
 
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();

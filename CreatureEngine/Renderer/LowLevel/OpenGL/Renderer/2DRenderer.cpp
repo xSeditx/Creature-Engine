@@ -1,6 +1,6 @@
 #include "2DRenderer.h"
 
-
+#include"./../../../../Profiling/Timing/Benchmark.h"
 //GLuint DebugQuadVAO{ 0 };
 //GLuint DebugQuadVBO{ 0 };
 //Shader *QuadRenderer{ nullptr };
@@ -15,9 +15,10 @@ namespace OpenGL
 
 
     /* Constructs the Render pass object */
-    RenderPass::RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal, GLenum _format)
+    RenderPass::RenderPass(int _width, int _height, Shader *_shader, GLenum _datatype, GLenum _internal, GLenum _format) 
         :
         GPU_Program{ _shader }
+    trace(1)
     {
         std::vector<Vec2> VertData;
         std::vector<Vec4> ColorData;
@@ -64,9 +65,11 @@ namespace OpenGL
             VAO->Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec4>(ColorData));
         }
         GPU_Program->Unbind();
+        Return();
     }
 
     void RenderPass::Render()
+        trace(1)
     {
         Vec4 Stored_Color = OpenGL::get_ClearColor();
         // Can likely do away with Unbind in the future but for now it is needed
@@ -89,12 +92,14 @@ namespace OpenGL
         }
         FBO->Unbind();
         OpenGL::set_ClearColor(Stored_Color);
+        Return();
     }
     void RenderPass::attach(Camera2D *_camera)
     {
         mainCamera = _camera;
     }
     void RenderPass::attach(Geometry *_mesh)
+        trace(1)
     {
         GPU_Program->Bind();
         {
@@ -106,6 +111,7 @@ namespace OpenGL
             }
             VAO->Unbind();
         }
+        Return();
     }
     void RenderPass::attach(VertexArrayObject* _vao)
     {
@@ -136,7 +142,7 @@ namespace OpenGL
         __debugbreak();
         if (needs_Updated)
         {
-            /// UPDATE THE BUFFERS IF WE HAVE CHANGED ANYTHING IN THEM'
+            /// UPDATE THE BUFFERS IF WE HAVE CHANGED ANYTHING IN THEM
         }
     }
 
@@ -148,7 +154,7 @@ namespace OpenGL
 
 
 
-    Renderer2D::Renderer2D(Vec2 _size)
+    Renderer2D::Renderer2D(Vec2 _size) trace(1)
     {
         WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
         //mainCamera = new Camera2D(_size);
@@ -195,7 +201,9 @@ namespace OpenGL
         }
         LineRenderer->Unbind();
      // OpenGL::set_LineWidth(6);
+        Return();
     }
+
     void Renderer2D::renderQuad(Vec2 _topleft, Vec2 _size, Vec4 _color)
     {
         Positions.emplace_back(Vec4(_topleft.x, _topleft.y, _size.x, _size.y));
@@ -212,7 +220,7 @@ namespace OpenGL
     {
         ColorData.insert(ColorData.end(), _batch.size() / 6, CurrentRenderColor);
     }
-    void Renderer2D::Render()
+    void Renderer2D::Render() trace(1)
     {
 
         OpenGL::bind_VAO(QuadVAO);
@@ -233,6 +241,8 @@ namespace OpenGL
             Renderer::drawArrayLines( (uint32_t)Line_Data.size());
         }
         LineRenderer->Unbind();
+
+        Return();
     }
     void Renderer2D::Flush()
     {// Clears buffer, perhaps change this idk
@@ -241,12 +251,13 @@ namespace OpenGL
         Positions.clear();
         Line_Data.clear();
     }
-    void Renderer2D::Update()
+    void Renderer2D::Update() trace(1)
     {
         //mainCamera->Update();
  
         if (Positions.size())
         {
+            trace_scope("QuadData");
             OpenGL::bind_VBO(ColorVBO);
             OpenGL::set_BufferData(ColorData);
 
@@ -256,6 +267,7 @@ namespace OpenGL
 
         if (Line_Data.size())
         {
+            trace_scope("Line Data");
             VAO_Lines.Buffers[0]->Update(Line_Data);// .data(), Line_Data.size());
             // OpenGL::bind_VBO(LineVBO);
             // OpenGL::set_BufferData(Line_Data);
@@ -263,6 +275,8 @@ namespace OpenGL
             //OpenGL::set_BufferData(Line_Data);
             //*VBO_Test = Line_Data;
         }
+
+        Return();
     }
     void Renderer2D::Resize(Vec2 _size)
     {
