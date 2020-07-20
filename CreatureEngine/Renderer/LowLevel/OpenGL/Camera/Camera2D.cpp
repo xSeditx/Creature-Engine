@@ -79,9 +79,13 @@ void Camera2D::Bind()
 void Camera2D::Update()
 {// Updates the interpolation of the Camera
     Mat4 Transform =
-         
-        glm::translate(Mat4(1.0f), Vec3(Position.x, Position.y, -1.0f)) *
-        glm::rotate(Mat4(1.0f), Rotation, Vec3(0, 0, 1.0f));
+        glm::translate
+        (
+            Mat4(1.0f),
+            Vec3(Position.x, Position.y, -1.0f)) * glm::rotate(Mat4(1.0f),
+                Rotation,
+                Vec3(0, 0, 1.0f)
+            );
 
     ViewMatrix = glm::inverse(Transform);
     ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
@@ -107,16 +111,9 @@ void Camera2D::Resize(iVec2 _size)
 
 void Camera2D::Zoom(float _amount)
 {//  Zooms in or out of a scene by manipulating the Projection Matrix
-    TODO("Make a Zoom In To Function that Zooms to an XY location regardless of specifically where the cameras Center is at that moment");
-    REFACTOR("I believe it is fixed although it appears ever so slightly off on the Y axis. Perhaps I need to adjust for aspect ratio or something idk");
     ZoomLevel += (_amount / 100);
-// __debugbreak();
-// if (ZoomLevel < 0)
-// {// Prevent Projection Matrix from Inverting
-//     ZoomLevel = 0;  
-//     return;
-// }
 }
+
 void Camera2D::ZoomIn(float _amount) {  Zoom(-_amount);  }
 void Camera2D::ZoomOut(float _amount){  Zoom(_amount); }
 void Camera2D::ZoomInto(Vec2 _pos, float _amount)
@@ -150,8 +147,7 @@ void Camera2D::ZoomOutFrom(Vec2 _pos, float _amount)
 /*=======================================================================================================================================================
 
 
-Transformations:
-https://www.opengl.org/archives/resources/faq/technical/transformations.htm
+ Transformations: https://www.opengl.org/archives/resources/faq/technical/transformations.htm
 
 
 */

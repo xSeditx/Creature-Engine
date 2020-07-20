@@ -531,9 +531,9 @@ void Application::Dispatch( Event _msg)
         }
     }
 }
-bool Application::PeekMSG ( Event& _msg) trace(1)
+bool Application::PeekMSG ( Event& _msg) 
 { ///This is a test of my Trace macro
-	Return( getWindow().Messenger().PeekMSG(_msg));
+	 return  getWindow().Messenger().PeekMSG(_msg);
 }
 bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _rangemax, int _handlingflags)
 {
