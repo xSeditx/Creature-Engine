@@ -154,7 +154,8 @@ namespace OpenGL
 
 
 
-    Renderer2D::Renderer2D(Vec2 _size) trace(1)
+    Renderer2D::Renderer2D(Vec2 _size) 
+        trace(1)
     {
         WARN_ME("When Initializing likely prior to this ctor even being called due to overloading the Memory_pool new/delete this fails and I can not figure out why");
         //mainCamera = new Camera2D(_size);
@@ -180,27 +181,20 @@ namespace OpenGL
         }
         InstanceRenderer->Unbind();
 
-        WARN_ME("Did you mean Unbind here?");
-
         OpenGL::bind_VBO(QuadVBO); 
         OpenGL::set_BufferData(sizeof(QuadData), QuadData);
 
 
-///     Layers.push(new Layer("Root Layer"));
-
-       // LineVAO = OpenGL::new_VAO();
-       // LineVBO = OpenGL::new_VBO();
-
         LineRenderer = new Shader(Line_shader_v, Line_shader_f);
-       // VBO_Test = new VertexBufferObject<Vec2>(nullptr, 0);
 
         LineRenderer->Bind();
         {
-            //OpenGL::bind_VAO(LineVAO);
             VAO_Lines.Attach(BufferTypes::VERTEX, new VertexBufferObject<Vec2>(nullptr, 0));
         }
         LineRenderer->Unbind();
-     // OpenGL::set_LineWidth(6);
+ ///    Layers.push(new Layer("Root Layer"));
+
+    // OpenGL::set_LineWidth(6);
         Return();
     }
 
@@ -220,7 +214,8 @@ namespace OpenGL
     {
         ColorData.insert(ColorData.end(), _batch.size() / 6, CurrentRenderColor);
     }
-    void Renderer2D::Render() trace(1)
+    void Renderer2D::Render()
+        trace(1)
     {
 
         OpenGL::bind_VAO(QuadVAO);
@@ -251,7 +246,8 @@ namespace OpenGL
         Positions.clear();
         Line_Data.clear();
     }
-    void Renderer2D::Update() trace(1)
+    void Renderer2D::Update()
+        trace(1)
     {
  
         if (Positions.size())
@@ -267,12 +263,7 @@ namespace OpenGL
         if (Line_Data.size())
         {
             trace_scope("Line Data");
-            VAO_Lines.Buffers[0]->Update(Line_Data);// .data(), Line_Data.size());
-            // OpenGL::bind_VBO(LineVBO);
-            // OpenGL::set_BufferData(Line_Data);
-            //OpenGL::bind_VBO(VBO_Test->GL_Handle);
-            //OpenGL::set_BufferData(Line_Data);
-            //*VBO_Test = Line_Data;
+            VAO_Lines.Buffers[0]->Update(Line_Data);
         }
 
         Return();
@@ -406,6 +397,30 @@ std::vector<Vec2> make_Triangle(Vec2 _center, Vec2 _sz)
     return result;
 }
 
+
+
+
+
+
+
+
+
+
+
+/* 
+
+
++-------------------+
+|                 / |
+|               /   |
+|            /      |
+|         /         |
+|      /            |
+|   /               |
+|/                  |
++------------------ +
+
+ */
 
 
 

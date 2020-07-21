@@ -35,7 +35,6 @@ Shader::~Shader()
 }
 void Shader::Delete()
 {
-	WARN_ME("Error creatd here if Shader is made on the Stack and destroyed after strings are gone");
 	if (Filepath)
 	{
 		DEBUGPrint(CON_Red, "Called the Shader Destructor: " << Filepath);
@@ -53,12 +52,8 @@ void Shader::Bind()
 }
 void Shader::Unbind()
 {
-	REFACTOR("Perhaps return just the Shader ID instead of dereferencing a pointer here.");
-	//DEBUG_CODE(Print("Disabling Shader:" << Shader::get_CurrentShader()));
-	int Prog = Pop().GL_Handle;
-	glUseProgram(Prog);
-	//DEBUG_CODE(Print("Reenabling Shader:" << Shader::get_CurrentShader()));
- }
+    OpenGL::set_Shader(Pop().GL_Handle);
+}
  
 void Shader::Push(Shader& shad)
 {
@@ -67,8 +62,6 @@ void Shader::Push(Shader& shad)
 Shader& Shader::Pop()
 {
 	ActiveShader.pop();
-	//DEBUG_CODE(if (ActiveShader.empty()) __debugbreak(););
-	//DEBUG_CODE(Print("Popping Shader: " << ActiveShader.top()->GL_Handle));
 	return *ActiveShader.top();
 }
 
@@ -85,9 +78,8 @@ GLuint Shader::Load()
 	std::ifstream ShaderFile(Filepath, std::ios::in);
 	if (!ShaderFile)
 	{
-		Print("Shader File Not Found:" << Filepath);
+		DEBUGPrint(CON_Red, "Shader File Not Found:" << Filepath);
 		__debugbreak();
-		//    EngineErrorResponse(ERROR_FILE_NOT_FOUND, 0, (char*)Filepath);
 	}
 	std::string Line;
 	std::string VertexShader;
@@ -117,8 +109,6 @@ GLuint Shader::Load()
 	std::string frag = SS[FRAGMENT].str();
 
 	CompileStrings(vert, frag);
-	TODO("See TRASHED SHADER in Trash.txt");
-
 	return GL_Handle;
 }
 
@@ -129,9 +119,8 @@ void Shader::Reload()
 	std::ifstream ShaderFile(Filepath, std::ios::in);
 	if (!ShaderFile)
 	{
-		Print("Shader File Not Found:" << Filepath);
+		DEBUGPrint(CON_Red, "Shader File Not Found:" << Filepath);
 		__debugbreak();
-		//		EngineErrorResponse(ERROR_FILE_NOT_FOUND, 0, (char*)Filepath);
 	}
 	std::string Line;
 	std::string VertexShader;
@@ -161,7 +150,6 @@ void Shader::Reload()
 	std::string frag = SS[FRAGMENT].str();
 
 	CompileStrings(vert, frag);
-	TODO("See TRASHED SHADER in Trash.txt");
 	return;
 }
 
@@ -173,17 +161,17 @@ Static Gets and Shader information
 //----------------
 int Shader::get_FunctionCount(int _shadertype)
 {//	To query the number of active subroutine functions, pname? must be GL_ACTIVE_SUBROUTINES.
-	int RETURN;
-	glGetProgramStageiv(GL_Handle, _shadertype, GL_ACTIVE_SUBROUTINES, &RETURN);
-	return RETURN;
+	int result;
+	glGetProgramStageiv(GL_Handle, _shadertype, GL_ACTIVE_SUBROUTINES, &result);
+	return result;
 }
 std::string Shader::get_FunctionName(int _shadertype, int _index)
 {
-	char RETURN[255] = { 0 };
+	char result[255] = { 0 };
 	GLsizei Length;
 	GLsizei Size = 20;
-	glGetActiveSubroutineName(GL_Handle, _shadertype, _index, Size, &Length, RETURN);
-	return RETURN;
+	glGetActiveSubroutineName(GL_Handle, _shadertype, _index, Size, &Length, result);
+	return result;
 }
 void Shader::GetShaderError(ErrorType T)
 {
@@ -204,9 +192,8 @@ void Shader::GetShaderError(ErrorType T)
 			glGetShaderiv(VertID, GL_INFO_LOG_LENGTH, &length);
 			//std::vector<char> error(length);
 			glGetShaderInfoLog(VertID, length, &length, &error[0]);
-			std::cout << "Failed to compile VertexShader: " << &error[0] << std::endl;
+            DEBUGPrint(CON_Red, "Failed to compile VertexShader: " << &error[0]);
 			glDeleteShader(VertID);
-			//EngineErrorResponse(0x10, VertID, (char*)Filepath);
 		}
 		break;
 	case Frag:
@@ -217,9 +204,8 @@ void Shader::GetShaderError(ErrorType T)
 		{
 			glGetShaderiv(FragID, GL_INFO_LOG_LENGTH, &length);
 			glGetShaderInfoLog(FragID, length, &length, &error[0]);
-			Print("Failed to compile Fragment Shader:" << &error[0]);
+            DEBUGPrint(CON_Red, "Failed to compile Fragment Shader:" << &error[0]);
 			glDeleteShader(FragID);
-			//	EngineErrorResponse(0x11, FragID, (char*)Filepath);
 		}
 		break;
 
@@ -231,7 +217,6 @@ void Shader::GetShaderError(ErrorType T)
 			glGetProgramInfoLog(GL_Handle, length, &length, &error[0]);
 			std::cout << "Link Fail " << &error[0] << std::endl;
 			glDeleteShader(GL_Handle);
-			//	EngineErrorResponse(0x12, ID, (char*)Filepath);
 		}
 		break;
 	};
@@ -270,8 +255,6 @@ void Shader::SetUniform(const char* _name, float _val, float _val2, float _val3,
     _GL(glUniform4f(glGetUniformLocation(GL_Handle, _name), _val, _val2, _val3, _val4));
 }
 
- 
-
 void Shader::SetUniform(const char* _name, int _val)
 {
 	_GL(glUniform1i(glGetUniformLocation(GL_Handle, _name), _val));
@@ -282,9 +265,6 @@ void Shader::SetUniform(const char* _name, uint64_t _val)
 	GLuint Location = glGetUniformLocation(GL_Handle, _name);
 	glProgramUniformui64NV(GL_Handle, glGetUniformLocation(GL_Handle, _name), _val);
 }
-
-
-
 void Shader::SetUniform(const char* _name, int _val, int _val2)
 {
 	_GL(glUniform2i(glGetUniformLocation(GL_Handle, _name), _val, _val2));
@@ -293,6 +273,7 @@ void Shader::SetUniform(const char* _name, int _val, int _val2, int _val3)
 {
 	glUniform3i(glGetUniformLocation(GL_Handle, _name), _val, _val2, _val3);
 }
+
 void Shader::SetUniform(const char* _name, Vec2 _val)
 {
 	glUniform2fv(glGetUniformLocation(GL_Handle, _name), 1, &_val[0]);
@@ -305,6 +286,7 @@ void Shader::SetUniform(const char* _name, Vec4 _val)
 {
 	glUniform4fv(glGetUniformLocation(GL_Handle, _name), 1, &_val[0]);
 }
+
 void Shader::SetUniform(const char* _name, Mat3 _val)
 {
 	glUniformMatrix3fv(glGetUniformLocation(GL_Handle, _name), 1, GL_FALSE, glm::value_ptr(_val));
@@ -317,23 +299,23 @@ void Shader::SetUniform(const char* _name, Mat4 _val)
 
 void Shader::SetUniform(const char* _name, std::vector < Vec2>& _array)
 {
-	_GL(glUniform2fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0])));
+	glUniform2fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0]));
 }
 void Shader::SetUniform(const char* _name, std::vector < Vec3>& _array)
 {
-	_GL(glUniform3fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0])));
+	glUniform3fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0]));
 }
 void Shader::SetUniform(const char* _name, std::vector < Vec4>& _array)
-{
-	_GL(glUniform4fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0])));
+{  
+	glUniform4fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), glm::value_ptr(_array[0]));
 }
 void Shader::SetUniform(const char* _name, std::vector < Mat3>& _array)
 {
-	_GL(glUniformMatrix3fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), GL_FALSE, glm::value_ptr(_array[0])));
+	glUniformMatrix3fv(glGetUniformLocation(GL_Handle, _name), (GLsizei)_array.size(), GL_FALSE, glm::value_ptr(_array[0]));
 }
 void Shader::SetUniform(const char* _name, std::vector<Mat4>& _array)
 {
-	_GL(glUniformMatrix4fv(glGetUniformLocation(GL_Handle, _name),2, GL_FALSE, reinterpret_cast<GLfloat*>(&_array[0]))); // Passing 20 matrices
+	glUniformMatrix4fv(glGetUniformLocation(GL_Handle, _name),2, GL_FALSE, reinterpret_cast<GLfloat*>(&_array[0])); // Passing 20 matrices
 }
 
 

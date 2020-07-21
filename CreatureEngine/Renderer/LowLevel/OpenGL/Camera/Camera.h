@@ -36,7 +36,11 @@ public:
 	void set_ProjectionMatrix(Mat4 mat);
 
 
-    virtual Vec2 get_Center() { WARN_ME("get_Canter in Viewport Class is just returning junk: Be sure to correct this"); return Vec2(SCREEN_X, SCREEN_Y); }
+    virtual Vec2 get_Center()
+    {
+        //WARN_ME("get_Canter in Viewport Class is just returning junk: Be sure to correct this"); 
+        return Vec2(0);
+    }
     //=======================================================================================================================================================
 
 	static Viewport& get()               { return *ActiveCamera; }

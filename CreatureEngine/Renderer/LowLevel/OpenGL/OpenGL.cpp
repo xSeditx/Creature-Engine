@@ -96,9 +96,6 @@ namespace OpenGL
 
 
 
-
-
-
     void set_PixelFormat()
     {// Creating and Setting Pixel Format Scope
         /* 	NOTE:  A good pixel format to choose for the dummy context is a simple 32-bit RGBA color buffer, with a 24-bit depth buffer and 8-bit stencil, as we did in the above sample PFD. This will usually get a hardware accelerated pixel format. */
@@ -157,6 +154,30 @@ namespace OpenGL
             &PixelFormatDescriptor
         );
     }
+
+
+
+
+    void Attribute_Pointer(uint32_t _location, uint32_t _elements)
+    {
+        glVertexAttribPointer(_location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
+    }
+    void bind_VAO(int32_t _vaoID)
+    {
+        DEBUG_CODE(CheckGLERROR());
+        assert(_vaoID != NULL);
+        glBindVertexArray(_vaoID);
+        DEBUG_CODE(CheckGLERROR());
+    } 
+    void delete_VAO(uint32_t _id)
+    {// Frees ID for a Vertex Array Object
+        glDeleteVertexArrays(1, &_id);
+    }
+    void enable_Attribute(uint32_t _location)
+    {
+        glEnableVertexAttribArray(_location);
+    }
+
 
     int  get_RecommendedIndices()
     {// Recommended maximum number of vertex array indices  */
@@ -220,17 +241,6 @@ namespace OpenGL
         glGenVertexArrays(1, &result);
         DEBUG_CODE(CheckGLERROR());
         return result;
-    }
-    void delete_VAO(uint32_t _id)
-    {// Frees ID for a Vertex Array Object
-        glDeleteVertexArrays(1, &_id);
-    }
-    void bind_VAO(int32_t _vaoID)
-    {
-        DEBUG_CODE(CheckGLERROR());
-        assert(_vaoID != NULL);
-        glBindVertexArray(_vaoID);
-        DEBUG_CODE(CheckGLERROR());  
     }
     void unbind_VAO()
     {
@@ -324,7 +334,6 @@ namespace OpenGL
     }
     bool isIBO(int _array)
     {// Is an ID a Vertex Buffer Object 
-        REFACTOR("Not sure if this is complete. isIBO() in OpenGL.cpp");
         return (bool)(glIsBuffer(_array));
     }
 
@@ -628,7 +637,9 @@ namespace OpenGL
     void  DisableProgramPointSize() { glDisable(GL_PROGRAM_POINT_SIZE); }
 
 
-
+    void set_Shader(uint32_t _program) {
+        glUseProgram(_program);
+    }
 
     uint32_t set_Attribute(uint32_t _shaderID, uint8_t _elements, const char* _name)
     {
@@ -663,15 +674,6 @@ namespace OpenGL
         CheckGLERROR();
         return Location;
     }
-    void enable_Attribute(uint32_t _location)
-    {
-        glEnableVertexAttribArray(_location);
-    }
-    void Attribute_Pointer(uint32_t _location, uint32_t _elements)
-    {
-        glVertexAttribPointer(_location, _elements, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
-    }
-
 
     void set_Divisor(uint8_t _location, uint32_t _divisor)
     {

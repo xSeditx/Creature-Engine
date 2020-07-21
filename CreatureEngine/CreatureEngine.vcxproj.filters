@@ -42,9 +42,6 @@
     <Filter Include="Source Files\Creatures">
       <UniqueIdentifier>{b2c0ab8f-2568-4f40-8f10-03178b8e972c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Creatures\Physics">
-      <UniqueIdentifier>{a054c2fc-d92a-4a14-9841-654c2838deb6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Creatures\AI">
       <UniqueIdentifier>{5afc59c8-ece9-442e-96b9-d4e6e8848629}</UniqueIdentifier>
     </Filter>
@@ -152,9 +149,6 @@
     <ClCompile Include="Creatures\Creatures.cpp">
       <Filter>Source Files\Creatures</Filter>
     </ClCompile>
-    <ClCompile Include="Creatures\Physics\Springs.cpp">
-      <Filter>Source Files\Creatures\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="Creatures\AI\Evolution.cpp">
       <Filter>Source Files\Creatures\AI</Filter>
     </ClCompile>
@@ -215,6 +209,12 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.cpp">
       <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Graphics\Terrain.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Creatures\Physics\Springs.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">
@@ -252,9 +252,6 @@
     </ClInclude>
     <ClInclude Include="Core\Threading\Future.h">
       <Filter>Source Files\System\Threading</Filter>
-    </ClInclude>
-    <ClInclude Include="Profiling\RenderUtilities.h">
-      <Filter>Source Files\Profiling</Filter>
     </ClInclude>
     <ClInclude Include="Core\Application.h">
       <Filter>Source Files\System</Filter>
@@ -315,9 +312,6 @@
     </ClInclude>
     <ClInclude Include="Creatures\Creatures.h">
       <Filter>Source Files\Creatures</Filter>
-    </ClInclude>
-    <ClInclude Include="Creatures\Physics\Springs.h">
-      <Filter>Source Files\Creatures\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Creatures\AI\Evolution.h">
       <Filter>Source Files\Creatures\AI</Filter>
@@ -381,6 +375,12 @@
     </ClInclude>
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.h">
       <Filter>Source Files\Graphics\OpenGL\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\Terrain.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Creatures\Physics\Springs.h">
+      <Filter>Source Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

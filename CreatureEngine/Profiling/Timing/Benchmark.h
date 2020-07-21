@@ -224,6 +224,9 @@ we will have more functionality for tracking the stack and functions while easil
 */
 // std::cout << "IN: "<< x << typeid(*this).name() << "\n"
 // std::cout <<"OUT: "<< x << typeid(*this).name() << "\n"
+
+#pragma warning( disable :4003) // not enough arguments for function-like macro invocation 'Return'
+
 #ifdef _STACK_TRACE_
 #    define trace_IN(x)   PROFILE_FUNCTION()
 #    define trace_OUT(x) 

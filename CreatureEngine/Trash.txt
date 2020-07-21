@@ -3,6 +3,19 @@
 
 
 
+
+    /* Get the Viewport Dimensions and the Max view dimensions 
+    {
+        iVec2 r = OpenGL::get_MaximumViewportDimensions();
+        Print("Max Viewport Dimensions: " << r.x << " : " << r.y);
+        iVec4 vp = OpenGL::get_Viewport();
+        Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w);
+    }
+*/
+
+
+
+
      //    TestRenderer->Main_Camera->RotateX(RADIANS(GLOBAL_Delta_Mouse.x));
      //   TestRenderer->Main_Camera->RotateZ(RADIANS(GLOBAL_Delta_Mouse.y));
      // TestRenderer->Main_Camera->Rotation.x += ((GLOBAL_Delta_Mouse.x));

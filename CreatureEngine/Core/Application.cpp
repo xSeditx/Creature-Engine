@@ -85,7 +85,8 @@ std::mutex DEBUGMutex;
 
      // Setup Dear ImGui context
      IMGUI_CHECKVERSION();
-     ImGUI_Context =  ImGui::CreateContext();::SetCapture(Application::getWindow().g_Handle()); /// Dont believe this is needed as I do this in the Window Creation Function I think
+     ImGUI_Context =  ImGui::CreateContext();
+     ::SetCapture(Application::getWindow().g_Handle()); /// Dont believe this is needed as I do this in the Window Creation Function I think
      ImGuiIO&  GUI_io = ImGui::GetIO(); (void)GUI_io;
 
      GUI_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
@@ -157,11 +158,6 @@ std::mutex DEBUGMutex;
 		 ++FPS;
 		 Update();
 		 Render();
-         for (auto &L : Layers)
-         {
-             REFACTOR("This is pointless and should be in the Renderer class not in the Messaging system. It should be adjunt to the MSG system for the Renderer to receive Messages ");
-             L->OnUpdate();
-         }
 
          if ((NewTime - PreviousTime) > 1000)
 		 {
@@ -527,7 +523,7 @@ void Application::Window::CLS()
 {// Clear the Contents of the BackBuffer 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }        
-void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)             // Resize And Initialize The GL Window
+void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height) // Resize And Initialize The GL Window
 {/// NOTE :https://stackoverflow.com/questions/692742/how-do-you-programmatically-resize-and-move-windows-with-the-windows-api
 	if (!this)
 	{
@@ -554,7 +550,6 @@ void Application::Window::ResizeWindow(uint32_t _width, uint32_t _height)       
 }
 void Application::Window::s_Title(std::string _name)
 {
-///    Print("Name IS: " << Title << "  Changing it to " << _name << " Address: " << (void*)this);
 	Title = _name;
 	SetWindowTextA
 	(
@@ -603,19 +598,12 @@ void Application::PostMSG ( Event _msg)
 void Application::Dispatch( Event _msg) 
 {
 	getWindow().Messenger().Dispatch(_msg);
-    for (auto it = Layers.end(); it != Layers.begin();)
-    {
-       REFACTOR("I do not want this for the Application, I wantLayers for the Renderer, I already have Event System and this is redundent")
-        if ((*--it)->OnEvent(_msg))
-        {
-            break;
-        }
-    }
 }
 
-bool Application::PeekMSG ( Event& _msg) trace("",1)
-{ ///This is a test of my Trace macro
-	Return( getWindow().Messenger().PeekMSG(_msg));
+bool Application::PeekMSG(Event& _msg)
+trace(1)
+{
+    Return(getWindow().Messenger().PeekMSG(_msg));
 }
 bool Application::PeekMSG ( Event& _msg, unsigned int _rangemin, unsigned int _rangemax, int _handlingflags)
 {
@@ -696,13 +684,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 _static Application::Window::InputDevices::_mouse    Application::Window::InputDevices::Mouse;
 _static Application::Window::InputDevices::_keyboard Application::Window::InputDevices::Keyboard;
 
-//_static Application::Window::EventHandler& Application::Window::EventHandler::get()
-//{
-//	static Application::Window::EventHandler instance;
-//	return instance;
-//}
-//
-
 
 std::string VertexShader =
 "#version 330 core \n\
@@ -728,6 +709,16 @@ void main()         \n\
 
 
 
+
+
+
+
+
+
+
+
+
+
 //https://www.worldometers.info/coronavirus/country/south-korea/
 
 /* =============================================================================================================================================
@@ -741,16 +732,6 @@ void main()         \n\
  
  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee418748(v%3Dvs.85)
 
-*/
-
-
-
-
-
-
-
-
-/* 
 
 Odds of Winning Powerball : 1 in 292,201,338
 
@@ -813,20 +794,6 @@ Mortality:
      ________________________________________________________
      
      
-     
-     
-     
-     
-
-
-
-
-
-
-
-
-
-
 
 |
 |
@@ -835,7 +802,6 @@ Mortality:
 |                                 |                                 |
 |                                 |                                 |
 |
-
 
 
 
@@ -843,5 +809,20 @@ Mortality:
 
 
 
+/// 7/21/2020
+///    REFACTOR("I do not want this for the Application, I wantLayers for the Renderer, I already have Event System and this is redundent");
+// for (auto it = Layers.end(); it != Layers.begin();)
+// {
+//     if ((*--it)->OnEvent(_msg))
+//     {
+//         break;
+//     }
+// }
 
+//_static Application::Window::EventHandler& Application::Window::EventHandler::get()
+//{
+//	static Application::Window::EventHandler instance;
+//	return instance;
+//}
+//
 

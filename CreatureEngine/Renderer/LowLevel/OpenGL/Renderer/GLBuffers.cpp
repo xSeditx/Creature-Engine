@@ -120,28 +120,7 @@ void Attribute::Append(void * _data, size_t _sz)
 }
 
 
-//  Print("DataSize: " << _sz);
-//  Print("NewSize: " << NewSize);
-//  Print("Addresses: " << (void*)newBuffer << " : " << (void*)mod);
-//  Print("Difference: " <<  (int)((void*)mod)- (int)((void*)newBuffer) );
-//template<typename _Ty>
-//void Update(std::vector<_Ty>& _data)
-//{
-//    __debugbreak();
-//    REFACTOR("DATA: Is simply debug shit, clean this up in the future. && This needs to have the Access changed from default Access and to the Access of this Buffer however I see no way to change the Acces type");
-//    BufferPtr = &_data[0];
-//    Bind();
-//    {
-//        OpenGL::set_BufferData(_data);
-//    }
-//    Unbind();
-//    Size = _data.size() * sizeof(_Ty);
-//}
  
-///=================================================================================================================
-
-
-
 ///=================================================================================================================
 ///=================================================================================================================
 
@@ -153,8 +132,9 @@ ElementArrayBuffer::ElementArrayBuffer(GLuint* _data, size_t _count)
 	Data = new GLuint[_count];
 	Data = _data;/// HMMM....
 
-	glGenBuffers(1, &GL_Handle);
+    GL_Handle = OpenGL::new_IBO();
 	Bind();
+    //OpenGL::set_BufferData(_count, _data);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _count * sizeof(GLuint), _data, DEFAULT_BUFFER_ACCESS);
 }
 ElementArrayBuffer::ElementArrayBuffer(GLenum _access, GLuint* _data, size_t _count)
@@ -232,10 +212,7 @@ FrameBufferObject::FrameBufferObject(int _width, int _height, GLenum _datatype, 
     GL_Handle(OpenGL::new_FBO())
 {
 
-	TODO("Need to create : \n\
-		[x]Color : the outputs written with the output variables from the fragment shader \n\
-		[x]Depth : this works as the Z buffer for the framebuffer object \n\
-		[ ]Stencil : the stencil buffer");
+	TODO("Need to create the stencil buffer");
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, GL_Handle);

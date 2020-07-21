@@ -180,6 +180,7 @@
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
     <ClCompile Include="Core\ECS\TestComponents.cpp" />
     <ClCompile Include="Core\EventSystem.cpp" />
+    <ClCompile Include="Core\Graphics\Terrain.cpp" />
     <ClCompile Include="Core\Layer.cpp" />
     <ClCompile Include="Core\Math\Easing.cpp" />
     <ClCompile Include="Core\Math\Math.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="Core\ECS\ECSsystem.h" />
     <ClInclude Include="Core\ECS\TestComponents.h" />
     <ClInclude Include="Core\EventSystem.h" />
+    <ClInclude Include="Core\Graphics\Terrain.h" />
     <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Core\Math\Easing.h" />
     <ClInclude Include="Core\Math\Math.h" />
@@ -245,7 +247,6 @@
     <ClInclude Include="Physics\Physics.h" />
     <ClInclude Include="Physics\Quadtree.h" />
     <ClInclude Include="Profiling\MemoryPerf\MemTracker.h" />
-    <ClInclude Include="Profiling\RenderUtilities.h" />
     <ClInclude Include="Profiling\SystemInfo.h" />
     <ClInclude Include="Profiling\Timing\Benchmark.h" />
     <ClInclude Include="Profiling\Timing\Timer.h" />

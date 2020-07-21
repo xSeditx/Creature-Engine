@@ -6,11 +6,9 @@ class GameObject
 public:
     GameObject()
         :
-        model_Matrix(Transform(Vec3(0),Vec3(0),"ModelMatrix")),
+        model_Matrix(Transform(Vec3(0), Vec3(0), "ModelMatrix")),
         Handle(ObjectCount++)
-    {
-        WARN_ME("Pure Virtual Nature of this Class has been Removed. All derived classes must use Override");
-	}
+    {}
 
 	GameObject(Vec3 _pos, Vec3 _rot, Vec3 _scale)
 		:
@@ -155,6 +153,16 @@ static std::ostream& operator <<(std::ostream& _stream, GameObject& _object)
 
     return _stream;
 }
+
+
+///7/21/2020
+//WARN_ME("Pure Virtual Nature of this Class has been Removed. All derived classes must use Override");
+//Resolution: Well um, That was bullshit and not even true.
+
+
+
+
+
 
 /* Unity Mono behavior 
 

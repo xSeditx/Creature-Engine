@@ -67,7 +67,10 @@ namespace OpenGL
             DEBUG_CODE(CheckGLERROR());
         }
 
-
+        static void drawElementsInstanced(void *_indices, uint32_t _indicesCount, uint32_t _instanceCount)
+        {
+            glDrawElementsInstanced(GL_TRIANGLES, 0, _indicesCount, _indices, _instanceCount);//mode/count/type, *indices, instancecount
+        }
         static void drawArrayInstanced(uint32_t _indicesCount, uint32_t _instanceCount)
 		{
 			glDrawArraysInstanced(GL_TRIANGLES, 0, _indicesCount, _instanceCount);//mode/first/count/instancecount

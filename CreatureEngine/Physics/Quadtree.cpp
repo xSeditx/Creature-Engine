@@ -58,7 +58,7 @@ bool  Node::Insert(Object_type *object)
     REFACTOR(" Check to see if these following Test are still Applicable ");
     for (auto& C : object->Children)
     {// Inserts all of the Parent Objects Children into this Node as well
-    	Insert(C);
+    	Insert(C); /// Should just insert parent and check the children during Test time for better performance
     }
     if (!object->g_Position().x && !object->g_Position().y )
     {// Prevents objects at {0,0} from Infinitely attempting to subdivide the Tree
@@ -115,7 +115,7 @@ bool  Node::Insert(Object_type *object)
 /* Reconsidered at a later date */
 bool Node::IsContained(Object_type *object)
 {
-    REFACTOR("Possibly alter this test to include other dimensions instead of assuming object is a single point ");
+    REFACTOR("Possibly alter this test to include other dimensions instead of assuming object is a single point | 7/21 Object should just be Vec2 for performance else I have to dereference many times  ");
     return
         (
             object->g_PositionX() >= (Position.x - Size.x) _AND_
@@ -162,8 +162,9 @@ void  Node::Prune(Node *_node)
 
 
 
-void  Node::Render()
-{
+void Node::Render()
+{//    REFACTOR(" Include a Debug Renderer here That can draw Wire Frames of our Nodes Boarders: 7/21/20 [ Why not just use the Line Batch Renderer for all that ");
+
     float X1 = (Position.x - (Size.x));
     float Y1 = (Position.y - (Size.y));
     float X2 = ((Size.x) * 2); 
@@ -174,24 +175,8 @@ void  Node::Render()
     if (Facing _IS_EQUAL_TO_ NW) { Color.r = 0;   Color.g = 255; Color.b = 0; }
     if (Facing _IS_EQUAL_TO_ SW) { Color.r = 0;   Color.g = 0;  Color.b = 255; }
     if (Facing _IS_EQUAL_TO_ SE) { Color.r = 255; Color.g = 255; Color.b = 255; }
-    TODO("Call the Collider Render HERE");
 
     Vec2 Offset = Viewport::get().get_Center();
-
-    REFACTOR(" Include a Debug Renderer here That can draw Wire Frames of our Nodes Boarders ");
-   // SDL_Rect R = {
-   //     X1 + Offset.x,
-   //     Y1 + Offset.y,
-   //     X2,
-   //     Y2
-   // };
-   // SDL_SetRenderDrawColor(Renderer::get().g_Context(), Color.r, Color.g, Color.b, 80); //0, 255, 0, 100);
-   //
-   // SDL_RenderDrawRect(Renderer::get().g_Context(), &R);
-   // SDL_RenderDrawLine(Renderer::get().g_Context(), Position.x + Offset.x, R.y, Position.x + Offset.x, R.y + (Size.y * 2));
-   // SDL_RenderDrawLine(Renderer::get().g_Context(), R.x, Position.y + Offset.y, R.x + (Size.x * 2), Position.y + Offset.y);
-   //
-   // SDL_SetRenderDrawColor(Renderer::get().g_Context(), DEFAULT_DRAW_COLOR);
 
     if (is_Not_a_Leaf_Node())
     {
@@ -201,7 +186,7 @@ void  Node::Render()
         }
     }
 }
-Vec2  Node::NewPos(Vec2 pos, NodeTag direction) {
+Vec2 Node::NewPos(Vec2 pos, NodeTag direction) {
     Vec2 NewPos = pos;
     if (direction _IS_EQUAL_TO_ NE)
     {

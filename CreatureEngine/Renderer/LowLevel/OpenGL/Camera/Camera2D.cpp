@@ -93,7 +93,7 @@ void Camera2D::Update()
 
 void Camera2D::Resize(iVec2 _size)
 {
-    AspectRatio = _size.x / _size.y;
+    AspectRatio = (float)_size.x / (float)_size.y;
     ZoomLevel = (ZoomLevel > 0.1f) ? ZoomLevel : 0.1f;
     float Level = 1.0f / ZoomLevel;
     float HalfH = _size.y * 0.5f;

@@ -5,7 +5,6 @@
     Options can likely be handled in main prior to including this to trigger various changes 
 */
 
- 
 
 #pragma comment (lib, "CreatureEngine.lib")
 
@@ -22,22 +21,15 @@
 #include"Profiling/MemoryPerf/MemTracker.h"
 #include"Profiling/Timing/Benchmark.h"
 
-/* Needs work as the Proper use of Textures and BMP was never incoperated into this class */
-#include"Profiling/RenderUtilities.h"
-
-
-
 /* Perhaps I should include all the Rendering stuff in the OpenGL header and Dir Tree from there */
 #include"Renderer/LowLevel/OpenGL/OpenGL.h" 
 #include"Renderer/LowLevel/OpenGL/Renderer/Primitives.h"
 #include"Renderer/LowLevel/OpenGL/Renderer/2DRenderer.h"
 
- 
 
 /* Likely not needed */
 #include"Core/Threading/TestFunctions.h"
 #include"Core/Memory.h"
-
 
 
 /* Potentially split off to just become the Soft bodied physics portion of the engine once the proper
@@ -50,8 +42,9 @@
 #include"../CreatureEngine/Core/ECS/ECS.h"
 #include"../CreatureEngine/Core/ECS/TestComponents.h"
 #include"../CreatureEngine/Core/Math/Easing.h"
-//
-//
+
+ 
+ 
 //class Mesh;
 //class Application;
 //

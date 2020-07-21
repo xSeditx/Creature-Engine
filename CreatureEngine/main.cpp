@@ -327,9 +327,9 @@ class App
     //=================================================================================================================================================================
 
     Renderer_test *Bucket_Test;
-    OpenGL::Renderer2D *MainRenderer{ nullptr };
+    OpenGL::Renderer2D *test_Renderer2D{ nullptr };
    
-    OpenGL::Renderer3D *TestRenderer{ nullptr };
+    OpenGL::Renderer3D *test_Renderer3D{ nullptr };
 
     OpenGL::RenderPass *test_RenderPass;
     MyScene SCENE;
@@ -353,15 +353,7 @@ class App
         // TEST_ASSERT( Creatures::TEST_SPRINGS(), " Springs Class Incomplete  contains Errors ", " Springs Class Complete ");
         // TEST_ASSERT( TEST_Ring_Buffer_Class() , " Ring Buffer Class Incomplete  contains Errors " , " Ring Buffer Class Complete ");
 
-        MEMORYSTATUSEX memInfo;
-        memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-        GlobalMemoryStatusEx(&memInfo);
-        DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
-        DWORDLONG         totalPhysMem = memInfo.ullAvailPhys;
-        Print("Physical Memory:" << totalPhysMem);
-        /// Likely add this to the Base Application class to relieve the user of this. Create a setup that only Initializes the desired shaders
-        init_DefaultShaders();
-
+        init_DefaultShaders();        /// Likely add this to the Base Application class to relieve the user of this. Create a setup that only Initializes the desired shaders
 
         /* Load up the Listeners for the Various Input Events */
         {
@@ -371,8 +363,10 @@ class App
         }
 
         /* Creates Different Test Renderers for our Application to try out */
-        MainRenderer = new OpenGL::Renderer2D({ SCREEN_X, SCREEN_Y });
-        MainRenderer->Attach
+        test_Renderer2D = new OpenGL::Renderer2D({ SCREEN_X, SCREEN_Y });
+        test_Renderer3D = new OpenGL::Renderer3D({ SCREEN_X, SCREEN_Y });
+
+        test_Renderer2D->Attach
         (
             new Camera2D
             (
@@ -380,22 +374,31 @@ class App
                 (float)Application::getWindow().Height()
             )
         );
-        Application::setCamera(MainRenderer->g_Camera());
+        Application::setCamera(test_Renderer2D->g_Camera());
 
 
-        TestRenderer = new OpenGL::Renderer3D({SCREEN_X, SCREEN_Y });
-        Camera_3D = &TestRenderer->g_Camera();
+        Camera_3D = &test_Renderer3D->g_Camera();
         SCENE.Create();
 
         testSurface = test_RenderPass->new_Surface({ SCREEN_X, SCREEN_Y });
         test_RenderPass = new OpenGL::RenderPass(SCREEN_X, SCREEN_Y, shader_BasicRenderer);// SCENE.RENDERER);
-        Bucket_Test = new Renderer_test(&MainRenderer->g_Camera());
+        Bucket_Test = new Renderer_test(&test_Renderer2D->g_Camera());
 
 
         std::vector<Vec2> Verts;
         std::vector<Vec4> Cols;
 
-
+        for_loop(z, 10)
+        {
+            for_loop(y, 10)
+            {
+                for_loop(x, 10)
+                {
+                    test_Renderer3D->renderCube({ x,y,z }, RANDOM(30));
+                }
+            }
+        }
+    
         /* Create a Bunch of Quads to Test Render */
         {
             uint8_t R{ 100 }, G{ 0 }, B{ 0 };
@@ -408,13 +411,13 @@ class App
                     if (R >= 255) { G += 5; R = 0; }
                     if (G >= 255) { B += 5; G = 0; }
 
-                    MainRenderer->renderQuad
+                    test_Renderer2D->renderQuad
                     (
                         { x * 8.0f, y * 8.0f },
                         { 7, 7 },
                         OpenGL::Renderer::normalize_RGBA_Color(R, G, B, 255)
                     );
-                    MainRenderer->draw_Line(x * 8.0f, y * 8.0f, x * 8.0f + 7, y * 8.0f + 7);
+                    test_Renderer2D->draw_Line(x * 8.0f, y * 8.0f, x * 8.0f + 7, y * 8.0f + 7);
 
                     Verts.push_back({ x * 8.0f, y * 8.0f });
                     Verts.push_back({ x * 8.0f + 100, y * 8.0f });
@@ -432,7 +435,7 @@ class App
             }
         }
 
-        test_RenderPass->attach(&Application::getCamera());;//MainRenderer->g_Camera())&Application::getCamera());//
+        test_RenderPass->attach(&Application::getCamera());;//test_Renderer2D->g_Camera())&Application::getCamera());//
         test_RenderPass->attach(SCENE.Vertices_VAO);
 
         //   [ ] FIX THE GOD DAMN CAMERA ALREADY WILL YOU. 
@@ -496,17 +499,15 @@ class App
         Return();
     }
 
-
-
     /* Renders User Defined Geometry */
     virtual void OnRender() override trace(1)
     {
-        /// Currently if ANY Camera is bound before this call it trashes the MainRenderers Camera
+        /// Currently if ANY Camera is bound before this call it trashes the test_Renderer2Ds Camera
         /// It is possibly not the Camera but the Shader Instead. 
         /// Would like to Detach all these systems as seperate entities and make them their own form of DrawCalls.
         {
-            trace_scope("MainRenderer");
-            MainRenderer->Render();
+            trace_scope("test_Renderer2D");
+            test_Renderer2D->Render();
         }
         {
             trace_scope("SceneRender");
@@ -528,8 +529,8 @@ class App
             Bucket_Test->Render();
         }
         {
-            trace_scope("TestRenderer");
-            TestRenderer->Render();
+            trace_scope("test_Renderer3D");
+            test_Renderer3D->Render();
         }
 
         DEBUG_CODE(CheckGLERROR());
@@ -539,16 +540,16 @@ class App
     /* Runs on Applications Frame Update */
     virtual void OnUpdate() override trace(1)
     {
-        TestRenderer->Main_Camera->s_Rotation
+        test_Renderer3D->Main_Camera->s_Rotation
         (
             {
-                DEGREES(GLOBAL_Delta_Mouse.x), 
+                RADIANS(GLOBAL_Delta_Mouse.x),
                 0,
-                DEGREES(GLOBAL_Delta_Mouse.y)
+                RADIANS(GLOBAL_Delta_Mouse.y)
             }
         );
 
-        TestRenderer->Update();
+        test_Renderer3D->Update();
             
         if (Update_Geometry)
         {
@@ -566,7 +567,7 @@ class App
     /* Cleans up the Memory of stuff we still have Active */
     virtual void OnEnd() override
     {
-        delete(MainRenderer);
+        delete(test_Renderer2D);
         delete(test_Texture);
     }
 
@@ -757,13 +758,6 @@ class App
 
 int main()
 {
-   // TEST_ASSERT(condition, FAIL_MSG, PASS_MSG);
-    DEBUGPrint(CON_Red,"Problem with the Debug print Symbols hConsole and DEBUGMutex in that they have no real home on where they should be. It is possible Common.h should perhaps have a CPP file for Symbol definition");
-
-    TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. /n Each Module should have its very own Application class. ");
-    TODO(" Serious Restructuring needs to take place to the Entire project, it is starting to grow rather large and I am not happy with some of the early design and structure decisions that have begun to slightly conflict. \n\
- It would be wise to reformat and refactor the project before these minor issues become big ones  ");
-
     App MyApp;
 
     PROFILE_BEGIN_SESSION("Init", "ProfileInitResults.json");
@@ -772,13 +766,6 @@ int main()
     }
     PROFILE_END_SESSION();
 
-    /* Get the Viewport Dimensions and the Max view dimensions */
-    {
-        iVec2 r = OpenGL::get_MaximumViewportDimensions();
-        Print("Max Viewport Dimensions: " << r.x << " : " << r.y);
-        iVec4 vp = OpenGL::get_Viewport();
-        Print("Viewport: " << vp.x << " : " << vp.y << " : " << vp.z << " : " << vp.w);
-    }
 
     PROFILE_BEGIN_SESSION("Run", "ProfileRunResults.json");
     {
@@ -789,261 +776,17 @@ int main()
 	//	Profiling::Memory::TrackDumpBlocks();
 	//	Profiling::Memory::TrackListMemoryUsage();
 	return 0;
+
+
+    DEBUGPrint(CON_Red, "Problem with the Debug print Symbols hConsole and DEBUGMutex in that they have no real home on where they should be. It is possible Common.h should perhaps have a CPP file for Symbol definition");
+ 
+    TODO("Fucked up. It is all fucked up. Cube Instance Renderer3D is not properly rendering a damn thing. Rotate clicker on ImGui on the 2D render is not properly rotating and just spins out of control rapidly. \n ImGui appears to be sticking and this should be one of the first things fixed because it is fucking annoying.");
+    TODO(" Setup Mock ups which use the Application class to setup a state in a way that I can test various functionality by switching through different applications. /n Each Module should have its very own Application class. ");
+    TODO(" Serious Restructuring needs to take place to the Entire project, it is starting to grow rather large and I am not happy with some of the early design and structure decisions that have begun to slightly conflict. \n\
+ It would be wise to reformat and refactor the project before these minor issues become big ones | HA!! Dumbass! You never fuckin listen! ");
+
 }
   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int LOOP_COUNT{ 1000000 };
-
-#define NUMBER_OF_THREADS 200
-#define _TEST_THREADPOOL_SPEED    1
-
-bool THREAD_POOL_TEST()
-{
-#if 0
-	/// TEST_UNIT(TEST_PROFILE_WINDOW());
-	DEBUG_CODE(_Trace("Testing Trace Macro", 100000));
-	DEBUGPrint(CON_Red, "Testing Print");
-	/* */
-
-	while (true)
-	{
-		TestAsyncSort SortTest(1024); // 4096); // 262144); //
-		Print("Running 40");
-		ThreadPool::get().Async(TestRecursion, 40);
-		Print("Running 30");
-		ThreadPool::get().Async(TestRecursion, 30);
-		Print("Running 20");
-		ThreadPool::get().Async(TestRecursion, 20);
-		Print("Running 10");
-		ThreadPool::get().Async(TestRecursion, 10);
-		{
-			Timing::Profiling::Profile_Timer Bench("My Linear Merge Sort");
-			// 	SortTest.LinearMergeSort();
-		}
-		{// Currently freezes if one attempts to recurse to many levels to the point it overwhelms the threadpool as it can never return until it is capable of recursing deeper.
-			Timing::Profiling::Profile_Timer Bench("My MT Merge Sort");// Dont use the current Threaded Version its broke.
-		//	SortTest.AsyncMergeSort();
-		}
-		{
-			Timing::Profiling::Profile_Timer Bench("std::async Merge Sort");
-			//SortTest.StdMergeSort();
-		}
-
-
-#if _TEST_THREADPOOL_SPEED
-		Function_Counter = 0;
-		//	LOOP_COUNT += 1000;// 22100 is when Threadpool and Linear start to become one.
-		Print("/n/n/n/n Loop Counter:" << LOOP_COUNT << " iterations in the Worker Functions/n");
-		{
-			Timing::Profiling::Profile_Timer Bench("My Threadpool");
-			std::vector<std::vector<uint32_t>> Test;
-
-			auto A = ThreadPool::get().Async(TestFunctionE, std::move(LOOP_COUNT));
-			auto B = ThreadPool::get().Async(TestFunctionE, std::move(LOOP_COUNT));
-			auto C = ThreadPool::get().Async(TestFunctionB, 1431);
-			auto D = ThreadPool::get().Async(TestFunctionD, 123.321f, 10);
-			auto E = ThreadPool::get().Async(TestFunctionA);
-			auto F = ThreadPool::get().Async(TestFunctionC, 3.14159f, 123);
-			auto G = ThreadPool::get().Async(TestFunctionF, std::move(LOOP_COUNT));
-			auto H = ThreadPool::get().Async(TestFunctionG, std::move(LOOP_COUNT));
-			auto I = ThreadPool::get().Async(TestFunctionH, std::move(LOOP_COUNT));
-			auto J = ThreadPool::get().Async(TestFunctionI, std::move(LOOP_COUNT));
-			auto K = ThreadPool::get().Async(TestFunctionJ, std::move(LOOP_COUNT));
-
-			Print("Thread Pool Cluster");
-			std::vector<std::future<float>> Fut;
-			//std::vector<Future<float>> Fut;
-			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
-			{
-				auto F = ThreadPool::get().Async(TestFunctionC, 123.321f, std::move(rand() % NUMBER_OF_THREADS));
-				//Fut.push_back(std::forward<std::future<float>>(F));
-				///Fut.push_back(std::forward<Future<float>>(F));
-			}
-			uint64_t result{ 0 };
-			uint64_t counter = Fut.size();
-			while (counter)
-			{
-				for (auto& F : Fut)
-				{
-					if (!is_ready(F))
-					{
-						continue;
-					}
-					result += (uint64_t)F.get();
-					--counter;
-				}
-			}
-			Print("End Thread Pool Cluster: " << result);
-
-			//while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter.
-
-			Print("Threadpool: " << result);
-		}
-
-		Function_Counter = 0;
-		{
-
-			Timing::Profiling::Profile_Timer ThreadBM("std::Async");
-			auto  TPTest5T = std::async(std::launch::async | std::launch::deferred, TestFunctionE, LOOP_COUNT);
-			auto  TPTest1T = std::async(std::launch::async | std::launch::deferred, TestFunctionB, 1431);
-			auto  TPTest4T = std::async(std::launch::async | std::launch::deferred, TestFunctionD, 123.321f, 10);
-			auto  TPTest3T = std::async(std::launch::async | std::launch::deferred, TestFunctionA);
-			auto  TPTest2T = std::async(std::launch::async | std::launch::deferred, TestFunctionC, 3.14159f, 123);
-			auto  TPTest6T = std::async(std::launch::async | std::launch::deferred, TestFunctionF, LOOP_COUNT);
-			auto  TPTest7T = std::async(std::launch::async | std::launch::deferred, TestFunctionG, LOOP_COUNT);
-			auto  TPTest8T = std::async(std::launch::async | std::launch::deferred, TestFunctionH, LOOP_COUNT);
-			auto  TPTest9T = std::async(std::launch::async | std::launch::deferred, TestFunctionI, LOOP_COUNT);
-			auto TPTest10T = std::async(std::launch::async | std::launch::deferred, TestFunctionJ, LOOP_COUNT);
-
-			Print("Async Cluster");
-			std::vector<std::future<float>> Fut;
-			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
-			{
-				auto TPTest4loop = std::async(std::launch::async, TestFunctionC, 123.321f, rand() % NUMBER_OF_THREADS);
-				Fut.push_back(std::move(TPTest4loop));
-			}
-			uint64_t result{ 0 };
-			uint64_t counter = Fut.size();
-			while (counter)
-			{
-				for (auto& F : Fut)
-				{
-					if (!is_ready(F))
-					{// if not ready yet, check the next  
-						continue;
-					}
-					result += (uint64_t)F.get(); // it is ready 
-					--counter;
-				}
-			}
-
-			Print("End Async Cluster");
-			Print("Async :" << result);
-			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
-
-			std::vector<std::vector<uint64_t>> Test;
-
-			Test.push_back(TPTest5T.get());
-			Test.push_back(TPTest6T.get());
-			Test.push_back(TPTest7T.get());
-			Test.push_back(TPTest8T.get());
-			Test.push_back(TPTest9T.get());
-			Test.push_back(TPTest10T.get());
-			///Print("Async: " << TPTest4T.get() << " : " << TestCompile(Test));
-		}
-
-
-		Function_Counter = 0;
-		{
-			Timing::Profiling::Profile_Timer LBench("Linear Benchmark");
-			auto Test5 = TestFunctionE(std::move(LOOP_COUNT));// .5ms
-			auto Test4 = TestFunctionD(123.321f, 10);
-			auto Test1 = TestFunctionB(1431);
-			auto Test3 = TestFunctionA();
-			auto Test2 = TestFunctionC(3.14159f, 123);
-			auto Test6 = TestFunctionF(std::move(LOOP_COUNT));//.3
-			auto Test7 = TestFunctionG(std::move(LOOP_COUNT));//3.21
-			auto Test8 = TestFunctionH(std::move(LOOP_COUNT));// .32
-			auto Test9 = TestFunctionI(std::move(LOOP_COUNT));//2.8
-			auto Test10 = TestFunctionJ(std::move(LOOP_COUNT));//2.6
-
-
-			while (Function_Counter < 10) {}// SpinLock until every single function called returns as measured via the atomic int Function_Counter. 
-
-
-			uint64_t result{ 0 };
-			for (int i{ 0 }; i < NUMBER_OF_THREADS; ++i)
-			{
-				result += (uint64_t)TestFunctionC(123.321f, rand() % NUMBER_OF_THREADS);
-			}
-			Print("Linear :" << result);
-
-			std::vector<std::vector<uint64_t>> Test;
-			Test.push_back(Test5);
-			Test.push_back(Test6);
-			Test.push_back(Test7);
-			Test.push_back(Test8);
-			Test.push_back(Test9);
-			Test.push_back(Test10);
-			///Print("Linear: " << Test4 << " : " << TestCompile(Test));
-		}
-		Sleep(1500);
-#endif //_TEST_THREADPOOL_SPEED
-	}
-#endif // IF 0 to turn all this off for now.
-	return true;
-}
-bool TEST_PROFILE_WINDOW()
-{
-	{
-		Profiling::DisplayWindow Test({ 0,0 }, { 10, 150 }, { 30, 450 });
-		{	// TEST SET PIXEL
-
-			Test.setPixel(1, 1, Pixel(255,255,255,255));
-		}
-		{	// TEST UPDATE
-
-			Test.Update(1);
-			if (Test.getPixel(1, 2) _NOT_EQUAL_TO_ 0xffffffff)return false;
-		}
-		{	// REPEATEDLY TEST TO ENSURE UPDATE IS MOVING THE VALUES DOWN
-
-			Test.Update(1);
-			if (Test.getPixel(1, 3) _NOT_EQUAL_TO_ 0xffffffff)return false;
-			Test.Update(1);
-			if (Test.getPixel(1, 4) _NOT_EQUAL_TO_ 0xffffffff)return false;
-			Test.Update(1);
-			if (Test.getPixel(1, 5) _NOT_EQUAL_TO_ 0xffffffff)return false;
-			Test.Update(1);
-			if (Test.getPixel(1, 6) _NOT_EQUAL_TO_ 0xffffffff)return false;
-			Test.Update(1);
-			if (Test.getPixel(1, 7) _NOT_EQUAL_TO_ 0xffffffff)return false;
-			Test.Update(1);
-			if (Test.getPixel(1, 8) _NOT_EQUAL_TO_ 0xffffffff)return false;
-		}
-		{	// TEST TO MAKE SURE IT IS NOT LEAVING A VALUE BEHIMD AND IS NOT JUST SETTING NEW VALUE
-
-			if (Test.getPixel(1, 7) _EQUALS_ 0xffffffff)return false;
-		}
-	}
-
-	return true;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

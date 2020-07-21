@@ -56,14 +56,13 @@
 #define NO_WARNINGS             TRUE
 
 /* Defines the level of Messages the user wishes to see */
-#define MESSAGE_LEVEL         ERROR_MESSAGE_DISPLAY // TODO_MESSAGES//FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE//USER_WARNING_MESSAGES// REFACTOR_MESSAGES// 
+#define MESSAGE_LEVEL       0//USER_WARNING_MESSAGES// OBJECT_CREATION_MESSAGE//  ERROR_MESSAGE_DISPLAY // TODO_MESSAGES//FUNCTION_TRACE_MESSAGES//OBJECT_CREATION_MESSAGE//REFACTOR_MESSAGES// 
 
 /* Test block of code for testing Threadspools Speeds */
 ///#define  _TEST_THREADPOOL_SPEED  TRUE // FALSE
 
 /* List all the warnings we wish to disable or enable */
-#define DISABLED_WARNINGS 4018
-
+#define DISABLED_WARNINGS 4018 
 //  Arithmetic overflow: Using operator Just pain in the ass warning about using Integer inside of [] brackets and mostly shit like that.
 //  Check it every now and then but mostly keep this off
 #pragma warning( disable : 26451 ) 
@@ -456,7 +455,7 @@ extern bool TerminateOnError;
 
 /// FIX THIS LATER
 #define GetRandom( min, max )     ((rand() % (int)(((max) + 1) - (min))) + (min))  
-#define RANDOM(x)                 ((rand() * (1.0 / (1.0 + RAND_MAX))) * x)
+#define RANDOM(x)                 ((float)((rand() * (1.0 / (1.0 + RAND_MAX))) * x))
 #define RANDOM_RANGE(x)           (RANDOM(x * 2) - (x))
 
 

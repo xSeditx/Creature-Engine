@@ -44,6 +44,8 @@ private:
 struct CREATURE_API EventHandler
 {
 public:
+
+    NO_COPY_OR_ASSIGNMENT(EventHandler);
     EventHandler() = default;
 
     void PollEvents() noexcept;
@@ -57,24 +59,35 @@ public:
     void RemoveListener(MsgType msg, Listener& handler) noexcept;
 
     EventHandler(EventHandler&& _other) noexcept
-        :
-        Messages (std::move(_other.Messages)),
-        ListenerMap(std::move( _other.ListenerMap))
+        :// Allows Application::Window to move
+        Messages(std::move(_other.Messages)),
+        ListenerMap(std::move(_other.ListenerMap))
     {
-        WARN_ME("FIX THIS SHIT, IDK WHY MY BRAIN IS SHITTING ITSELF RIGHT NOW BUT ASSIGNMENT MOVE SHOULD NOT WORK");
         _other.ListenerMap.clear();
     }
     EventHandler& operator = (EventHandler  &&_other) noexcept
     {/// Should likely be Swapping here?
         return _other;//*this;
     }
- 
-
-    EventHandler(EventHandler const&) = delete; // and prevents Copies from being made
-    EventHandler operator = (EventHandler const&) = delete;
-
 private:
     std::queue<Event> Messages;
     std::unordered_map<MsgType, std::vector<Listener*>> ListenerMap;
 };
+
+
+//7/21/2020 Fixed this WARNING
+//   WARN_ME("FIX THIS SHIT, IDK WHY MY BRAIN IS SHITTING ITSELF RIGHT NOW BUT ASSIGNMENT MOVE SHOULD NOT WORK");
+//EventHandler(EventHandler&& _other) noexcept
+//    :
+//    Messages (std::move(_other.Messages)),
+//    ListenerMap(std::move( _other.ListenerMap))
+//{
+//    _other.ListenerMap.clear();
+//}
+//EventHandler& operator = (EventHandler  &&_other) noexcept
+//{/// Should likely be Swapping here?
+//    return _other;//*this;
+//}
+//    EventHandler(EventHandler const&) = delete; // and prevents Copies from being made
+//    EventHandler operator = (EventHandler const&) = delete;
 
