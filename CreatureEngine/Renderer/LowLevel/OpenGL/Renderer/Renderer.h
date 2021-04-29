@@ -29,9 +29,7 @@ foreach( object )           //
 */
 namespace OpenGL
 {
-///TODO: Why the fuck will it not let me extend the OpenGL namespace here, it does then it goes on stopping me from using check_FBO_Status besides bind_FBO being found directly above it and it has no problem with that. 
-///        IT makes not fucking sense''
-	class Renderer
+    class Renderer
 	{
 	protected:
 		 
@@ -77,8 +75,8 @@ namespace OpenGL
 		}
 		static void drawIndices(uint32_t _ibo, uint32_t _elementCount)
 		{
-            OpenGL::bind_IBO(_ibo);
-			glDrawElements(GL_TRIANGLES, _elementCount, GL_FLOAT, (char*)0);
+            OpenGL::bind_IBO(_ibo);   
+			glDrawElements(GL_TRIANGLES, _elementCount, GL_UNSIGNED_INT, (char*)0);
 			DEBUG_CODE(OpenGL::unbind_IBO());
 		}
 
@@ -111,5 +109,64 @@ namespace OpenGL
             constexpr float coef = 1.0f / 255.0f;
             return _col * coef;;
         }
+
+
 	};
+
+
+} // NS OpenGL
+
+
+
+
+//======================================================
+/*void InitOpenGL()
+{
+    Print(gladLoadGL());
+    RenderPair TestObject =
+    {
+        Material
+        (
+            {
+                {
+                    {
+                        Normals, Texture()
+                    },
+                    {
+                        Albedo, Texture()
+                    },
+                    {
+                        Metallic, Texture()
+                    }
+                },
+                Shader()
+            }
+        ),
+        Mesh()
+    };
 }
+*/
+/*
+     MatrixMode( uint32_t _matMode )
+     {
+         if(_matMode == GL_PROJECTION)
+         {
+             Active_Matrix = ProjectionMatrix;
+         }
+         if(_matMode == GL_MODELVIEW)
+         {
+             Active_Matrix = ModelView;
+         }
+     }
+  
+    
+
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();*/
+
+//
+//Look into it
+//NanoGUI
+
+

@@ -4,29 +4,34 @@
 #include<vector>
 #include<utility>
 
-#include"Core/Common.h"
+#include"../Core/Common.h"
 #include"../Renderer/LowLevel/OpenGL/Renderer/GameObject.h"
+#include"Quadtree.h"
 
-#define M_PI   3.141592653589
+#ifndef M_PI
+#    define M_PI   3.141592653589
+#endif
+
 //Uses
-
-
-class  QuadTree;
+//template<typename Object_Type>
+//class  QuadTree<Object_Type>;
 
 /* Requirements for Object_Type is that it needs functions
 g_PositionX'Y'Z'(); 
 std::vector<Object_Type> Children ;
 g_Collider() Inorder to find the Position of the Object
 */
-using Object_type = GameObject;
+ 
 
+template<typename Object_Type>
 class Simulation
 {
 
 public:
     NO_COPY_OR_ASSIGNMENT(Simulation);
 
-    Simulation(double _timestep);
+ 
+    Simulation(double _timestep, double _gravity);
 
     void Add(Object_type *_collider);
     void Remove(Object_type *_collider);
@@ -47,13 +52,13 @@ public:
     {
         Instance = _simulation;
     }
-    inline static bool Initialize(double _timestep)
+    inline static bool Initialize(double _timestep, double _gravity)
     {
         Static_Simulation_Mtx.lock();
         {/* ~ CRITICAL SECTION ~ Must Ensure only single object is Initialized at once */
             if (Instance == nullptr)
             {
-                Instance = new Simulation(_timestep);
+                Instance = new Simulation(_timestep, _gravity);
                 return true;
             }
         }
@@ -61,21 +66,22 @@ public:
         return false;
     }
 
-    void AddtoQuadTree(Object_type *_object);
+    void Add_Object(Object_type *_object);
 
 
     std::mutex Simulation_Mtx;
     static std::mutex Static_Simulation_Mtx;
 
-    QuadTree *SpatialTree;
+    QuadTree<Object_Type> *SpatialTree;
 
 private:
+    double Gravity{ 0.0 };
+    double const G = 6.670e-11;
     std::vector<std::pair<Object_type *, Object_type *>> CollisionPairs;
+
     static Simulation *Instance;
+
 };
-
-
-
 
 
 

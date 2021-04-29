@@ -1,4 +1,759 @@
+         ///Window operator=(const Window& _other)
+        ///{
+        ///    WindowShader = _other.WindowShader;
+        ///    defaultCamera = _other.defaultCamera;
+        ///    Parent = _other.Parent;
+        ///    GL_Context = _other.GL_Context;
+        ///    Handle = _other.Handle;
+        ///    DeviceContext = _other.DeviceContext;
+        ///    Size = _other.Size;
+        ///    Position = _other.Position;
+        ///    WindowProperties = _other.WindowProperties;
+        ///    PixelFormatDescriptor = _other.PixelFormatDescriptor;
+        ///    PixelFormat = _other.PixelFormat;
+        ///    Title = _other.Title;
+        ///    Active = _other.Active;
+        ///    Alive = _other.Alive;
+        ///    Visible = _other.Visible;
+        ///
+        ///    Observer = std::move(_other.Observer);
+        ///}
 
+
+        /* struct EventHandler
+        {
+            EventHandler() = default;
+        public:
+            static EventHandler& get();                 // Initializes EventSystem when called first time
+
+
+            void PollEvents();
+            void PostMSG(Event msg);
+            bool PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags);
+            bool PeekMSG(Event& msg);
+
+            void Dispatch(Event msg);
+
+            void RegisterListener(MsgType msg, Listener& handler);
+            void RemoveListener(MsgType msg, Listener& handler);
+
+            EventHandler(EventHandler const&) = delete; // and prevents Copies from being made
+            void operator = (EventHandler const&) = delete;
+
+        private:
+            std::queue<Event> Messages;
+            std::unordered_map<MsgType, std::vector<Listener*>> ListenerMap;
+        };*/
+
+
+
+
+      //  AppInstance->mainWindow = std::forward<Application::Window>(_window);
+     //   std::string N = _window.g_Title();
+    //    Print("Application Name is    : " << AppInstance->mainWindow.g_Title());
+   //     Print("Setting Application To : " << N);
+        //AppInstance->mainWindow = *(_window);
+     //   std::swap(AppInstance->mainWindow, _window);
+       // *&AppInstance->mainWindow = &_window;
+    //  memcpy(&AppInstance->mainWindow, &_window, sizeof(Application::Window));
+
+
+/* =============================================================================================================================================*/
+
+ 
+ 
+ 
+ 
+ 
+ //Assimp::Importer importer;
+  //const aiScene* scene = importer.ReadFile("../Resources/Models/Mech/Drone.fbx",
+  //    aiProcess_CalcTangentSpace |
+  //    aiProcess_Triangulate |
+  //    aiProcess_JoinIdenticalVertices |
+  //    aiProcess_SortByPType);
+  //
+
+
+
+// FFx = (float)(cos(RADIANS(Ang++)) * 200);        FFy = (float)(-sin(RADIANS(Ang)) * 200);
+
+
+//class Mesh;
+//class Application;
+//
+//Mesh::Mesh();
+//Mesh::Mesh(std::string file);
+//void Mesh::Bind();
+//void Mesh::Render();
+//void Mesh::Unbind();
+//void Mesh::Update();
+//void Mesh::GetPrimativeType(unsigned int input);
+//
+//Graphics::Bitmap::Bitmap(void * _memory, Vec2 _dimensions) noexcept
+//Graphics::Bitmap::Bitmap(std::string _file) noexcept
+//void Graphics::Bitmap::FlipYAxis()
+//void Graphics::Bitmap::FlipXAxis()
+//
+// 
+//void  Application::Window::Window::InputDevices::_mouse::Hide() { Print("Hide Mouse"); }
+//void  Application::Window::Window::InputDevices::_mouse::Show() { Print("Hide Mouse"); }
+//void  Application::Window::Window::InputDevices::_mouse::Update(Vec2 _pos, float _wheel);
+//
+//Application::Window::Window::InputDevices&   Application::Window::getInput();
+//
+//Application::Window::Window();
+//Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name, DWORD _flags) noexcept;
+//Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, std::string _name, DWORD _flags = 0) noexcept;
+//
+//        /* Returns Windows Position */
+//        Vec2     Application::Window::g_Position() const noexcept;
+//        /* Returns X location of Window on Screen */
+//        float    Application::Window::g_PositionX() const noexcept;
+//        /* Returns Y location of Window on Screen */
+//        float    Application::Window::g_PositionY() const noexcept;
+//        /* return the Dimensions of a Window */
+//        Vec2     Application::Window::g_Size() const noexcept;
+//        /* Gets the Name of the Window */
+//        std::string   Application::Window::g_Title();
+// 
+//        /* Return the Parent Window if this is a Child */
+//        Window&   Application::Window::g_Parent() const noexcept;
+//
+//
+//        /* Sets the Parent Window if this is a Child */
+//        Window&   Application::Window::s_Parent() const noexcept;
+//        /* Sets the location of a Window */
+//        void     Application::Window::s_Position(Vec2 _pos)  noexcept;
+//        /* Sets the X location for a Window */
+//        Vec2    Application::Window::s_PositionX(float _x) noexcept;
+//        /* Sets the Y location for a Window */
+//        Vec2     Application::Window::s_PositionY(float _y) noexcept;
+//        /* Sets Window Width */
+//        void   Application::Window::s_Width(int _x) const noexcept;
+//        /* Sets Window Height*/
+//        void   Application::Window::s_Height(int _y) const noexcept;
+//        /* Sets Window Title */
+//        void   Application::Window::s_Title(std::string _name);
+//
+//        /* Sets Window Dimensions */
+//        void   Application::Window::s_Size(Vec2 _size) noexcept
+//
+//            /* Sets the Width */
+//            Vec2     Application::Window::s_Height() const noexcept;
+//
+//
+//        /* Return the Width dimension of a Window */
+//        int   Application::Window::Width()     const noexcept;
+//        /* Return the Height Dimension of a Window */
+//        int    Application::Window::Height()    const noexcept;
+//
+//        /* Return if the Window is Alive
+//        Note: A Window can be invisible and still be Alive. When the final Window is no longer Alive our Application will terminate*/
+//        bool   Application::Window::isAlive()   const noexcept;
+//
+//        /* Let us know if the Window is currently Visible on Screen
+//        Note: Intentions are to hide all child Windows if Parent becomes invisible*/
+//        bool   Application::Window::isVisible() const noexcept;
+//
+//        /* Allow us to see if the Window in Question is the Currently Active window on the screen */
+//        bool   Application::Window::isActive()  const noexcept;
+//
+//        /* Display the contents of the back buffer to the Screen (*note:future at VSync if Specified) */
+//        void   Application::Window::Sync();
+//
+//        /* Clear the Contents of the BackBuffer */
+//        void   Application::Window::CLS();      // Clear The Screen And The Depth Buffer
+//
+//        /* Returns the Native Windows Handle (HWND) of the Window */
+//        const HWND   Application::Window::g_Handle() const noexcept;
+//
+//        /* Changes with Window size and OpenGL Viewport settings */
+//        void   Application::Window::ResizeWindow(uint32_t _x, uint32_t _y);
+//
+//        /* Returns the Windows Device Context */
+//        HDC   Application::Window::g_DeviceContext() noexcept;
+//
+//        /* Return the Most basic and default Shader */
+//        uint32_t   Application::Window::defaultShaderHandle() noexcept; 
+//
+//        /* Gets the default Shader Object */
+//        Shader&   Application::Window::defaultShader() noexcept; 
+//
+//        /* Return the OS Dimensions of the Window */
+//        Vec2   Application::Window::get_WindowSize();
+//
+//        /* returns the default Camera for our Window */
+//        Camera2D&   Application::Window::g_Camera() noexcept;
+//
+//
+//            /* Sets the Default Camera for our Window */
+//            void   Application::Window::s_Camera(Camera2D* _camera) noexcept;
+// 
+//        void Application::Window::create_DefaultShader();
+// 
+//         //  static EventHandler& Messenger() { return EventHandler::get(); } 
+//     //   EventHandler& Application::Window::Messenger() noexcept { return Observer; }
+// 
+//  
+//    Application::Application();
+//    //Application(int _width, int _height, std::string _name) noexcept;
+//
+//    Application::~Application() noexcept;
+//
+//    /* Called when Application is Initialized */
+//    void  Application::Init();
+//    /* Called when Application is created or comes back from a pause */
+//    void  Application::Run();
+//    /* Halts Applications execution until run is called again */
+//    void  Application::Pause();
+//    /* Cleanup Application on Termination */
+//    void  Application::End();
+//    /* Called Once a Frame to Update Application state */
+//    void  Application::Update();
+//    /* Called Once a Frame to Render Application */
+//    void  Application::Render();
+//    /* Kills our Application */
+//    void  Application::Terminate();// noexcept { Running = false; }
+//
+//    /* Returns the Title of the Applications Window */
+//    std::string  Application::Name() noexcept;
+//    /* Return the Width dimension of the Main Window */
+//    int    Application::Width() const noexcept;
+//    /* Return the Height Dimension of the Main Window */
+//    int    Application::Height() const noexcept;
+//    /* Tells us the application is currently running 	NOTE: Perhaps enumerate this to allow more states */
+//    bool   Application::isRunning() const noexcept;
+//    /* Returns Applications Position */
+//    Vec2   Application::g_Position() const noexcept;
+//    /* Returns Applications X location on Screen */
+//    float  Application::g_PositionX() const noexcept;
+//    /* Returns Applications Y location on Screen */
+//    float  Application::g_PositionY() const noexcept;
+//
+//    /* Sets the location of a Window */
+//    void   Application::s_Position(Vec2 _pos)  noexcept;
+//    /* Sets the X location for a Window */
+//    Vec2   Application::s_PositionX(float _x) noexcept;
+//    /* Sets the Y location for a Window */
+//    Vec2   Application::s_PositionY(float _y) noexcept;
+//    /* Sets the Size for the base Window of Application */
+//    void   Application::s_Size(Vec2 _size) noexcept;
+//    /* Sets the Width for the base Window of Application */
+//    void   Application::s_Width(int _x) const noexcept;
+//    /* Sets the Height for the base Window of Application */
+//    void   Application::s_Height(int _y) const noexcept;
+//    /* Sets the Title for the base Window of Application */
+//    void   Application::s_Name(std::string _name);
+//
+//
+//    /* Removes an Event from our Listener Queue   */
+//    void  Application::RemoveListener(MsgType msg, Listener& handler);
+//    /* Registers a Callback for specified Message */
+//    void  Application::RegisterListener(MsgType msg, Listener& handler);
+//    /* Gather the Events from the OS */
+//    void  Application::PollEvents();
+//    /* Dispatches Events to their Registered Objects */
+//    void  Application::Dispatch(Event  msg);
+//    /* Post a Message to Applications */
+//    void  Application::PostMSG(Event  msg);
+//    /* Non Blocking check of our Message Queues */
+//    bool  Application::PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags);
+//    /* Basic Nonblocing check of our Message Queue */
+//    bool  Application::PeekMSG(Event& msg);
+//
+//    /* Resize the Application */
+//    void  Application::Resize(Vec2 _size);
+//protected:
+//
+//    /* Executed when Application is Initialized */
+//    virtual void  Application::OnCreate();
+//    /* Executed at Start of Application */
+//    virtual void Application::OnStart();
+//    /* Executed Application is Started on creation or after a Pause */
+//    virtual void  Application::OnRun(); /// Differs from start in that it can resume execution; Possibly change to Resume later or something
+//    /* Executed when Application is Paused 	NOTE: Incomplete */
+//    virtual void  Application::OnPause();
+//    /* Executed when Application goes to sleep from lack of Messages	NOTE: Incomplete */
+//    virtual void  Application::OnSleep();
+//    /* Called when Application Terminates */
+//    virtual void  Application::OnEnd();
+//    /* Called once a frame on Application Update */
+//    virtual void  Application::OnUpdate();
+//    /* Called once a frame when our Application is Rendered */
+//    virtual void  Application::OnRender();
+//
+//    void  Application::CreateApplicationWindow();
+//    virtual void  Application::SetWindowProperties();
+//
+//    static void  Application::set(Application& _app) noexcept;
+// 
+//
+//    static Application&  Application::get() noexcept;
+//    static Application::Window&  Application::getWindow() noexcept;
+//    static void  Application::setWindow(Application::Window& _window)
+//    static Application::Window::InputDevices&  Application::getDevice() noexcept;
+//    static Window::InputDevices::_mouse&  Application::getMouse();
+//    static Window::InputDevices::_keyboard&  Application::getKeyboard();
+//    static void  Application::setCamera(Camera2D& _camera)
+//
+//    static Camera2D&  Application::getCamera()
+// 
+//
+////Vec2 SplitLParam(int lParam);
+
+
+// {
+          //     RADIANS(GLOBAL_Delta_Mouse.x),
+          //     0,
+          //     RADIANS(GLOBAL_Delta_Mouse.y)
+          // }
+
+
+bool TEST_PROFILE_WINDOW()
+{
+    {
+        Profiling::DisplayWindow Test({ 0,0 }, { 10, 150 }, { 30, 450 });
+        {	// TEST SET PIXEL
+
+            Test.setPixel(1, 1, Pixel(255, 255, 255, 255));
+        }
+        {	// TEST UPDATE
+
+            Test.Update(1);
+            if (Test.getPixel(1, 2) _NOT_EQUAL_TO_ 0xffffffff)return false;
+        }
+        {	// REPEATEDLY TEST TO ENSURE UPDATE IS MOVING THE VALUES DOWN
+
+            Test.Update(1);
+            if (Test.getPixel(1, 3) _NOT_EQUAL_TO_ 0xffffffff)return false;
+            Test.Update(1);
+            if (Test.getPixel(1, 4) _NOT_EQUAL_TO_ 0xffffffff)return false;
+            Test.Update(1);
+            if (Test.getPixel(1, 5) _NOT_EQUAL_TO_ 0xffffffff)return false;
+            Test.Update(1);
+            if (Test.getPixel(1, 6) _NOT_EQUAL_TO_ 0xffffffff)return false;
+            Test.Update(1);
+            if (Test.getPixel(1, 7) _NOT_EQUAL_TO_ 0xffffffff)return false;
+            Test.Update(1);
+            if (Test.getPixel(1, 8) _NOT_EQUAL_TO_ 0xffffffff)return false;
+        }
+        {	// TEST TO MAKE SURE IT IS NOT LEAVING A VALUE BEHIMD AND IS NOT JUST SETTING NEW VALUE
+
+            if (Test.getPixel(1, 7) _EQUALS_ 0xffffffff)return false;
+        }
+    }
+
+    return true;
+}
+
+
+
+
+    /// Attributes can be Aliased with multiple ones occupying the same location
+    /// They can be turned on and off as long as one attribute per location is active.
+    ///void glEnableVertexAttribArray(GLuint index);
+    ///void glDisableVertexAttribArray(GLuint index);
+
+    // glArrayElement, glDrawArrays, glDrawElements, glDrawRangeElements glMultiDrawArrays, or glMultiDrawElements is called.See glNormalPointer.
+    //void glVertexAttribPointer(GLuint index,        GLint size,        GLenum type,        GLboolean normalized,        GLsizei stride,        const void * pointer);
+    //If a non - zero named buffer object is bound to the GL_ARRAY_BUFFER target(see glBindBuffer) while a generic vertex attribute array is specified, pointer is treated as a byte offset into the buffer object's data store
+
+
+
+
+// WARN_ME("This is likely to corrupt the Stack and almost surely will corrupt the Iterators. While there are standard ways of inserting into a vector they are slow and the Vectors will be completely removed in the future.");
+// memcpy(&Colors[0], _pointer, _size);
+// OpenGL::set_Attribute(_stride, "VColor");
+
+
+
+/// Old Engine stuff to review Attribute Pointers
+// oid VertexBuffer::Bind()
+// 
+//    _GL(glBindBuffer(GL_ARRAY_BUFFER, ID));
+//    glVertexPointer(3, GL_FLOAT, 0, (char *)NULL);
+//    glEnableClientState(GL_VERTEX_ARRAY);
+// 
+// oid VertexBuffer::Unbind()
+// 
+//    glDisableClientState(GL_VERTEX_ARRAY);
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 
+// oid VertexBuffer::Rebuild()
+//     //glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexPositions), &fNewData[0]);
+//    glBindBuffer(GL_ARRAY_BUFFER, ID);
+//    glBufferSubData(GL_ARRAY_BUFFER, 0, ElementCount * sizeof(Vec3), Data);
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 
+// ormalBuffer::~NormalBuffer()
+// 
+//    glDeleteBuffers(1, &ID);
+// 
+// ormalBuffer::NormalBuffer(Vec3 *NormalData, GLsizei count)
+//    : ElementCount(count),
+//    ID(0)
+// 
+//    Data = new Vec3[count];
+//    Data = NormalData;// Wow this was stupid, Allocate all the Memory than Immediately throw it away and assign a different address
+//    ID = OpenGL::new_VBO();
+//    OpenGL::bind_VBO(ID);
+//    OpenGL::set_BufferData(ElementCount * sizeof(Vec3), NormalData);
+//    OpenGL::unbind_VBO();
+// 
+// oid NormalBuffer::Bind()
+// 
+// 
+//    glBindBuffer(GL_ARRAY_BUFFER, ID); // 
+//    glNormalPointer(GL_FLOAT, 0, (void *)NULL);
+//    glEnableClientState(GL_NORMAL_ARRAY);
+// 
+// oid NormalBuffer::Unbind()
+// 
+//    glDisableClientState(GL_NORMAL_ARRAY);
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 
+ 
+//void glIndexPointer(GLenum type,
+//    GLsizei stride,
+//    const void * pointer);
+//void glVertexPointer(GLenum type,
+//    GLsizei stride,
+//    const void * pointer);
+//void glNormalPointer(GLenum type,
+//    GLsizei stride,
+//    const void * pointer);
+//void glSecondaryColorPointer(GLint size,
+//    GLenum type,
+//    GLsizei stride,
+//    const void * pointer);
+//void glFogCoordPointer(GLenum type,
+//    GLsizei stride,
+//    void * pointer);
+//void glTexCoordPointer(GLint size,
+//    GLenum type,
+//    GLsizei stride,
+//    const void * pointer);
+//
+
+
+
+
+
+
+    // OpenGL::bind_IBO(GL_Handle);
+    // OpenGL::bind_IBO(buffer->GL_Handle);
+
+    //Active_Program->Unbind();
+    //==================================================
+    //pointer_Index.set_Data(_type, _stride, _pointer);
+    //==================================================
+    //assert(GL_Handle != NULL);
+    //Size = 0;
+    //Type = _type;
+    //Name = _name;
+    //Stride = _stride;
+    //Pointer = _ptr;
+    //
+    //Bind();
+    //OpenGL::set_Attribute(_stride, Name);
+    //OpenGL::set_BufferData(_size, _ptr);
+    //==================================================
+///    _static std::string GL::V =
+///    "#version 330 core                             \n\
+///                    layout(location = 0) in vec3 Position; \n\
+///                    layout(location = 1) in vec4 VColor;   \n\
+///                    uniform mat4 ModelViewProjectionMatrix;         \n\
+///                    out vec4 FColor;                       \n\
+///                    void main()                            \n\
+///                    {                                      \n\
+///                        FColor = VColor;                   \n\
+///                        gl_Position = ModelViewProjectionMatrix* vec4( Position.x, Position.y, Position.z, 1.0); \n\
+///                    }";
+///    
+///    _static std::string GL::F =
+///    "#version 330 core                      \n\
+///                    in vec4 FColor;                 \n\
+///                    out vec4 FragColor;             \n\
+///                    void main()                     \n\
+///                    {                               \n\
+///                        FragColor = FColor;  \n\
+///                    }";
+
+
+
+
+
+//
+//#version 330 core                             
+//layout(location = 0) in vec3 Position;
+//layout(location = 1) in vec4 VColor;   
+//uniform mat4 ProjectionMatrix;
+//uniform mat4 ModelViewMatrix;         
+//out vec4 FColor;                       
+//void main()                            
+//{                                      
+//  FColor = VColor;                   
+//  gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Position.x, Position.y, Position.z, 1.0); 
+//}
+//
+//#version 330 core                     
+//in vec4 FColor;        
+//out vec4 FragColor;    
+//void main()            
+//{                      
+//  FragColor = FColor;
+//}
+
+
+
+
+
+
+
+
+
+//  GL_CURRENT_BIT    //	Current RGBA color
+//  GL_POINT_BIT          //	//GL_POINT_SMOOTH flag
+//  GL_LINE_BIT //	GL_LINE_SMOOTH flag
+//  GL_POLYGON_BIT         //	//GL_CULL_FACE enable bit
+//
+//  GL_POLYGON_STIPPLE_BIT         //	Polygon stipple image
+//  GL_PIXEL_MODE_BIT         //	GL_RED_BIAS and GL_RED_SCALE settings
+//  GL_LIGHTING_BIT      ///GL_COLOR_MATERIAL enable bit
+//  GL_FOG_BIT     //	GL_FOG enable bit
+//
+//  GL_DEPTH_BUFFER_BIT        
+//  GL_ACCUM_BUFFER_BIT
+//  GL_STENCIL_BUFFER_BIT 
+//  GL_VIEWPORT_BIT    //	Depth range(near and far)
+//
+//  GL_TRANSFORM_BIT  // Coefficients of the six clipping planes
+//  GL_ENABLE_BIT 
+//  GL_COLOR_BUFFER_BIT 
+//  GL_HINT_BIT    //	GL_PERSPECTIVE_CORRECTION_HINT setting
+//
+//  GL_EVAL_BIT 
+//  GL_LIST_BIT      //	GL_LIST_BASE setting
+//  GL_TEXTURE_BIT	  //Enable bits for the four texture coordinates
+//  GL_SCISSOR_BIT            //	GL_SCISSOR_TEST flag
+
+
+
+
+
+    // uint32_t type_Index{ 0 };
+// uint32_t stride_Index{ 0 };
+// void *pointer_Index{ nullptr };
+//
+// uint32_t size_Color{ 0 };
+// uint32_t type_Color{ 0 };
+// uint32_t stride_Color{ 0 };
+// void *pointer_Color{ nullptr };
+//
+// uint32_t size_Vertex{ 0 };
+// uint32_t type_Vertex{ 0 };
+// uint32_t stride_Vertex{ 0 };
+// void *pointer_Vertex{ nullptr };
+//
+//
+// uint32_t type_Normal{ 0 };
+// uint32_t stride_Normal{ 0 };
+// void *pointer_Normal{ nullptr };
+//
+// uint32_t size_FogCoord{ 0 };
+// uint32_t type_FogCoord{ 0 };
+// uint32_t stride_FogCoord{ 0 };
+// void *pointer_FogCoord{ nullptr };
+//
+//
+// uint32_t size_TexCood{ 0 };
+// uint32_t type_TexCoord{ 0 };
+// uint32_t stride_TexCoord{ 0 };
+// void *pointer_TexCoord{ nullptr };
+//
+// uint32_t size_SecondaryColor{ 0 };
+// uint32_t stride_SecondaryColor{ 0 };
+// uint32_t type_SecondaryColor{ 0 };
+// void *pointer_SecondaryColor{ nullptr };
+
+
+
+
+//struct GL_Attribute
+//{
+    ///glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT...etc
+//struct Bit_Flags
+//{
+//    uint32_t unused1 : 1;
+//    uint32_t unused2 : 1;
+//    uint32_t MULTISAMPLE_State : 1;
+//    uint32_t unused4 : 1;
+//
+//    uint32_t unused5 : 1;
+//    uint32_t unused6 : 1;
+//    uint32_t unused7 : 1;
+//    uint32_t unused8 : 1;
+//
+//    uint32_t unused9 : 1;
+//    uint32_t unused10 : 1;
+//    uint32_t unused11 : 1;
+//    uint32_t unused12 : 1;
+//
+//    uint32_t CURRENT_State : 1;         //  GL_CURRENT_BIT      Current RGBA color
+//    uint32_t POINT_State : 1;           //  GL_POINT_SMOOTH flag
+//    uint32_t LINE_State : 1;	        //  GL_LINE_SMOOTH flag
+//    uint32_t POLYGON_State : 1;         //   GL_POLYGON_BIT     	//GL_CULL_FACE enable bit
+//
+//    uint32_t POLYGON_STIPPLE_State : 1; //	Polygon stipple image
+//    uint32_t PIXEL_MODE_State : 1;      //	GL_RED_BIAS and GL_RED_SCALE settings
+//    uint32_t LIGHTING_State : 1;        //  GL_COLOR_MATERIAL enable bit
+//    uint32_t FOG_State : 1;             //	GL_FOG enable bit
+//
+//    uint32_t DEPTH_BUFFER_State : 1;
+//    uint32_t ACCUM_BUFFER_State : 1;
+//    uint32_t STENCIL_BUFFER_State : 1;
+//    uint32_t VIEWPORT_State : 1;         //  Depth range(near and far)
+//
+//    uint32_t TRANSFORM_State : 1;        //  Coefficients of the six clipping planes
+//    uint32_t ENABLE_State : 1;
+//    uint32_t COLOR_BUFFE_State : 1;
+//    uint32_t HINT_State : 1;              //  GL_PERSPECTIVE_CORRECTION_HINT setting
+//
+//    uint32_t EVAL_State : 1;
+//    uint32_t LIST_State : 1;             //  GL_LIST_BASE setting
+//    uint32_t TEXTURE_State : 1;	         //  Enable bits for the four texture coordinates
+//    uint32_t SCISSOR_State : 1;          //  GL_SCISSOR_TEST flag
+//}State_Flags;
+    //0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,
+
+           ////GL_MULTISAMPLE flag
+//        void set_Handle(uint32_t _handle) { GL_Handle = _handle; }
+
+//GL_DEPTH_TEST enable bit
+//        GL_ALPHA_TEST enable bit
+//        GL_BLEND enable bit
+//        GL_DITHER enable bit
+//        GL_DRAW_BUFFER setting
+//        GL_COLOR_LOGIC_OP enable bit
+//        GL_INDEX_LOGIC_OP enable bit
+//        GL_CURRENT_RASTER_POSITION_VALID flag
+//        GL_EDGE_FLAG flag
+//        GL_DEPTH_WRITEMASK enable bit
+//        	GL_ALPHA_TEST flag
+//        GL_AUTO_NORMAL flag
+//        GL_BLEND flag
+//        GL_COLOR_MATERIAL
+//        GL_CULL_FACE flag
+//        GL_DEPTH_TEST flag
+//        GL_DITHER flag
+//        GL_FOG flag
+// ///       GL_LIGHTi where 0 <= i < GL_MAX_LIGHTS
+//        GL_LIGHTING flag
+//        GL_LINE_SMOOTH flag
+//        GL_LINE_STIPPLE flag
+//        GL_COLOR_LOGIC_OP flag
+//        GL_INDEX_LOGIC_OP flag
+//        //GL_MAP1_x// where x is a map type
+//        //GL_MAP2_x// where x is a map type
+//        GL_MULTISAMPLE flag
+//        GL_NORMALIZE flag
+//        GL_POINT_SMOOTH flag
+//        GL_POLYGON_OFFSET_LINE flag
+//        GL_POLYGON_OFFSET_FILL flag
+//        GL_POLYGON_OFFSET_POINT flag
+//        GL_POLYGON_SMOOTH flag
+//        GL_POLYGON_STIPPLE flag
+//        GL_SAMPLE_ALPHA_TO_COVERAGE flag
+//        GL_SAMPLE_ALPHA_TO_ONE flag
+//        GL_SAMPLE_COVERAGE flag
+//        GL_SCISSOR_TEST flag
+//        GL_STENCIL_TEST flag
+//        GL_TEXTURE_1D flag
+//        GL_TEXTURE_2D flag
+//        GL_TEXTURE_3D flag
+//       /// Flags GL_TEXTURE_GEN_x where x is S, T, R, or Q
+//       /// 	GL_MAP1_x enable bits, where x is a map type
+//       /// GL_MAP2_x enable bits, where x is a map type
+//        GL_AUTO_NORMAL enable bit
+//
+//        GL_FOG_MODE value
+//        GL_POINT_SMOOTH_HINT setting
+//        GL_LINE_SMOOTH_HINT setting
+//        GL_POLYGON_SMOOTH_HINT setting
+//        GL_FOG_HINT setting
+//        GL_GENERATE_MIPMAP_HINT setting
+//        GL_TEXTURE_COMPRESSION_HINT setting
+//        GL_COLOR_MATERIAL_FACE value
+//
+//        GL_LIGHT_MODEL_LOCAL_VIEWER value
+//        GL_LIGHT_MODEL_TWO_SIDE setting
+//        GL_LIGHTING enable bit
+//
+//        GL_SHADE_MODEL setting
+//        GL_LINE_STIPPLE enable bit
+//
+//        GL_SAMPLE_ALPHA_TO_COVERAGE flag
+//        GL_SAMPLE_ALPHA_TO_ONE flag
+//        GL_SAMPLE_COVERAGE flag
+//        GL_SAMPLE_COVERAGE_VALUE value
+//        GL_SAMPLE_COVERAGE_INVERT value
+//        GL_GREEN_BIAS and GL_GREEN_SCALE values
+//        GL_BLUE_BIAS and GL_BLUE_SCALE
+//        GL_ALPHA_BIAS and GL_ALPHA_SCALE
+//        GL_DEPTH_BIAS and GL_DEPTH_SCALE
+//        GL_INDEX_OFFSET and GL_INDEX_SHIFT values
+//        GL_MAP_COLOR and GL_MAP_STENCIL flags
+//        GL_ZOOM_X and GL_ZOOM_Y factors
+//        GL_READ_BUFFER setting
+//
+//        GL_CULL_FACE_MODE value
+//        GL_FRONT_FACE indicator
+//        GL_POLYGON_MODE setting
+//        GL_POLYGON_SMOOTH flag
+//        GL_POLYGON_STIPPLE enable bit
+//        GL_POLYGON_OFFSET_FILL flag
+//        GL_POLYGON_OFFSET_LINE flag
+//        GL_POLYGON_OFFSET_POINT flag
+//        GL_POLYGON_OFFSET_FACTOR
+//        GL_POLYGON_OFFSET_UNITS
+//        GL_STENCIL_TEST enable bit
+//
+//
+//        GL_TEXTURE_GEN_MODE setting for S, T, R, and Q
+//
+//        GL_MATRIX_MODE value
+//        GL_NORMALIZE flag
+//        GL_RESCALE_NORMAL flag
+
+//};
+
+
+
+//glGetVertexAttrib returns in params the value of a generic vertex attribute parameter.The generic vertex attribute to be queried is specified by index, and the parameter to be queried is specified by pname.
+//void glGetVertexAttribfv(GLuint index,    GLenum pname,    GLfloat *params);
+//void glGetVertexAttribiv(GLuint index,    GLenum pname,    GLint *params);
+
+
+
+// 
+// The accepted parameter names are as follows :
+// 
+// GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING //  params returns a single value, the name of the buffer object currently bound to the binding point corresponding to generic vertex attribute array index.If no buffer object is bound, 0 is returned.The initial value is 0.
+// GL_VERTEX_ATTRIB_ARRAY_ENABLED        //  params returns a single value that is non - zero(true) if the vertex attribute array for index is enabled and 0 (false) if it is disabled.The initial value is GL_FALSE.
+// GL_VERTEX_ATTRIB_ARRAY_SIZE           //  params returns a single value, the size of the vertex attribute array for index.The size is the number of values for each element of the vertex attribute array, and it will be 1, 2, 3, or 4. The initial value is 4.
+// GL_VERTEX_ATTRIB_ARRAY_STRIDE         //  params returns a single value, the array stride for (number of bytes between successive elements in) the vertex attribute array for index.A value of 0 indicates that the array elements are stored sequentially in memory.The initial value is 0.
+// GL_VERTEX_ATTRIB_ARRAY_TYPE           //  params returns a single value, a symbolic constant indicating the array type for the vertex attribute array for index.Possible values are GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FIXED, and GL_FLOAT.The initial value is GL_FLOAT.
+// GL_VERTEX_ATTRIB_ARRAY_NORMALIZED     //  params returns a single value that is non - zero(true) if fixed - point data types for the vertex attribute array indicated by index are normalized when they are converted to floating point, and 0 (false) otherwise.The initial value is GL_FALSE.
+// GL_CURRENT_VERTEX_ATTRIB              //  params returns four values that represent the current value for the generic vertex attribute specified by index.The initial value is(0, 0, 0, 1).
+
+//All of the parameters except GL_CURRENT_VERTEX_ATTRIB represent client - side state.
+
+            //pointer_Vertex.Bind();
+            //pointer_Color.Bind();
+           //  pointer_Vertex.Bind();
+           //  pointer_Vertex.set_Data(3,Vertices.data());
+           //  pointer_Color.Bind();
+           //  pointer_Color.set_Data(4,Colors.data());
 
 
 

@@ -4,9 +4,12 @@
 
 #include"../Renderer/LowLevel/OpenGL/Camera/Camera.h"
 
-_static QuadTree *QuadTree::QT;
+template<typename Object_Type>
+_static QuadTree<Object_Type> *QuadTree<Object_Type>::QT;
 
-Node::Node(Vec2 pos, Vec2 size)
+
+template<typename Object_Type>
+Node<Object_Type>::Node(Vec2 pos, Vec2 size)
     :
     Position(pos),
     Size(size),
@@ -21,8 +24,8 @@ Node::Node(Vec2 pos, Vec2 size)
     Entities.reserve(MAX_CAPACITY);
 }
 
-
-void Node::Subdivide()
+template<typename Object_Type>
+void Node<Object_Type>::Subdivide()
 {
     for_loop(Index, 4)
     {
@@ -44,8 +47,8 @@ void Node::Subdivide()
     }
 
 }
-
-bool  Node::Insert(Object_type *object)
+template<typename Object_Type>
+bool  Node<Object_Type>::Insert(Object_type *object)
 {
     if (Size.x < 1.0)
     {
@@ -113,7 +116,7 @@ bool  Node::Insert(Object_type *object)
 /* Currently the QT only test points and considers Objects to be Dimensionless. 
 /* At the very least this is something that should be kept in mind and possibly
 /* Reconsidered at a later date */
-bool Node::IsContained(Object_type *object)
+template<typename Object_Type> bool Node<Object_Type>::IsContained(Object_type *object)
 {
     REFACTOR("Possibly alter this test to include other dimensions instead of assuming object is a single point | 7/21 Object should just be Vec2 for performance else I have to dereference many times  ");
     return
@@ -124,9 +127,7 @@ bool Node::IsContained(Object_type *object)
             object->g_PositionY() <= (Position.y + Size.y)
             );
 }
-
-
-bool  Node::PushDown(Object_type *_object)
+template<typename Object_Type> bool  Node<Object_Type>::PushDown(Object_type *_object)
 {
     if (SubNodes[NE]->Insert(_object) _IS_EQUAL_TO_ true) return true;
     if (SubNodes[SE]->Insert(_object) _IS_EQUAL_TO_ true) return true;
@@ -134,15 +135,11 @@ bool  Node::PushDown(Object_type *_object)
     if (SubNodes[SW]->Insert(_object) _IS_EQUAL_TO_ true) return true;
     return false;
 }
-
-
-void  Node::Moveup(Object_type *_object)
+template<typename Object_Type> void Node<Object_Type>::Moveup(Object_type *_object)
 {
     // Needs work and possibly is not needed at all
 }
-
-
-void  Node::Prune(Node *_node)
+template<typename Object_Type> void Node<Object_Type>::Prune(Node *_node)
 {
     if (_node _NOT_EQUAL_TO_ nullptr)
     {
@@ -161,8 +158,7 @@ void  Node::Prune(Node *_node)
 }
 
 
-
-void Node::Render()
+template<typename Object_Type> void Node<Object_Type>::Render()
 {//    REFACTOR(" Include a Debug Renderer here That can draw Wire Frames of our Nodes Boarders: 7/21/20 [ Why not just use the Line Batch Renderer for all that ");
 
     float X1 = (Position.x - (Size.x));
@@ -186,7 +182,7 @@ void Node::Render()
         }
     }
 }
-Vec2 Node::NewPos(Vec2 pos, NodeTag direction) {
+template<typename Object_Type> Vec2 Node<Object_Type>::NewPos(Vec2 pos, NodeTag direction) {
     Vec2 NewPos = pos;
     if (direction _IS_EQUAL_TO_ NE)
     {
@@ -210,7 +206,7 @@ Vec2 Node::NewPos(Vec2 pos, NodeTag direction) {
     }
     return NewPos;
 }
-bool  Node::Intersects(Vec2 position, Vec2 size)
+template<typename Object_Type> bool Node<Object_Type>::Intersects(Vec2 position, Vec2 size)
 {// Position is Center of Quad
     return
         _NOT_(
@@ -220,7 +216,7 @@ bool  Node::Intersects(Vec2 position, Vec2 size)
             position.y + size.y < Position.y - Size.y);
 
 }
-std::vector<Object_type*> Node::QueryRange(Vec2 position, Vec2 size)
+template<typename Object_Type> std::vector<Object_type*> Node<Object_Type>::QueryRange(Vec2 position, Vec2 size)
 {
 
     std::vector<Object_type *> results;
@@ -268,9 +264,7 @@ std::vector<Object_type*> Node::QueryRange(Vec2 position, Vec2 size)
 
     return results;
 }
-
-
-QuadTree::QuadTree(Vec2 _position, Vec2 _size)
+template<typename Object_Type> QuadTree<Object_Type>::QuadTree(Vec2 _position, Vec2 _size)
     :
     Position(_position),
     Size(_size)
@@ -278,7 +272,7 @@ QuadTree::QuadTree(Vec2 _position, Vec2 _size)
     RootNode = new Node(_position, _size);
     QT = this;
 }
-void QuadTree::Init()
+template<typename Object_Type> void QuadTree<Object_Type>::Init()
 {
     RootNode = new Node(Position, Size);
     for_loop(Index, Simulation::get().Colliders.size())
@@ -287,8 +281,11 @@ void QuadTree::Init()
     }
 }
 
+
+
+
 DEBUG_CODE(size_t InsertionWatch = 0;)
-void QuadTree::Update()
+template<typename Object_Type> void QuadTree<Object_Type>::Update()
 {
     DEBUG_CODE(InsertionWatch = 0;)
 
@@ -299,9 +296,7 @@ void QuadTree::Update()
         ChildAdd(Simulation::get().Colliders[Index]);
     }
 }
-
-
-void QuadTree::ChildAdd(Object_type *_object)
+template<typename Object_Type> void QuadTree<Object_Type>::ChildAdd(Object_type *_object)
 {
     if (_object->is_Alive())
     {

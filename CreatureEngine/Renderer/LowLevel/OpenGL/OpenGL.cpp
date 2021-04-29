@@ -13,20 +13,37 @@ std::string OpenGL_ErrorList;
  wglChoosePixelFormatARB_type *wglChoosePixelFormatARB;
  wglCreateContextAttribsARB_type *wglCreateContextAttribsARB;
 
+///bool is_ActiveVAO(int _vao)
+///{
+///    int32_t result;
+///void glGetVertexAttribiv( index,
+///    GL_CURRENT_VERTEX_ATTRIB,
+///    &result);
+///}
+///
+///void glGetVertexAttribfv(GLuint index,
+///    GLenum pname,
+///    GLfloat *params);
+
+
+
 namespace OpenGL
 {
 
-    /*
-    Experimental nonsense more than likely
-    ========================================================*/
+    /* ========================================================
+    /*         Experimental nonsense more than likely
+    /* ======================================================== */
     struct Mesh {};
 
-    enum  Surface_t { Normals, Albedo, Metallic };
-    using SurfaceFragment = std::pair<Surface_t, Texture>;
-    using Surface = std::vector<SurfaceFragment>;
-    using Material = std::pair<Surface, Shader>;
+    enum  Material_type { Normals, Albedo, Metallic };
+    using Material_Fragment = std::pair<Material_type, Texture>;
+    using Material = std::pair<std::vector<Material_Fragment>, Shader>;
     using RenderPair = std::pair<Material, Mesh>;
-
+    /* =============================================================================================================
+        THIS MEANS A RENDERABLE OBJECT CONSIST OF YOUR VERTICES STORED ON A SERVER SIDE VBO AND A MATERIAL INSTANCE 
+        WHICH CONSIST OF A SERIES OF TEXTURES WITH A TYPE ASSIGNED TO THEM INSIDE OF A VECTOR AS WELL AS A SHADER
+        DESIGNED TO RENDER THAT SERIES OF TEXTURES APPROPRIATELY.
+    /* ============================================================================================================= */
 
 
 
@@ -42,7 +59,7 @@ namespace OpenGL
         {
             MessageBox
             (/// Turn all this into a Macro for Clearity 
-                /// DEBUGPRINT THIS and Get rid of the damn box
+                /// DEBUGPRINT THIS and Get rid of the damn box- 11/13/20 ~ Stillll fucking here isn't it!
                 NULL,
                 "GL Context Creation Failed  "
                 "Cannot Create Renderer",
@@ -67,7 +84,7 @@ namespace OpenGL
         return results;
     }
     bool make_Context_Current(HDC _device, HGLRC _context)
-    {
+    {// Sets the Provided Context as Current on the given Device
         bool result = wglMakeCurrent(_device, _context);
         if (!result)
         {
@@ -89,7 +106,6 @@ namespace OpenGL
         HDC DeviceContext{ nullptr };
         PFD PixelForma;
         PIXELFORMATDESCRIPTOR PixelFormatDescriptor;
-
     };
 
 
@@ -226,6 +242,29 @@ namespace OpenGL
         DEBUG_CODE(CheckGLERROR());
         return result;
     }
+
+    uint32_t get_VAO()
+    {
+        int32_t result;
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &result);
+        return result;
+    }
+    uint32_t get_VertexVBO()
+    {
+        int32_t result;
+        glGetIntegerv(GL_VERTEX_ARRAY_BUFFER_BINDING, &result);
+        return result;
+    }  
+    uint32_t get_ColorVBO()
+    {
+        int32_t result;
+        glGetIntegerv(GL_COLOR_ARRAY_BUFFER_BINDING, &result);
+        return result;
+    }
+
+    // 
+  //  GL_VERTEX_ARRAY_BUFFER_BINDING
+
     void set_Hint(Hint_t _hint, Mode_t _mode)
     {// Sets a Hint for the OpenGL Context
         glHint(_hint, _mode);
@@ -251,6 +290,8 @@ namespace OpenGL
     {// Is an ID a Vertex Array Object 
         return (bool)(glIsVertexArray(_array));
     }
+
+
 
     /* ==========================================================
                      Generic Buffer Object Management
@@ -316,6 +357,7 @@ namespace OpenGL
     }
     void delete_IBO(uint32_t _id)
     {// Frees ID for a Element Array Object
+        assert(_id != NULL);
         glDeleteBuffers(1, &_id);
         DEBUG_CODE(CheckGLERROR());
     }
@@ -328,12 +370,13 @@ namespace OpenGL
         DEBUG_CODE(CheckGLERROR());
     }
     void unbind_IBO()
-    { // Unbinds all Vertex Buffer Objects from OpenGL
+    { // Unbinds all Vertex Buffer Objects from OpenGL 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         DEBUG_CODE(CheckGLERROR());
     }
     bool isIBO(int _array)
     {// Is an ID a Vertex Buffer Object 
+        __debugbreak(); // Deactivated as I am unsure if there is functionality for determining if a buffer can be a valid Element Array Buffer 
         return (bool)(glIsBuffer(_array));
     }
 
@@ -366,16 +409,19 @@ namespace OpenGL
     {
         assert(_handle != NULL);
         glBindTexture(_target, _handle);
+        DEBUG_CODE(CheckGLERROR());
     }
     void bind_Texture_Target(uint32_t _target, uint32_t _handle, uint32_t _slot)
     {
         assert(_handle != NULL);
         glActiveTexture(GL_TEXTURE0 + _slot);
         glBindTexture(_target, _handle);
+        DEBUG_CODE(CheckGLERROR());
     }
     void unbind_Texture_Target(uint32_t _target)
     {
         glBindTexture(_target, 0);
+        DEBUG_CODE(CheckGLERROR());
     }
 
 
@@ -391,12 +437,14 @@ namespace OpenGL
     void update_SubImage(const void* _pixels, iVec2 _size, iVec2 _offset, GLenum _format , GLenum _type )
     {
         glTexSubImage2D(GL_TEXTURE_2D, 0, _offset.x, _offset.y, _size.x, _size.y, _format, _type, _pixels);
+        DEBUG_CODE(CheckGLERROR());
     }
 
     /* Update all of the Bound OpenGL Texture */
     void update_Texture(const void* _pixels, iVec2 _size, GLenum _internal_format ,GLenum _format , GLenum _type )
     {
         glTexImage2D(GL_TEXTURE_2D, 0, _internal_format, _size.x, _size.y, 0, _format, _type, _pixels);
+        DEBUG_CODE(CheckGLERROR());
     }
 
     /* Creates a new Handle for an OpenGL Texture Object */
@@ -429,12 +477,14 @@ namespace OpenGL
     {//  Return the Active Texture unit 
         int result{ 0 };
         glGetIntegerv(GL_ACTIVE_TEXTURE, &result);
+        DEBUG_CODE(CheckGLERROR());
         return result;
     }
     int  get_MaximumTextureUnits()
     {
         int result{ 0 };
         glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
+        DEBUG_CODE(CheckGLERROR());
         return result;
     }
 
@@ -442,22 +492,27 @@ namespace OpenGL
     void generate_MipMap()
     {
         glGenerateMipmap(GL_TEXTURE_2D);
+        DEBUG_CODE(CheckGLERROR());
     }
     void turn_Mipmap_On() 
     {// Turns on Mipmap for this texture
         glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+        DEBUG_CODE(CheckGLERROR());
     }
     void turn_Mipmap_Off() 
     {// Turns off Mipmaps for this Texture
         glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+        DEBUG_CODE(CheckGLERROR());
     }
     void turn_Mipmap_On(GLenum _target)
     {// Turns on Mipmap for this texture
         glTexParameteri(_target, GL_GENERATE_MIPMAP, GL_TRUE);
+        DEBUG_CODE(CheckGLERROR());
     }
     void turn_Mipmap_Off(GLenum _target)
     {// Turns off Mipmaps for this Texture
         glTexParameteri(_target, GL_GENERATE_MIPMAP, GL_FALSE);
+        DEBUG_CODE(CheckGLERROR());
     }
 
     void set_Magnification(uint32_t _param)                         { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _param); }
@@ -468,23 +523,28 @@ namespace OpenGL
     void set_WrapX(unsigned int param) 
     {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, param);
-
+        DEBUG_CODE(CheckGLERROR());
     }
     void set_WrapY(unsigned int param) 
     {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, param);
+        DEBUG_CODE(CheckGLERROR());
     }
     void set_Texture_WrapX(uint32_t _target, unsigned int param) 
     {
         glTexParameteri(_target, GL_TEXTURE_WRAP_S, param);
+        DEBUG_CODE(CheckGLERROR());
     }
     void set_Texture_WrapY(uint32_t _target, unsigned int param) 
     {
         glTexParameteri(_target, GL_TEXTURE_WRAP_T, param);
+        DEBUG_CODE(CheckGLERROR());
     }
-    void  delete_Texture(uint32_t _handle)
+    void delete_Texture(uint32_t _handle)
     {
+        assert(_handle != 0);
         glDeleteTextures(1, &_handle);
+        DEBUG_CODE(CheckGLERROR());
     }
     ///=================================================================================
     /// Texture Buffer Object 
@@ -492,6 +552,7 @@ namespace OpenGL
 
     void bind_TextureBuffer(uint32_t _handle)
     {
+        assert(_handle != 0);
         glBindTexture(GL_TEXTURE_BUFFER, _handle);
     }
     void attach_TextureBuffer(uint32_t _buffer, uint32_t _format)
@@ -507,6 +568,7 @@ namespace OpenGL
     {
         uint32_t Result;
         glGenBuffers(1, &Result);
+        DEBUG_CODE(CheckGLERROR());
         return Result;
     }
     
@@ -656,19 +718,24 @@ namespace OpenGL
     }
     uint32_t set_Attribute(uint8_t _elements, const char* _name)
     {
+        CheckGLERROR();
+
         int H = Shader::getHandle();
         int32_t Location = glGetAttribLocation(H, _name);
+        CheckGLERROR();
 
         DEBUG_CODE
         (
             if (Location == -1)
             {
-                Print("ERROR: Attribute does not exist");
+                Print("ERROR: Attribute does not exist, Your shader did not compile or you are attempting an attribute that was never used and erased by GLSL");
                 __debugbreak();
             }
         );
+        CheckGLERROR();
 
         enable_Attribute(Location);
+        CheckGLERROR();
         Attribute_Pointer(Location, _elements);
 
         CheckGLERROR();
@@ -720,7 +787,7 @@ namespace OpenGL
             std::cout << output << std::endl; 
 
         }
-        OpenGL_Debug::GetFirstNMessages(5);
+       // OpenGL_Debug::GetFirstNMessages(5);
         return errorCode;
     }
 
@@ -936,56 +1003,12 @@ namespace OpenGL_Debug
 
 
 
-
-
-
-
-
-
-
-
-
-//            glCreateShader();
-
-
-
-//glGet with argument GL_LOGIC_OP_MODE.
-
-
-
-/*
-Mathmatics for Lighting in OpenGL
-https://www.tjhsst.edu/~dhyatt/supercomp/n310.html
-
-Vertexbanana Basic-OpenGL-Tutorials
-https://github.com/vertexbanana/Basic-OpenGL-Tutorials/blob/master/BasicTutorials/DEPENDENCIES/include/GL/GL.H
-*/
-
-
-//======================================================
-/*void InitOpenGL()
-{
-    Print(gladLoadGL());
-    RenderPair TestObject =
-    {
-        Material
-        (
-            {
-                {
-                    {
-                        Normals, Texture()
-                    },
-                    {
-                        Albedo, Texture()
-                    },
-                    {
-                        Metallic, Texture()
-                    }
-                },
-                Shader()
-            }
-        ),
-        Mesh()
-    };
-}
-*/
+/* =========================================================================================================================================
+/*                                                       REFERENCES 
+/*  =========================================================================================================================================
+/*  Mathmatics for Lighting in OpenGL
+/*  https://www.tjhsst.edu/~dhyatt/supercomp/n310.html
+/*  
+/*  Vertexbanana Basic-OpenGL-Tutorials
+/*  https://github.com/vertexbanana/Basic-OpenGL-Tutorials/blob/master/BasicTutorials/DEPENDENCIES/include/GL/GL.H
+/* ========================================================================================================================================= */

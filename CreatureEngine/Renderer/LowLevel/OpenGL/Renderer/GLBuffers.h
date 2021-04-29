@@ -57,6 +57,7 @@ public:
 
     void Append(void *_data, size_t _sz);
     void Update(void *_data, size_t _sz);
+
     template<typename _Ty>
     void Update(std::vector<_Ty> _data)
     {
@@ -118,6 +119,12 @@ public:
         VertexBufferObject<_Ty>(_vec.data(),(GLsizei)_vec.size())
 	{}
 
+    /* Adds single piece of data of Type to the Buffer */
+    void Add(_Ty _data)
+    {
+
+    }
+
     _Ty* data() { return (_Ty*)BufferPtr.data(); }
 };
 
@@ -173,7 +180,7 @@ public:
 
 		Buffers.push_back(buffer);
 
-		switch (bufferT)
+        switch (bufferT)
 		{/// Case statement of Buffer types. Indices pushback then exit the function so that EnableVertexAttribArray and glVertexAttribPointer are never called.
         case BufferTypes::INDICE:
         {
@@ -252,11 +259,29 @@ public:
 		break;
 
 		}
-      //  THIS SHOULD NEVER BE 0 SHOULD IT?
+ 
         OpenGL::bind_VBO(buffer->GL_Handle);
-		_GL(glEnableVertexAttribArray(buffer->Location));
-		_GL(glVertexAttribPointer(buffer->Location, Amount, GL_FLOAT, GL_FALSE, 0, (char*)NULL));
+		glEnableVertexAttribArray(buffer->Location);
+	    glVertexAttribPointer(buffer->Location, Amount, GL_FLOAT, GL_FALSE, 0, (char*)NULL);
 	}
+
+
+// template<typename _Ty>
+// void Attach(BufferTypes _bufferT, const char *_name, VertexBufferObject<_Ty>* _buffer)
+// {
+//     _buffer->AttributeType = bufferT;
+//     Buffers.emplace_back(_buffer);
+//     Buffers.back()->Location = Shader::get().AttributeLocation(_name);
+//     if (Buffers.back()->Location == -1)
+//     {
+//         DEBUGPrint(CON_Red, "Attribute not in the Active Shader. Ensure proper shader is bound and Attribute has not been compiled away");
+//         __debugbreak();
+//         return;
+//     }
+// }
+
+
+
 
     void Append(VertexArrayObject *_other)
     {

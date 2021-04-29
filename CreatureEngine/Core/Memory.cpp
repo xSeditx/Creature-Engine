@@ -412,9 +412,9 @@ and Index information"
 
     for (int i = 0; i < Size; ++i)
     {
-        int Index = rand() % (TestRingBuffer.element_Count() * 10);
+        int Index = rand() % (TestRingBuffer.capacity() * 10);
         //Print("Testing get_Ptr() wrapping using Index " << Index << " at address " << (void*)TestRingBuffer.get_Ptr(Index));
-        TEST_ASSERT((void*)TestRingBuffer.get_Ptr(Index) _EQUALS_ (void*)TestRingBuffer.get_Ptr(Index + TestRingBuffer.element_Count()), "Pointer and Index Test", "Pointer and Index Test" );
+        TEST_ASSERT((void*)TestRingBuffer.get_Ptr(Index) _EQUALS_ (void*)TestRingBuffer.get_Ptr(Index + TestRingBuffer.capacity()), "Pointer and Index Test", "Pointer and Index Test" );
     }
     /* ============================================================================== */
 

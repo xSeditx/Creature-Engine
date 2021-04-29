@@ -186,42 +186,6 @@ bool THREAD_POOL_TEST()
 #endif // IF 0 to turn all this off for now.
     return true;
 }
-bool TEST_PROFILE_WINDOW()
-{
-    {
-        Profiling::DisplayWindow Test({ 0,0 }, { 10, 150 }, { 30, 450 });
-        {	// TEST SET PIXEL
-
-            Test.setPixel(1, 1, Pixel(255, 255, 255, 255));
-        }
-        {	// TEST UPDATE
-
-            Test.Update(1);
-            if (Test.getPixel(1, 2) _NOT_EQUAL_TO_ 0xffffffff)return false;
-        }
-        {	// REPEATEDLY TEST TO ENSURE UPDATE IS MOVING THE VALUES DOWN
-
-            Test.Update(1);
-            if (Test.getPixel(1, 3) _NOT_EQUAL_TO_ 0xffffffff)return false;
-            Test.Update(1);
-            if (Test.getPixel(1, 4) _NOT_EQUAL_TO_ 0xffffffff)return false;
-            Test.Update(1);
-            if (Test.getPixel(1, 5) _NOT_EQUAL_TO_ 0xffffffff)return false;
-            Test.Update(1);
-            if (Test.getPixel(1, 6) _NOT_EQUAL_TO_ 0xffffffff)return false;
-            Test.Update(1);
-            if (Test.getPixel(1, 7) _NOT_EQUAL_TO_ 0xffffffff)return false;
-            Test.Update(1);
-            if (Test.getPixel(1, 8) _NOT_EQUAL_TO_ 0xffffffff)return false;
-        }
-        {	// TEST TO MAKE SURE IT IS NOT LEAVING A VALUE BEHIMD AND IS NOT JUST SETTING NEW VALUE
-
-            if (Test.getPixel(1, 7) _EQUALS_ 0xffffffff)return false;
-        }
-    }
-
-    return true;
-}
 
 
 */

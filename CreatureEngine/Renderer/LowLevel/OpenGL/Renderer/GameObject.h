@@ -299,3 +299,166 @@ bool operator == (std::vector<GameObject *>::iterator &lhv, const GameObject& rh
 //Transform = glm::rotate(Transform, glm::radians(Rotation.x), Vec3(1.0f, 0.0f, 0.0f));
 //Transform = glm::rotate(Transform, glm::radians(Rotation.y), Vec3(0.0f, 1.0f, 0.0f));
 //Transform = glm::rotate(Transform, glm::radians(Rotation.z), Vec3(0.0f, 0.0f, 1.0f));
+
+
+
+///OLD ENGINE
+/*
+GameObject
+=========
+Children:
+---- Physics              // TODO: All of this class
+----~---- RigidBody
+----~---- SoftBody
+----~---- Material
+----~----~---- Fluid
+----~----~---- Cloth
+----~----~---- Spring
+----~----~---- Rope
+---- Camera               // COMMENT: Currently there is only a single Camera with different Projection matrix however it might be wise to Subclass for the two types as various optimizations could be performed
+----~---- Perspective
+----~---- Orthographic
+---- Light
+---- Objects // TODO: NEW NAME Since we changed component to GameObject???
+----~---- TileMap         // TODO: Implement
+----~---- Mesh
+----~----~---- Cube
+----~----~---- Sphere
+----~----~---- Block
+----~----~---- Plane
+----~----~---- Torus      // Errors
+----~----~---- Diamond
+----~---- Sprite
+----~---- Terrain         //  TODO: Create and have various Terrain Generators and types such as Noise, Perlin Noise, SinWave etc...
+---- Effect               //  TODO: All of these Effects
+----~---- Particle System
+----~---- Lens Flair
+----~---- Trail Render
+----~---- Halo
+----~---- Water
+*/
+/*===============================================================================================================================================================
+                                                //
+This handles buffers but not all:				//
+                                                //
+Scene->Groups->Mesh->Polygon->Buffers;			//
+                                                //
+                                                //
+Scene											//
+=====											//
+-- Group										//
+---- Mesh										//
+=========										//
+                                                //
+------ Material									//
+_________________								//
+-------- Shader									//
+------------ ?? Locations						//
+-------- Lighting								//
+------------ Diffuse							//
+------------ Ambient							//
+------------ Specular							//
+-------- Surface								//
+------------ Diffuse							//
+------------ Ambient							//
+------------ Specular							//
+-------- Texture								//
+-----------~ Diffuse							//
+-----------~ Normals							//
+-----------~ Specular							//
+-----------~ Glow								//
+------ Polygon									//
+_________________								//
+-------- UVBuffer								//
+-------- VAO									//
+-----------~ Indices							//
+-----------~ Vertices							//
+-----------~ Normals							//
+-----------~ Colors								//
+                                                //
+=================================================================================================================================================================
+
+
+class Group : public Mesh
+{
+public:
+    Group();
+    Vec3 Position = Vec3(0.0f);
+    Vec3 Rotation = Vec3(0.0f);
+
+    std::vector<Mesh*> Objects;
+
+    Material *Surface = NULL;
+
+    Matrix *ProjectionMatrix = NULL;
+
+    int ObjectCount = 0;
+
+    void Add(Mesh *object);
+    void Add(Mesh *object, Material *surface);
+    void Attach(Material *surface);
+    void Attach(Shader *shader);
+
+    void Bind();
+    void Unbind();
+    void Update();
+    void Render();
+};
+class Scene
+{
+public:
+    Scene();
+    Scene(Material *renderer);
+
+    std::vector<Group> Groups;
+    std::vector<Light> Lights;
+
+    int LightCount = 0;
+    int GroupCount = 0;
+
+    Viewport Camera;
+    Material *Surface;
+
+    void Update();
+    void Render();
+
+    void AddGroup(const Group& group);
+    void AddLight(const Light& light);
+
+    void Attach(Material *renderer);
+    void Attach(Shader *renderer);
+    void Attach(Viewport camera);
+};
+
+void Scene::Update()
+{
+    Camera.Update(); // If this breaks remove it....
+    for (auto& G : Groups)
+    {
+        G.Update();
+    }
+}
+void Scene::Render()
+{
+    if (Surface != NULL)
+    {// Bind the Material
+        Surface->Bind();
+    }
+
+    Lights[0].Bind(); 
+    Camera.Update();// Why doing this when it should be done already
+
+    for (auto& G : Groups)
+    {
+        G.Render();
+    }
+    if (Surface != NULL)
+    {
+        Surface->Unbind();
+    }
+}  
+*/
+
+
+// TODO: Make a GameObject class of which all things such as Lights, Cameras and Objects all inheirit from. 
+    // With the use of an std::Unordered map I can look up and Camera, Object or Light as simple as calling it by name.

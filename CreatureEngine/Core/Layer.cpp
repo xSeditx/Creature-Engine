@@ -11,6 +11,7 @@ Layer::~Layer() {}
 void Layer::OnAttach() {}
 void Layer::OnDetach() {}
 void Layer::OnUpdate() {}
+void Layer::OnRender() {}
 bool Layer::OnEvent(Event _msg) { return false; }
 
 //void Layer::OnEvent(Event& _msg) {}

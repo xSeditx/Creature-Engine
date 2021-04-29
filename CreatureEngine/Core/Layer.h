@@ -13,7 +13,8 @@ public:
 
 	virtual void OnAttach();
 	virtual void OnDetach();
-	virtual void OnUpdate();
+    virtual void OnUpdate();
+    virtual void OnRender();
 
     /* If The Layer Desires to Handle this return True */
     virtual bool OnEvent(Event _msg);
@@ -42,6 +43,7 @@ public:
 
 	void push_back(Layer* _layer);
 	Layer* pop_back();
+    Layer* back() { return Stack.back(); }
 
 	void push_Overlay(Layer* _layer);
 	bool remove_Overlay(Layer*);
@@ -53,7 +55,15 @@ public:
     std::vector<Layer*>::iterator end();
 
 	layerStack* Overlays;
+
+    template<typename _Ty>
+    _Ty* get_Layer_Object(_Ty *_obj)
+    {
+        return this->_obj;
+    }
 private:
 	std::vector<Layer*> Stack;
 	std::vector<Layer*>::iterator Inserter_iter;
 };
+
+

@@ -12,10 +12,10 @@
 
 #include<chrono>
 #include<unordered_map>
-#include"../../Core/Common.h"
 
 #include"Timer.h"
 
+#include"../../Core/Common.h"
 
 
 
@@ -212,46 +212,6 @@ private:
 };
 
 
-
-
-
-#define _STACK_TRACE_
-
-/* Trace calls in and our of specified functions
-
-This will likely become so much more in which ALL of our function calls will be wrapped in a method that traces their creation and destruction so when desired
-we will have more functionality for tracking the stack and functions while easily being capable of turning it off at will
-*/
-// std::cout << "IN: "<< x << typeid(*this).name() << "\n"
-// std::cout <<"OUT: "<< x << typeid(*this).name() << "\n"
-
-#pragma warning( disable :4003) // not enough arguments for function-like macro invocation 'Return'
-
-#ifdef _STACK_TRACE_
-#    define trace_IN(x)   PROFILE_FUNCTION()
-#    define trace_OUT(x) 
-#    define trace(x)      { trace_IN(x);
-#    define Return(x)       return x; } trace_OUT(0);
-
-#    define trace_scope(_name) PROFILE_SCOPE(_name)
-
-#    define PROFILE_BEGIN_SESSION(_name, _filepath) Instrumentor::get().BeginSession(_name, _filepath)
-#    define PROFILE_END_SESSION()   Instrumentor::get().EndSession();
-#    define PROFILE_SCOPE(_name) InstrumentationTimer timer##__LINE__(_name);
-#    define PROFILE_FUNCTION() PROFILE_SCOPE(__FUNCSIG__) void __cdecl Stop()
-
-#else
-#    define trace_IN(x)   
-#    define trace_OUT(x)  
-#    define trace(x)
-#    define Return(x)       return x;
-
-
-#    define PROFILE_BEGIN_SESSION(_name, _filepath) 
-#    define PROFILE_END_SESSION()   
-#    define PROFILE_SCOPE(_name) 
-#    define PROFILE_FUNCTION() 
-#endif
 
 
 

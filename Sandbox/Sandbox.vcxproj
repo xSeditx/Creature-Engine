@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(Solution)../x64/Debug;$(Solution)../Bin/Soil/Debug/;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(Solution)../Bin/glad/include;$(IncludePath);$(IncludePath)</IncludePath>
+    <LibraryPath>$(Solution)../x64/Debug;$(Solution)../Bin/Soil/Debug/;$(LibraryPath);C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\Assimp\Debug</LibraryPath>
+    <IncludePath>$(Solution)../Bin/glad/include;$(IncludePath);$(IncludePath);$(Solution)../Bin/Assimp/include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../x64/Release;$(Solution)../Bin/Soil/Debug/;$(LibraryPath)</LibraryPath>
@@ -88,7 +88,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SOIL.lib;%(AdditionalDependencies);assimp.lib;IrrXMLd.lib;zlibstaticd.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -138,11 +138,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\CreatureEngine\main.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Utility_Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Creature.h" />
+    <ClInclude Include="userLayers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,15 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\CreatureEngine\main.cpp">
+    <ClCompile Include="Utility_Test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utility_Test.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Creature.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="userLayers.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

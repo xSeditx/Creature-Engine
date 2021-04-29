@@ -126,10 +126,6 @@ namespace Profiling
 
 			return nb_physical_cores;
 		}
-
-
-
-
 	}// End System Info NS
 }// End Profiling NS
 

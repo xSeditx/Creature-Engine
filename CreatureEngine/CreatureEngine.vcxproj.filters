@@ -215,6 +215,12 @@
     <ClCompile Include="Creatures\Physics\Springs.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Graphics\Model_importer.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Fixed_Func.cpp">
+      <Filter>Source Files\Graphics\OpenGL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ECS\ECScomponent.h">
@@ -381,6 +387,12 @@
     </ClInclude>
     <ClInclude Include="Creatures\Physics\Springs.h">
       <Filter>Source Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\Model_importer.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Fixed_Func.h">
+      <Filter>Source Files\Graphics\OpenGL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

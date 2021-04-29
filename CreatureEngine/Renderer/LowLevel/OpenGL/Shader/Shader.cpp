@@ -293,7 +293,10 @@ void Shader::SetUniform(const char* _name, Mat3 _val)
 }
 void Shader::SetUniform(const char* _name, Mat4 _val)
 {
-	glUniformMatrix4fv(glGetUniformLocation(GL_Handle, _name), 1, GL_FALSE, glm::value_ptr(_val));
+    DEBUG_CODE(CheckGLERROR());
+    int Location = glGetUniformLocation(GL_Handle, _name);
+	glUniformMatrix4fv(Location, 1, GL_FALSE, glm::value_ptr(_val));
+    DEBUG_CODE(CheckGLERROR());
 }
 
 

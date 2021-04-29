@@ -150,10 +150,6 @@ namespace OpenGL
 
 
 
-
-
-
-
     Renderer2D::Renderer2D(Vec2 _size) 
         trace(1)
     {
@@ -283,21 +279,24 @@ namespace OpenGL
 
     void Renderer2D::Submit(Shader& _shader, Texture& _texture, Mesh& _mesh)
     {
-        uint32_t Shader_Index = static_cast<uint32_t>(Shaders.size());
-        Texture_ID_t Texture_Index = static_cast<uint32_t>(Textures.size());
-        uint32_t Mesh_Index = static_cast<uint32_t>(Meshes.size());
+        uint32_t     Mesh_Index    = static_cast<uint32_t>( Meshes.size()   );
+        uint32_t     Shader_Index  = static_cast<uint32_t>( Shaders.size()  );
+        Texture_ID_t Texture_Index = static_cast<uint32_t>( Textures.size() );
 
         Shaders.emplace_back(&_shader);
         Textures.emplace_back(&_texture);
         Meshes.emplace_back(&_mesh);
 
-        Surface Surf;
-        Surf.emplace_back( Surface_t::Diffuse, Texture_Index );
-
-        Material Mat = { Surf, Shader_Index };
-     
-        Buckets.emplace_back(Mat, Mesh_Index); //  RenderPair Bucket = { Mat, Mesh_Index };
-
+        /// CREATE THE FULL MATERIAL VECTOR
+        std::vector<MaterialFragment> Full_Material;
+        /// PUSH THE DEFAULT DIFFUSE TEXTURE TO IT ~ NOTE: WE SHOULD ADD MORE LATER
+        Full_Material.push_back({ Diffuse, Texture_Index });
+        /// CREATES THE REAL MATERIAL AS THE RENDERING SHADER IS ATTACHED TO IT
+        Material Mat = { Full_Material, Shader_Index };
+        /// CREATES A BUCKET THAT WILL BE RENDERED AS WE PASS OVER ALL DRAW_CALLS
+        Buckets.emplace_back(Mat, Mesh_Index);  
+        /// NOTE: WE SHOULD TEST THESE BUCKED FOR OPTIMIZATION. 
+        ///    IF A MESH SHARES OUT SHADER/MATERIAL THAN RENDER IT ALL INTO A SINGLE DRAW CALL BY USING A SECOND THREAD TO CONDENSE INTO A SHARED VBO
     }
     void Renderer2D::renderImage(Vec2 _pos, Vec2 _size, Texture *_image)
     {

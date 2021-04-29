@@ -33,32 +33,39 @@ namespace OpenGL
         /* Submits a Cube using the Current Draw Color */
         void renderCube(Vec3 _center, float _size);
 
-
-        Shader  *InstanceRenderer{ nullptr };
-        Shader   *Main_Program  { nullptr };
-        Camera3D *Main_Camera   { nullptr };
-        FrameBufferObject *Main_FBO{ nullptr };
-        VertexArrayObject *Main_VAO{ nullptr };
+                           
+        Shader            *InstanceRenderer  { nullptr };
+        Shader            *Main_Program      { nullptr };
+        Camera3D          *Main_Camera       { nullptr };
+        FrameBufferObject *Main_FBO          { nullptr };
+        VertexArrayObject *Main_VAO          { nullptr };
 
 
         std::vector<Vec3> Vertices; // The xyz components to our Geometry
         std::vector<Vec4> Colors;   // The Colors of our Geometry
 
-        /* Returns a new buffer which is a combination of the two old buffers */
-        static Vec3 *Concat_Vertices(Vec3 *_dataA, size_t _szA, Vec3 *_dataB, size_t _szB);
+        uint32_t          active_VertexBuffer{ 0 };
+        Vec3             *Vertex_Data{nullptr};
+        Vec4             *Color_Data{nullptr};
+        uint32_t          Vertex_Elements{ 0 };
 
-
-        Vec3 *Vertex_Data;
-        Vec4 *Color_Data;
-        uint32_t Vertex_Elements{ 0 };
-
-        VertexArrayObject *CubeVAO;
+        VertexArrayObject        *CubeVAO;
         VertexBufferObject<Vec3> *CubeVBO;
-        std::vector<Vec4> Cube_Positions;
-        std::vector<uint32_t> CubeInds;
+        std::vector<Vec4>         Cube_Positions;
+        std::vector<uint32_t>     CubeInds;
 
         uint32_t InstanceCount{ 0 };
 
+        /* Returns a new buffer which is a combination of the two old buffers */
+        static Vec3 *Concat_Vertices(Vec3 *_dataA, size_t _szA, Vec3 *_dataB, size_t _szB);
+
+        /* I need Material data and start-end points for Vertex Data*/
+        void Submit(void *_data)
+        {
+
+        }
+        float *Submitted_data;
+        std::vector<std::pair<uint32_t, uint32_t>> Drawcall_list;
  
         // ================================================================================================================
 

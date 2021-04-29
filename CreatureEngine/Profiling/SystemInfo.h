@@ -1,4 +1,10 @@
 #pragma once
+#include <Windows.h>
+
+#include "pdh.h"
+#include "TCHAR.h"
+
+#pragma comment(lib, "Pdh.lib")
 
 namespace Profiling
 {
@@ -26,3 +32,34 @@ namespace Profiling
 		extern unsigned int Hardware_Thread_Count;
 	}// End System Info NS
 }// End Profiling NS
+
+
+static ULARGE_INTEGER
+              lastCPU,
+              lastSysCPU,
+              lastUserCPU;
+
+static int numProcessors;
+static HANDLE self;
+
+static PDH_HQUERY   cpuQuery;
+static PDH_HCOUNTER cpuTotal;
+
+
+
+
+inline void init_CPUmonitor()
+{
+    // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
+    PdhOpenQuery(NULL, NULL, &cpuQuery);
+    PdhAddEnglishCounter(cpuQuery, "\\Processor(_Total)\\% Processor Time", NULL, &cpuTotal);
+    PdhCollectQueryData(cpuQuery);
+}
+inline double getCurrentValueCPU()
+{
+    PDH_FMT_COUNTERVALUE counterVal;
+
+    PdhCollectQueryData(cpuQuery);
+    PdhGetFormattedCounterValue(cpuTotal, PDH_FMT_DOUBLE, NULL, &counterVal);
+    return counterVal.doubleValue;
+}

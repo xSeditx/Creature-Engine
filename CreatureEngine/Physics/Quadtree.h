@@ -1,6 +1,6 @@
 #pragma once
 
-#include"Core/Common.h"
+#include"../Core/Common.h"
 #include"../Renderer/LowLevel/OpenGL/Renderer/GameObject.h"
 
 #include<vector>
@@ -24,6 +24,7 @@ enum NodeTag
 /* Can we Potentially just make this a Void pointer with a Templated caster get<_Ty>() in our class */
 using Object_type = GameObject;
 
+template<typename Object_Type>
 class Node
 {
 public:
@@ -81,6 +82,8 @@ public:
     bool is_Not_a_Leaf_Node() { return !IsLeaf; }
 };
 
+
+template<typename Object_Type>
 class QuadTree
 {
 public:
@@ -89,7 +92,7 @@ public:
 
     Vec2 Position;
     Vec2 Size;
-    Node *RootNode;
+    Node<Object_Type> *RootNode;
 
     /* Creates the Root Node and Adds all the Collidable objects to the Tree */
     void Init();

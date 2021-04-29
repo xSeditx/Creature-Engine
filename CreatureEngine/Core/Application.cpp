@@ -25,14 +25,15 @@ HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 std::mutex DEBUGMutex;
 
 
-
-
- Application::Application() 
- { 
-	 Instance = GetModuleHandle(nullptr);
-	 set(*this); 
- }
-
+Application::Application(int _width, int _height, std::string _name) noexcept
+    :
+    Application_Name(_name),
+    Size({ _width, _height })
+{
+     Instance = GetModuleHandle(nullptr);
+     set(*this);
+}
+ 
 
  //=======================================================================================================
  //_______________________________ STATE and FLOW HANDLING _______________________________________________
@@ -111,12 +112,15 @@ std::mutex DEBUGMutex;
      }
 
 
-     GUI_io.WantCaptureMouse = true;
-     GUI_io.WantCaptureKeyboard = true;
+    // GUI_io.WantCaptureMouse = true;
+    // GUI_io.WantCaptureKeyboard = true;
      Port = ImGui::GetMainViewport();
  
      OnCreate();
-
+     for (auto& L : Layers)
+     {
+         L->OnAttach();
+     }
      ImGui_ImplWin32_Init(getWindow().g_Handle());// ImGui_ImplWin32_InitPlatformInterface();//
      ImGui_ImplOpenGL3_Init("#version 130");
 
@@ -142,11 +146,13 @@ std::mutex DEBUGMutex;
  void Application::End()
  {
      ImGui_ImplWin32_Shutdown();
+     getWindow().Close();
 	 OnEnd();
+     
  }
  void Application::Run()
  {
-	 MSG msg;
+	 Event msg;
 	 size_t PreviousTime{ 0 };
      std::string Name = getWindow().g_Title()  + " FPS: ";
      FrameTimes.emplace_back(120.0f);
@@ -185,11 +191,14 @@ std::mutex DEBUGMutex;
  void Application::Update()
  { // Calls User defined Application Update function
 	 OnUpdate();
-     OnUpdateGUI();
+    //for (auto& L : Layers)
+    //{
+    //    L->OnUpdate();
+    //}
  }
  void Application::Render()
  { // Calls User define Application Render function
-	 OnRender();
+
      ImGuiIO&  GUI_io = ImGui::GetIO();
       
      ImGui_ImplOpenGL3_NewFrame();
@@ -198,7 +207,11 @@ std::mutex DEBUGMutex;
          {
              ImGui::NewFrame();
              {
-                 OnRenderGUI();
+                 OnRender();
+                 //for (auto& L : Layers)
+                 //{
+                 // //   L->OnRender();
+                 //}
              }
              ImGui::EndFrame();
          }
@@ -227,8 +240,6 @@ std::mutex DEBUGMutex;
  void Application::OnRun()    {  }
  void Application::OnUpdate() {  }
  void Application::OnRender() {  }
- void Application::OnUpdateGUI() { }
- void Application::OnRenderGUI() { }
 
 // HGLRC  backup = wglGetCurrentContext();
 // wglMakeCurrent(getWindow().g_DeviceContext(), backup);
@@ -242,7 +253,7 @@ std::mutex DEBUGMutex;
  void Application::SetWindowProperties()
  {
 	 s_Position ({ 0,0 });// iVec2(0);
-	 s_Size ( { 640, 480 });//iVec2(640, 480);
+	 s_Size ( Size);//iVec2(640, 480);
 	 mainWindow.s_Title("Default Application Window");
  }
  void Application::CreateApplicationWindow()
@@ -256,7 +267,7 @@ std::mutex DEBUGMutex;
 		 Print(" Define the virtual function with the specifications for your applications Window before calling CreateWindow() ");
 		 __debugbreak();
 	 }
-	 mainWindow = Window( SCREEN_X, SCREEN_Y, "TestWIndow",0);
+	 mainWindow = Window( Size.x, Size.y, Application_Name,0);
  }
 
 ///==================================================================================================================
@@ -280,6 +291,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
     s_Title(_name);
 	/// Create Window Handle and Device Context
 	{
+        LPCSTR classname = _name.c_str();
         trace_scope("CreateWindow")
 		assert(&Application::get() != nullptr);
 		WindowProperties.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -291,7 +303,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		WindowProperties.hCursor = LoadCursor(NULL, IDC_ARROW);
 		WindowProperties.hbrBackground = NULL;
 		WindowProperties.lpszMenuName = NULL;
-		WindowProperties.lpszClassName = "OpenGL";
+        WindowProperties.lpszClassName = classname;/// _name.c_str();//"OpenGL";
 
 		if (!RegisterClass(&WindowProperties))
 		{
@@ -301,7 +313,7 @@ Application::Window::Window(uint32_t _width, uint32_t _height, std::string _name
 		} 
 		if (!(Handle = CreateWindow
 		(
-			"OpenGL",
+            classname,
 			Title.c_str(),
 			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 			(int)g_PositionX(), (int)g_PositionY(), (int)Width() , (int)Height() ,
@@ -492,24 +504,7 @@ Application::Window::Window(Window* _parent, uint32_t _width, uint32_t _height, 
 //wglMakeCurrent(NULL, NULL);
 //TerminateThread2_And_GiveControlToThread1();
 //
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// 
 
 
 
@@ -640,44 +635,75 @@ void Application::Resize(Vec2 _size)
 	mainWindow.g_Camera().Resize(_size);
 }
 
-
+//
+//void Application::
+//void Application::OnMouseDown(Window *_window, iVec2 _position, uint32_t _button) {}
+//void Application::OnMouseUp(Window *_window, iVec2 _position, uint32_t _button) {}
+//void Application::OnKeydown(Window *_window, uint32_t _keyCode, uint32_t _scanCode, bool _repeat) {}
+//void Application::OnKeyup(Window *_window, uint32_t _modification) {}
+//MK_CONTROL  0x0008  The CTRL key is down.
+//MK_LBUTTON  0x0001  The left mouse button is down.
+//MK_MBUTTON  0x0010  The middle mouse button is down.
+//MK_RBUTTON  0x0002  The right mouse button is down. 
+//MK_SHIFT    0x0004  The SHIFT key is down.
+//MK_XBUTTON1 0x0020  The first X button is down.
+//MK_XBUTTON2 0x0040  The second X button is down.
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) trace(1)
 {
     if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+    {
         return true;
+    }
 
-    switch (uMsg)
-	{
+    Application::Window *Active_Window = &Application::get().getWindow();
+    switch (static_cast<uint32_t>(uMsg))
+    {
+    case NULL: /* If nothing exit */break;
+
     case WM_MOUSEWHEEL:
     {
         float Wheel = (int16_t)SplitLParam((int)wParam).y / 120.0f;
-        Vec2 Mpos = SplitLParam((int)lParam);
+        Vec2  Mpos = SplitLParam((int)lParam);
         Application::getMouse().Update(Mpos, Wheel);
     }break;
 
     case WM_MOUSEMOVE:
     {
-         Application::getMouse().Update(SplitLParam((int)lParam), 0);
+        Application::getMouse().Update(SplitLParam((int)lParam), 0);
+        Application::get().OnMouseMove(Active_Window, { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) }, Application::getMouse().Relative, (uint32_t)wParam);
+
     }break;
 
-	case WM_SIZE:
-	{
-		Vec2 sz = SplitLParam((int)lParam);
+    case WM_KEYDOWN:
+    {
+        Application::get().OnKeydown(Active_Window, (uint32_t)wParam, lParam, BIT(30));
+    }break;
+
+
+    case WM_KEYUP:
+    { 
+        Application::get().OnKeyup(Active_Window, (uint32_t)wParam);
+    }break;
+     
+
+    case WM_SIZE:
+    {
+        Vec2 sz = SplitLParam((int)lParam);
         sz.x += 16; // Did not have the .x and .y here? Why?
         sz.y += 39;
-		Application::get().Resize({ sz.x, sz.y });
-	}break;
+        Application::get().Resize({ sz.x, sz.y });
+    }break;
 
-	case WM_DESTROY:
-	{
+    case WM_DESTROY:
+    {
         ImGui::Shutdown(Application::get().ImGUI_Context);
-		Application::get().Terminate();
-	}break;
+        Application::get().Terminate();
+    }break;
 
-	};
-
-	Return( DefWindowProc(hwnd, uMsg, wParam, lParam));
+    };
+ 
+    Return( DefWindowProc(hwnd, uMsg, wParam, lParam));
 }
 
 
@@ -709,8 +735,11 @@ void main()         \n\
 
 
 
-
-
+void Application::OnMouseMove(Window *_window, iVec2 _position, iVec2 _relative, uint32_t _button) {}
+void Application::OnMouseDown(Window *_window, iVec2 _position, uint32_t _button) {}
+void Application::OnMouseUp(Window *_window, iVec2 _position, uint32_t _button) {}
+void Application::OnKeydown(Window *_window, uint32_t _keyCode, uint32_t _scanCode, bool _repeat) {}
+void Application::OnKeyup(Window *_window, uint32_t _modification) {}
 
 
 

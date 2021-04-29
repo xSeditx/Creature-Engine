@@ -13,9 +13,109 @@
           //std::vector<FrameBufferObject*> FrameBuffers;
 
 /// Material = Shader && Bunch of Uniforms
+/*
+GMS VertexBuffers
+    CREATE FORMAT FOR VERTEX BUFFER
+        vertex_format_begin
+        vertex_format_add_colour
+        vertex_format_add_position
+        vertex_format_add_position_3d
+        vertex_format_add_textcoord
+        vertex_format_add_normal
+        vertex_format_add_custom
+    my_format =  vertex_format_end()
+    vertex_format_delete
 
+    CREATE VERTEX BUFFER USING FORMAT
+
+    vertex_create_buffer_ext( size )
+    vertex_create_buffer_from_buffer( buffer, format );
+    vertex_create_buffer_from_buffer_ext( buffer, format, src_offset, vert_num );
+    vertex_get_buffer_size( buffer );
+    vertex_get_number( buffer );
+    vertex_delete_buffer( buffer );
+
+     
+    v_buff = vertex_begin( v_buff, global.my_format );
+        vertex_position( v_buff, x, y );
+        vertex_colour( v_buff, color, alpha );
+        vertex_texcoord( v_buff, u, v );
+    vertex_end(v_buff);
+ 
+    vertex_position_3d( buffer, x, y, z );
+    vertex_argb( buffer, argb );
+    vertex_texcoord( buffer, u, v )
+    vertex_float1( buffer, float );
+    vertex_float2( buffer, float, float );
+    vertex_float3( buffer, float, float float );
+    vertex_float4( buffer, float, float float, float );
+    vertex_ubyte4( buffer, char )
+    vertex_end( buffer )
+    vertex_freeze( buffer )
+    vertex_submit( buffer, primitive, texture );
+*/
+
+
+
+ 
 namespace OpenGL
 {
+    struct Vertex_Format
+    {// THIS IS A VAO, PERHAPS ALTER THE WAY VAOs WORK IN GL_BUFFERS.H TO BE MORE SIMILAR SO CUSTOM ENTRIES CAN BE POSSIBLE
+        Vertex_Format(bool _position = false, bool _texture = false, bool _normal = false, bool _color = false, bool _pos3D = false)
+            :
+            format_Position(_position ),
+            format_Textcoord(_texture ), 
+            format_Normal(_normal ),
+            format_Color(_color ),
+            format_Position_3d(_pos3D ),
+            format_Custom{false}
+        {}
+        std::unordered_map <const char*, Attribute *> Buffers;
+
+        void add_color()       {          format_Color = true;    }
+        void add_position()    {       format_Position = true;    }
+        void add_position_3d() {    format_Position_3d = true;    }
+        void add_textcoord()   {      format_Textcoord = true;    }
+        void add_normal()      {         format_Normal = true;    }
+        void add_custom()      {         format_Custom = true;    }
+        bool format_Color      { false };
+        bool format_Position   { false };
+        bool format_Position_3d{ false };
+        bool format_Textcoord  { false };
+        bool format_Normal     { false };
+        bool format_Custom     { false };
+
+        uint32_t GL_Handle{ 0 };
+
+        template<typename _Ty> 
+        uint32_t set_Custom(const char *_name)
+        {
+            WARN_ME("I Came back to find this Error after being away for a while. WTF was this line for?"); // ( _Ty* data, GLsizei count, GLenum _access = GL_STATIC_DRAW)
+            Buffers[_name] = new VertexBufferObject<_Ty>();
+            OpenGL::set_Attribute(sizeof(_Ty) / sizeof(float), _name);
+        }
+        void vertex_format_begin()
+        {
+            GL_Handle = OpenGL::new_VAO();
+        }
+        uint32_t vertex_format_end()
+        {
+           
+            OpenGL::bind_VAO(GL_Handle);
+            {
+                if (format_Color)       { set_Custom<Vec4>("v_Color");    }
+                if (format_Position)    { set_Custom<Vec2>("v_Position"); }
+                if (format_Position_3d) { set_Custom<Vec3>("v_Position"); }
+                if (format_Textcoord)   { set_Custom<Vec2>("v_TexCoord"); }
+                if (format_Normal)      { set_Custom<Vec3>("v_Normals");  }
+            }
+            OpenGL::unbind_VAO();
+            return GL_Handle;
+        }
+    };
+
+
 
 
     // ================================================================================================================
@@ -230,20 +330,48 @@ namespace OpenGL
         // layerStack Layers;
 
         using Texture_ID_t = uint32_t;
-        using Mesh_ID_t = uint32_t;
-        using Shader_ID_t = uint32_t;
+        using Mesh_ID_t    = uint32_t;
+        using Shader_ID_t  = uint32_t;
         using Texture_ID_t = uint32_t;
         using Texture_ID_t = uint32_t;
 
-        enum  Surface_t { Diffuse, Normals, Albedo, Metallic };
-        using SurfaceFragment = std::pair   < Surface_t, Texture_ID_t >;
-        using Surface = std::vector < SurfaceFragment         >;
-        using Material = std::pair   < Surface, Shader_ID_t    >;
-        using RenderPair = std::pair   < Material, Mesh_ID_t     >;
+        /* =============================================================================================================
+            THIS MEANS A RENDERABLE OBJECT CONSIST OF YOUR VERTICES STORED ON A SERVER SIDE VBO AND A MATERIAL INSTANCE
+            WHICH CONSIST OF A SERIES OF TEXTURES WITH A TYPE ASSIGNED TO THEM INSIDE OF A VECTOR AS WELL AS A SHADER
+            DESIGNED TO RENDER THAT SERIES OF TEXTURES APPROPRIATELY.
+        /* ============================================================================================================= */
 
-        std::vector<Shader*> Shaders;
-        std::vector<Texture*> Textures;
-        std::vector<Mesh*> Meshes;
+
+
+        enum  Material_t { Diffuse, Normals, Albedo, Metallic };
+        using MaterialFragment = std::pair< Material_t, Texture_ID_t >;
+        using Material = std::pair< std::vector < MaterialFragment >, Shader_ID_t >;
+        using RenderPair = std::pair< Material, Mesh_ID_t >;
+
+        /* =============================================================================================================
+            THE IDS OF TEXTURES, SHADERS, AND MESH ARE ALL STORED IN THEIR RESPECTIVE VECTORS AND OUR RENDER PAIRS 
+            CONSIST INDEXES INTO THESE VECTORS. WHEN A MATERIAL, SHADER AND MESH IS REQUESTED WE BIND THE GIVEN 
+            OBJECT THAT IS CONTAINED INSIDE OF ITS VECTOR.
+
+            WE BUCKET THE RENDERER SO WE CAN PUSH SUBMIT MATERIAL PAIRS TO THE RENDERER AND IT WILL CYCLE IN THE 
+            FOLLOWING ORDER.
+
+            ON SUBMIT( MATERIAL, MESH);
+            ----------------------------
+            FIRST SEARCH FOR BUCKET OF THIS MATERIAL
+            PLACE THE MESH INTO ITS APPROPRIATE BUCKET
+
+            ON RENDER:
+            ---------
+            FIRST: BIND ANY SPECIFIC SHADER
+            SECOND: ALL TEXTURES ATTACHED TO THAT SHADER ARE TO BE BOUND
+            THIRD: WE MAKE DRAW CALLS FOR ALL THE GEOMETRY THAT USES THAT SHADER/TEXTURE PAIR
+
+        /* ============================================================================================================= */
+
+        std::vector<Mesh*>      Meshes;
+        std::vector<Shader*>    Shaders;
+        std::vector<Texture*>   Textures;
         std::vector<RenderPair> Buckets;
         void Submit(Shader& _shader, Texture& _texture, Mesh& _mesh);
 
@@ -265,6 +393,7 @@ namespace OpenGL
 
         /* Renderers the Current batch */
         void Render();
+
         /* Updates the data in the Camera and the Batchs */
         void Update();
 
@@ -279,7 +408,6 @@ namespace OpenGL
 
         /* Gets the Camera the Renderer uses */
         Camera2D& g_Camera() { return *mainCamera; }
-        void renderImage(Vec2 _pos, Vec2 _size, Texture *_image);
 
         /* Render a Line in the Current Render color as floats */
         void draw_Line(float _x1, float _y1, float _x2, float _y2);
@@ -299,13 +427,19 @@ namespace OpenGL
         Shader* InstanceRenderer;
         Shader* LineRenderer;
 
+
+        void renderImage(Vec2 _pos, Vec2 _size, Texture *_image);
+
+        void copy_SubImage(Texture *_texture, Vec4 _source, Vec4 _destination)
+        {
+            TODO("Implement a Render Copy to copy a Rect from the provided [Texture ? Bitmap] onto our Renderer Surface ");
+            REFACTOR("Would it potentially be better to simply use a Shader that renders Lines, Circles, Quads instead of using OpenGL Geometry? An Array of the Points could be passed and a single Drawcall could potentially render all in one without the need for keeping multiple VBOs around");
+            REFACTOR("2D Render needs a Surface or Surfaces. All Operations should be targeted at that surface which can be swapped by the user as desired ");
+        }
+
     private:
-    //    uint32_t LineVAO{ 0 };
-    //    uint32_t LineVBO{ 0 };
-    //    VertexBufferObject<Vec2> *VBO_Test;
 
         VertexArrayObject VAO_Lines;
-
 
         std::vector<Vec2> Line_Data;
 
@@ -406,8 +540,7 @@ namespace OpenGL
                     FragColor = vec4(texture(DiffuseTexture,TexCoords.xy).xyz, 1.0);  \n\
                 }";
 
-    };// Class Renderer2D
-
+    };// Class Renderer2D  
 }// NS OpenGL  
 
 
@@ -446,7 +579,6 @@ struct Renderer_test
         {
             Program->Bind();
             Diffuse->Bind(0);
-            //Program->SetUniform("DiffuseTexture", (int));
             Program->SetTextureUniform("DiffuseTexture", Diffuse->g_Handle(), 0);
         }
 

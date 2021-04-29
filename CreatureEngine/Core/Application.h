@@ -33,14 +33,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 class Application
 {
-private:
-    bool Running{ true };
-    HINSTANCE Instance{ nullptr };
-
-    layerStack Layers;
-
-
-
+public:
     struct Window
     {
         struct InputDevices
@@ -205,6 +198,11 @@ private:
         
         Vec4 g_ClearColor() { return ClearColor; }
         void s_ClearColor(Vec4 _col) { ClearColor = _col; }
+
+        void Close()
+        {
+            CloseWindow(Handle); 
+        }
     protected:
         Shader* WindowShader{ nullptr };
         Camera2D* defaultCamera{ nullptr };
@@ -239,8 +237,15 @@ private:
     public:
         //  static EventHandler& Messenger() { return EventHandler::get(); } 
         EventHandler& Messenger() noexcept { return Observer; }
-    }  mainWindow;// Window
+    }  mainWindow;// Windowprivate:
 
+
+    bool Running{ true };
+    HINSTANCE Instance{ nullptr };
+
+
+    std::string Application_Name;
+    iVec2 Size{ 640,480 };
  public:
 
     ImGuiContext *ImGUI_Context{ nullptr };
@@ -248,8 +253,8 @@ private:
 
      size_t FPS{ 0 };
      std::vector<float> FrameTimes;
-    Application();
-    //Application(int _width, int _height, std::string _name) noexcept;
+     Application() {}
+    Application(int _width, int _height, std::string _name) noexcept;
 
     ~Application() noexcept = default;
 
@@ -316,12 +321,15 @@ private:
 
     /* Resize the Application */
     void Resize(Vec2 _size);
-protected:
 
-    /* Updates User Generated GUI */
-    virtual void OnUpdateGUI();
-    /* Renders User Generated GUI */
-    virtual void OnRenderGUI();
+
+    virtual void OnMouseMove(Window *_window, iVec2 _position, iVec2 _relative, uint32_t _button);
+    virtual void OnMouseDown(Window *_window, iVec2 _position, uint32_t _button);
+    virtual void OnMouseUp(Window *_window, iVec2 _position, uint32_t _button);
+
+    virtual void OnKeydown(Window *_window, uint32_t _keyCode, uint32_t _scanCode, bool _repeat);
+    virtual void OnKeyup(Window *_window, uint32_t _modification);
+protected:
 
     /* Executed when Application is Initialized */
     virtual void OnCreate();
@@ -340,10 +348,40 @@ protected:
     /* Called once a frame when our Application is Rendered */
     virtual void OnRender();
 
+
+
+
+/* KMOD_NONE	No modifiers applicable
+KMOD_NUM	Numlock is down
+KMOD_CAPS	Capslock is down
+KMOD_LCTRL	Left Control is down
+KMOD_RCTRL	Right Control is down
+KMOD_RSHIFT	Right Shift is down
+KMOD_LSHIFT	Left Shift is down
+KMOD_RALT	Right Alt is down
+KMOD_LALT	Left Alt is down
+KMOD_CTRL	A Control key is down
+KMOD_SHIFT	A Shift key is down
+KMOD_ALT	An Alt key is down*/
+
+    typedef struct tagMSG {
+        HWND   hwnd;
+        UINT   message;
+        WPARAM wParam;
+        LPARAM lParam;
+        DWORD  time;
+        POINT  pt;
+        DWORD  lPrivate;
+    } MSG, *PMSG, *NPMSG, *LPMSG;
+
+     
+
     void CreateApplicationWindow();
     virtual void SetWindowProperties();
 
     static void set(Application& _app) noexcept { AppInstance = &_app; }
+
+    layerStack Layers;
 public:
     static Application* AppInstance;
 
@@ -373,64 +411,4 @@ Vec2 SplitLParam(int lParam);
 /* =============================================================================================================================================
 /*                                                TRASH
 /* =============================================================================================================================================
-        ///Window operator=(const Window& _other)
-        ///{
-        ///    WindowShader = _other.WindowShader;
-        ///    defaultCamera = _other.defaultCamera;
-        ///    Parent = _other.Parent;
-        ///    GL_Context = _other.GL_Context;
-        ///    Handle = _other.Handle;
-        ///    DeviceContext = _other.DeviceContext;
-        ///    Size = _other.Size;
-        ///    Position = _other.Position;
-        ///    WindowProperties = _other.WindowProperties;
-        ///    PixelFormatDescriptor = _other.PixelFormatDescriptor;
-        ///    PixelFormat = _other.PixelFormat;
-        ///    Title = _other.Title;
-        ///    Active = _other.Active;
-        ///    Alive = _other.Alive;
-        ///    Visible = _other.Visible;
-        ///
-        ///    Observer = std::move(_other.Observer);
-        ///}
-
-
-        /* struct EventHandler
-        {
-            EventHandler() = default;
-        public:
-            static EventHandler& get();                 // Initializes EventSystem when called first time
-
-
-            void PollEvents();
-            void PostMSG(Event msg);
-            bool PeekMSG(Event& msg, unsigned int rangemin, unsigned int rangemax, int handlingflags);
-            bool PeekMSG(Event& msg);
-
-            void Dispatch(Event msg);
-
-            void RegisterListener(MsgType msg, Listener& handler);
-            void RemoveListener(MsgType msg, Listener& handler);
-
-            EventHandler(EventHandler const&) = delete; // and prevents Copies from being made
-            void operator = (EventHandler const&) = delete;
-
-        private:
-            std::queue<Event> Messages;
-            std::unordered_map<MsgType, std::vector<Listener*>> ListenerMap;
-        };*/
-
-
-
-
-      //  AppInstance->mainWindow = std::forward<Application::Window>(_window);
-     //   std::string N = _window.g_Title();
-    //    Print("Application Name is    : " << AppInstance->mainWindow.g_Title());
-   //     Print("Setting Application To : " << N);
-        //AppInstance->mainWindow = *(_window);
-     //   std::swap(AppInstance->mainWindow, _window);
-       // *&AppInstance->mainWindow = &_window;
-    //  memcpy(&AppInstance->mainWindow, &_window, sizeof(Application::Window));
-
-
-/* =============================================================================================================================================*/
+*/

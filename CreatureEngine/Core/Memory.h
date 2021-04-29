@@ -227,11 +227,11 @@ public:
             auto __begin = begin_expr;
             auto __end = end_expr;
         /* =======================================================================================================================*/
-    public:
-        using self_type  = iterator;
-        using value_type = std::atomic<_Ty>;
-        using reference  = value_type&;
-        using pointer    = value_type*;
+    public:                     
+        using self_type         = iterator;
+        using value_type        = std::atomic<_Ty>;
+        using reference         = value_type&;
+        using pointer           = value_type*;
         using iterator_category = std::forward_iterator_tag;
         using difference_type   = int;
         
@@ -244,12 +244,12 @@ public:
             Difference = ((ptr - _rb->front()) / sizeof(std::atomic<_Ty>));
         }
 
-        self_type operator++()                { self_type i = *this; get_Next(ptr_); return i; }
-        self_type operator++(int junk)        { get_Next(ptr_); return *this;                  }  //{ ptr_++; return *this;                  }
-        reference operator* ()                { return *ptr_;                          }  // { return *ptr_;                          }
-        pointer   operator->()                { return ptr_;                           }
-        bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_;               }
-        bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_;               }
+        self_type operator++()                     { self_type i = *this; get_Next(ptr_); return i; }
+        self_type operator++(int junk)             { get_Next(ptr_); return *this;                  }  //{ ptr_++; return *this;                  }
+        reference operator* ()                     { return *ptr_;                                  }  // { return *ptr_;                          }
+        pointer   operator->()                     { return ptr_;                                   }
+        bool      operator==(const self_type& rhs) { return ptr_ == rhs.ptr_;                       }
+        bool      operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_;                       }
     private:
         void get_Next(pointer _location)
         {
@@ -295,7 +295,7 @@ public:
     }
 
     /* Return the number of Elements in the Ring Buffer before it Rolls Over */
-    size_t element_Count()
+    size_t capacity() const
     {
         return BufferSize ;
     }
@@ -362,26 +362,35 @@ public:
     }/// WE MIGHT BE ABLE TO PACK THE READER AND WRITER INTO THE SAME ATOMIC INTEGER WHICH WILL REDUCE THE OVERHEAD
 
     /* Get the Start of the Ring Buffer */
-    auto front()    { return &Data[0];    } 
+    auto front()        { return &Data[0];    } 
     /* Get the Start of the Ring Buffer */
-    auto back()    { return &Data[BufferSize - 1];    }
+    auto back()         { return &Data[BufferSize - 1];    }
 
     /* Remove the First Element in the Ring Buffer */
     void pop_front()    { ReadPosition = nextElement(ReadPosition);    }
 
     /* Test if container is Empty
        NOTE: Change this to is_Empty() because the STL naming convention is retarded */
-    bool is_Empty()    { return (ReadPosition == WritePosition);    }
+    bool is_Empty()     { return (ReadPosition == WritePosition);    }
 
     /* Deletes the Ring Buffers Data */
-    bool destroy()    { delete[](Data);    }//return BufferSize; b<0- This is not Correct, We need WritePosition - ReadPosition;
+    bool destroy()      { delete[](Data);    }//return BufferSize; b<0- This is not Correct, We need WritePosition - ReadPosition;
 
     /* Current size of the Ring Buffer from Start to End */
-    size_t size()    { return WritePosition - ReadPosition;     }
- //[ReadPosition % BufferSize];
+    size_t size()       { return WritePosition - ReadPosition;     }
+
+
     /* Overload to properly wrap the _offset in the Ring Buffer */
     reference operator[](const int _offset)    { return Data[_offset % BufferSize];    }
 
+    /* Returns the Amount of data the Buffer can hold */
+    const size_t capacity() { return _SZ; }
+
+    /* Add Data to the End of the Buffer */
+    void append(_Ty *_data, size_t _sz)
+    {
+        __debugbreak();
+    }
 private:
 
     /* Retrieved the next Element in the RB taking care to wrap when needed */
@@ -393,7 +402,6 @@ private:
     pointer incMemory(size_t _pos)
     {// Note: This can be accomplished Via Bit operations extremely fast if the Size is proper
         size_t Index =  ++_pos == BufferSize ? 0 : _pos;
-
     }
 
 
@@ -424,13 +432,14 @@ bool TEST_Ring_Buffer_Class();
  ---------------------------------
   RANGE_FOR_LOOP()
   {
-    auto && __range = range_expression ;
-    auto __begin = begin_expr;
-    auto __end = end_expr;
-    for (;__begin != __end; ++__begin) {
-      range_declaration = *__begin;
-      loop_statement
-    }
+      auto && __range = range_expression ;
+      auto __begin = begin_expr;
+      auto __end = end_expr;
+      for (;__begin != __end; ++__begin) 
+      {
+          range_declaration = *__begin;
+          loop_statement
+      }
   }
 
 

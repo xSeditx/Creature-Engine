@@ -78,8 +78,8 @@
     <LibraryPath>C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\SOIL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(Solution)../Bin/glad/include/;$(IncludePath)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/</LibraryPath>
+    <IncludePath>$(ProjectDir);$(Solution)../Bin/;$(Solution)../Bin/glad/include/;$(IncludePath);$(Solution)../Bin/Assimp/include;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib/um/x64;$(Solution)../Bin/Soil/Debug/;C:\Users\curti\source\repos\xSeditx\Creature-Engine\Bin\Assimp\Debug</LibraryPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -120,7 +120,7 @@
       <IgnoreSpecificDefaultLibraries> /NODEFAULTLIB:mscrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <Lib>
-      <AdditionalDependencies>SOIL.lib</AdditionalDependencies>
+      <AdditionalDependencies>SOIL.lib;Assimp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -180,6 +180,7 @@
     <ClCompile Include="Core\ECS\ECSsystem.cpp" />
     <ClCompile Include="Core\ECS\TestComponents.cpp" />
     <ClCompile Include="Core\EventSystem.cpp" />
+    <ClCompile Include="Core\Graphics\Model_importer.cpp" />
     <ClCompile Include="Core\Graphics\Terrain.cpp" />
     <ClCompile Include="Core\Layer.cpp" />
     <ClCompile Include="Core\Math\Easing.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="Renderer\LowLevel\OpenGL\OpenGL.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.cpp" />
+    <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Fixed_Func.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.cpp" />
     <ClCompile Include="Renderer\LowLevel\OpenGL\Renderer\Pipeline.cpp" />
@@ -229,6 +231,7 @@
     <ClInclude Include="Core\ECS\ECSsystem.h" />
     <ClInclude Include="Core\ECS\TestComponents.h" />
     <ClInclude Include="Core\EventSystem.h" />
+    <ClInclude Include="Core\Graphics\Model_importer.h" />
     <ClInclude Include="Core\Graphics\Terrain.h" />
     <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Core\Math\Easing.h" />
@@ -258,6 +261,7 @@
     <ClInclude Include="Renderer\LowLevel\OpenGL\OpenGL.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\2DRenderer.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\3DRenderer.h" />
+    <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Fixed_Func.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GameObject.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\GLBuffers.h" />
     <ClInclude Include="Renderer\LowLevel\OpenGL\Renderer\Mesh.h" />

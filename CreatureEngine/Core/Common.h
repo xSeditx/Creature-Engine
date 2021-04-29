@@ -3,9 +3,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define SCREEN_X 1280
-#define SCREEN_Y 720
-
+//#define SCREEN_X 1920
+//#define SCREEN_Y 1200
+const int SCREEN_X = 1920;
+const int SCREEN_Y = 1200;
 
 
 #include<cstdint>
@@ -288,7 +289,6 @@ pure_Virtual tells if a function is pure virtual in plain english*/
 #include <windows.h>
 
 
-
 #define CON_DarkBlue 1
 #define CON_DarkGreen 2
 #define CON_Darkteal 3
@@ -368,9 +368,10 @@ DEBUGPrint(CON_Green, "Test " << #x << " Passed")
 #define OpenGL4_6(_code)
 #define OpenGL3_1(_code) _code
 
-
-#define RADIANS(x)            ((x) * 0.01745329251)
-#define DEGREES(x)            ((x) * 57.2957795131)
+inline double RADIANS(double _x) { return ((_x) * 0.01745329251); }
+inline double DEGREES(double _x) { return ((_x) * 57.2957795131); }
+//#define RADIANS(x)            ((x) * 0.01745329251)
+//#define DEGREES(x)            ((x) * 57.2957795131)
 
 /* Creates a 32bit word from RGB Values */
 #define _RGB(r,g,b)     (((b << 16) | (g << 8)) | (r))
@@ -471,7 +472,7 @@ extern bool TerminateOnError;
 
 /* Defines for accessing the upper and lower byte of an integer. */
 #define  LOW_BYTE(x)    (x & 0x00FF)
-#define  HI_BYTE(x)     ((x & 0xFF00) >> 8)
+#define  HIGH_BYTE(x)     ((x & 0xFF00) >> 8)
 
 #define  BIT(x)         (1 << x) // GET THE STATE OF A SINGLE BIT AT X POSITION
 #define  MAX_INTEGER    0xFFFFFFFF
@@ -575,6 +576,56 @@ T ExtractHigh16Bits(T _value)
 
 // THESE NEED A HOME DEFINED IN UTILITY.CPP But I want utilities to have roughly global scope
 std::string get_FileName(const  std::string& s);
+
+
+
+
+
+
+#define _STACK_TRACE_
+
+/* Trace calls in and our of specified functions
+
+This will likely become so much more in which ALL of our function calls will be wrapped in a method that traces their creation and destruction so when desired
+we will have more functionality for tracking the stack and functions while easily being capable of turning it off at will
+*/
+// std::cout << "IN: "<< x << typeid(*this).name() << "\n"
+// std::cout <<"OUT: "<< x << typeid(*this).name() << "\n"
+
+#pragma warning( disable :4003) // not enough arguments for function-like macro invocation 'Return'
+#define ConCat1(_a, _b)  _a##_b
+#define ConCat(_a, _b)  ConCat1(_a, _b)
+
+
+
+#ifdef _STACK_TRACE_
+#    define PROFILE_BEGIN_SESSION(_name, _filepath) Instrumentor::get().BeginSession(_name, _filepath)
+#    define PROFILE_END_SESSION()                   Instrumentor::get().EndSession()
+#    define PROFILE_SCOPE(_name)                   InstrumentationTimer timer##__LINE__(_name);
+#    define PROFILE_FUNCTION() PROFILE_SCOPE( __FUNCSIG__ ) //void __cdecl Stop()
+
+#    define trace_IN(x)   InstrumentationTimer timer##__LINE__ = InstrumentationTimer( __FUNCSIG__ );   //PROFILE_SCOPE(__FUNCSIG__) // PROFILE_FUNCTION()
+#    define trace_OUT(x) 
+#    define trace(x) { InstrumentationTimer ConCat(timer,__LINE__) = InstrumentationTimer( __FUNCSIG__ );
+#    define Return(x)       return x; }
+
+// trace_OUT(0);
+
+#    define trace_scope(_name) PROFILE_SCOPE(_name)
+//trace_IN(x);
+
+#else
+#    define trace_IN(x)   
+#    define trace_OUT(x)  
+#    define trace(x)
+#    define Return(x)       return x;
+
+#    define PROFILE_BEGIN_SESSION(_name, _filepath) 
+#    define PROFILE_END_SESSION()   
+#    define PROFILE_SCOPE(_name) 
+#    define PROFILE_FUNCTION() 
+#endif
+
 
 
 #endif// COMMON_H

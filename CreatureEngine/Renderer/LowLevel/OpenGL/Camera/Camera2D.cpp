@@ -25,7 +25,7 @@ Camera2D::Camera2D(float _left, float _right, float _top, float _bottom, float _
     ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top, Near, Far);  //OrthographicMatrix(_size.x, _size.y);
     ViewMatrix = glm::translate(Mat4(1.0f), Vec3(0.0f));
     ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-
+    Resize(Size);
     // glViewport(0,0, (GLsizei)Right, (GLsizei)Bottom); // Dunno if I should put this here
     set(this);
 }

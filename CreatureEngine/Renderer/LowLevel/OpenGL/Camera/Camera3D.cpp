@@ -62,7 +62,7 @@ void Camera3D::Update()
 // CAMERA MANIPULATIONS
 void Camera3D::Rotate(float pitch, float yaw)
 {
-	Target_Rotation.x -= yaw * static_cast<float>(RADIANS(.9));
+	Target_Rotation.x -= yaw   * static_cast<float>(RADIANS(.9));
 	Target_Rotation.y -= pitch * static_cast<float>(RADIANS(.9));
 }
 void Camera3D::MoveBack(float speed)

@@ -128,32 +128,40 @@ namespace OpenGL
 		uint32_t dwDamageMask;
 	};
 
-///====================================================================================================================================================
+    ///=============================================================    A    ==================================================================================
     CREATURE_API void Attribute_Pointer(uint32_t _location, uint32_t _elements);
+
 
     /* Attaches a Colorbuffer to the bound Framebuffer Object at Attachment point defined */
     CREATURE_API void attach_ColorBuffer(uint32_t _texture, uint32_t _attachmentPoint = 0);
 
+    /* Attaches Color Texture to Specified FrameBuffer ID at Attachment Point */
+    CREATURE_API void attach_ColorBuffer(uint32_t _fboID, uint32_t _texture, uint32_t _attachmentPoint); 
+
     /* Attaches a Depthbuffer to the currently bound FrameBufferObject */
     CREATURE_API void attach_DepthBuffer(uint32_t _texture);
 
-    /* Attaches Color Texture to Specified FrameBuffer ID at Attachment Point */
-    CREATURE_API void attach_ColorBuffer(uint32_t _fboID, uint32_t _texture, uint32_t _attachmentPoint);
-
     /* Attaches Depth Texture to Specified FrameBuffer */
     CREATURE_API void attach_DepthBuffer(uint32_t _fboID, uint32_t _texture);
+ 
+    ///=============================================================    B    ==================================================================================
+
+    /* Sets Buffer Object as Current using the given target */
+    CREATURE_API void bind_Buffer(uint32_t _bufferID, uint32_t _target);
 
     /* Sets Vertex Buffer Object as Current */
-    CREATURE_API void bind_VBO(uint32_t _vboID);
+    CREATURE_API void bind_FBO(uint32_t _vboID);
 
     /*  Sets Vertex Buffer Object as Current */
     CREATURE_API void bind_IBO(int32_t _IboID);
 
-    /* Sets Buffer Object as Current using the given target */
-    CREATURE_API void bind_Buffer(uint32_t _bufferID, uint32_t _target);
-    /* Sets Vertex Array Object as Current */
-    CREATURE_API void bind_VAO(int32_t _vaoID);
+    /* Creates a New VAO and bind it as Current */
+    CREATURE_API void bind_new_VAO(); 
+
+    /* Binds the given Texture to currently Active Slot */
     CREATURE_API void bind_Texture(uint32_t _handle);
+
+    /* Binds the given Texture to Provided Slot */
     CREATURE_API void bind_Texture(uint32_t _handle, uint32_t _slot);
 
     CREATURE_API void bind_TextureBuffer(uint32_t _id);
@@ -162,10 +170,21 @@ namespace OpenGL
         glBufferData(GL_TEXTURE_BUFFER, sizeof(_Ty) * _data.size(), _data.data(), GL_STATIC_DRAW);
     }
 
-    /* Sets Vertex Buffer Object as Current */
-    CREATURE_API void bind_FBO(uint32_t _vboID);
+    /* Binds the Texture ID to the specified target */
     CREATURE_API void bind_Texture_Target(uint32_t _target, uint32_t _handle);
+
+    /* Binds the Texture ID to the specified target in the given Slot */
     CREATURE_API void bind_Texture_Target(uint32_t _target, uint32_t _handle, uint32_t _slot);
+
+    /* Sets Vertex Buffer Object as Current */
+    CREATURE_API void bind_VBO(uint32_t _vboID);
+
+    /* Sets Vertex Array Object as Current */
+    CREATURE_API void bind_VAO(int32_t _vaoID);
+
+
+    ///=============================================================    C    ==================================================================================
+
 	/* Creates an OpenGL context from an OS native Device Context */
 	CREATURE_API HGLRC create_OpenGLContext(HDC _dc);
 
@@ -176,6 +195,8 @@ namespace OpenGL
     /* Checks to see if FrameBuffer Object is complete */
     CREATURE_API int check_FBO_Status();
 
+
+    ///=============================================================    D    ==================================================================================
 
     /* Frees ID for a Vertex Array Object*/
     CREATURE_API void delete_VBO(uint32_t _id);
@@ -190,7 +211,7 @@ namespace OpenGL
     /* Frees ID for a Vertex Array Object*/
     CREATURE_API void delete_FBO(uint32_t _id);
 
-
+    ///=============================================================    E    ==================================================================================
 
 	/* Disables states for OpenGL */
     CREATURE_API void enable_DebugOutput();
@@ -218,6 +239,11 @@ namespace OpenGL
     CREATURE_API void enable_Attribute(uint32_t _location);
 
 
+    ///=============================================================    F    ==================================================================================
+
+
+
+    ///=============================================================    G    ==================================================================================
     CREATURE_API size_t get_Bindless_Address();
 
     /* Creates Mip map for bound 2D Texture  */
@@ -259,6 +285,19 @@ namespace OpenGL
     /* returns Maximum Texture Units*/
     CREATURE_API int  get_MaximumTextureUnits();
 
+
+    CREATURE_API uint32_t get_VAO();
+    CREATURE_API uint32_t get_VertexVBO();
+    CREATURE_API uint32_t get_ColorVBO();
+
+
+    ///=============================================================    H    ==================================================================================
+
+
+
+    ///=============================================================    I    ==================================================================================
+
+
     /* Is an ID a Vertex Buffer Object */
     CREATURE_API bool isFBO(int _array);
 
@@ -290,10 +329,17 @@ namespace OpenGL
     CREATURE_API bool isIBO(int _array);
 
 
+    ///=============================================================    J    ==================================================================================
+
+    ///=============================================================    K    ==================================================================================
+
+
+    ///=============================================================    L    ==================================================================================
+
+
     CREATURE_API GLenum glCheckError_(const char *file, int line);
 
-
-    ///========================================================
+    ///=============================================================    M    ==================================================================================
 
 
     CREATURE_API bool make_Context_Current(HDC _device, HGLRC _context);
@@ -316,6 +362,10 @@ namespace OpenGL
         return (_Ty*)glMapBuffer(_target, _access);
     }
 
+
+    ///=============================================================    N    ==================================================================================
+
+
 	/* Creates a Unique ID for a Vertex Array Object*/
 	CREATURE_API uint32_t new_VAO();
     CREATURE_API uint32_t new_Buffer();
@@ -328,6 +378,31 @@ namespace OpenGL
     /* Generates a New Texture ID for OpenGL */
     CREATURE_API uint32_t new_TextureHandle();
 
+
+    ///=============================================================    O    ==================================================================================
+
+
+
+    ///=============================================================    P    ==================================================================================
+
+    /* Set the Alignment of the Pixel pack and unpack processed for a texture */
+    CREATURE_API void PixelAlignment(uint32_t _pack, uint32_t _unpack);
+
+    /* Set the Alignment of the Pixel Pack processe for a texture */
+    CREATURE_API void PixelAlignmentPack(uint32_t _align);
+
+    /* Set the Alignment of the Pixel Unpack processed for a texture */
+    CREATURE_API void PixelAlignmentUnpack(uint32_t _align);
+
+    ///=============================================================    Q    ==================================================================================
+
+
+
+    ///=============================================================    R    ==================================================================================
+
+
+
+    ///=============================================================    S    ==================================================================================
     /* Sets the active Texture Unit */
     CREATURE_API void set_ActiveTexture(uint32_t _slot);
     CREATURE_API void set_LineWidth(float _size);
@@ -373,9 +448,25 @@ namespace OpenGL
     CREATURE_API void set_Texture_WrapX(uint32_t _target, unsigned int param);
     CREATURE_API void set_Texture_WrapY(uint32_t _target, unsigned int param);
 
+    ///=============================================================    T    ==================================================================================
 
 
-	/* Clears any VAO Binding */
+
+    /* Turns Mip Map on for bound 2D texture */
+    CREATURE_API void turn_Mipmap_On();
+    /* Turns Mip Map off for bound 2D Texture */
+    CREATURE_API void turn_Mipmap_Off();
+
+    /* Turns Mip Map on for bound texture of _target type*/
+    CREATURE_API void turn_Mipmap_On(GLenum _target);
+    /* Turns Mip Map off for bound 2D Texture of _target type*/
+    CREATURE_API void turn_Mipmap_Off(GLenum _target);
+
+
+
+    ///=============================================================    U    ==================================================================================
+    
+    /* Clears any VAO Binding */
 	CREATURE_API void unbind_VAO();  
     CREATURE_API void unbind_Texture_Target(uint32_t _target);
     CREATURE_API void unbind_Texture();
@@ -392,30 +483,12 @@ namespace OpenGL
     CREATURE_API void update_Texture(const void* _pixels, iVec2 _size, GLenum _internal_format = GL_RGBA, GLenum _format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
 
 
+    ///=============================================================    V    ==================================================================================
 
-	/* Sets _slot as the Currently Active Texture */
-	//CREATURE_API void ActivateTexture(uint32_t _slot);
-
-
-    /* Set the Alignment of the Pixel pack and unpack processed for a texture */
-    CREATURE_API void PixelAlignment(uint32_t _pack, uint32_t _unpack);
-
-    /* Set the Alignment of the Pixel Pack processe for a texture */
-    CREATURE_API void PixelAlignmentPack(uint32_t _align);
-
-    /* Set the Alignment of the Pixel Unpack processed for a texture */
-    CREATURE_API void PixelAlignmentUnpack(uint32_t _align);
-
-
-    /* Turns Mip Map on for bound 2D texture */
-    CREATURE_API void turn_Mipmap_On();
-    /* Turns Mip Map off for bound 2D Texture */
-    CREATURE_API void turn_Mipmap_Off();
-
-    /* Turns Mip Map on for bound texture of _target type*/
-    CREATURE_API void turn_Mipmap_On(GLenum _target);
-    /* Turns Mip Map off for bound 2D Texture of _target type*/
-    CREATURE_API void turn_Mipmap_Off(GLenum _target);
+    ///=============================================================    W    ==================================================================================
+    ///=============================================================    X    ==================================================================================
+    ///=============================================================    Y    ==================================================================================
+    ///=============================================================    Z    ==================================================================================
 
 }
 
@@ -429,27 +502,8 @@ namespace OpenGL_Debug
 }
 
 
-
-
-
-
-
-
-
-    // BINDLESS BUFFER MANAGEMENT 
-    //============================================================================================
-    /* */
-    /* */
-    ///============================================================================================
-    ///============================================================================================
-    //============================================================================================
-    /* Sets the Line width for OpenGL */
-    //============================================================================================
-    // FRAME BUFFER OBJECT 
-    //============================================================================================
-    /* Creates a Unique ID for a Vertex Array Object*/
-
-
+/* Sets _slot as the Currently Active Texture */
+//CREATURE_API void ActivateTexture(uint32_t _slot);
 
 
 //int fetchIndex(const char* _name)
@@ -490,53 +544,54 @@ namespace OpenGL_Debug
 
 
 
+ 
 
-/* 
-int Shader::GetCSMaxBlocks()
-{//	data returns one value, the maximum number of active shader storage blocks that may be accessed by a compute shader.
-	int results = 0;
-	glGetIntegerv(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, &results);
-	return results;
-}
-int Shader::GetMaxShaderStorageBlocks()
-{//	data returns one value, the maximum total number of active shader storage blocks that may be accessed by all active shaders.
-	int results = 0;
-	glGetIntegerv(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, &results);
-	return results;
-}
-	int GetCSMaxBlocks();
-	int GetMaxShaderStorageBlocks();
+ 
 
 
 
+
+/* GMS2 GPU State Functions
+get_blendenable
+get_ztestenable
+get_zfunc
+get_zwriteenable
+get_fog
+get_cullmode
+get_blendmode
+get_blendmode_ext
+get_blendmode_ext_sepalpha
+get_blendmode_src
+get_blendmode_dest
+get_blendmode_srcalpha
+get_blendmode_destalpha
+get_alphatestenable
+get_colourwriteenable
+get_alphatestref
+get_texfilter
+get_texfilter_ext
+get_texrepeat
+get_texrepeat_ext
+set_blendenable
+set_ztestenable
+set_zfunc
+set_zwriteenable
+set_fog
+set_cullmode
+set_blendmode
+set_blendmode_ext
+set_blendmode_ext_sepalpha
+set_colorwriteenable
+set_alphatestenable
+set_alphatestref
+set_texfilter
+set_texfilter_ext
+set_texrepeat
+set_texrepeat_ext
+push_state
+pop_state
+get_state
+set_state
 */
 
 
-
-
-
-
-//		data returns one value, the name of the program object that is currently active, or 0 if no program object is active.See glUseProgram.
-
-
-    //============================================================================================
-    // VERTEX ARRAY OBJECT 
-
-    ///============================================================================================
-    ///                   TEXTURE MANAGEMENT 
-    ///============================================================================================
-
-    //============================================================================================
-
-
-    //============================================================================================
-
-    //============================================================================================
-
-    //============================================================================================
-    // GENERIC BUFFER OBJECT 
-    //============================================================================================
-
-    //============================================================================================
-    // VERTEX BUFFER OBJECT 
-    //============================================================================================
